@@ -1,0 +1,38 @@
+export const orcamentos = [
+  {
+    id: 1,
+    obraId: 1,
+    clienteId: 1,
+    valor: 500000,
+    servico: "Construção de Residência",
+    data: "2024-01-15",
+    status: "Aprovado",
+  },
+  {
+    id: 2,
+    obraId: 2,
+    clienteId: 2,
+    valor: 1200000,
+    servico: "Construção de Edifício",
+    data: "2024-02-10",
+    status: "Pendente",
+  },
+  {
+    id: 3,
+    obraId: 3,
+    clienteId: 3,
+    valor: 800000,
+    servico: "Construção de Prédio",
+    data: "2024-03-05",
+    status: "Aprovado",
+  },
+  {
+    id: 4,
+    obraId: 4,
+    clienteId: 4,
+    valor: 400000,
+    servico: "Construção de Galpão",
+    data: "2024-04-20",
+    status: "Rejeitado",
+  },
+];
