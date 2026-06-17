@@ -16,8 +16,11 @@ import { orcamentos } from "../../data/orcamentos";
 
 import { clients } from "../../data/clients";
 
+import { AddOrcamentoModal } from "../../components/modals/addOrcamentoModal";
+
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   const FilteredOrcamentos = orcamentos.filter((orcamento) =>
     orcamento.servico.toLowerCase().includes(search.toLowerCase()),
@@ -90,12 +93,19 @@ export default function OrcamentosScreen() {
       </ScrollView>
 
       <View style={globalStyles.bottomActionContainer}>
-        <Pressable style={globalStyles.bottomActionButton}>
+        <Pressable
+          style={globalStyles.bottomActionButton}
+          onPress={() => setModalVisible(true)}
+        >
           <Text style={globalStyles.bottomActionButtonText}>
             + Novo Orçamento
           </Text>
         </Pressable>
       </View>
+      <AddOrcamentoModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 }

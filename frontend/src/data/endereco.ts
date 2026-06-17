@@ -1,0 +1,38 @@
+export const enderecos = [
+  {
+    id: 1,
+    complemento: "Ap 101",
+    rua: "Rua A",
+    numero: "123",
+    cidade: "Ipatinga",
+    estado: "MG",
+    cep: "35162-000",
+  },
+  {
+    id: 2,
+    complemento: "Casa",
+    rua: "Rua B",
+    numero: "456",
+    cidade: "Timóteo",
+    estado: "MG",
+    cep: "35180-000",
+  },
+  {
+    id: 3,
+    complemento: "Ap 202",
+    rua: "Rua C",
+    numero: "789",
+    cidade: "Coronel Fabriciano",
+    estado: "MG",
+    cep: "35171-000",
+  },
+  {
+    id: 4,
+    complemento: "Casa",
+    rua: "Rua D",
+    numero: "321",
+    cidade: "Ipatinga",
+    estado: "MG",
+    cep: "35162-000",
+  },
+];

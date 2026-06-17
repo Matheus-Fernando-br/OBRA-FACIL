@@ -16,10 +16,11 @@ export function AppInput({ placeholder, value, onChangeText }: Props) {
       value={value}
       onChangeText={onChangeText}
       style={{
+        width: "80%",
         height: 55,
         backgroundColor: "#FFF",
         borderRadius: 14,
-        paddingHorizontal: 16,
+        paddingHorizontal: 30,
         marginBottom: 16,
       }}
     />

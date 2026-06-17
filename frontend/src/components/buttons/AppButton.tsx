@@ -19,7 +19,16 @@ export function AppButton({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      style={[globalStyles.appButton, { backgroundColor: color }]}
+      style={[
+        {
+          width: "80%",
+          height: 50,
+          backgroundColor: COLORS.primary,
+          borderRadius: 12,
+          justifyContent: "center",
+          alignItems: "center",
+        },
+      ]}
     >
       {loading ? (
         <ActivityIndicator color="#FFF" />

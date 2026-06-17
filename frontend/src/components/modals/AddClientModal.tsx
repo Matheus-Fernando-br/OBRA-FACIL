@@ -1,10 +1,14 @@
-import { Modal, View, Text } from "react-native";
+import { Modal, View, Text, Pressable } from "react-native";
 
 import { useState } from "react";
+
+import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../forms/AppInput";
 
 import { AppButton } from "../buttons/AppButton";
+
+import { Ionicons } from "@expo/vector-icons";
 
 interface Props {
   visible: boolean;
@@ -27,44 +31,41 @@ export function AddClientModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View
+      <Pressable
         style={{
           flex: 1,
           backgroundColor: "rgba(0,0,0,0.4)",
           justifyContent: "flex-end",
         }}
+        onPress={onClose}
       >
-        <View
-          style={{
-            backgroundColor: "#FFF",
-            padding: 24,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 24,
-              fontWeight: "bold",
-              marginBottom: 20,
-            }}
-          >
-            Novo cliente
-          </Text>
+        <Pressable onPress={(e) => e.stopPropagation()}>
+          <View style={globalStyles.addCard}>
+            <View style={globalStyles.modalHeader}>
+              <Text style={globalStyles.addTitle}>Novo cliente</Text>
 
-          <AppInput placeholder="Nome" value={name} onChangeText={setName} />
+              <Pressable onPress={onClose}>
+                <Ionicons name="close" size={28} color="#FFF" />
+              </Pressable>
+            </View>
+            <AppInput placeholder="Nome" value={name} onChangeText={setName} />
 
-          <AppInput
-            placeholder="Telefone"
-            value={phone}
-            onChangeText={setPhone}
-          />
+            <AppInput
+              placeholder="Telefone"
+              value={phone}
+              onChangeText={setPhone}
+            />
 
-          <AppInput placeholder="Cidade" value={city} onChangeText={setCity} />
+            <AppInput
+              placeholder="Cidade"
+              value={city}
+              onChangeText={setCity}
+            />
 
-          <AppButton title="Salvar cliente" onPress={handleSave} />
-        </View>
-      </View>
+            <AppButton title="Salvar cliente" onPress={handleSave} />
+          </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }

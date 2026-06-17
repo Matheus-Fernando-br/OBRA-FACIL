@@ -5,7 +5,6 @@ import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
-import { FabButton } from "../../components/buttons/FabButton";
 import { AddClientModal } from "../../components/modals/AddClientModal";
 
 import { clients } from "../../data/clients";

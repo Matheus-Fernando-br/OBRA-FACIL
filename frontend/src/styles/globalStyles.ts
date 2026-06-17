@@ -573,6 +573,47 @@ export const globalStyles = StyleSheet.create({
   },
 
   /* =========================
+    ADD CARD
+========================= */
+
+  addCard: {
+    backgroundColor: COLORS.card,
+    padding: 30,
+    borderRadius: 18,
+    marginBottom: 16,
+
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  addTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.text,
+    marginBottom: 20,
+  },
+
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: 20,
+  },
+
+  modalCloseButton: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 18,
+  },
+
+  modalCloseButtonHover: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+
+  /* =========================
    QUICK ACCESS CARD
 ========================= */
 
