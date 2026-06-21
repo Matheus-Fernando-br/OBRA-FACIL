@@ -21,8 +21,9 @@ export function AppButton({
       activeOpacity={0.8}
       style={[
         {
-          width: "80%",
+          width: "100%",
           height: 50,
+          marginTop: 10,
           backgroundColor: COLORS.primary,
           borderRadius: 12,
           justifyContent: "center",

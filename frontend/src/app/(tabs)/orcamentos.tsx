@@ -42,7 +42,10 @@ export default function OrcamentosScreen() {
         <View style={globalStyles.pageHeaderRow}>
           <Text style={globalStyles.title}>Orçamentos</Text>
 
-          <Pressable style={globalStyles.pageHeaderButton}>
+          <Pressable
+            style={globalStyles.pageHeaderButton}
+            onPress={() => setModalVisible(true)}
+          >
             <Text style={globalStyles.pageHeaderButtonText}>+</Text>
           </Pressable>
         </View>

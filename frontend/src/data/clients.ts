@@ -3,20 +3,20 @@ export const clients = [
     id: 1,
     name: "João Pedro",
     phone: "(31) 99999-9999",
-    city: "Ipatinga",
+    cpf: "123.456.789-00",
   },
 
   {
     id: 2,
     name: "Maria Clara",
     phone: "(31) 98888-8888",
-    city: "Timóteo",
+    cpf: "987.654.321-00",
   },
 
   {
     id: 3,
     name: "Carlos Henrique",
     phone: "(31) 97777-7777",
-    city: "Coronel Fabriciano",
+    cpf: "456.789.123-00",
   },
 ];

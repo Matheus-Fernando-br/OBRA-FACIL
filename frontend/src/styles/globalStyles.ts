@@ -26,6 +26,8 @@ export const COLORS = {
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
+
+  tabBarHeight: 70,
 };
 
 /* =========================
@@ -249,7 +251,7 @@ export const globalStyles = StyleSheet.create({
   ========================= */
 
   tabBar: {
-    height: 70,
+    height: COLORS.tabBarHeight,
     paddingTop: 10,
     paddingBottom: 10,
 
@@ -578,12 +580,13 @@ export const globalStyles = StyleSheet.create({
 
   addCard: {
     backgroundColor: COLORS.card,
-    padding: 30,
-    borderRadius: 18,
-    marginBottom: 16,
-
-    justifyContent: "center",
-    alignItems: "center",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 20,
+    paddingLeft: 50,
+    paddingRight: 50,
+    marginBottom: 2 + COLORS.tabBarHeight,
   },
 
   addTitle: {
@@ -611,6 +614,13 @@ export const globalStyles = StyleSheet.create({
 
   modalCloseButtonHover: {
     backgroundColor: "rgba(255,255,255,0.1)",
+  },
+
+  label: {
+    alignSelf: "flex-start",
+    color: COLORS.textSecondary,
+    marginBottom: 6,
+    marginTop: 12,
   },
 
   /* =========================

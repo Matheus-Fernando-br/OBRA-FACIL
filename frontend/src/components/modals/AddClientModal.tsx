@@ -21,7 +21,7 @@ export function AddClientModal({ visible, onClose }: Props) {
 
   const [phone, setPhone] = useState("");
 
-  const [city, setCity] = useState("");
+  const [cpf, setCpf] = useState("");
 
   function handleSave() {
     alert("Cliente adicionado");
@@ -34,7 +34,7 @@ export function AddClientModal({ visible, onClose }: Props) {
       <Pressable
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.4)",
+          backgroundColor: "rgba(0, 0, 0, 0.53)",
           justifyContent: "flex-end",
         }}
         onPress={onClose}
@@ -48,19 +48,17 @@ export function AddClientModal({ visible, onClose }: Props) {
                 <Ionicons name="close" size={28} color="#FFF" />
               </Pressable>
             </View>
+            <Text style={globalStyles.label}>Nome</Text>
             <AppInput placeholder="Nome" value={name} onChangeText={setName} />
 
+            <Text style={globalStyles.label}>Telefone</Text>
             <AppInput
               placeholder="Telefone"
               value={phone}
               onChangeText={setPhone}
             />
-
-            <AppInput
-              placeholder="Cidade"
-              value={city}
-              onChangeText={setCity}
-            />
+            <Text style={globalStyles.label}>CPF</Text>
+            <AppInput placeholder="CPF" value={cpf} onChangeText={setCpf} />
 
             <AppButton title="Salvar cliente" onPress={handleSave} />
           </View>

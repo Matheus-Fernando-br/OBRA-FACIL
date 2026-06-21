@@ -16,7 +16,7 @@ export function AppInput({ placeholder, value, onChangeText }: Props) {
       value={value}
       onChangeText={onChangeText}
       style={{
-        width: "80%",
+        width: "100%",
         height: 55,
         backgroundColor: "#FFF",
         borderRadius: 14,
