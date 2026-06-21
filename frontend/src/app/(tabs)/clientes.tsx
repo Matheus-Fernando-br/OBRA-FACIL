@@ -46,7 +46,7 @@ export default function ClientesScreen() {
             key={client.id}
             name={client.name}
             phone={client.phone}
-            city={client.city}
+            cpf={client.cpf}
           />
         ))}
       </ScrollView>

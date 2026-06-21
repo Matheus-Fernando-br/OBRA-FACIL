@@ -34,7 +34,7 @@ export function AddClientModal({ visible, onClose }: Props) {
       <Pressable
         style={{
           flex: 1,
-          backgroundColor: "rgba(0, 0, 0, 0.53)",
+          backgroundColor: "rgba(0, 0, 0, 0.6)",
           justifyContent: "flex-end",
         }}
         onPress={onClose}
@@ -45,7 +45,7 @@ export function AddClientModal({ visible, onClose }: Props) {
               <Text style={globalStyles.addTitle}>Novo cliente</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={28} color="#FFF" />
+                <Ionicons name="close" size={30} color="#FFF" />
               </Pressable>
             </View>
             <Text style={globalStyles.label}>Nome</Text>

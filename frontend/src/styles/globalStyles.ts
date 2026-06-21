@@ -579,6 +579,7 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   addCard: {
+    flex: 1,
     backgroundColor: COLORS.card,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -586,6 +587,7 @@ export const globalStyles = StyleSheet.create({
     paddingBottom: 20,
     paddingLeft: 50,
     paddingRight: 50,
+    marginTop: 100,
     marginBottom: 2 + COLORS.tabBarHeight,
   },
 
