@@ -48,6 +48,8 @@ export function AddClientModal({ visible, onClose }: Props) {
                 <Ionicons name="close" size={30} color="#FFF" />
               </Pressable>
             </View>
+            <View style={globalStyles.divider} />
+
             <Text style={globalStyles.label}>Nome</Text>
             <AppInput placeholder="Nome" value={name} onChangeText={setName} />
 
@@ -59,6 +61,7 @@ export function AddClientModal({ visible, onClose }: Props) {
             />
             <Text style={globalStyles.label}>CPF</Text>
             <AppInput placeholder="CPF" value={cpf} onChangeText={setCpf} />
+            <View style={globalStyles.divider} />
 
             <AppButton title="Salvar cliente" onPress={handleSave} />
           </View>

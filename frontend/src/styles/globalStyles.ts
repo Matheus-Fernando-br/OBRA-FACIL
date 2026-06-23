@@ -625,6 +625,13 @@ export const globalStyles = StyleSheet.create({
     marginTop: 12,
   },
 
+  divider: {
+    height: 1,
+    backgroundColor: "#444",
+    width: "100%",
+    marginVertical: 15,
+  },
+
   /* =========================
    QUICK ACCESS CARD
 ========================= */
