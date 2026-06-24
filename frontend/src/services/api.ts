@@ -5,6 +5,16 @@ export const api = axios.create({
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
 });
 
+//ROTA LOGIN
+export async function login(email: string, senha: string) {
+  const response = await api.post("/auth/login", {
+    email,
+    senha,
+  });
+
+  return response.data;
+}
+
 //ROTAS CLIENTES
 export async function getClients() {
   try {

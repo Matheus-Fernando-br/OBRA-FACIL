@@ -13,21 +13,31 @@ import { globalStyles } from "../../styles/globalStyles";
 
 import { useAuth } from "../../contexts/AuthContext";
 
+import { login } from "@/services/api";
+
 export default function LoginScreen() {
-  const { signIn } = useAuth();
+  const { setToken } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
 
+  
+
   async function handleLogin() {
     try {
       setLoading(true);
-
-      await signIn(email, password);
-
+  
+      const response = await login(email, password);
+  
+      console.log("LOGIN API:", response);
+  
+      setToken(response.accessToken);
+  
       router.replace("/(tabs)");
+    } catch (error) {
+      console.log(error);
     } finally {
       setLoading(false);
     }

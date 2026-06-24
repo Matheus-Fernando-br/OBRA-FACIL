@@ -7,40 +7,31 @@ interface User {
 
 interface AuthContextData {
   user: User | null;
+  token: string | null;
 
-  signIn: (email: string, password: string) => Promise<void>;
+  setToken: (token: string) => void;
 
   signOut: () => void;
 }
 
 const AuthContext = createContext({} as AuthContextData);
 
-interface Props {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: Props) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  async function signIn(email: string, password: string) {
-    // Simulação futura API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    setUser({
-      name: "Matheus",
-      email,
-    });
-  }
+  const [token, setToken] = useState<string | null>(null);
 
   function signOut() {
     setUser(null);
+    setToken(null);
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        signIn,
+        token,
+        setToken,
         signOut,
       }}
     >

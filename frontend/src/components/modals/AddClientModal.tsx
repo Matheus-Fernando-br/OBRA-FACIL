@@ -8,6 +8,8 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { createClient } from "../../services/api";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -18,6 +20,7 @@ export function AddClientModal({ visible, onClose }: Props) {
   const [email, setEmail] = useState("");
   const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
 
   async function handleSave() {
     try {
@@ -39,7 +42,7 @@ export function AddClientModal({ visible, onClose }: Props) {
           email,
           CPF: cpf,
         },
-        "SEU_TOKEN_AQUI"
+        token || ""
       );
 
       Alert.alert("Sucesso", "Cliente cadastrado com sucesso!");
