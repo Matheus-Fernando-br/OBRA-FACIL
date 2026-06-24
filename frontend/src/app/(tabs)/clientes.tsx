@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
 
@@ -7,14 +7,38 @@ import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
 import { AddClientModal } from "../../components/modals/AddClientModal";
 
-import { clients } from "../../data/clients";
+import { getClients } from "../../services/api";
+
+interface Client {
+  _id: string;
+  nome: string;
+  email: string;
+  CPF: string;
+}
 
 export default function ClientesScreen() {
+  const [clientsList, setClientsList] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
-  const filteredClients = clients.filter((client) =>
-    client.name.toLowerCase().includes(search.toLowerCase()),
+  useEffect(() => {
+    async function loadClients() {
+      try {
+        const data = await getClients();
+
+        console.log("CLIENTES:", data);
+
+        setClientsList(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    loadClients();
+  }, []);
+
+  const filteredClients = clientsList.filter((client) =>
+    client.nome.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -43,10 +67,10 @@ export default function ClientesScreen() {
 
         {filteredClients.map((client) => (
           <ClientCard
-            key={client.id}
-            name={client.name}
-            phone={client.phone}
-            cpf={client.cpf}
+            key={client._id}
+            name={client.nome}
+            phone={client.email}
+            cpf={client.CPF || ""}
           />
         ))}
       </ScrollView>
@@ -64,7 +88,13 @@ export default function ClientesScreen() {
 
       <AddClientModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+
+          getClients()
+            .then(setClientsList)
+            .catch(console.log);
+        }}
       />
     </View>
   );

@@ -5,7 +5,7 @@ import { Picker } from "@react-native-picker/picker";
 import { globalStyles } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
-import { getClients } from "../../services/clientService";
+import { getClients } from "../../services/api";
 
 interface Props {
   visible: boolean;
@@ -13,10 +13,10 @@ interface Props {
 }
 
 interface Client {
-  id: number;
-  name: string;
-  phone: string;
-  cpf: string;
+  _id: string;
+  nome: string;
+  email: string;
+  CPF: string;
 }
 interface Servico {
   id: number;
@@ -75,13 +75,20 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
 
   useEffect(() => {
     async function loadClients() {
-      const data = await getClients();
-
-      setClientsList(data);
+      try {
+        const data = await getClients();
+  
+        console.log("CLIENTES:", data);
+  
+        setClientsList(data);
+      } catch (error) {
+        console.log(error);
+      }
     }
-
+  
     loadClients();
   }, []);
+  
 
   function updateCategoria(id: number, field: string, value: string) {
     setCategorias((prev) =>
@@ -242,9 +249,9 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
 
                   {clientsList.map((client: any) => (
                     <Picker.Item
-                      key={client.id}
-                      label={client.name}
-                      value={String(client.id)}
+                      key={client._id}
+                      label={client.nome}
+                      value={client._id}
                     />
                   ))}
                 </Picker>
