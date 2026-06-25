@@ -595,7 +595,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: COLORS.text,
-    marginBottom: 20,
+    marginBottom: 10,
   },
 
   modalHeader: {

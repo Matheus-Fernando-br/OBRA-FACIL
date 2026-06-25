@@ -50,3 +50,31 @@ export async function createClient(
 
   return response.data;
 }
+
+export async function updateClient(
+  id: string,
+  data: {
+    nome: string;
+    email: string;
+    CPF: string;
+  },
+  token: string,
+) {
+  const response = await api.put(`/client/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+export async function deleteClient(id: string, token: string) {
+  const response = await api.delete(`/client/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}

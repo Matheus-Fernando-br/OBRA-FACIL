@@ -24,7 +24,7 @@ export function AppButton({
           width: "100%",
           height: 50,
           marginTop: 10,
-          backgroundColor: COLORS.primary,
+          backgroundColor: color,
           borderRadius: 12,
           justifyContent: "center",
           alignItems: "center",

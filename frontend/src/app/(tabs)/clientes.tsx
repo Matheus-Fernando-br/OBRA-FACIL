@@ -6,7 +6,7 @@ import { globalStyles } from "../../styles/globalStyles";
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
 import { AddClientModal } from "../../components/modals/AddClientModal";
-
+import { EditClientModal } from "../../components/modals/EditClientModal";
 import { getClients } from "../../services/api";
 
 interface Client {
@@ -20,6 +20,10 @@ export default function ClientesScreen() {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+
+const [selectedClient, setSelectedClient] =
+  useState<Client | null>(null);
 
   useEffect(() => {
     async function loadClients() {
@@ -71,6 +75,10 @@ export default function ClientesScreen() {
             name={client.nome}
             phone={client.email}
             cpf={client.CPF || ""}
+            onEdit={() => {
+              setSelectedClient(client);
+              setEditVisible(true);
+            }}
           />
         ))}
       </ScrollView>
@@ -95,6 +103,11 @@ export default function ClientesScreen() {
             .then(setClientsList)
             .catch(console.log);
         }}
+      />
+      <EditClientModal
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        client={selectedClient}
       />
     </View>
   );
