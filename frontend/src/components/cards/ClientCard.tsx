@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 interface Props {
   name: string;
@@ -9,6 +9,7 @@ interface Props {
   cpf: string;
 
   onEdit: () => void;
+  onDelete: () => void;
 }
 
 export function ClientCard({
@@ -16,37 +17,40 @@ export function ClientCard({
   phone,
   cpf,
   onEdit,
+  onDelete,
 }: Props) {
-    return (
-      <View style={globalStyles.clientCard}>
+  return (
+    <View style={globalStyles.clientCard}>
+      <Text style={globalStyles.clientCardName}>{name}</Text>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Text style={globalStyles.clientCardName}>
-            {name}
-          </Text>
+      <Text style={globalStyles.clientCardInfo}>{phone}</Text>
 
-          <Pressable onPress={onEdit}>
-            <Ionicons
-              name="pencil"
-              size={22}
-              color="#F59E0B"
-            />
-          </Pressable>
-        </View>
+      <Text style={globalStyles.clientCardCity}>{cpf}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>
-          {phone}
-        </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          gap: 15,
+          marginTop: 15,
+        }}
+      >
+        <Pressable onPress={onEdit}>
+          <Ionicons
+            name="pencil"
+            size={22}
+            color={COLORS.primary}
+          />
+        </Pressable>
 
-        <Text style={globalStyles.clientCardCity}>
-          {cpf}
-        </Text>
+        <Pressable onPress={onDelete}>
+          <Ionicons
+            name="trash"
+            size={22}
+            color={COLORS.danger}
+          />
+        </Pressable>
       </View>
-    );
-  }
+    </View>
+  );
+}

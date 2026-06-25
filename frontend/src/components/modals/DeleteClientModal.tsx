@@ -1,163 +1,104 @@
 import { Modal, View, Text, Pressable, Alert } from "react-native";
-import { useState, useEffect } from "react";
 
-import { globalStyles } from "../../styles/globalStyles";
-import { AppInput } from "../forms/AppInput";
+import { COLORS } from "../../styles/globalStyles";
 import { AppButton } from "../buttons/AppButton";
-import { Ionicons } from "@expo/vector-icons";
 
-import { deleteClient, updateClient } from "../../services/api";
+import { deleteClient } from "../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { COLORS } from "../../styles/globalStyles";
 
 interface Props {
-    visible: boolean;
-    onClose: () => void;
-  
-    client: {
-      _id: string;
-      nome: string;
-      email: string;
-      CPF: string;
-    } | null;
-  }
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  clientId: string;
+  clientName: string;
+}
 
-export function EditClientModal({ visible, onClose, client }: Props) {
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [CPF, setCPF] = useState("");
-  const [loading, setLoading] = useState(false);
+export function DeleteClientModal({ visible, onClose, onSuccess ,clientId, clientName, }: Props) {
   const { token } = useAuth();
-
-  async function handleSave() {
-    try {
-      if (!nome.trim()) {
-        Alert.alert("Erro", "Informe o nome do cliente");
-        return;
-      }
-
-      if (!email.trim()) {
-        Alert.alert("Erro", "Informe o e-mail do cliente");
-        return;
-      }
-
-      setLoading(true);
-
-      if (!client) return;
-
-      await updateClient(
-        client._id,
-        {
-          nome,
-          email,
-          CPF,
-        },
-        token || ""
-      );
-
-      Alert.alert("Sucesso", "Cliente atualizado com sucesso!");
-
-      setNome("");
-      setEmail("");
-      setCPF("");
-
-      onClose();
-    } catch (error: any) {
-      console.log("ERRO CLIENTE:", error?.response?.data || error);
-
-      Alert.alert(
-        "Erro",
-        error?.response?.data?.message || "Erro ao atualizar cliente"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleDelete() {
     try {
-      setLoading(true);
 
-      if (!client) return;
+      await deleteClient(clientId, token || "");
 
-    await deleteClient(client._id, token || "");
-
-      Alert.alert("Sucesso", "Cliente excluído com sucesso!");
-
+      Alert.alert(
+        "Sucesso",
+        "Cliente removido com sucesso!"
+      );
+      onSuccess?.();
       onClose();
     } catch (error: any) {
-      console.log("ERRO CLIENTE:", error?.response?.data || error);
+      console.log(error?.response?.data);
+
+      Alert.alert(
+        "Erro",
+        error?.response?.data?.message ||
+          "Erro ao remover cliente"
+      );
     }
   }
 
-  useEffect(() => {
-    if (client) {
-      setNome(client.nome);
-      setEmail(client.email);
-      setCPF(client.CPF || "");
-    }
-  }, [client]);
-
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <Pressable
+    <Modal visible={visible} transparent animationType="fade">
+      <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "flex-end",
+          justifyContent: "center",
+          padding: 20,
+          backgroundColor: "rgba(0,0,0,0.7)",
         }}
-        onPress={onClose}
       >
-        <Pressable onPress={(e) => e.stopPropagation()}>
-          <View style={globalStyles.addCard}>
-            <View style={globalStyles.modalHeader}>
-              <Text style={globalStyles.addTitle}>Editar cliente</Text>
+        <View
+          style={{
+            backgroundColor: COLORS.card,
+            padding: 20,
+            borderRadius: 12,
+          }}
+        >
+          <Text
+            style={{
+              color: "#FFF",
+              fontSize: 18,
+              fontWeight: "bold",
+              marginBottom: 10,
+            }}
+          >
+            Excluir Cliente
+          </Text>
 
-              <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color="#FFF" />
-              </Pressable>
-            </View>
+          <Text
+            style={{
+              color: "#FFF",
+              marginBottom: 20,
+            }}
+          >
+            Deseja realmente excluir:
+          </Text>
 
-            <View style={globalStyles.divider} />
+          <Text
+            style={{
+              color: COLORS.danger,
+              fontWeight: "bold",
+              marginBottom: 20,
+            }}
+          >
+            {clientName}
+          </Text>
 
-            <Text style={globalStyles.label}>Nome</Text>
-            <AppInput
-              placeholder="Nome"
-              value={nome}
-              onChangeText={setNome}
-            />
+          <AppButton
+            title="Excluir Cliente"
+            onPress={handleDelete}
+            color={COLORS.danger}
+          />
 
-            <Text style={globalStyles.label}>E-mail</Text>
-            <AppInput
-              placeholder="cliente@email.com"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            <Text style={globalStyles.label}>CPF</Text>
-            <AppInput
-              placeholder="CPF"
-              value={CPF}
-              onChangeText={setCPF}
-            />
-
-            <View style={globalStyles.divider} />
-
-            <AppButton
-              title={loading ? "Salvando..." : "Salvar Alterações do cliente"}
-              onPress={handleSave}
-            />
-
-            <AppButton
-              title="Cancelar alterações do cliente"
-              onPress={onClose}
-                color={COLORS.danger}
-            />
-
-          </View>
-        </Pressable>
-      </Pressable>
+          <AppButton
+            title="Cancelar"
+            onPress={onClose}
+          />
+        </View>
+      </View>
     </Modal>
   );
 }

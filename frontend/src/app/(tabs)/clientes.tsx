@@ -7,6 +7,7 @@ import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
 import { AddClientModal } from "../../components/modals/AddClientModal";
 import { EditClientModal } from "../../components/modals/EditClientModal";
+import { DeleteClientModal } from "../../components/modals/DeleteClientModal";
 import { getClients } from "../../services/api";
 
 interface Client {
@@ -21,23 +22,23 @@ export default function ClientesScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+
 
 const [selectedClient, setSelectedClient] =
   useState<Client | null>(null);
 
-  useEffect(() => {
-    async function loadClients() {
-      try {
-        const data = await getClients();
+  async function loadClients() {
+    try {
+      const data = await getClients();
 
-        console.log("CLIENTES:", data);
-
-        setClientsList(data);
-      } catch (error) {
-        console.log(error);
-      }
+      setClientsList(data);
+    } catch (error) {
+      console.log(error);
     }
+  }
 
+  useEffect(() => {
     loadClients();
   }, []);
 
@@ -74,10 +75,14 @@ const [selectedClient, setSelectedClient] =
             key={client._id}
             name={client.nome}
             phone={client.email}
-            cpf={client.CPF || ""}
+            cpf={client.CPF}
             onEdit={() => {
               setSelectedClient(client);
               setEditVisible(true);
+            }}
+            onDelete={() => {
+              setSelectedClient(client);
+              setDeleteVisible(true);
             }}
           />
         ))}
@@ -107,7 +112,16 @@ const [selectedClient, setSelectedClient] =
       <EditClientModal
         visible={editVisible}
         onClose={() => setEditVisible(false)}
+        onSuccess={loadClients}
         client={selectedClient}
+      />
+
+      <DeleteClientModal
+        visible={deleteVisible}
+        onClose={() => setDeleteVisible(false)}
+        onSuccess={loadClients}
+        clientId={selectedClient?._id || ""}
+        clientName={selectedClient?.nome || ""}
       />
     </View>
   );

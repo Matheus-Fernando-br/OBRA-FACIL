@@ -14,7 +14,7 @@ import { COLORS } from "../../styles/globalStyles";
 interface Props {
     visible: boolean;
     onClose: () => void;
-  
+    onSuccess?: () => void;
     client: {
       _id: string;
       nome: string;
@@ -23,7 +23,7 @@ interface Props {
     } | null;
   }
 
-export function EditClientModal({ visible, onClose, client }: Props) {
+export function EditClientModal({ visible, onClose, onSuccess, client }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [CPF, setCPF] = useState("");
@@ -61,7 +61,7 @@ export function EditClientModal({ visible, onClose, client }: Props) {
       setNome("");
       setEmail("");
       setCPF("");
-
+      onSuccess?.();
       onClose();
     } catch (error: any) {
       console.log("ERRO CLIENTE:", error?.response?.data || error);
