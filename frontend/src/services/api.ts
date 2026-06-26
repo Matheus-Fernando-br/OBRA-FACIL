@@ -25,7 +25,7 @@ export async function registerUser(data: {
   CPF?: string;
   CNPJ?: string;
 }) {
-  const response = await api.post("/user", data);
+  const response = await api.post("/auth/register", data);
 
   return response.data;
 }
