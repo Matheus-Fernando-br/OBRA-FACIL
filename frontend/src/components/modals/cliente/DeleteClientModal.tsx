@@ -1,9 +1,9 @@
 import { Modal, View, Text, Alert } from "react-native";
 import { useState } from "react";
-import { COLORS } from "../../styles/globalStyles";
-import { AppButton } from "../buttons/AppButton";
+import { COLORS } from "../../../styles/globalStyles";
+import { AppButton } from "../../buttons/AppButton";
 
-import { deleteClient } from "../../services/api";
+import { deleteClient } from "../../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
 

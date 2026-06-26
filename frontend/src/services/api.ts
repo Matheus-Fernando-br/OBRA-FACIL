@@ -30,6 +30,46 @@ export async function registerUser(data: {
   return response.data;
 }
 
+export async function logout() {
+  await api.post("/auth/logout");
+}
+
+export async function getUser(
+  id: string,
+  token: string
+) {
+  const response = await api.get(`/user/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+export async function updateUser(
+  id: string,
+  data: {
+    nome: string;
+    email: string;
+    CPF?: string;
+    CNPJ?: string;
+  },
+  token: string
+) {
+  const response = await api.put(
+    `/user/${id}`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+}
+
 // ==========================
 // CLIENTE
 // ==========================

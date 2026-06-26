@@ -5,9 +5,9 @@ import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
-import { AddClientModal } from "../../components/modals/AddClientModal";
-import { EditClientModal } from "../../components/modals/EditClientModal";
-import { DeleteClientModal } from "../../components/modals/DeleteClientModal";
+import { AddClientModal } from "../../components/modals/cliente/AddClientModal";
+import { EditClientModal } from "../../components/modals/cliente/EditClientModal";
+import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientModal";
 import { getClients } from "../../services/api";
 
 interface Client {
