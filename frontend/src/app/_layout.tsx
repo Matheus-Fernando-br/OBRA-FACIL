@@ -20,14 +20,15 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="login" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="cadastro" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
     </AuthProvider>
   );
 }

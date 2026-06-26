@@ -91,11 +91,29 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
   },
 
+  loginButtonCadastro: {
+    height: 55,
+    backgroundColor: "#1E293B",
+    borderRadius: 12,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },  
+
   loginButtonText: {
     color: "#FFFFFF",
     fontWeight: "bold",
     fontSize: 16,
   },
+
+  loginText : {
+    color: "#FFFFFF",
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 16,
+    marginBottom: 16,
+  },
+
 
   /* =========================
      LAYOUT

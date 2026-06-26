@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { globalStyles } from "../../styles/globalStyles";
@@ -6,13 +6,21 @@ import { globalStyles } from "../../styles/globalStyles";
 import { DashboardCard } from "../../components/cards/DashboardCard";
 import { WorkCard } from "../../components/cards/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
-
 import { obras } from "../../data/obras";
-import { clients } from "../../data/clients";
 import { orcamentos } from "../../data/orcamentos";
+import { useState, useEffect } from "react";
+import { getClients } from "../../services/api";
+
+interface Client {
+  _id: string;
+  nome: string;
+  email: string;
+  CPF: string;
+}
 
 export default function HomeScreen() {
-  const clientesCount = clients.length;
+  const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
   const obrasCount = obras.length;
   const orcamentosPendentesCount = orcamentos.filter(
     (o) => o.status === "Pendente",
@@ -20,6 +28,25 @@ export default function HomeScreen() {
   const faturamentoTotal = orcamentos
     .filter((orcamento) => orcamento.status === "Aprovado")
     .reduce((acc, orcamento) => acc + orcamento.valor, 0);
+
+    async function loadClients() {
+      try {
+        setLoading(true);
+    
+        const data = await getClients();
+    
+        setClientsList(data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    useEffect(() => {
+      loadClients();
+    }, []);
+    const clientesCount = clientsList.length;
 
   return (
     <ScrollView
@@ -40,7 +67,10 @@ export default function HomeScreen() {
           value={orcamentosPendentesCount.toString()}
         />
 
-        <DashboardCard title="Clientes" value={clientesCount.toString()} />
+      <DashboardCard
+        title="Clientes"
+        value={loading ? "..." : clientesCount.toString()}
+      />
 
         <DashboardCard title="Obras" value={obrasCount.toString()} />
 

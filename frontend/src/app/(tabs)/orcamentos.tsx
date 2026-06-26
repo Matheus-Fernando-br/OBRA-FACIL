@@ -4,9 +4,10 @@ import {
   ScrollView,
   TouchableOpacity,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
 
@@ -14,24 +15,71 @@ import { AppInput } from "../../components/forms/AppInput";
 
 import { orcamentos } from "../../data/orcamentos";
 
-import { clients } from "../../data/clients";
+import { getClients } from "../../services/api";
 
-import { AddOrcamentoModal } from "../../components/modals/addOrcamentoModal";
+import { AddOrcamentoModal } from "../../components/modals/AddOrcamentoModal"
+
+interface Client {
+  _id: string;
+  nome: string;
+  email: string;
+  CPF: string;
+}
+
 
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const FilteredOrcamentos = orcamentos.filter((orcamento) =>
     orcamento.servico.toLowerCase().includes(search.toLowerCase()),
   );
 
-  //APAGAR O CLIENTE, POIS N TEMOS BD AINDA
-  const nomeCliente = (clienteId: number) => {
-    const cliente = clients.find((cliente) => cliente.id === clienteId);
 
-    return cliente ? cliente.name : "Cliente não encontrado";
+  async function loadClients() {
+    try {
+      setLoading(true);
+  
+      const data = await getClients();
+  
+      setClientsList(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadClients();
+  }, []);
+
+  const nomeCliente = () => {
+    return clientsList.length > 0
+      ? clientsList[0].nome
+      : "Cliente";
   };
+
+  if (loading) {
+    return (
+      <View
+        style={[
+          globalStyles.screen,
+          {
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#3B82F6" />
+        <Text style={{ color: "#FFF", marginTop: 15 }}>
+          Carregando clientes...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={globalStyles.screen}>
@@ -67,7 +115,7 @@ export default function OrcamentosScreen() {
         {orcamentos.map((orcamento) => (
           <View key={orcamento.id} style={globalStyles.orcamentoCard}>
             <Text style={globalStyles.orcamentoCliente}>
-              {nomeCliente(orcamento.clienteId)}
+              {nomeCliente()}
             </Text>
 
             <Text style={globalStyles.orcamentoInfo}>

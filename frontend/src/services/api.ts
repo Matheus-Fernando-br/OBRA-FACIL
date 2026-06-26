@@ -5,7 +5,10 @@ export const api = axios.create({
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
 });
 
-//ROTA LOGIN
+// ==========================
+// USUÁRIO
+// ==========================
+
 export async function login(email: string, senha: string) {
   const response = await api.post("/auth/login", {
     email,
@@ -15,7 +18,22 @@ export async function login(email: string, senha: string) {
   return response.data;
 }
 
-//ROTAS CLIENTES
+export async function registerUser(data: {
+  nome: string;
+  email: string;
+  senha: string;
+  CPF?: string;
+  CNPJ?: string;
+}) {
+  const response = await api.post("/user", data);
+
+  return response.data;
+}
+
+// ==========================
+// CLIENTE
+// ==========================
+
 export async function getClients() {
   try {
     const response = await api.get("/client");
