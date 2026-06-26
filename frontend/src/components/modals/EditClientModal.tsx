@@ -10,6 +10,7 @@ import { updateClient } from "../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "../../styles/globalStyles";
+import { ActivityIndicator } from "react-native";
 
 interface Props {
     visible: boolean;
@@ -129,7 +130,8 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
             <View style={globalStyles.divider} />
 
             <AppButton
-              title={loading ? "Salvando..." : "Salvar Alterações do cliente"}
+              title="Salvar Alterações do cliente"
+              loading={loading}
               onPress={handleSave}
             />
 

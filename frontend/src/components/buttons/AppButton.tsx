@@ -1,6 +1,10 @@
-import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { COLORS, globalStyles } from "../../styles/globalStyles";
 
 interface Props {
   title: string;
@@ -17,22 +21,22 @@ export function AppButton({
 }: Props) {
   return (
     <TouchableOpacity
+      disabled={loading}
       onPress={onPress}
       activeOpacity={0.8}
-      style={[
-        {
-          width: "100%",
-          height: 50,
-          marginTop: 10,
-          backgroundColor: color,
-          borderRadius: 12,
-          justifyContent: "center",
-          alignItems: "center",
-        },
-      ]}
+      style={{
+        width: "100%",
+        height: 50,
+        marginTop: 10,
+        backgroundColor: color,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        opacity: loading ? 0.8 : 1,
+      }}
     >
       {loading ? (
-        <ActivityIndicator color="#FFF" />
+        <ActivityIndicator size="small" color="#FFF" />
       ) : (
         <Text style={globalStyles.appButtonText}>{title}</Text>
       )}

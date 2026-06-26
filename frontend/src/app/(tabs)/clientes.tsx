@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
@@ -23,20 +23,24 @@ export default function ClientesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  const [selectedClient, setSelectedClient] =
+    useState<Client | null>(null);
 
-const [selectedClient, setSelectedClient] =
-  useState<Client | null>(null);
+    async function loadClients() {
+      try {
+        setLoading(true);
+        const data = await getClients();
 
-  async function loadClients() {
-    try {
-      const data = await getClients();
-
-      setClientsList(data);
-    } catch (error) {
-      console.log(error);
+        setClientsList(data);
+      } catch (error) {
+        console.log(error);
+      }
+      finally {
+        setLoading(false);
+      }
     }
-  }
 
   useEffect(() => {
     loadClients();
@@ -70,22 +74,45 @@ const [selectedClient, setSelectedClient] =
           onChangeText={setSearch}
         />
 
-        {filteredClients.map((client) => (
-          <ClientCard
-            key={client._id}
-            name={client.nome}
-            phone={client.email}
-            cpf={client.CPF}
-            onEdit={() => {
-              setSelectedClient(client);
-              setEditVisible(true);
+        {loading ? (
+          <View
+            style={{
+              marginTop: 40,
+              alignItems: "center",
             }}
-            onDelete={() => {
-              setSelectedClient(client);
-              setDeleteVisible(true);
-            }}
-          />
-        ))}
+          >
+            <ActivityIndicator
+              size="large"
+              color="#3B82F6"
+            />
+
+            <Text
+              style={{
+                color: "#FFF",
+                marginTop: 15,
+              }}
+            >
+              Carregando clientes...
+            </Text>
+          </View>
+        ) : (
+          filteredClients.map((client) => (
+            <ClientCard
+              key={client._id}
+              name={client.nome}
+              phone={client.email}
+              cpf={client.CPF}
+              onEdit={() => {
+                setSelectedClient(client);
+                setEditVisible(true);
+              }}
+              onDelete={() => {
+                setSelectedClient(client);
+                setDeleteVisible(true);
+              }}
+            />
+          ))
+        )}
       </ScrollView>
 
       <View style={globalStyles.bottomActionContainer}>

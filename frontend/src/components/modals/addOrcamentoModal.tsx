@@ -42,7 +42,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   const [name, setName] = useState("");
   const [descricao, setDescricao] = useState("");
   const [validade, setValidade] = useState("");
-
   const [cep, setCep] = useState("");
   const [estado, setEstado] = useState("");
   const [cidade, setCidade] = useState("");
@@ -50,7 +49,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   const [logradouro, setLogradouro] = useState("");
   const [numero, setNumero] = useState("");
   const [complemento, setComplemento] = useState("");
-
   const [categorias, setCategorias] = useState<Categoria[]>([
     {
       id: Date.now(),
@@ -69,20 +67,23 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
 
   const [sinapiLink, setSinapiLink] = useState("");
   const [bdi, setBdi] = useState("");
-
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function loadClients() {
       try {
+        setLoading(true);
         const data = await getClients();
-  
-        console.log("CLIENTES:", data);
+        console.log("NOVO CLIENTE CADASTRADO:", data);
   
         setClientsList(data);
       } catch (error) {
         console.log(error);
+      }
+      finally{
+        setLoading(false);
       }
     }
   
@@ -464,7 +465,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               />
               <View style={globalStyles.divider} />
 
-              <AppButton title="Salvar orçamento" onPress={handleSave} />
+              <AppButton title="Salvar orçamento" loading={loading} onPress={handleSave} />
             </ScrollView>
           </View>
         </Pressable>

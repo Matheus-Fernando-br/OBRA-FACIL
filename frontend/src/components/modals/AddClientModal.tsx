@@ -110,7 +110,8 @@ export function AddClientModal({ visible, onClose }: Props) {
             <View style={globalStyles.divider} />
 
             <AppButton
-              title={loading ? "Salvando..." : "Salvar cliente"}
+              title="Salvar cliente"
+              loading={loading}
               onPress={handleSave}
             />
           </View>

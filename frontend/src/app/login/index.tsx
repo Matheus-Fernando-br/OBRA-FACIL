@@ -64,11 +64,20 @@ export default function LoginScreen() {
         style={globalStyles.loginInput}
       />
 
-      <TouchableOpacity onPress={handleLogin} style={globalStyles.loginButton}>
+      <TouchableOpacity
+        onPress={handleLogin}
+        style={[
+          globalStyles.loginButton,
+          loading && { opacity: 0.7 },
+        ]}
+        disabled={loading}
+      >
         {loading ? (
-          <ActivityIndicator color="#FFF" />
+          <ActivityIndicator size="small" color="#FFF" />
         ) : (
-          <Text style={globalStyles.loginButtonText}>Entrar</Text>
+          <Text style={globalStyles.loginButtonText}>
+            Entrar
+          </Text>
         )}
       </TouchableOpacity>
     </View>

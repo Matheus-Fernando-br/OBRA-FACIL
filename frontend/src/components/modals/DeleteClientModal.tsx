@@ -1,5 +1,5 @@
-import { Modal, View, Text, Pressable, Alert } from "react-native";
-
+import { Modal, View, Text, Alert } from "react-native";
+import { useState } from "react";
 import { COLORS } from "../../styles/globalStyles";
 import { AppButton } from "../buttons/AppButton";
 
@@ -17,10 +17,10 @@ interface Props {
 
 export function DeleteClientModal({ visible, onClose, onSuccess ,clientId, clientName, }: Props) {
   const { token } = useAuth();
-
+  const [loading, setLoading] = useState(false);
   async function handleDelete() {
     try {
-
+      setLoading(true);
       await deleteClient(clientId, token || "");
 
       Alert.alert(
@@ -37,6 +37,9 @@ export function DeleteClientModal({ visible, onClose, onSuccess ,clientId, clien
         error?.response?.data?.message ||
           "Erro ao remover cliente"
       );
+    }
+    finally{
+      setLoading(false);
     }
   }
 
@@ -89,6 +92,7 @@ export function DeleteClientModal({ visible, onClose, onSuccess ,clientId, clien
 
           <AppButton
             title="Excluir Cliente"
+            loading={loading}
             onPress={handleDelete}
             color={COLORS.danger}
           />
