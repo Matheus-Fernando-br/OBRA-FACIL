@@ -14,27 +14,24 @@ import { globalStyles } from "../styles/globalStyles";
 import { useAuth } from "../contexts/AuthContext";
 
 import { login } from "@/services/api";
-import { AppButton } from "@/components/buttons/AppButton";
 
 export default function LoginScreen() {
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
-
-  
-
+  const [loadingRegister] = useState(false);
+    
   async function handleLogin() {
     try {
       setLoading(true);
   
       const response = await login(email, password);
   
-      console.log("LOGIN API:", response);
-  
       setToken(response.accessToken);
+      setUser(response.user);
   
       router.replace("/(tabs)");
     } catch (error) {
@@ -84,7 +81,7 @@ export default function LoginScreen() {
       <Text style={globalStyles.loginText}>
         Ainda não tem conta?{" "}
       </Text>
-        <TouchableOpacity style={globalStyles.loginButtonCadastro} onPress={() => router.push("/cadastro")}>{loading ? (
+        <TouchableOpacity style={globalStyles.loginButtonCadastro} onPress={() => router.push("/cadastro")}>{loadingRegister ? (
           <ActivityIndicator size="small" color="#FFF" />
         ) : (
           <Text style={globalStyles.loginButtonText}>

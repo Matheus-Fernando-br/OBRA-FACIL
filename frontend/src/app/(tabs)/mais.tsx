@@ -7,6 +7,8 @@ import { logout } from "../../services/api";
 import { globalStyles } from "../../styles/globalStyles";
 import {EditUserModal} from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
+import { getUser } from "../../services/api";
+
 
 const options = [
   "Configurações",

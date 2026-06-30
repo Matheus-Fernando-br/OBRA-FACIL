@@ -54,6 +54,7 @@ export async function updateUser(
     email: string;
     CPF?: string;
     CNPJ?: string;
+    senha?: string;
   },
   token: string
 ) {
@@ -77,8 +78,6 @@ export async function updateUser(
 export async function getClients() {
   try {
     const response = await api.get("/client");
-
-    console.log("CLIENTES API:", response.data);
 
     return response.data;
   } catch (error) {

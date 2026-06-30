@@ -12,7 +12,7 @@ interface AuthContextData {
   user: User | null;
   token: string | null;
 
-  setToken: (token: string) => void;
+  setToken: (token: string | null) => void;
   setUser: (user: User | null) => void;
 
   signOut: () => void;

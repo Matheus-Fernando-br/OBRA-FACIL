@@ -9,9 +9,17 @@ import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
 import { obras } from "../../data/obras";
 import { orcamentos } from "../../data/orcamentos";
 import { useState, useEffect } from "react";
-import { getClients } from "../../services/api";
+import { getClients, getUser } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface Client {
+  _id: string;
+  nome: string;
+  email: string;
+  CPF: string;
+}
+
+interface User {
   _id: string;
   nome: string;
   email: string;
@@ -43,10 +51,31 @@ export default function HomeScreen() {
       }
     }
 
+    const clientesCount = clientsList.length;
+
+    const [user, setUser] = useState<User | null>(null);
+    const { token } = useAuth();
+
+    async function loadUser() {
+      try {
+        if (!token) return;
+
+        // ID DO USUÁRIO
+        const userId = ""; // <-- precisa do id
+
+        const data = await getUser(userId, token);
+
+        setUser(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     useEffect(() => {
       loadClients();
+      loadUser();
     }, []);
-    const clientesCount = clientsList.length;
+    
 
   return (
     <ScrollView
@@ -54,7 +83,9 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={globalStyles.homeHeader}>
-        <Text style={globalStyles.title}>Olá, Matheus 👋</Text>
+      <Text style={globalStyles.title}>
+        Olá, {user?.nome ?? "Usuário"} 👋
+      </Text>
 
         <Text style={globalStyles.subtitle}>Bem-vindo ao OBRA-FÁCIL</Text>
       </View>

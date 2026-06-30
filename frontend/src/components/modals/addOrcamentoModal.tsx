@@ -6,6 +6,8 @@ import { globalStyles } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { getClients } from "../../services/api";
+import * as Linking from 'expo-linking';
+import { Alert } from 'react-native';
 
 interface Props {
   visible: boolean;
@@ -76,7 +78,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
       try {
         setLoading(true);
         const data = await getClients();
-        console.log("NOVO CLIENTE CADASTRADO:", data);
   
         setClientsList(data);
       } catch (error) {
@@ -186,6 +187,19 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
     alert("Orçamento adicionado");
     onClose();
   }
+
+  const handleOpenSinapiLink = async () => {
+    const url = 'https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-05-formato-pdf.zip';
+    
+    // Verifica se o dispositivo consegue abrir a URL antes de tentar
+    const supported = await Linking.canOpenURL(url);
+  
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("Erro", "Não foi possível abrir este link no seu dispositivo.");
+    }
+  };
 
   return (
     <Modal
@@ -435,10 +449,9 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               </Text>
 
               <Text style={globalStyles.label}>Link da tabela SINAPI</Text>
-              <AppInput
-                placeholder="Link da tabela SINAPI"
-                value={sinapiLink}
-                onChangeText={setSinapiLink}
+              <AppButton 
+                title="Baixar Tabela SINAPI" 
+                onPress={handleOpenSinapiLink} 
               />
 
               <Text style={globalStyles.label}>Custo da obra</Text>
