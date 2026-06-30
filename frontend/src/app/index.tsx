@@ -13,81 +13,140 @@ import { globalStyles } from "../styles/globalStyles";
 
 import { useAuth } from "../contexts/AuthContext";
 
-import { login } from "@/services/api";
-
 export default function LoginScreen() {
-  const { setToken, setUser } = useAuth();
+  const { login, loading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [loading, setLoading] = useState(false);
   const [loadingRegister] = useState(false);
-    
+
+  const [feedback, setFeedback] = useState("");
+
   async function handleLogin() {
     try {
-      setLoading(true);
-  
-      const response = await login(email, password);
-  
-      setToken(response.accessToken);
-      setUser(response.user);
-  
+      setFeedback("");
+
+      await login(email, password);
+
       router.replace("/(tabs)");
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-    } finally {
-      setLoading(false);
+
+      if (error.response?.status === 401) {
+        setFeedback("E-mail ou senha incorretos.");
+      } else if (error.response?.status === 400) {
+        setFeedback(
+          error.response.data?.message ||
+            "Dados inválidos."
+        );
+      } else {
+        setFeedback(
+          "Erro ao conectar com o servidor."
+        );
+      }
+
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     }
   }
 
   return (
     <View style={globalStyles.loginContainer}>
-      <Text style={globalStyles.loginTitle}>OBRA-FÁCIL</Text>
-      <Text style={globalStyles.label}>E-mail</Text>
+      <Text style={globalStyles.loginTitle}>
+        OBRA-FÁCIL
+      </Text>
+
+      <Text style={globalStyles.label}>
+        E-mail
+      </Text>
+
       <TextInput
         placeholder="Informe seu email"
         placeholderTextColor="#94A3B8"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => {
+          setEmail(text);
+
+          if (feedback) setFeedback("");
+        }}
         style={globalStyles.loginInput}
       />
-      <Text style={globalStyles.label}>Senha</Text>
+
+      <Text style={globalStyles.label}>
+        Senha
+      </Text>
+
       <TextInput
         placeholder="Informe sua senha"
         placeholderTextColor="#94A3B8"
         secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => {
+          setPassword(text);
+
+          if (feedback) setFeedback("");
+        }}
         style={globalStyles.loginInput}
       />
+
+      {feedback !== "" && (
+        <Text
+          style={{
+            color: "#EF4444",
+            fontSize: 14,
+            marginTop: -5,
+            marginBottom: 15,
+            textAlign: "center",
+            fontWeight: "600",
+          }}
+        >
+          {feedback}
+        </Text>
+      )}
 
       <TouchableOpacity
         onPress={handleLogin}
         style={[
           globalStyles.loginButton,
-          loading && { opacity: 0.7 },
+          loading && {
+            opacity: 0.7,
+          },
         ]}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#FFF" />
+          <ActivityIndicator
+            size="small"
+            color="#FFF"
+          />
         ) : (
           <Text style={globalStyles.loginButtonText}>
             Entrar
           </Text>
         )}
       </TouchableOpacity>
+
       <Text style={globalStyles.loginText}>
-        Ainda não tem conta?{" "}
+        Ainda não tem conta?
       </Text>
-        <TouchableOpacity style={globalStyles.loginButtonCadastro} onPress={() => router.push("/cadastro")}>{loadingRegister ? (
-          <ActivityIndicator size="small" color="#FFF" />
+
+      <TouchableOpacity
+        style={globalStyles.loginButtonCadastro}
+        onPress={() => router.push("/cadastro")}
+      >
+        {loadingRegister ? (
+          <ActivityIndicator
+            size="small"
+            color="#FFF"
+          />
         ) : (
           <Text style={globalStyles.loginButtonText}>
             Cadastre-se
           </Text>
-        )}</TouchableOpacity>
+        )}
+      </TouchableOpacity>
     </View>
   );
 }

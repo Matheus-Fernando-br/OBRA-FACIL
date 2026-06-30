@@ -1,12 +1,12 @@
 import axios from "axios";
 
 export const api = axios.create({
-
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
+  withCredentials: true,
 });
 
 // ==========================
-// USUÁRIO
+// AUTH
 // ==========================
 
 export async function login(email: string, senha: string) {
@@ -30,15 +30,22 @@ export async function registerUser(data: {
   return response.data;
 }
 
+export async function refreshToken() {
+  const response = await api.post("/auth/refresh");
+
+  return response.data;
+}
+
 export async function logout() {
   await api.post("/auth/logout");
 }
 
-export async function getUser(
-  id: string,
-  token: string
-) {
-  const response = await api.get(`/user/${id}`, {
+// ==========================
+// USUÁRIO
+// ==========================
+
+export async function getUser(token: string) {
+  const response = await api.get("/user/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -58,33 +65,40 @@ export async function updateUser(
   },
   token: string
 ) {
-  const response = await api.put(
-    `/user/${id}`,
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const response = await api.put(`/user/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+export async function deleteUser(
+  id: string,
+  token: string
+) {
+  const response = await api.delete(`/user/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return response.data;
 }
 
 // ==========================
-// CLIENTE
+// CLIENTES
 // ==========================
 
-export async function getClients() {
-  try {
-    const response = await api.get("/client");
+export async function getClients(token: string) {
+  const response = await api.get("/client/userClients", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-    return response.data;
-  } catch (error) {
-    console.log("ERRO CLIENTES:", error);
-
-    return [];
-  }
+  return response.data;
 }
 
 export async function createClient(
@@ -93,17 +107,13 @@ export async function createClient(
     email: string;
     CPF: string;
   },
-  token: string,
+  token: string
 ) {
-  const response = await api.post(
-    "/client",
-    data,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  const response = await api.post("/client", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
     },
-  );
+  });
 
   return response.data;
 }
@@ -115,7 +125,7 @@ export async function updateClient(
     email: string;
     CPF: string;
   },
-  token: string,
+  token: string
 ) {
   const response = await api.put(`/client/${id}`, data, {
     headers: {
@@ -126,7 +136,10 @@ export async function updateClient(
   return response.data;
 }
 
-export async function deleteClient(id: string, token: string) {
+export async function deleteClient(
+  id: string,
+  token: string
+) {
   const response = await api.delete(`/client/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,

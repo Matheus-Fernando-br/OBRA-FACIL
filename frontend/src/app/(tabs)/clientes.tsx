@@ -1,13 +1,22 @@
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
+
 import { AddClientModal } from "../../components/modals/cliente/AddClientModal";
 import { EditClientModal } from "../../components/modals/cliente/EditClientModal";
 import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientModal";
+
 import { getClients } from "../../services/api";
 
 interface Client {
@@ -18,36 +27,46 @@ interface Client {
 }
 
 export default function ClientesScreen() {
-  const [clientsList, setClientsList] = useState<Client[]>([]);
-  const [search, setSearch] = useState("");
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editVisible, setEditVisible] = useState(false);
-  const [deleteVisible, setDeleteVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { token } = useAuth();
 
+  const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] =
     useState<Client | null>(null);
 
-    async function loadClients() {
-      try {
-        setLoading(true);
-        const data = await getClients();
+  const [search, setSearch] = useState("");
 
-        setClientsList(data);
-      } catch (error) {
-        console.log(error);
-      }
-      finally {
-        setLoading(false);
-      }
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+
+  async function loadClients() {
+    try {
+      if (!token) return;
+
+      setLoading(true);
+
+      const data = await getClients(token);
+
+      setClientsList(data);
+    } catch (error) {
+      console.log("ERRO CLIENTES:", error);
+    } finally {
+      setLoading(false);
     }
+  }
 
   useEffect(() => {
-    loadClients();
-  }, []);
+    if (token) {
+      loadClients();
+    }
+  }, [token]);
 
   const filteredClients = clientsList.filter((client) =>
-    client.nome.toLowerCase().includes(search.toLowerCase()),
+    client.nome
+      .toLowerCase()
+      .includes(search.toLowerCase())
   );
 
   return (
@@ -58,13 +77,17 @@ export default function ClientesScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={globalStyles.pageHeaderRow}>
-          <Text style={globalStyles.title}>Clientes</Text>
+          <Text style={globalStyles.title}>
+            Clientes
+          </Text>
 
           <Pressable
             style={globalStyles.pageHeaderButton}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+            <Text style={globalStyles.pageHeaderButtonText}>
+              +
+            </Text>
           </Pressable>
         </View>
 
@@ -120,7 +143,9 @@ export default function ClientesScreen() {
           style={globalStyles.bottomActionButton}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={globalStyles.bottomActionButtonText}>
+          <Text
+            style={globalStyles.bottomActionButtonText}
+          >
             + Novo Cliente
           </Text>
         </Pressable>
@@ -130,25 +155,23 @@ export default function ClientesScreen() {
         visible={modalVisible}
         onClose={() => {
           setModalVisible(false);
-
-          getClients()
-            .then(setClientsList)
-            .catch(console.log);
+          loadClients();
         }}
       />
+
       <EditClientModal
         visible={editVisible}
         onClose={() => setEditVisible(false)}
-        onSuccess={loadClients}
         client={selectedClient}
+        onSuccess={loadClients}
       />
 
       <DeleteClientModal
         visible={deleteVisible}
         onClose={() => setDeleteVisible(false)}
-        onSuccess={loadClients}
         clientId={selectedClient?._id || ""}
         clientName={selectedClient?.nome || ""}
+        onSuccess={loadClients}
       />
     </View>
   );

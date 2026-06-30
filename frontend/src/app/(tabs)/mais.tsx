@@ -1,13 +1,19 @@
-import { ScrollView, View, Text, TouchableOpacity, Image } from "react-native";
+import { ScrollView, View, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+
 import { useAuth } from "../../contexts/AuthContext";
-import { logout } from "../../services/api";
+import {
+  logout,
+  updateUser,
+  
+} from "../../services/api";
+
 import { globalStyles } from "../../styles/globalStyles";
-import {EditUserModal} from "../../components/modals/EditUserModal";
+
+import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
-import { getUser } from "../../services/api";
 
 
 const options = [
@@ -22,8 +28,14 @@ const options = [
 
 export default function MaisScreen() {
 
-  const { user, setToken } = useAuth();
+  const {
+    user,
+    token,
+    setUser,
+    setToken,
+  } = useAuth();
   const [profileVisible, setProfileVisible] = useState(false);
+  
 
   async function handleLogout() {
     try {

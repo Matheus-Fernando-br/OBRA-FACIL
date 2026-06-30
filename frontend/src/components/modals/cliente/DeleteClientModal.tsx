@@ -18,27 +18,37 @@ interface Props {
 export function DeleteClientModal({ visible, onClose, onSuccess ,clientId, clientName, }: Props) {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
+
   async function handleDelete() {
     try {
+      if (!token) {
+        Alert.alert(
+          "Sessão expirada",
+          "Faça login novamente."
+        );
+        return;
+      }
+  
       setLoading(true);
-      await deleteClient(clientId, token || "");
-
+  
+      await deleteClient(clientId, token);
+  
       Alert.alert(
         "Sucesso",
         "Cliente removido com sucesso!"
       );
+  
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      console.log(error?.response?.data);
-
+      console.log("DELETE CLIENT:", error?.response?.data);
+    
       Alert.alert(
         "Erro",
-        error?.response?.data?.message ||
-          "Erro ao remover cliente"
+        error?.response?.data?.message ??
+          "Erro ao remover cliente."
       );
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   }

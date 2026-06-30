@@ -6,6 +6,9 @@ import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 
+import { useAuth } from "../../contexts/AuthContext";
+import { updateUser } from "../../services/api";
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -17,27 +20,19 @@ interface Props {
     CPF?: string;
     CNPJ?: string;
   } | null;
-
-  onSave?: (data: {
-    nome: string;
-    email: string;
-    CPF?: string;
-    CNPJ?: string;
-    senha?: string;
-  }) => Promise<void>;
 }
 
 export function EditUserModal({
   visible,
   onClose,
   user,
-  onSave,
 }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [documento, setDocumento] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
+  const { token, setUser } = useAuth();
 
   useEffect(() => {
     if (!user) return;
@@ -50,26 +45,39 @@ export function EditUserModal({
 
   async function handleSave() {
     try {
+      if (!user || !token) {
+        Alert.alert("Erro", "Usuário não encontrado.");
+        return;
+      }
+  
       setLoading(true);
-
-      await onSave?.({
-        nome,
-        email,
-        CPF: user?.CPF ? documento : undefined,
-        CNPJ: user?.CNPJ ? documento : undefined,
-        senha: senha || undefined,
-      });
-
+  
+      const updatedUser = await updateUser(
+        user._id,
+        {
+          nome: nome.trim(),
+          email: email.trim(),
+          CPF: user.CPF ? documento.trim() : undefined,
+          CNPJ: user.CNPJ ? documento.trim() : undefined,
+          senha: senha.trim() || undefined,
+        },
+        token
+      );
+  
+      setUser(updatedUser);
+  
       Alert.alert(
         "Sucesso",
         "Dados atualizados com sucesso!"
       );
-
+  
       onClose();
     } catch (error: any) {
+      console.log(error.response?.data);
+  
       Alert.alert(
         "Erro",
-        error?.response?.data?.message ||
+        error?.response?.data?.message ??
           "Erro ao atualizar usuário."
       );
     } finally {

@@ -24,40 +24,49 @@ export function AddClientModal({ visible, onClose }: Props) {
 
   async function handleSave() {
     try {
+      if (!token) {
+        Alert.alert("Erro", "Sessão expirada. Faça login novamente.");
+        return;
+      }
+  
       if (!name.trim()) {
         Alert.alert("Erro", "Informe o nome do cliente");
         return;
       }
-
+  
       if (!email.trim()) {
         Alert.alert("Erro", "Informe o e-mail do cliente");
         return;
       }
-
+  
       setLoading(true);
-
+  
       await createClient(
         {
-          nome: name,
-          email,
-          CPF: cpf,
+          nome: name.trim(),
+          email: email.trim(),
+          CPF: cpf.trim(),
         },
-        token || ""
+        token
       );
-
-      Alert.alert("Sucesso", "Cliente cadastrado com sucesso!");
-
+  
+      Alert.alert(
+        "Sucesso",
+        "Cliente cadastrado com sucesso!"
+      );
+  
       setName("");
       setEmail("");
       setCpf("");
-
+  
       onClose();
     } catch (error: any) {
-      console.log("ERRO CLIENTE:", error?.response?.data || error);
-
+      console.log("CREATE CLIENT:", error?.response?.data);
+  
       Alert.alert(
         "Erro",
-        error?.response?.data?.message || "Erro ao cadastrar cliente"
+        error?.response?.data?.message ??
+          "Erro ao cadastrar cliente."
       );
     } finally {
       setLoading(false);
