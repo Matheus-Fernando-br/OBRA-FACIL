@@ -83,6 +83,7 @@ export default function CadastroScreen() {
               tipoDocumento={documentType}
               setTipoDocumento={setDocumentType}
               onNext={() => setStep(2)}
+              
             />
           )}
 

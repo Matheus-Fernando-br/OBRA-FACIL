@@ -8,10 +8,10 @@ import {
 
 import { router } from "expo-router";
 import { useState } from "react";
-
-import { globalStyles } from "../styles/globalStyles";
-
-import { useAuth } from "../contexts/AuthContext";
+import { COLORS, globalStyles } from "../styles/globalStyles";
+import { useAuth } from "@/contexts/AuthContext";
+import { AppInput } from "@/components/forms/AppInput";
+import { emailMask } from "@/components/forms/mask";
 
 export default function LoginScreen() {
   const { login, loading } = useAuth();
@@ -36,47 +36,34 @@ export default function LoginScreen() {
       if (error.response?.status === 401) {
         setFeedback("E-mail ou senha incorretos.");
       } else if (error.response?.status === 400) {
-        setFeedback(
-          error.response.data?.message ||
-            "Dados inválidos."
-        );
+        setFeedback(error.response.data?.message || "Dados inválidos.");
       } else {
-        setFeedback(
-          "Erro ao conectar com o servidor."
-        );
+        setFeedback("Erro ao conectar com o servidor.");
       }
 
       setTimeout(() => {
         setFeedback("");
-      }, 5000);
+      }, 7000);
     }
   }
 
   return (
     <View style={globalStyles.loginContainer}>
-      <Text style={globalStyles.loginTitle}>
-        OBRA-FÁCIL
-      </Text>
+      <Text style={globalStyles.loginTitle}>OBRA-FÁCIL</Text>
 
-      <Text style={globalStyles.label}>
-        E-mail
-      </Text>
+      <Text style={globalStyles.label}>E-mail</Text>
 
-      <TextInput
-        placeholder="Informe seu email"
-        placeholderTextColor="#94A3B8"
+      <AppInput
+        placeholder="Informe seu e-mail"
         value={email}
         onChangeText={(text) => {
-          setEmail(text);
+          setEmail(emailMask(text));
 
           if (feedback) setFeedback("");
         }}
-        style={globalStyles.loginInput}
       />
 
-      <Text style={globalStyles.label}>
-        Senha
-      </Text>
+      <Text style={globalStyles.label}>Senha</Text>
 
       <TextInput
         placeholder="Informe sua senha"
@@ -88,14 +75,18 @@ export default function LoginScreen() {
 
           if (feedback) setFeedback("");
         }}
-        style={globalStyles.loginInput}
+        style={{
+          width: "100%",
+          height: 55,
+          backgroundColor: COLORS.text,
+          borderRadius: 14,
+          paddingHorizontal: 30,
+          marginBottom: 16,
+        }}
       />
+      <View style={globalStyles.divider} />
 
-      {feedback !== "" && (
-        <Text style={globalStyles.feedback}>
-          {feedback}
-        </Text>
-      )}
+      {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
 
       <TouchableOpacity
         onPress={handleLogin}
@@ -108,34 +99,22 @@ export default function LoginScreen() {
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator
-            size="small"
-            color="#FFF"
-          />
+          <ActivityIndicator size="small" color="#FFF" />
         ) : (
-          <Text style={globalStyles.loginButtonText}>
-            Entrar
-          </Text>
+          <Text style={globalStyles.loginButtonText}>Entrar</Text>
         )}
       </TouchableOpacity>
 
-      <Text style={globalStyles.loginText}>
-        Ainda não tem conta?
-      </Text>
+      <Text style={globalStyles.loginText}>Ainda não tem conta?</Text>
 
       <TouchableOpacity
         style={globalStyles.loginButtonCadastro}
         onPress={() => router.push("/cadastro")}
       >
         {loadingRegister ? (
-          <ActivityIndicator
-            size="small"
-            color="#FFF"
-          />
+          <ActivityIndicator size="small" color="#FFF" />
         ) : (
-          <Text style={globalStyles.loginButtonText}>
-            Cadastre-se
-          </Text>
+          <Text style={globalStyles.loginButtonText}>Cadastre-se</Text>
         )}
       </TouchableOpacity>
     </View>

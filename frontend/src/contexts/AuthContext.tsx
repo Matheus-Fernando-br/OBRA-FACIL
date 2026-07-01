@@ -105,11 +105,12 @@ export function AuthProvider({
       if (token) {
         await apiLogout(token);
       }
-    } catch {}
-
-    setUser(null);
-
-    setToken(null);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setUser(null);
+      setToken(null);
+    }
   }
 
   return (

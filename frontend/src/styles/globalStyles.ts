@@ -63,6 +63,7 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     padding: 24,
+    paddingHorizontal: 40,
     backgroundColor: "#0F172A",
   },
 
@@ -86,7 +87,7 @@ export const globalStyles = StyleSheet.create({
     height: 55,
     backgroundColor: COLORS.primary,
     borderRadius: 12,
-
+    marginTop: 16,
     justifyContent: "center",
     alignItems: "center",
   },

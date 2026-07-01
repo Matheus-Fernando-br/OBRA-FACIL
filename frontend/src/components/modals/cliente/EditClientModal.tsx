@@ -7,23 +7,29 @@ import { AppButton } from "../../buttons/AppButton";
 import { Ionicons } from "@expo/vector-icons";
 
 import { updateClient } from "../../../services/api";
+import { documentMask, emailMask } from "@/components/forms/mask";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "../../../styles/globalStyles";
 
 interface Props {
-    visible: boolean;
-    onClose: () => void;
-    onSuccess?: () => void;
-    client: {
-      _id: string;
-      nome: string;
-      email: string;
-      CPF: string;
-    } | null;
-  }
+  visible: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+  client: {
+    _id: string;
+    nome: string;
+    email: string;
+    CPF: string;
+  } | null;
+}
 
-export function EditClientModal({ visible, onClose, onSuccess, client }: Props) {
+export function EditClientModal({
+  visible,
+  onClose,
+  onSuccess,
+  client,
+}: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [CPF, setCPF] = useState("");
@@ -34,6 +40,12 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
   async function handleSave() {
     try {
       setFeedback("");
+
+      if (!token) {
+        setFeedback("Sessão expirada. Faça login novamente.");
+        return;
+      }
+
       if (!nome.trim()) {
         setFeedback("Informe o nome do cliente");
         return;
@@ -41,6 +53,16 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
 
       if (!email.trim()) {
         setFeedback("Informe o e-mail do cliente");
+        return;
+      }
+
+      if (!email.includes("@")) {
+        setFeedback("Informe um e-mail válido.");
+        return;
+      }
+
+      if (!CPF.trim()) {
+        setFeedback("Informe o CPF/CNPJ do cliente");
         return;
       }
 
@@ -55,7 +77,7 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
           email,
           CPF,
         },
-        token || ""
+        token || "",
       );
 
       setFeedback("Cliente atualizado com sucesso!");
@@ -66,12 +88,12 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
       onSuccess?.();
       setTimeout(() => {
         onClose();
-        }, 1200);
+      }, 1200);
     } catch (error: any) {
       console.log("ERRO AO ATUALIZAR CLIENTE:", error?.response?.data || error);
 
       setFeedback(
-        error?.response?.data?.message || "Erro ao atualizar cliente"
+        error?.response?.data?.message || "Erro ao atualizar cliente",
       );
 
       setTimeout(() => {
@@ -79,7 +101,9 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
       }, 5000);
     } finally {
       setLoading(false);
-      setFeedback("");
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     }
   }
 
@@ -114,31 +138,25 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
             <View style={globalStyles.divider} />
 
             <Text style={globalStyles.label}>Nome</Text>
-            <AppInput
-              placeholder="Nome"
-              value={nome}
-              onChangeText={setNome}
-            />
+            <AppInput placeholder="Nome" value={nome} onChangeText={setNome} />
 
             <Text style={globalStyles.label}>E-mail</Text>
             <AppInput
               placeholder="cliente@email.com"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(emailMask(text))}
             />
 
             <Text style={globalStyles.label}>CPF</Text>
             <AppInput
               placeholder="CPF"
               value={CPF}
-              onChangeText={setCPF}
+              onChangeText={(text) => setCPF(documentMask(text))}
             />
 
             <View style={globalStyles.divider} />
             {feedback !== "" && (
-              <Text style={globalStyles.feedback}>
-                {feedback}
-              </Text>
+              <Text style={globalStyles.feedback}>{feedback}</Text>
             )}
             <AppButton
               title="Salvar Alterações do cliente"
@@ -149,9 +167,8 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
             <AppButton
               title="Cancelar alterações do cliente"
               onPress={onClose}
-                color={COLORS.danger}
+              color={COLORS.danger}
             />
-
           </View>
         </Pressable>
       </Pressable>

@@ -8,8 +8,7 @@ import {
 import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
-import { useAuth } from "../../contexts/AuthContext";
-
+import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
 

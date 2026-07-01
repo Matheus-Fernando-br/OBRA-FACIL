@@ -5,8 +5,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
-
-import { useAuth } from "../../contexts/AuthContext";
+import { documentMask, emailMask } from "@/components/forms/mask";
+import { useAuth } from "@/contexts/AuthContext";
 import { updateUser } from "../../services/api";
 
 interface Props {
@@ -43,8 +43,29 @@ export function EditUserModal({ visible, onClose, user }: Props) {
   async function handleSave() {
     try {
       setFeedback("");
+
       if (!user || !token) {
         setFeedback("Usuário não encontrado.");
+        return;
+      }
+
+      if (!nome.trim()) {
+        setFeedback("Informe seu nome Completo");
+        return;
+      }
+
+      if (!email.trim()) {
+        setFeedback("Informe seu e-mail");
+        return;
+      }
+
+      if (!email.includes("@")) {
+        setFeedback("Informe um e-mail válido.");
+        return;
+      }
+
+      if (!documento.trim()) {
+        setFeedback("Informe seu CPF/CNPJ");
         return;
       }
 
@@ -78,7 +99,9 @@ export function EditUserModal({ visible, onClose, user }: Props) {
       setFeedback("Erro ao atualizar usuário.");
     } finally {
       setLoading(false);
-      setFeedback("");
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     }
   }
 
@@ -127,7 +150,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
 
               <AppInput
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => setEmail(emailMask(text))}
                 placeholder="Email"
               />
 
@@ -135,7 +158,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
 
               <AppInput
                 value={documento}
-                onChangeText={setDocumento}
+                onChangeText={(text) => setDocumento(documentMask(text))}
                 placeholder="CPF/CNPJ"
               />
 

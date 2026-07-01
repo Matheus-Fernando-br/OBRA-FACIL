@@ -8,7 +8,6 @@ import { AppButton } from "../buttons/AppButton";
 import { getClients } from "../../services/api";
 import * as Linking from "expo-linking";
 import { useAuth } from "@/contexts/AuthContext";
-
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -67,7 +66,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
     },
   ]);
 
-  const [sinapiLink, setSinapiLink] = useState("");
   const [bdi, setBdi] = useState("");
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
@@ -93,8 +91,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
       } catch (error) {
         console.log(error);
         setFeedbackClient("Erro ao carregar clientes: ");
-      } finally {
-        setFeedbackClient("");
       }
     }
 
@@ -203,7 +199,6 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
       setFeedback("Erro ao adicionar orçamento: ");
     } finally {
       setLoading(false);
-      setFeedback("");
     }
   }
   const handleOpenSinapiLink = async () => {

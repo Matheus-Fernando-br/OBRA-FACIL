@@ -17,8 +17,7 @@ import { obras } from "../../data/obras";
 import { orcamentos } from "../../data/orcamentos";
 
 import { getClients, getUser } from "../../services/api";
-import { useAuth } from "../../contexts/AuthContext";
-
+import { useAuth } from "@/contexts/AuthContext";
 interface Client {
   _id: string;
   nome: string;

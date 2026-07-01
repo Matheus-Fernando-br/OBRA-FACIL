@@ -12,7 +12,7 @@ import { useState, useEffect } from "react";
 import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
-
+import { useAuth } from "@/contexts/AuthContext";
 import { orcamentos } from "../../data/orcamentos";
 
 import { getClients } from "../../services/api";
@@ -32,7 +32,7 @@ export default function OrcamentosScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const {token} = useAuth();
   const FilteredOrcamentos = orcamentos.filter((orcamento) =>
     orcamento.servico.toLowerCase().includes(search.toLowerCase()),
   );
@@ -40,9 +40,10 @@ export default function OrcamentosScreen() {
 
   async function loadClients() {
     try {
+      if (!token) return;
       setLoading(true);
-  
-      const data = await getClients();
+      
+      const data = await getClients(token);
   
       setClientsList(data);
     } catch (error) {

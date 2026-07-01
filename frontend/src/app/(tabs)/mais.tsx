@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 import { globalStyles } from "../../styles/globalStyles";
@@ -30,8 +30,8 @@ export default function MaisScreen() {
   async function handleLogout() {
     try {
       await logout();
-  
       router.replace("/");
+      
     } catch (error) {
       console.log(error);
     }

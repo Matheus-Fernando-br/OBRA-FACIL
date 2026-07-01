@@ -5,6 +5,7 @@ import { globalStyles } from "../../../styles/globalStyles";
 import { AppInput } from "../../forms/AppInput";
 import { AppButton } from "../../buttons/AppButton";
 import { Ionicons } from "@expo/vector-icons";
+import { documentMask, emailMask } from "@/components/forms/mask";
 
 import { createClient } from "../../../services/api";
 
@@ -31,42 +32,51 @@ export function AddClientModal({ visible, onClose }: Props) {
         setFeedback("Sessão expirada. Faça login novamente.");
         return;
       }
-  
+
       if (!name.trim()) {
         setFeedback("Informe o nome do cliente");
         return;
       }
-  
+
       if (!email.trim()) {
         setFeedback("Informe o e-mail do cliente");
         return;
       }
-  
+
+      if (!email.includes("@")) {
+        setFeedback("Informe um e-mail válido.");
+        return;
+      }
+
+      if (!cpf.trim()) {
+        setFeedback("Informe o CPF/CNPJ do cliente");
+        return;
+      }
+
       setLoading(true);
-  
+
       await createClient(
         {
           nome: name.trim(),
           email: email.trim(),
           CPF: cpf.trim(),
         },
-        token
+        token,
       );
-  
+
       setFeedback("Cliente cadastrado com sucesso!");
-  
+
       setName("");
       setEmail("");
       setCpf("");
       setTimeout(() => {
-      onClose();
+        onClose();
       }, 1200);
     } catch (error: any) {
       console.log("ERRO AO CADASTRAR CLIENTE:", error?.response?.data);
-  
+
       setFeedback(
-        error?.response?.data?.message ??
-          "Erro ao cadastrar cliente."
+        error?.response?.data?.message ?? "Erro ao cadastrar cliente.",
       );
 
       setTimeout(() => {
@@ -74,7 +84,9 @@ export function AddClientModal({ visible, onClose }: Props) {
       }, 5000);
     } finally {
       setLoading(false);
-      setFeedback("");
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     }
   }
 
@@ -102,30 +114,28 @@ export function AddClientModal({ visible, onClose }: Props) {
 
             <Text style={globalStyles.label}>Nome</Text>
             <AppInput
-              placeholder="Nome"
+              placeholder="Informe o nome do cliente completo"
               value={name}
               onChangeText={setName}
             />
 
             <Text style={globalStyles.label}>E-mail</Text>
             <AppInput
-              placeholder="cliente@email.com"
+              placeholder="Informe o e-mail do cliente a ser cadastrado"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => setEmail(emailMask(text))}
             />
 
-            <Text style={globalStyles.label}>CPF</Text>
+            <Text style={globalStyles.label}>CPF / CNPJ</Text>
             <AppInput
-              placeholder="CPF"
+              placeholder="Informe o CPF / CNPJ do cliente a ser cadastrado"
               value={cpf}
-              onChangeText={setCpf}
+              onChangeText={(text) => setCpf(documentMask(text))}
             />
 
             <View style={globalStyles.divider} />
             {feedback !== "" && (
-              <Text style={globalStyles.feedback}>
-                {feedback}
-              </Text>
+              <Text style={globalStyles.feedback}>{feedback}</Text>
             )}
             <AppButton
               title="Salvar cliente"

@@ -6,7 +6,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { deleteClient } from "../../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
-
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -29,6 +28,7 @@ export function DeleteClientModal({
   async function handleDelete() {
     try {
       setFeedback("");
+
       if (!token) {
         setFeedback("Sessão expirada. Faça login novamente.");
         return;
@@ -54,7 +54,6 @@ export function DeleteClientModal({
       }, 5000);
     } finally {
       setLoading(false);
-      setFeedback("");
     }
   }
 
