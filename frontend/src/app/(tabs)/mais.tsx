@@ -4,11 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import { useAuth } from "../../contexts/AuthContext";
-import {
-  logout,
-  updateUser,
-  
-} from "../../services/api";
+
 
 import { globalStyles } from "../../styles/globalStyles";
 
@@ -28,20 +24,12 @@ const options = [
 
 export default function MaisScreen() {
 
-  const {
-    user,
-    token,
-    setUser,
-    setToken,
-  } = useAuth();
   const [profileVisible, setProfileVisible] = useState(false);
+  const { logout, user } = useAuth();
   
-
   async function handleLogout() {
     try {
       await logout();
-  
-      setToken("");
   
       router.replace("/");
     } catch (error) {

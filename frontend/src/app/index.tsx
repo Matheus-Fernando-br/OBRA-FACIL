@@ -92,16 +92,7 @@ export default function LoginScreen() {
       />
 
       {feedback !== "" && (
-        <Text
-          style={{
-            color: "#EF4444",
-            fontSize: 14,
-            marginTop: -5,
-            marginBottom: 15,
-            textAlign: "center",
-            fontWeight: "600",
-          }}
-        >
+        <Text style={globalStyles.feedback}>
           {feedback}
         </Text>
       )}

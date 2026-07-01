@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, Alert, ScrollView } from "react-native";
+import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,17 +22,14 @@ interface Props {
   } | null;
 }
 
-export function EditUserModal({
-  visible,
-  onClose,
-  user,
-}: Props) {
+export function EditUserModal({ visible, onClose, user }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [documento, setDocumento] = useState("");
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const { token, setUser } = useAuth();
+  const [feedback, setFeedback] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -45,13 +42,14 @@ export function EditUserModal({
 
   async function handleSave() {
     try {
+      setFeedback("");
       if (!user || !token) {
-        Alert.alert("Erro", "Usuário não encontrado.");
+        setFeedback("Usuário não encontrado.");
         return;
       }
-  
+
       setLoading(true);
-  
+
       const updatedUser = await updateUser(
         user._id,
         {
@@ -61,128 +59,114 @@ export function EditUserModal({
           CNPJ: user.CNPJ ? documento.trim() : undefined,
           senha: senha.trim() || undefined,
         },
-        token
+        token,
       );
-  
+
       setUser(updatedUser);
-  
-      Alert.alert(
-        "Sucesso",
-        "Dados atualizados com sucesso!"
-      );
-  
-      onClose();
+
+      setFeedback("Dados atualizados com sucesso!");
+      setNome("");
+      setEmail("");
+      setDocumento("");
+      setSenha("");
+      setTimeout(() => {
+        onClose();
+      }, 1200);
     } catch (error: any) {
       console.log(error.response?.data);
-  
-      Alert.alert(
-        "Erro",
-        error?.response?.data?.message ??
-          "Erro ao atualizar usuário."
-      );
+
+      setFeedback("Erro ao atualizar usuário.");
     } finally {
       setLoading(false);
+      setFeedback("");
     }
   }
 
   return (
-<Modal visible={visible} animationType="slide" transparent>
-  <Pressable
-    style={{
-      flex: 1,
-      backgroundColor: "rgba(0,0,0,.65)",
-      justifyContent: "flex-end",
-    }}
-    onPress={onClose}
-  >
-    <Pressable
-      onPress={(e) => e.stopPropagation()}
-      style={{
-        maxHeight: "100%", // <-- importante
-      }}
-    >
-      <View
-        style={[
-          globalStyles.addCard,
-
-        ]}
+    <Modal visible={visible} animationType="slide" transparent>
+      <Pressable
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,.65)",
+          justifyContent: "flex-end",
+        }}
+        onPress={onClose}
       >
-        <View style={globalStyles.modalHeader}>
-          <Text style={globalStyles.addTitle}>
-            Meu Perfil
-          </Text>
-
-          <Pressable onPress={onClose}>
-            <Ionicons
-              name="close"
-              color="#FFF"
-              size={28}
-            />
-          </Pressable>
-        </View>
-
-        <View style={globalStyles.divider} />
-
-        <ScrollView
-          showsVerticalScrollIndicator
-          contentContainerStyle={{
-            paddingBottom: 20,
+        <Pressable
+          onPress={(e) => e.stopPropagation()}
+          style={{
+            maxHeight: "100%", // <-- importante
           }}
         >
-          <Text style={globalStyles.label}>Nome</Text>
+          <View style={[globalStyles.addCard]}>
+            <View style={globalStyles.modalHeader}>
+              <Text style={globalStyles.addTitle}>Meu Perfil</Text>
 
-          <AppInput
-            value={nome}
-            onChangeText={setNome}
-            placeholder="Nome"
-          />
+              <Pressable onPress={onClose}>
+                <Ionicons name="close" color="#FFF" size={28} />
+              </Pressable>
+            </View>
 
-          <Text style={globalStyles.label}>Email</Text>
+            <View style={globalStyles.divider} />
 
-          <AppInput
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Email"
-          />
+            <ScrollView
+              showsVerticalScrollIndicator
+              contentContainerStyle={{
+                paddingBottom: 20,
+              }}
+            >
+              <Text style={globalStyles.label}>Nome</Text>
 
-          <Text style={globalStyles.label}>Documento</Text>
+              <AppInput
+                value={nome}
+                onChangeText={setNome}
+                placeholder="Nome"
+              />
 
-          <AppInput
-            value={documento}
-            onChangeText={setDocumento}
-            placeholder="CPF/CNPJ"
-          />
+              <Text style={globalStyles.label}>Email</Text>
 
-          <Text style={globalStyles.label}>
-            Nova senha (opcional)
-          </Text>
+              <AppInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Email"
+              />
 
-          <AppInput
-            value={senha}
-            onChangeText={setSenha}
-            placeholder="Nova senha"
-          />
+              <Text style={globalStyles.label}>CPF / CNPJ</Text>
 
-          <View style={globalStyles.divider} />
+              <AppInput
+                value={documento}
+                onChangeText={setDocumento}
+                placeholder="CPF/CNPJ"
+              />
 
-          <AppButton
-            title={
-              loading
-                ? "Salvando..."
-                : "Salvar alterações"
-            }
-            onPress={handleSave}
-          />
+              <Text style={globalStyles.label}>Nova senha (opcional)</Text>
 
-          <AppButton
-            title="Cancelar"
-            color={COLORS.danger}
-            onPress={onClose}
-          />
-        </ScrollView>
-      </View>
-    </Pressable>
-  </Pressable>
-</Modal>
+              <AppInput
+                value={senha}
+                onChangeText={setSenha}
+                placeholder="Nova senha"
+              />
+
+              <View style={globalStyles.divider} />
+
+              {feedback !== "" && (
+                <Text style={globalStyles.feedback}>{feedback}</Text>
+              )}
+
+              <AppButton
+                title={loading ? "Salvando..." : "Salvar alterações"}
+                onPress={handleSave}
+              />
+
+              <AppButton
+                title="Cancelar"
+                color={COLORS.danger}
+                onPress={onClose}
+              />
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }

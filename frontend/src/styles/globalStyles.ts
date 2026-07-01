@@ -135,6 +135,15 @@ export const globalStyles = StyleSheet.create({
     padding: 24,
   },
 
+  feedback: {
+    color: "#EF4444",
+    fontSize: 14,
+    marginTop: -5,
+    marginBottom: 15,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
   /* =========================
    ORÇAMENTOS
 ========================= */

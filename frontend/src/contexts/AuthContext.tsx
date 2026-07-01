@@ -7,8 +7,9 @@ import {
 
 import {
   login as apiLogin,
-  getUser,
   logout as apiLogout,
+  refreshToken,
+  getUser,
 } from "../services/api";
 
 export interface User {
@@ -25,27 +26,28 @@ interface AuthContextData {
 
   loading: boolean;
 
-  login: (
+  login(
     email: string,
     senha: string
-  ) => Promise<void>;
+  ): Promise<void>;
 
-  refreshUser: () => Promise<void>;
+  logout(): Promise<void>;
 
-  logout: () => Promise<void>;
+  refresh(): Promise<void>;
 
-  setUser: (user: User |null) => void;
-  setToken: (token: string | null) => void;
+  setUser(user: User | null): void;
+
+  setToken(token: string | null): void;
 }
 
-const AuthContext = createContext({} as AuthContextData);
+const AuthContext =
+  createContext({} as AuthContextData);
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-
   const [user, setUser] =
     useState<User | null>(null);
 
@@ -59,10 +61,9 @@ export function AuthProvider({
     email: string,
     senha: string
   ) {
+    setLoading(true);
+
     try {
-
-      setLoading(true);
-
       const response =
         await apiLogin(email, senha);
 
@@ -72,39 +73,43 @@ export function AuthProvider({
         await getUser(response.accessToken);
 
       setUser(loggedUser);
-
     } finally {
-
       setLoading(false);
-
     }
   }
 
-  async function refreshUser() {
-
+  async function refresh() {
     if (!token) return;
 
-    const loggedUser =
-      await getUser(token);
+    try {
+      const response =
+        await refreshToken(token);
 
-    setUser(loggedUser);
+      if (response.accessToken) {
+        setToken(response.accessToken);
 
+        const loggedUser =
+          await getUser(response.accessToken);
+
+        setUser(loggedUser);
+      }
+    } catch (error) {
+      console.log(error);
+
+      await logout();
+    }
   }
 
   async function logout() {
-
     try {
+      if (token) {
+        await apiLogout(token);
+      }
+    } catch {}
 
-      await apiLogout();
+    setUser(null);
 
-    } finally {
-
-      setUser(null);
-
-      setToken(null);
-
-    }
-
+    setToken(null);
   }
 
   return (
@@ -117,7 +122,7 @@ export function AuthProvider({
 
         login,
         logout,
-        refreshUser,
+        refresh,
 
         setUser,
         setToken,

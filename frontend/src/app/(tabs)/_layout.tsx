@@ -3,7 +3,9 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { globalStyles } from "../../styles/globalStyles";
 
+
 export default function TabsLayout() {
+
   return (
     <Tabs
       screenOptions={{

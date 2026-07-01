@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, Alert } from "react-native";
+import { Modal, View, Text, Pressable } from "react-native";
 import { useState } from "react";
 
 import { globalStyles } from "../../../styles/globalStyles";
@@ -21,21 +21,24 @@ export function AddClientModal({ visible, onClose }: Props) {
   const [cpf, setCpf] = useState("");
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
+  const [feedback, setFeedback] = useState("");
 
   async function handleSave() {
     try {
+      setFeedback("");
+
       if (!token) {
-        Alert.alert("Erro", "Sessão expirada. Faça login novamente.");
+        setFeedback("Sessão expirada. Faça login novamente.");
         return;
       }
   
       if (!name.trim()) {
-        Alert.alert("Erro", "Informe o nome do cliente");
+        setFeedback("Informe o nome do cliente");
         return;
       }
   
       if (!email.trim()) {
-        Alert.alert("Erro", "Informe o e-mail do cliente");
+        setFeedback("Informe o e-mail do cliente");
         return;
       }
   
@@ -50,26 +53,28 @@ export function AddClientModal({ visible, onClose }: Props) {
         token
       );
   
-      Alert.alert(
-        "Sucesso",
-        "Cliente cadastrado com sucesso!"
-      );
+      setFeedback("Cliente cadastrado com sucesso!");
   
       setName("");
       setEmail("");
       setCpf("");
-  
+      setTimeout(() => {
       onClose();
+      }, 1200);
     } catch (error: any) {
-      console.log("CREATE CLIENT:", error?.response?.data);
+      console.log("ERRO AO CADASTRAR CLIENTE:", error?.response?.data);
   
-      Alert.alert(
-        "Erro",
+      setFeedback(
         error?.response?.data?.message ??
           "Erro ao cadastrar cliente."
       );
+
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     } finally {
       setLoading(false);
+      setFeedback("");
     }
   }
 
@@ -117,7 +122,11 @@ export function AddClientModal({ visible, onClose }: Props) {
             />
 
             <View style={globalStyles.divider} />
-
+            {feedback !== "" && (
+              <Text style={globalStyles.feedback}>
+                {feedback}
+              </Text>
+            )}
             <AppButton
               title="Salvar cliente"
               loading={loading}

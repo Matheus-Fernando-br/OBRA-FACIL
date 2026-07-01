@@ -10,12 +10,40 @@ export const api = axios.create({
 // ==========================
 
 export async function login(email: string, senha: string) {
-  const response = await api.post("/auth/login", {
+  const { data } = await api.post("/auth/login", {
     email,
     senha,
   });
 
-  return response.data;
+  return data;
+}
+
+export async function refreshToken(token: string) {
+  const { data } = await api.post(
+    "/auth/refresh",
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return data;
+}
+
+export async function logout(token?: string) {
+  await api.post(
+    "/auth/logout",
+    {},
+    {
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : undefined,
+    }
+  );
 }
 
 export async function registerUser(data: {
@@ -30,33 +58,23 @@ export async function registerUser(data: {
   return response.data;
 }
 
-export async function refreshToken() {
-  const response = await api.post("/auth/refresh");
-
-  return response.data;
-}
-
-export async function logout() {
-  await api.post("/auth/logout");
-}
-
 // ==========================
-// USUÁRIO
+// USER
 // ==========================
 
 export async function getUser(token: string) {
-  const response = await api.get("/user/me", {
+  const { data } = await api.get("/user/me", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function updateUser(
   id: string,
-  data: {
+  body: {
     nome: string;
     email: string;
     CPF?: string;
@@ -65,86 +83,90 @@ export async function updateUser(
   },
   token: string
 ) {
-  const response = await api.put(`/user/${id}`, data, {
+  const { data } = await api.put(`/user/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function deleteUser(
   id: string,
   token: string
 ) {
-  const response = await api.delete(`/user/${id}`, {
+  const { data } = await api.delete(`/user/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 // ==========================
-// CLIENTES
+// CLIENTS
 // ==========================
 
 export async function getClients(token: string) {
-  const response = await api.get("/client/userClients", {
+  const { data } = await api.get("/client/userClients", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function createClient(
-  data: {
+  body: {
     nome: string;
     email: string;
-    CPF: string;
+    CPF?: string;
+    CNPJ?: string;
+    telefone?: string;
   },
   token: string
 ) {
-  const response = await api.post("/client", data, {
+  const { data } = await api.post("/client", body, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function updateClient(
   id: string,
-  data: {
+  body: {
     nome: string;
     email: string;
-    CPF: string;
+    CPF?: string;
+    CNPJ?: string;
+    telefone?: string;
   },
   token: string
 ) {
-  const response = await api.put(`/client/${id}`, data, {
+  const { data } = await api.put(`/client/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }
 
 export async function deleteClient(
   id: string,
   token: string
 ) {
-  const response = await api.delete(`/client/${id}`, {
+  const { data } = await api.delete(`/client/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return response.data;
+  return data;
 }

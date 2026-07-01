@@ -1,4 +1,4 @@
-import { Modal, View, Text, Pressable, Alert } from "react-native";
+import { Modal, View, Text, Pressable } from "react-native";
 import { useState, useEffect } from "react";
 
 import { globalStyles } from "../../../styles/globalStyles";
@@ -10,7 +10,6 @@ import { updateClient } from "../../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "../../../styles/globalStyles";
-import { ActivityIndicator } from "react-native";
 
 interface Props {
     visible: boolean;
@@ -30,16 +29,18 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
   const [CPF, setCPF] = useState("");
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
+  const [feedback, setFeedback] = useState("");
 
   async function handleSave() {
     try {
+      setFeedback("");
       if (!nome.trim()) {
-        Alert.alert("Erro", "Informe o nome do cliente");
+        setFeedback("Informe o nome do cliente");
         return;
       }
 
       if (!email.trim()) {
-        Alert.alert("Erro", "Informe o e-mail do cliente");
+        setFeedback("Informe o e-mail do cliente");
         return;
       }
 
@@ -57,22 +58,28 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
         token || ""
       );
 
-      Alert.alert("Sucesso", "Cliente atualizado com sucesso!");
+      setFeedback("Cliente atualizado com sucesso!");
 
       setNome("");
       setEmail("");
       setCPF("");
       onSuccess?.();
-      onClose();
+      setTimeout(() => {
+        onClose();
+        }, 1200);
     } catch (error: any) {
-      console.log("ERRO CLIENTE:", error?.response?.data || error);
+      console.log("ERRO AO ATUALIZAR CLIENTE:", error?.response?.data || error);
 
-      Alert.alert(
-        "Erro",
+      setFeedback(
         error?.response?.data?.message || "Erro ao atualizar cliente"
       );
+
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     } finally {
       setLoading(false);
+      setFeedback("");
     }
   }
 
@@ -128,7 +135,11 @@ export function EditClientModal({ visible, onClose, onSuccess, client }: Props) 
             />
 
             <View style={globalStyles.divider} />
-
+            {feedback !== "" && (
+              <Text style={globalStyles.feedback}>
+                {feedback}
+              </Text>
+            )}
             <AppButton
               title="Salvar Alterações do cliente"
               loading={loading}

@@ -6,8 +6,8 @@ import { globalStyles } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { getClients } from "../../services/api";
-import * as Linking from 'expo-linking';
-import { Alert } from 'react-native';
+import * as Linking from "expo-linking";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Props {
   visible: boolean;
@@ -72,25 +72,34 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState("");
   const [loading, setLoading] = useState(false);
+  const { token } = useAuth();
+  const [feedback, setFeedback] = useState("");
+  const [feedbackClient, setFeedbackClient] = useState("");
+  const [feedbackSinapi, setFeedbackSinapi] = useState("");
 
   useEffect(() => {
     async function loadClients() {
       try {
-        setLoading(true);
-        const data = await getClients();
-  
+        setFeedbackClient("");
+
+        if (!token) {
+          setFeedbackClient("Sessão expirada. Faça login novamente.");
+          return;
+        }
+
+        const data = await getClients(token || "");
+
         setClientsList(data);
       } catch (error) {
         console.log(error);
-      }
-      finally{
-        setLoading(false);
+        setFeedbackClient("Erro ao carregar clientes: ");
+      } finally {
+        setFeedbackClient("");
       }
     }
-  
+
     loadClients();
   }, []);
-  
 
   function updateCategoria(id: number, field: string, value: string) {
     setCategorias((prev) =>
@@ -184,20 +193,33 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   }
 
   function handleSave() {
-    alert("Orçamento adicionado");
-    onClose();
+    try {
+      setFeedback("Orçamento adicionado");
+      setTimeout(() => {
+        onClose();
+      }, 1200);
+    } catch (error) {
+      console.log(error);
+      setFeedback("Erro ao adicionar orçamento: ");
+    } finally {
+      setLoading(false);
+      setFeedback("");
+    }
   }
-
   const handleOpenSinapiLink = async () => {
-    const url = 'https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-05-formato-pdf.zip';
-    
+    const url =
+      "https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-05-formato-pdf.zip";
+
     // Verifica se o dispositivo consegue abrir a URL antes de tentar
     const supported = await Linking.canOpenURL(url);
-  
+
+    setFeedbackSinapi("");
     if (supported) {
       await Linking.openURL(url);
     } else {
-      Alert.alert("Erro", "Não foi possível abrir este link no seu dispositivo.");
+      setFeedbackSinapi(
+        "Erro ao abrir link da tabela SINAPI: Erro ao abrir link no seu dispositivo.",
+      );
     }
   };
 
@@ -271,6 +293,10 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
                   ))}
                 </Picker>
               </View>
+
+              {feedbackClient !== "" && (
+                <Text style={globalStyles.feedback}>{feedbackClient}</Text>
+              )}
 
               <Text style={globalStyles.label}>Descrição</Text>
               <AppInput
@@ -449,13 +475,15 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               </Text>
 
               <Text style={globalStyles.label}>Link da tabela SINAPI</Text>
-              <AppButton 
-                title="Baixar Tabela SINAPI" 
-                onPress={handleOpenSinapiLink} 
+              <AppButton
+                title="Baixar Tabela SINAPI"
+                onPress={handleOpenSinapiLink}
               />
+              {feedbackSinapi !== "" && (
+                <Text style={globalStyles.feedback}>{feedbackSinapi}</Text>
+              )}
 
               <Text style={globalStyles.label}>Custo da obra</Text>
-              <Text style={globalStyles.label}>Custo da Obra</Text>
 
               <AppInput
                 placeholder="Custo da Obra"
@@ -478,7 +506,15 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               />
               <View style={globalStyles.divider} />
 
-              <AppButton title="Salvar orçamento" loading={loading} onPress={handleSave} />
+              {feedback !== "" && (
+                <Text style={globalStyles.feedback}>{feedback}</Text>
+              )}
+
+              <AppButton
+                title="Salvar orçamento"
+                loading={loading}
+                onPress={handleSave}
+              />
             </ScrollView>
           </View>
         </Pressable>
