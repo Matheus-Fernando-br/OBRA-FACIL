@@ -12,43 +12,21 @@ interface Props {
   onDelete: () => void;
 }
 
-export function ClientCard({
-  name,
-  phone,
-  cpf,
-  onEdit,
-  onDelete,
-}: Props) {
+export function ClientCard({ name, phone, cpf, onEdit, onDelete }: Props) {
   return (
     <View style={globalStyles.clientCard}>
-      <Text style={globalStyles.clientCardName}>{name}</Text>
-
-      <Text style={globalStyles.clientCardInfo}>{phone}</Text>
-
-      <Text style={globalStyles.clientCardCity}>{cpf}</Text>
-
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-end",
-          gap: 15,
-          marginTop: 15,
-        }}
-      >
+      <View style={{ flex: 1 }}>
+        <Text style={globalStyles.clientCardName}>{name}</Text>
+        <Text style={globalStyles.clientCardInfo}>{phone}</Text>
+        <Text style={globalStyles.clientCardInfo}>{cpf}</Text>
+      </View>
+      <View style={globalStyles.clientIcons}>
         <Pressable onPress={onEdit}>
-          <Ionicons
-            name="pencil"
-            size={22}
-            color={COLORS.primary}
-          />
+          <Ionicons name="pencil" size={30} color={COLORS.primary} />
         </Pressable>
 
         <Pressable onPress={onDelete}>
-          <Ionicons
-            name="trash"
-            size={22}
-            color={COLORS.danger}
-          />
+          <Ionicons name="trash" size={30} color={COLORS.danger} />
         </Pressable>
       </View>
     </View>

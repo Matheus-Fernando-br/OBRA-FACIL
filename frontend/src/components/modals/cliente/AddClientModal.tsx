@@ -1,7 +1,7 @@
 import { Modal, View, Text, Pressable } from "react-native";
 import { useState } from "react";
 
-import { globalStyles } from "../../../styles/globalStyles";
+import { COLORS, globalStyles } from "../../../styles/globalStyles";
 import { AppInput } from "../../forms/AppInput";
 import { AppButton } from "../../buttons/AppButton";
 import { Ionicons } from "@expo/vector-icons";
@@ -106,7 +106,7 @@ export function AddClientModal({ visible, onClose }: Props) {
               <Text style={globalStyles.addTitle}>Novo cliente</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color="#FFF" />
+                <Ionicons name="close" size={30} color={COLORS.text} />
               </Pressable>
             </View>
 

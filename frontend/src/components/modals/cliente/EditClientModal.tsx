@@ -34,6 +34,7 @@ export function EditClientModal({
   const [email, setEmail] = useState("");
   const [CPF, setCPF] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loadingClose, setLoadingClose] = useState(false);
   const { token } = useAuth();
   const [feedback, setFeedback] = useState("");
 
@@ -115,6 +116,16 @@ export function EditClientModal({
     }
   }, [client]);
 
+  async function handleClose() {
+    setLoadingClose(true);
+    setFeedback("Cancelando alterações...");
+    setTimeout(() => {
+      onClose();
+      setLoadingClose(false);
+      setFeedback("");
+    }, 1500);
+  }
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <Pressable
@@ -131,7 +142,7 @@ export function EditClientModal({
               <Text style={globalStyles.addTitle}>Editar cliente</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color="#FFF" />
+                <Ionicons name="close" size={30} color={COLORS.text} />
               </Pressable>
             </View>
 
@@ -166,7 +177,8 @@ export function EditClientModal({
 
             <AppButton
               title="Cancelar alterações do cliente"
-              onPress={onClose}
+              onPress={handleClose}
+              loading={loadingClose}
               color={COLORS.danger}
             />
           </View>

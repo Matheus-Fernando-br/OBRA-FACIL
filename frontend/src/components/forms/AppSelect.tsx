@@ -15,7 +15,7 @@ export function AppSelect({ label, value, onPress }: Props) {
         height: 55,
         backgroundColor: "#FFF",
         borderRadius: 14,
-        paddingHorizontal: 500,
+        paddingHorizontal: 20,
 
         justifyContent: "center",
 

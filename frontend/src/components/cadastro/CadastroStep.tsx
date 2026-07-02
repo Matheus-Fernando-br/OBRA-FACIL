@@ -96,8 +96,8 @@ export function CadastroStep({
       onNext();
     } catch (error) {
       console.log(error);
-    } finally{
-      setTimeout (() => {
+    } finally {
+      setTimeout(() => {
         setFeedback("");
       }, 5000);
     }
@@ -118,7 +118,7 @@ export function CadastroStep({
       setDocumento(cpfMask(text));
       return;
     }
-  
+
     setDocumento(cnpjMask(text));
   }
 
@@ -160,7 +160,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: "#FFF",
+              color: COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -185,7 +185,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: "#FFF",
+              color: COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -242,7 +242,7 @@ export function CadastroStep({
           style={{
             width: "100%",
             height: 55,
-            backgroundColor: COLORS.text,
+            backgroundColor: COLORS.white,
             borderRadius: 14,
             paddingHorizontal: 30,
             marginBottom: 16,
@@ -279,7 +279,7 @@ export function CadastroStep({
           style={{
             width: "100%",
             height: 55,
-            backgroundColor: "#FFF",
+            backgroundColor: COLORS.white,
             borderRadius: 14,
             paddingHorizontal: 30,
             marginBottom: 16,

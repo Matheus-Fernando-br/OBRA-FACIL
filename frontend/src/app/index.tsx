@@ -78,7 +78,7 @@ export default function LoginScreen() {
         style={{
           width: "100%",
           height: 55,
-          backgroundColor: COLORS.text,
+          backgroundColor: COLORS.white,
           borderRadius: 14,
           paddingHorizontal: 30,
           marginBottom: 16,

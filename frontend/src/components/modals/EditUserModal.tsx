@@ -126,7 +126,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
               <Text style={globalStyles.addTitle}>Meu Perfil</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" color="#FFF" size={28} />
+                <Ionicons name="close" color={COLORS.text} size={28} />
               </Pressable>
             </View>
 

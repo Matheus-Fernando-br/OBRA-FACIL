@@ -29,8 +29,7 @@ export default function ClientesScreen() {
   const { token } = useAuth();
 
   const [clientsList, setClientsList] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] =
-    useState<Client | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const [search, setSearch] = useState("");
 
@@ -63,9 +62,7 @@ export default function ClientesScreen() {
   }, [token]);
 
   const filteredClients = clientsList.filter((client) =>
-    client.nome
-      .toLowerCase()
-      .includes(search.toLowerCase())
+    client.nome.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -76,17 +73,13 @@ export default function ClientesScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={globalStyles.pageHeaderRow}>
-          <Text style={globalStyles.title}>
-            Clientes
-          </Text>
+          <Text style={globalStyles.title}>Clientes</Text>
 
           <Pressable
             style={globalStyles.pageHeaderButton}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={globalStyles.pageHeaderButtonText}>
-              +
-            </Text>
+            <Text style={globalStyles.pageHeaderButtonText}>+</Text>
           </Pressable>
         </View>
 
@@ -103,10 +96,7 @@ export default function ClientesScreen() {
               alignItems: "center",
             }}
           >
-            <ActivityIndicator
-              size="large"
-              color="#3B82F6"
-            />
+            <ActivityIndicator size="large" color="#3B82F6" />
 
             <Text
               style={{
@@ -142,9 +132,7 @@ export default function ClientesScreen() {
           style={globalStyles.bottomActionButton}
           onPress={() => setModalVisible(true)}
         >
-          <Text
-            style={globalStyles.bottomActionButtonText}
-          >
+          <Text style={globalStyles.bottomActionButtonText}>
             + Novo Cliente
           </Text>
         </Pressable>

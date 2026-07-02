@@ -2,7 +2,7 @@ import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { getClients } from "../../services/api";
@@ -239,7 +239,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               <Text style={globalStyles.addTitle}>Novo Orçamento</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color="#FFF" />
+                <Ionicons name="close" size={30} color={COLORS.text} />
               </Pressable>
             </View>
             <View style={globalStyles.divider} />

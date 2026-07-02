@@ -5,12 +5,10 @@ import { router } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
-
 
 const options = [
   "Configurações",
@@ -23,29 +21,26 @@ const options = [
 ];
 
 export default function MaisScreen() {
-
   const [profileVisible, setProfileVisible] = useState(false);
   const { logout, user } = useAuth();
-  
+
   async function handleLogout() {
     try {
       await logout();
       router.replace("/");
-      
     } catch (error) {
       console.log(error);
     }
   }
 
-
   return (
     <View style={globalStyles.screen}>
       <ScrollView style={globalStyles.maisContainer}>
-      <ProfileCard
-        nome={user?.nome || ""}
-        email={user?.email || ""}
-        onPress={() => setProfileVisible(true)}
-      />
+        <ProfileCard
+          nome={user?.nome || ""}
+          email={user?.email || ""}
+          onPress={() => setProfileVisible(true)}
+        />
 
         {options.map((item) => (
           <TouchableOpacity
@@ -60,7 +55,7 @@ export default function MaisScreen() {
         ))}
         <TouchableOpacity
           activeOpacity={0.8}
-          style={[globalStyles.menuCard, { backgroundColor: "#841313" }]}
+          style={[globalStyles.menuCard, { backgroundColor: COLORS.danger }]}
           onPress={handleLogout}
         >
           <Text style={globalStyles.menuText}>Logout</Text>

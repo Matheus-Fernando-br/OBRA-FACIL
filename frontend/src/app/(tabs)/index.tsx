@@ -1,13 +1,8 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-} from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useEffect, useState } from "react";
-
-import { globalStyles } from "../../styles/globalStyles";
+import { useState, useCallback } from "react";
+import { useFocusEffect } from "expo-router";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { DashboardCard } from "../../components/cards/DashboardCard";
 import { WorkCard } from "../../components/cards/WorkCard";
@@ -34,36 +29,42 @@ export default function HomeScreen() {
   const obrasCount = obras.length;
 
   const orcamentosPendentesCount = orcamentos.filter(
-    (o) => o.status === "Pendente"
+    (o) => o.status === "Pendente",
   ).length;
 
   const faturamentoTotal = orcamentos
     .filter((o) => o.status === "Aprovado")
     .reduce((acc, o) => acc + o.valor, 0);
 
-  async function loadData() {
-    try {
-      if (!token) return;
+  useFocusEffect(
+    useCallback(() => {
+      async function loadData() {
+        try {
+          if (!token) return;
 
-      setLoading(true);
+          setLoading(true);
 
-      // Busca usuário logado
-      const loggedUser = await getUser(token);
-      setUser(loggedUser);
+          // Busca usuário logado
+          const loggedUser = await getUser(token);
+          setUser(loggedUser);
 
-      // Busca clientes do usuário
-      const clients = await getClients(token);
-      setClientsList(clients);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
-  }
+          // Busca clientes do usuário
+          const clients = await getClients(token);
+          setClientsList(clients);
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
+      }
 
-  useEffect(() => {
-    loadData();
-  }, [token]);
+      if (token) {
+        loadData();
+      }
+
+      return;
+    }, [token, setUser]), // <-- Dependências necessárias
+  );
 
   return (
     <ScrollView
@@ -75,14 +76,10 @@ export default function HomeScreen() {
           Olá, {user?.nome || "Usuário"} 👋
         </Text>
 
-        <Text style={globalStyles.subtitle}>
-          Bem-vindo ao OBRA-FÁCIL
-        </Text>
+        <Text style={globalStyles.subtitle}>Bem-vindo ao OBRA-FÁCIL</Text>
       </View>
 
-      <Text style={globalStyles.sectionTitle}>
-        Resumo geral
-      </Text>
+      <Text style={globalStyles.sectionTitle}>Resumo geral</Text>
 
       <View style={globalStyles.dashboardGrid}>
         <DashboardCard
@@ -92,17 +89,10 @@ export default function HomeScreen() {
 
         <DashboardCard
           title="Clientes"
-          value={
-            loading
-              ? "..."
-              : clientsList.length.toString()
-          }
+          value={loading ? "..." : clientsList.length.toString()}
         />
 
-        <DashboardCard
-          title="Obras"
-          value={obrasCount.toString()}
-        />
+        <DashboardCard title="Obras" value={obrasCount.toString()} />
 
         <DashboardCard
           title="Faturamento"
@@ -114,9 +104,7 @@ export default function HomeScreen() {
       </View>
 
       <View style={globalStyles.quickAccessHeader}>
-        <Text style={globalStyles.sectionTitle}>
-          Acesso rápido
-        </Text>
+        <Text style={globalStyles.sectionTitle}>Acesso rápido</Text>
 
         <Pressable
           style={({ hovered }) => [
@@ -124,38 +112,20 @@ export default function HomeScreen() {
             hovered && globalStyles.quickButtonHover,
           ]}
         >
-          <Ionicons
-            name="pencil"
-            size={25}
-            color="#FFF"
-          />
+          <Ionicons name="pencil" size={25} color={COLORS.primary} />
         </Pressable>
       </View>
 
       <View style={globalStyles.quickAccessRow}>
-        <QuickAccessCard
-          title="Clientes"
-          icon="people"
-          onPress={() => {}}
-        />
+        <QuickAccessCard title="Clientes" icon="people" onPress={() => {}} />
 
-        <QuickAccessCard
-          title="Obras"
-          icon="hammer"
-          onPress={() => {}}
-        />
+        <QuickAccessCard title="Obras" icon="hammer" onPress={() => {}} />
 
-        <QuickAccessCard
-          title="Financeiro"
-          icon="cash"
-          onPress={() => {}}
-        />
+        <QuickAccessCard title="Financeiro" icon="cash" onPress={() => {}} />
       </View>
 
       <View style={globalStyles.workSection}>
-        <Text style={globalStyles.sectionTitle}>
-          Obras em andamento
-        </Text>
+        <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
 
         {obras.map((obra) => (
           <WorkCard

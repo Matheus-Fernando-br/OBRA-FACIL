@@ -1,17 +1,15 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles } from "../../styles/globalStyles";
-
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 export default function TabsLayout() {
-
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "#64748B",
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: globalStyles.tabBar,
       }}
     >

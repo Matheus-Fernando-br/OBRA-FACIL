@@ -17,7 +17,7 @@ import { orcamentos } from "../../data/orcamentos";
 
 import { getClients } from "../../services/api";
 
-import { AddOrcamentoModal } from "../../components/modals/AddOrcamentoModal"
+import { AddOrcamentoModal } from "@/components/modals/AddOrcamentoModal";
 
 interface Client {
   _id: string;
@@ -26,25 +26,23 @@ interface Client {
   CPF: string;
 }
 
-
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const {token} = useAuth();
+  const { token } = useAuth();
   const FilteredOrcamentos = orcamentos.filter((orcamento) =>
     orcamento.servico.toLowerCase().includes(search.toLowerCase()),
   );
-
 
   async function loadClients() {
     try {
       if (!token) return;
       setLoading(true);
-      
+
       const data = await getClients(token);
-  
+
       setClientsList(data);
     } catch (error) {
       console.log(error);
@@ -58,9 +56,7 @@ export default function OrcamentosScreen() {
   }, []);
 
   const nomeCliente = () => {
-    return clientsList.length > 0
-      ? clientsList[0].nome
-      : "Cliente";
+    return clientsList.length > 0 ? clientsList[0].nome : "Cliente";
   };
 
   if (loading) {
@@ -115,9 +111,7 @@ export default function OrcamentosScreen() {
 
         {orcamentos.map((orcamento) => (
           <View key={orcamento.id} style={globalStyles.orcamentoCard}>
-            <Text style={globalStyles.orcamentoCliente}>
-              {nomeCliente()}
-            </Text>
+            <Text style={globalStyles.orcamentoCliente}>{nomeCliente()}</Text>
 
             <Text style={globalStyles.orcamentoInfo}>
               Status: {orcamento.status}

@@ -73,7 +73,7 @@ export function DeleteClientModal({
               <Text style={globalStyles.addTitle}>Excluir Cliente</Text>
 
               <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color="#FFF" />
+                <Ionicons name="close" size={30} color={COLORS.text} />
               </Pressable>
             </View>
 

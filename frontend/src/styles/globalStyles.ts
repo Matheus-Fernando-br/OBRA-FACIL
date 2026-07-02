@@ -1,4 +1,5 @@
 import { Background } from "expo-router/build/react-navigation";
+import { Section } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 
 /* =========================
@@ -7,21 +8,21 @@ import { StyleSheet } from "react-native";
 
 export const COLORS = {
   primary: "#3B82F6",
-  primaryDark: "#2563EB",
+  secondary: "#0D6B75",
 
-  background: "#020617",
+  background: "#d7d7d7",
   backgroundSecondary: "#0F172A",
-  backgrounddark: "#01030e",
+  backgroundTab: "#f8eccf",
 
-  card: "#111827",
+  card: "#f8eccf",
   cardHover: "#1E293B",
 
   white: "#FFFFFF",
+  title: "#c45f00",
+  text: "#000000",
+  textSecondary: "#474242e5",
 
-  text: "#F8FAFC",
-  textSecondary: "#94A3B8",
-
-  border: "#1E293B",
+  border: "#1e2c43",
 
   success: "#22C55E",
   warning: "#F59E0B",
@@ -64,11 +65,11 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     paddingHorizontal: 40,
-    backgroundColor: "#0F172A",
+    backgroundColor: COLORS.background,
   },
 
   loginTitle: {
-    color: "#FFFFFF",
+    color: COLORS.title,
     fontSize: 34,
     fontWeight: "bold",
     marginBottom: 40,
@@ -76,10 +77,10 @@ export const globalStyles = StyleSheet.create({
 
   loginInput: {
     height: 55,
-    backgroundColor: "#1E293B",
+    backgroundColor: COLORS.backgroundSecondary,
     borderRadius: 12,
     paddingHorizontal: 16,
-    color: "#FFFFFF",
+    color: COLORS.text,
     marginBottom: 16,
   },
 
@@ -99,7 +100,7 @@ export const globalStyles = StyleSheet.create({
     width: "100%",
     justifyContent: "center",
     alignItems: "center",
-  },  
+  },
 
   loginButtonText: {
     color: "#FFFFFF",
@@ -107,14 +108,13 @@ export const globalStyles = StyleSheet.create({
     fontSize: 16,
   },
 
-  loginText : {
-    color: "#FFFFFF",
+  loginText: {
+    color: COLORS.textSecondary,
     fontSize: 14,
     textAlign: "center",
     marginTop: 16,
     marginBottom: 16,
   },
-
 
   /* =========================
      LAYOUT
@@ -283,9 +283,9 @@ export const globalStyles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
 
-    backgroundColor: COLORS.backgrounddark,
+    backgroundColor: COLORS.backgroundTab,
 
-    borderTopWidth: 1,
+    borderTopWidth: 3,
     borderTopColor: COLORS.border,
   },
 
@@ -299,7 +299,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   homeHeader: {
-    marginTop: 60,
+    marginTop: 20,
     marginBottom: 24,
   },
 
@@ -340,7 +340,7 @@ export const globalStyles = StyleSheet.create({
   title: {
     fontFamily: "IntelOneMono_700Bold",
     fontSize: 28,
-    color: COLORS.text,
+    color: COLORS.title,
   },
 
   pageTitle: {
@@ -410,7 +410,7 @@ export const globalStyles = StyleSheet.create({
     width: "48%",
     marginBottom: 16,
 
-    shadowColor: "#000",
+    shadowColor: COLORS.textSecondary,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -536,7 +536,7 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
 
-    shadowColor: "#000",
+    shadowColor: COLORS.textSecondary,
 
     shadowOffset: {
       width: 0,
@@ -560,7 +560,7 @@ export const globalStyles = StyleSheet.create({
   bottomActionButton: {
     height: 56,
 
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.secondary,
 
     borderRadius: 16,
 
@@ -584,22 +584,28 @@ export const globalStyles = StyleSheet.create({
     padding: 18,
     borderRadius: 18,
     marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   clientCardName: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 6,
+    marginBottom: 10,
     color: COLORS.text,
   },
 
   clientCardInfo: {
     color: COLORS.textSecondary,
+    marginTop: 6,
   },
 
-  clientCardCity: {
-    color: COLORS.textSecondary,
-    marginTop: 4,
+  clientIcons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 40,
+    marginRight: 20,
   },
 
   /* =========================
@@ -648,7 +654,7 @@ export const globalStyles = StyleSheet.create({
 
   label: {
     alignSelf: "flex-start",
-    color: COLORS.textSecondary,
+    color: COLORS.text,
     marginBottom: 6,
     marginTop: 12,
   },
@@ -740,7 +746,7 @@ export const globalStyles = StyleSheet.create({
 
   progressBarBackground: {
     height: 10,
-    backgroundColor: COLORS.border,
+    backgroundColor: COLORS.textSecondary,
     borderRadius: 99,
   },
 
