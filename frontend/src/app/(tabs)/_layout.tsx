@@ -1,13 +1,22 @@
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import { AppHeader } from "@/components/layout/AppHeader"
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        header: () => (
+          <AppHeader
+            onMenu={() => {
+              console.log("Menu");
+            }}
+            onNotifications={() => {
+              router.replace("../notificacoes");
+            }}
+          />
+        ),
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: globalStyles.tabBar,

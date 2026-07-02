@@ -10,7 +10,7 @@ export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
 
-  background: "#d7d7d7",
+  background: "#FCFCFC",
   backgroundSecondary: "#0F172A",
   backgroundTab: "#f8eccf",
 
@@ -31,29 +31,6 @@ export const COLORS = {
   tabBarHeight: 70,
 };
 
-/* =========================
-   ESTILOS GLOBAIS
-========================= */
-const CARD_STYLE = {
-  backgroundColor: COLORS.card,
-
-  borderWidth: 1,
-  borderColor: COLORS.border,
-
-  borderRadius: 18,
-
-  shadowColor: "#000",
-
-  shadowOffset: {
-    width: 0,
-    height: 4,
-  },
-
-  shadowOpacity: 0.2,
-  shadowRadius: 8,
-
-  elevation: 6,
-};
 
 export const globalStyles = StyleSheet.create({
   /* =========================
@@ -127,7 +104,8 @@ export const globalStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: 40,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
   },
 
   pageContainer: {
@@ -299,7 +277,6 @@ export const globalStyles = StyleSheet.create({
   },
 
   homeHeader: {
-    marginTop: 20,
     marginBottom: 24,
   },
 
