@@ -1,20 +1,15 @@
-import { TextInput } from "react-native";
+import {
+  TextInput,
+  TextInputProps,
+} from "react-native";
 
-interface Props {
-  placeholder: string;
+interface Props extends TextInputProps {}
 
-  value: string;
-
-  onChangeText: (text: string) => void;
-}
-
-export function AppInput({ placeholder, value, onChangeText }: Props) {
+export function AppInput({
+  ...rest
+}: Props) {
   return (
     <TextInput
-      placeholder={placeholder}
-      placeholderTextColor="#94A3B8"
-      value={value}
-      onChangeText={onChangeText}
       style={{
         width: "100%",
         height: 55,
@@ -23,6 +18,8 @@ export function AppInput({ placeholder, value, onChangeText }: Props) {
         paddingHorizontal: 30,
         marginBottom: 16,
       }}
+      placeholderTextColor="#94A3B8"
+      {...rest}
     />
   );
 }

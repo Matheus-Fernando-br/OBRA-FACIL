@@ -6,18 +6,53 @@ import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { globalStyles, COLORS } from "../../styles/globalStyles";
-
+import { OptionsCard } from "../../components/cards/OptionsCard";
 import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
 
 const options = [
-  "Configurações",
-  "Financeiro",
-  "Relatórios",
-  "Equipe",
-  "Notificações",
-  "Ajuda",
-  "Sobre o app",
+
+  {
+    title: "Configurações Gerais",
+    icon: "settings",
+    route: "/configuracoes",
+    description: "Preferências do aplicativo",
+  },
+
+  {
+    title: "Privacidade e Segurança",
+    icon: "shield-checkmark",
+    route: "/seguranca",
+    description: "Senha e segurança",
+  },
+
+  {
+    title: "Relatórios",
+    icon: "document-text",
+    route: "/relatorios",
+    description: "Exportações e estatísticas",
+  },
+
+  {
+    title: "Notificações",
+    icon: "notifications",
+    route: "/notificacoes",
+    description: "Alertas do sistema",
+  },
+
+  {
+    title: "Ajuda",
+    icon: "help-circle",
+    route: "/ajuda",
+    description: "FAQ e suporte",
+  },
+
+  {
+    title: "Sobre o app",
+    icon: "information-circle",
+    route: "/sobre",
+    description: "Versão e informações",
+  },
 ];
 
 export default function MaisScreen() {
@@ -43,15 +78,13 @@ export default function MaisScreen() {
         />
 
         {options.map((item) => (
-          <TouchableOpacity
-            key={item}
-            activeOpacity={0.8}
-            style={globalStyles.menuCard}
-          >
-            <Text style={globalStyles.menuText}>{item}</Text>
-
-            <Ionicons name="chevron-forward" size={20} color="#64748B" />
-          </TouchableOpacity>
+          <OptionsCard
+            key={item.title}
+            title={item.title}
+            description={item.description}
+            icon={item.icon as any}
+            onPress={() => router.push(item.route as any)}
+          />
         ))}
         <TouchableOpacity
           activeOpacity={0.8}

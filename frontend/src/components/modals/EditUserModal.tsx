@@ -26,7 +26,6 @@ export function EditUserModal({ visible, onClose, user }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [documento, setDocumento] = useState("");
-  const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState(false);
   const { token, setUser } = useAuth();
   const [feedback, setFeedback] = useState("");
@@ -37,7 +36,6 @@ export function EditUserModal({ visible, onClose, user }: Props) {
     setNome(user.nome);
     setEmail(user.email);
     setDocumento(user.CPF || user.CNPJ || "");
-    setSenha("");
   }, [user]);
 
   async function handleSave() {
@@ -78,7 +76,6 @@ export function EditUserModal({ visible, onClose, user }: Props) {
           email: email.trim(),
           CPF: user.CPF ? documento.trim() : undefined,
           CNPJ: user.CNPJ ? documento.trim() : undefined,
-          senha: senha.trim() || undefined,
         },
         token,
       );
@@ -89,7 +86,6 @@ export function EditUserModal({ visible, onClose, user }: Props) {
       setNome("");
       setEmail("");
       setDocumento("");
-      setSenha("");
       setTimeout(() => {
         onClose();
       }, 1200);
@@ -160,14 +156,6 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 value={documento}
                 onChangeText={(text) => setDocumento(documentMask(text))}
                 placeholder="CPF/CNPJ"
-              />
-
-              <Text style={globalStyles.label}>Nova senha (opcional)</Text>
-
-              <AppInput
-                value={senha}
-                onChangeText={setSenha}
-                placeholder="Nova senha"
               />
 
               <View style={globalStyles.divider} />

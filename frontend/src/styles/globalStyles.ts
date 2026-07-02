@@ -304,7 +304,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   pageHeaderRow: {
-    marginTop: 60,
+    marginTop: 10,
     marginBottom: 20,
 
     flexDirection: "row",

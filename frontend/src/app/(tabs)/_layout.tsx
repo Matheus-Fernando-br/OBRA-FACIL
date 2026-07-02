@@ -62,6 +62,49 @@ export default function TabsLayout() {
           ),
         }}
       />
+
+      {/*TELAS QUE NÃO PODEM APARECER DEVIDO AO NOME index*/}
+      <Tabs.Screen
+        name="configuracoes"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="seguranca"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="relatorios"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="notificacoes"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="ajuda"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="sobre"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

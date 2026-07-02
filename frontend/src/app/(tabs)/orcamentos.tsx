@@ -82,7 +82,7 @@ export default function OrcamentosScreen() {
     <View style={globalStyles.screen}>
       <ScrollView
         style={globalStyles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 30 }}
       >
         <View style={globalStyles.pageHeaderRow}>
           <Text style={globalStyles.title}>Orçamentos</Text>

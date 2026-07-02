@@ -19,7 +19,9 @@ export function StepIndicator({ step }: Props) {
   return (
     <View
       style={{
-        marginTop: 40,
+        flexDirection: "column",
+        justifyContent: "center",
+        marginTop: 10,
         marginBottom: 35,
       }}
     >
@@ -143,6 +145,7 @@ export function StepIndicator({ step }: Props) {
         style={{
           flexDirection: "row",
           marginTop: 12,
+          gap: 70,
         }}
       >
         <View
