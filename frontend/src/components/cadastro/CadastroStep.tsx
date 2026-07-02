@@ -235,18 +235,10 @@ export function CadastroStep({
             name={showPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>
-        <TextInput
+        <AppInput
           placeholder="Senha"
           secureTextEntry={!showPassword}
           placeholderTextColor={COLORS.textSecondary}
-          style={{
-            width: "100%",
-            height: 55,
-            backgroundColor: COLORS.white,
-            borderRadius: 14,
-            paddingHorizontal: 30,
-            marginBottom: 16,
-          }}
           value={senha}
           onChangeText={setSenha}
         />
@@ -272,18 +264,10 @@ export function CadastroStep({
             name={showConfirmPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>
-        <TextInput
+        <AppInput
           placeholder="Confirmar Senha"
           secureTextEntry={!showConfirmPassword}
           placeholderTextColor={COLORS.textSecondary}
-          style={{
-            width: "100%",
-            height: 55,
-            backgroundColor: COLORS.white,
-            borderRadius: 14,
-            paddingHorizontal: 30,
-            marginBottom: 16,
-          }}
           value={confirmarSenha}
           onChangeText={setConfirmarSenha}
         />

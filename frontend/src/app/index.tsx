@@ -65,7 +65,7 @@ export default function LoginScreen() {
 
       <Text style={globalStyles.label}>Senha</Text>
 
-      <TextInput
+      <AppInput
         placeholder="Informe sua senha"
         placeholderTextColor="#94A3B8"
         secureTextEntry
@@ -74,14 +74,6 @@ export default function LoginScreen() {
           setPassword(text);
 
           if (feedback) setFeedback("");
-        }}
-        style={{
-          width: "100%",
-          height: 55,
-          backgroundColor: COLORS.white,
-          borderRadius: 14,
-          paddingHorizontal: 30,
-          marginBottom: 16,
         }}
       />
       <View style={globalStyles.divider} />

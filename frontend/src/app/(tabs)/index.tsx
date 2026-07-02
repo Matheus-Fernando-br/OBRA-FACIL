@@ -73,36 +73,51 @@ export default function HomeScreen() {
     >
       <View style={globalStyles.homeHeader}>
         <Text style={globalStyles.title}>
-          Olá, {user?.nome || "Usuário"} 👋
+          <span style={{ color: COLORS.text }}>Olá, </span>
+          {user?.nome || "Usuário"} 👋
         </Text>
 
-        <Text style={globalStyles.subtitle}>Bem-vindo ao OBRA-FÁCIL</Text>
+        <Text style={globalStyles.subtitle}>
+          Aqui está o resumo dos seus projetos!
+        </Text>
       </View>
+      <View style={globalStyles.section}>
+        <Text style={globalStyles.sectionTitle}>Resumo geral</Text>
 
-      <Text style={globalStyles.sectionTitle}>Resumo geral</Text>
+        <View style={globalStyles.dashboardGrid}>
+          <DashboardCard
+            title="Orçamentos Pendentes"
+            value={orcamentosPendentesCount.toString()}
+            icon="document-text"
+            color={COLORS.title}
+          />
 
-      <View style={globalStyles.dashboardGrid}>
-        <DashboardCard
-          title="Orçamentos Pendentes"
-          value={orcamentosPendentesCount.toString()}
-        />
+          <DashboardCard
+            title="Clientes"
+            value={loading ? "..." : clientsList.length.toString()}
+            icon="people"
+            color={COLORS.warning}
+          />
 
-        <DashboardCard
-          title="Clientes"
-          value={loading ? "..." : clientsList.length.toString()}
-        />
+          <DashboardCard
+            title="Obras em Andamento"
+            value={obrasCount.toString()}
+            icon="hammer"
+            color={COLORS.primary}
+          />
 
-        <DashboardCard title="Obras" value={obrasCount.toString()} />
-
-        <DashboardCard
-          title="Faturamento"
-          value={faturamentoTotal.toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          })}
-        />
+          <DashboardCard
+            title="Faturamento"
+            value={faturamentoTotal.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+            icon="cash"
+            color={COLORS.success}
+          />
+        </View>
       </View>
-
+      <View style={globalStyles.section}>
       <View style={globalStyles.quickAccessHeader}>
         <Text style={globalStyles.sectionTitle}>Acesso rápido</Text>
 
@@ -123,8 +138,8 @@ export default function HomeScreen() {
 
         <QuickAccessCard title="Financeiro" icon="cash" onPress={() => {}} />
       </View>
-
-      <View style={globalStyles.workSection}>
+      </View>
+      <View style={globalStyles.section}>
         <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
 
         {obras.map((obra) => (

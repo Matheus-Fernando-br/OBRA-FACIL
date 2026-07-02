@@ -12,9 +12,9 @@ export const COLORS = {
 
   background: "#FCFCFC",
   backgroundSecondary: "#0F172A",
-  backgroundTab: "#f8eccf",
+  backgroundSection: "#F0F0F0",
 
-  card: "#f8eccf",
+  card: "#D9D7D7",
   cardHover: "#1E293B",
 
   white: "#FFFFFF",
@@ -261,7 +261,7 @@ export const globalStyles = StyleSheet.create({
     paddingTop: 10,
     paddingBottom: 10,
 
-    backgroundColor: COLORS.backgroundTab,
+    backgroundColor: COLORS.backgroundSection,
 
     borderTopWidth: 3,
     borderTopColor: COLORS.border,
@@ -315,8 +315,9 @@ export const globalStyles = StyleSheet.create({
   ========================= */
 
   title: {
-    fontFamily: "IntelOneMono_700Bold",
+    fontFamily: "Roboto_700Bold",
     fontSize: 28,
+    fontWeight: "700",
     color: COLORS.title,
   },
 
@@ -346,6 +347,13 @@ export const globalStyles = StyleSheet.create({
     color: COLORS.text,
   },
 
+  section: {
+    marginBottom: 40,
+    backgroundColor: COLORS.backgroundSection,
+    padding: 10,
+    borderRadius: 12,
+  },
+
   /* =========================
      DASHBOARD
   ========================= */
@@ -370,9 +378,6 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  workSection: {
-    marginTop: 28,
-  },
 
   /* =========================
    DASHBOARD CARD
