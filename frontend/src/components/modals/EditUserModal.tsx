@@ -119,10 +119,17 @@ export function EditUserModal({ visible, onClose, user }: Props) {
         >
           <View style={[globalStyles.addCard]}>
             <View style={globalStyles.modalHeader}>
+            <Pressable onPress={onClose} style={globalStyles.leftAction}>
+                <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+              </Pressable>
               <Text style={globalStyles.addTitle}>Meu Perfil</Text>
 
-              <Pressable onPress={onClose}>
-                <Ionicons name="close" color={COLORS.text} size={28} />
+              <Pressable onPress={handleSave} style={globalStyles.rightAction}>
+                <View style={globalStyles.saveTextStack}>
+                  <Text style={globalStyles.saveText}>Atualizar</Text>
+                  <Text style={globalStyles.saveText}>Perfil</Text>
+                </View>
+                <Ionicons name="download" size={20} color={COLORS.title} />
               </Pressable>
             </View>
 
@@ -167,6 +174,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
               <AppButton
                 title={loading ? "Salvando..." : "Salvar alterações"}
                 onPress={handleSave}
+                color={COLORS.primary}
               />
 
               <AppButton

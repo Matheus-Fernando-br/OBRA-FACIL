@@ -19,7 +19,8 @@ export function AppSwitch({
         false: "#374151",
         true: COLORS.primary,
       }}
-      thumbColor="#FFFFFF"
+      thumbColor= "#FFFF"
+      
     />
   );
 }

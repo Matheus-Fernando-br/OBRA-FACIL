@@ -236,13 +236,21 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
           <View style={globalStyles.addCard}>
             {/* HEADER FIXO */}
             <View style={globalStyles.modalHeader}>
+
+            <Pressable onPress={onClose} style={globalStyles.leftAction}>
+                <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+              </Pressable>
+
               <Text style={globalStyles.addTitle}>Novo Orçamento</Text>
 
-              <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color={COLORS.text} />
+              <Pressable onPress={handleSave} style={globalStyles.rightAction}>
+                <View style={globalStyles.saveTextStack}>
+                  <Text style={globalStyles.saveText}>Salvar</Text>
+                  <Text style={globalStyles.saveText}>Orçamento</Text>
+                </View>
+                <Ionicons name="add-circle" size={20} color={COLORS.title} />
               </Pressable>
             </View>
-            <View style={globalStyles.divider} />
 
             {/* CONTEÚDO ROLÁVEL */}
             <ScrollView
@@ -252,6 +260,8 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
                 paddingRight: 20,
               }}
             >
+              <Text style={globalStyles.subtitle}>Informações Gerais</Text>
+              <View style={globalStyles.divider} />
               <Text style={globalStyles.label}>Nome do orçamento</Text>
               <AppInput
                 placeholder="Nome do orçamento"
@@ -306,9 +316,10 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
                 value={validade}
                 onChangeText={setValidade}
               />
+
+              <Text style={globalStyles.subtitle}>Endereço da obra</Text>
               <View style={globalStyles.divider} />
 
-              <Text style={globalStyles.label}>Endereço da obra</Text>
               <Text style={globalStyles.label}>CEP</Text>
 
               <AppInput

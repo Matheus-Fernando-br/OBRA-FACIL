@@ -17,7 +17,7 @@ export function AppButton({
   title,
   onPress,
   loading = false,
-  color = COLORS.primary,
+  color = COLORS.title,
 }: Props) {
   return (
     <TouchableOpacity

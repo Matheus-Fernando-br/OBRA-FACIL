@@ -26,7 +26,7 @@ export function SettingsItem({
   title,
   description,
   icon,
-  iconColor = COLORS.primary,
+  iconColor = COLORS.title,
   value,
   disabled = false,
   danger = false,
@@ -39,7 +39,7 @@ export function SettingsItem({
       disabled={disabled || !onPress}
       onPress={onPress}
       style={{
-        backgroundColor: COLORS.card,
+        backgroundColor: COLORS.backgroundSection,
         borderRadius: 18,
         padding: 18,
         marginBottom: 14,

@@ -10,7 +10,7 @@ export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
 
-  background: "#FCFCFC",
+  background: "#FFFCFC",
   backgroundSecondary: "#0F172A",
   backgroundSection: "#F0F0F0",
 
@@ -30,7 +30,6 @@ export const COLORS = {
 
   tabBarHeight: 70,
 };
-
 
 export const globalStyles = StyleSheet.create({
   /* =========================
@@ -128,9 +127,9 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   orcamentoCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.backgroundSection,
 
-    borderWidth: 1,
+    borderWidth: .8,
     borderColor: COLORS.border,
 
     borderRadius: 18,
@@ -278,6 +277,7 @@ export const globalStyles = StyleSheet.create({
 
   homeHeader: {
     marginBottom: 24,
+    marginLeft: 7,
   },
 
   pageHeaderRow: {
@@ -295,7 +295,7 @@ export const globalStyles = StyleSheet.create({
 
     borderRadius: 12,
 
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.title,
 
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -315,7 +315,7 @@ export const globalStyles = StyleSheet.create({
   ========================= */
 
   title: {
-    fontFamily: "Roboto_700Bold",
+    fontFamily: "Poppins_700Bold",
     fontSize: 28,
     fontWeight: "700",
     color: COLORS.title,
@@ -330,9 +330,11 @@ export const globalStyles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontFamily: "IntelOneMono_700Bold",
+    fontFamily: "IntelOneMono_700SemiBold",
+    fontWeight: "700",
     fontSize: 22,
     color: COLORS.text,
+    marginLeft: 7,
     marginBottom: 16,
   },
 
@@ -377,7 +379,6 @@ export const globalStyles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-
 
   /* =========================
    DASHBOARD CARD
@@ -439,11 +440,10 @@ export const globalStyles = StyleSheet.create({
   maisContainer: {
     flex: 1,
     backgroundColor: COLORS.background,
-    padding: 24,
+    padding: 15,
   },
 
   profileCard: {
-    marginTop: 60,
     backgroundColor: COLORS.card,
     padding: 24,
     borderRadius: 22,
@@ -462,7 +462,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   menuCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.backgroundSection,
     padding: 20,
     borderRadius: 18,
     marginBottom: 14,
@@ -542,7 +542,7 @@ export const globalStyles = StyleSheet.create({
   bottomActionButton: {
     height: 56,
 
-    backgroundColor: COLORS.secondary,
+    backgroundColor: COLORS.title,
 
     borderRadius: 16,
 
@@ -562,7 +562,7 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   clientCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.backgroundSection,
     padding: 18,
     borderRadius: 18,
     marginBottom: 16,
@@ -596,15 +596,13 @@ export const globalStyles = StyleSheet.create({
 
   addCard: {
     flex: 1,
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
     paddingBottom: 20,
-    paddingLeft: 50,
-    paddingRight: 50,
-    marginTop: 100,
-    marginBottom: 2 + COLORS.tabBarHeight,
+    paddingHorizontal: 20,
+    marginTop: 50,
   },
 
   addTitle: {
@@ -612,6 +610,8 @@ export const globalStyles = StyleSheet.create({
     fontWeight: "bold",
     color: COLORS.text,
     marginBottom: 10,
+
+    textAlign: "center",
   },
 
   modalHeader: {
@@ -619,7 +619,18 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 10,
+    position: "relative",
+  },
+
+  leftAction: {
+    zIndex: 1, // Garante que a área de clique fique por cima do título
+  },
+
+  rightAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 1, // Garante clique sobre o título
   },
 
   modalCloseButton: {
@@ -635,17 +646,30 @@ export const globalStyles = StyleSheet.create({
   },
 
   label: {
+    fontFamily: "Poppins_800SemiBold",
     alignSelf: "flex-start",
     color: COLORS.text,
     marginBottom: 6,
     marginTop: 12,
   },
-
   divider: {
     height: 1,
     backgroundColor: "#444",
     width: "100%",
-    marginVertical: 15,
+    marginVertical: 10,
+  },
+
+  saveTextStack: {
+    flexDirection: "column",
+    alignItems: "flex-end", // Alinha os textos à direita (perto do ícone)
+    marginRight: 6, // Dá um respiro entre o texto e o ícone
+  },
+
+  saveText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 13, // Fonte um pouco menor já que está em duas linhas
+    color: COLORS.title,
+    lineHeight: 14, // Deixa as palavras mais próximas uma da outra
   },
 
   /* =========================

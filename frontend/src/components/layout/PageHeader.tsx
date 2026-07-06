@@ -16,7 +16,6 @@ export function PageHeader({
   return (
     <View
       style={{
-        marginTop: 10,
         marginBottom: 25,
       }}
     >
@@ -31,12 +30,12 @@ export function PageHeader({
         <Ionicons
           name="arrow-back"
           size={24}
-          color={COLORS.primary}
+          color={COLORS.title}
         />
 
         <Text
           style={{
-            color: COLORS.primary,
+            color: COLORS.title,
             marginLeft: 8,
             fontWeight: "600",
             fontSize: 16,

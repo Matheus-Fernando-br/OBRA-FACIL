@@ -54,7 +54,7 @@ export function OptionsCard({
             width: 42,
             height: 42,
             borderRadius: 10,
-            backgroundColor: COLORS.primary,
+            backgroundColor: COLORS.title,
             justifyContent: "center",
             alignItems: "center",
             marginRight: 15,

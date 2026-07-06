@@ -103,13 +103,22 @@ export function AddClientModal({ visible, onClose }: Props) {
         <Pressable onPress={(e) => e.stopPropagation()}>
           <View style={globalStyles.addCard}>
             <View style={globalStyles.modalHeader}>
+              <Pressable onPress={onClose} style={globalStyles.leftAction}>
+                <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+              </Pressable>
+
               <Text style={globalStyles.addTitle}>Novo cliente</Text>
 
-              <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color={COLORS.text} />
+              <Pressable onPress={handleSave} style={globalStyles.rightAction}>
+                <View style={globalStyles.saveTextStack}>
+                  <Text style={globalStyles.saveText}>Salvar</Text>
+                  <Text style={globalStyles.saveText}>Cliente</Text>
+                </View>
+                <Ionicons name="person-add" size={20} color={COLORS.title} />
               </Pressable>
             </View>
 
+            <Text style={globalStyles.subtitle}>Informações Pessoais</Text>
             <View style={globalStyles.divider} />
 
             <Text style={globalStyles.label}>Nome</Text>

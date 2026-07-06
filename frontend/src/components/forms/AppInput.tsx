@@ -18,7 +18,7 @@ export function AppInput({
         paddingHorizontal: 30,
         marginBottom: 16,
         borderColor: COLORS.textSecondary,
-        borderWidth: 1,
+        borderWidth: .8,
       }}
       placeholderTextColor="#94A3B8"
       {...rest}

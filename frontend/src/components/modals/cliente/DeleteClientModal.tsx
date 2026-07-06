@@ -70,11 +70,20 @@ export function DeleteClientModal({
         <Pressable onPress={(e) => e.stopPropagation()}>
           <View style={globalStyles.addCard}>
             <View style={globalStyles.modalHeader}>
+            <Pressable onPress={onClose} style={globalStyles.leftAction}>
+                <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+              </Pressable>
+
               <Text style={globalStyles.addTitle}>Excluir Cliente</Text>
 
-              <Pressable onPress={onClose}>
-                <Ionicons name="close" size={30} color={COLORS.text} />
+              <Pressable onPress={handleDelete} style={globalStyles.rightAction}>
+                <View style={globalStyles.saveTextStack}>
+                  <Text style={globalStyles.saveText}>Excluir</Text>
+                  <Text style={globalStyles.saveText}>Cliente</Text>
+                </View>
+                <Ionicons name="person-remove" size={20} color={COLORS.title} />
               </Pressable>
+
             </View>
 
             <View style={globalStyles.divider} />
