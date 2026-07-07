@@ -27,13 +27,13 @@ export function ProfileCard({
         alignItems: "center",
     }}
 >
-      <Image
-        source={
-          imagem ??
-          require("../../assets/images/profile.png")
-        }
-        style={globalStyles.profileImage}
-      />
+        <Image
+          source={
+            imagem ??
+            require("../../assets/images/profile.png")
+          }
+          style={globalStyles.profileImage}
+        />
 
       <View
         style={{

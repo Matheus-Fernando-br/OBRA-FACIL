@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable, Image } from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useCallback } from "react";
 import { useFocusEffect } from "expo-router";
@@ -72,21 +73,32 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={globalStyles.homeHeader}>
-        <Text style={globalStyles.title}>
-          <span style={{ color: COLORS.text }}>Olá, </span>
-          {user?.nome || "Usuário"} 👋
-        </Text>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={globalStyles.title}>
+            <Text style={{ color: COLORS.text }}>Olá, </Text>
+            {user?.nome || "Usuário"} 👋
+          </Text>
 
-        <Text style={globalStyles.subtitle}>
-          Aqui está o resumo dos seus projetos!
-        </Text>
+          <Text style={globalStyles.subtitle}>
+            Aqui está o resumo dos seus projetos!
+          </Text>
+        </View>
+        <Image
+          source={require("../../assets/images/profile.png")}
+          style={globalStyles.profileImageIndex}
+        />
       </View>
-      <View style={globalStyles.section}>
-        <Text style={globalStyles.sectionTitle}>Resumo geral</Text>
+      <View
+        style={[
+          globalStyles.section,
+          { backgroundColor: COLORS.backgroundSection },
+        ]}
+      >
+        <Text style={globalStyles.sectionTitle}>Resumo geral:</Text>
 
         <View style={globalStyles.dashboardGrid}>
           <DashboardCard
-            title="Orçamentos Pendentes"
+            title="Orçamentos"
             value={orcamentosPendentesCount.toString()}
             icon="document-text"
             color={COLORS.title}
@@ -100,7 +112,7 @@ export default function HomeScreen() {
           />
 
           <DashboardCard
-            title="Obras em Andamento"
+            title="Obras"
             value={obrasCount.toString()}
             icon="hammer"
             color={COLORS.primary}
@@ -111,34 +123,56 @@ export default function HomeScreen() {
             value={faturamentoTotal.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             })}
             icon="cash"
             color={COLORS.success}
+            valueStyle={{ fontSize: 13 }}
           />
         </View>
       </View>
+      <View style={globalStyles.divider} />
       <View style={globalStyles.section}>
-      <View style={globalStyles.quickAccessHeader}>
-        <Text style={globalStyles.sectionTitle}>Acesso rápido</Text>
+        <View style={globalStyles.quickAccessHeader}>
+          <Text style={globalStyles.sectionTitle}>Acesso rápido:</Text>
 
-        <Pressable
-          style={({ hovered }) => [
-            globalStyles.quickAccessEditButton,
-            hovered && globalStyles.quickButtonHover,
-          ]}
-        >
-          <Ionicons name="pencil" size={25} color={COLORS.primary} />
-        </Pressable>
+          <Pressable style={globalStyles.quickAccessEditButton}>
+            <Ionicons name="pencil" size={25} color={COLORS.primary} />
+          </Pressable>
+        </View>
+        <View style={globalStyles.quickAccessRow}>
+          <QuickAccessCard
+            title="Novo Orçamento"
+            icon="document-text"
+            onPress={() => {
+              router.replace("/orcamentos");
+            }}
+            color={COLORS.title}
+          />
+
+          <QuickAccessCard
+            title="Novo Cliente"
+            icon="people"
+            onPress={() => {
+              router.replace("/clientes");
+            }}
+            color={COLORS.success}
+          />
+
+
+          <QuickAccessCard
+            title="Configurações"
+            icon="cog"
+            onPress={() => {
+              router.replace("/configuracoes");
+            }}
+            color={COLORS.textSecondary}
+          />
+        </View>
       </View>
+      <View style={globalStyles.divider} />
 
-      <View style={globalStyles.quickAccessRow}>
-        <QuickAccessCard title="Clientes" icon="people" onPress={() => {}} />
-
-        <QuickAccessCard title="Obras" icon="hammer" onPress={() => {}} />
-
-        <QuickAccessCard title="Financeiro" icon="cash" onPress={() => {}} />
-      </View>
-      </View>
       <View style={globalStyles.section}>
         <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
 

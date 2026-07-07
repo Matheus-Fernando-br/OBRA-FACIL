@@ -42,8 +42,9 @@ export function AppHeader({ onMenu }: Props) {
         <Text
           style={{
             color: COLORS.text,
+            fontFamily: "Montserrat_800ExtraBold",
             fontSize: 22,
-            fontWeight: "800",
+   
             marginLeft: 8,
           }}
         >

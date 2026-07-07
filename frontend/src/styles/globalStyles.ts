@@ -11,7 +11,6 @@ export const COLORS = {
   secondary: "#0D6B75",
 
   background: "#FFFCFC",
-  backgroundSecondary: "#0F172A",
   backgroundSection: "#F0F0F0",
 
   card: "#D9D7D7",
@@ -49,15 +48,6 @@ export const globalStyles = StyleSheet.create({
     fontSize: 34,
     fontWeight: "bold",
     marginBottom: 40,
-  },
-
-  loginInput: {
-    height: 55,
-    backgroundColor: COLORS.backgroundSecondary,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    color: COLORS.text,
-    marginBottom: 16,
   },
 
   loginButton: {
@@ -104,7 +94,7 @@ export const globalStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
   },
 
   pageContainer: {
@@ -129,7 +119,7 @@ export const globalStyles = StyleSheet.create({
   orcamentoCard: {
     backgroundColor: COLORS.backgroundSection,
 
-    borderWidth: .8,
+    borderWidth: 0.8,
     borderColor: COLORS.border,
 
     borderRadius: 18,
@@ -197,7 +187,7 @@ export const globalStyles = StyleSheet.create({
 
     borderRadius: 14,
 
-    backgroundColor: COLORS.backgroundSecondary,
+    backgroundColor: COLORS.textSecondary,
 
     justifyContent: "center",
     alignItems: "center",
@@ -278,6 +268,8 @@ export const globalStyles = StyleSheet.create({
   homeHeader: {
     marginBottom: 24,
     marginLeft: 7,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   pageHeaderRow: {
@@ -315,8 +307,8 @@ export const globalStyles = StyleSheet.create({
   ========================= */
 
   title: {
-    fontFamily: "Poppins_700Bold",
-    fontSize: 28,
+    fontFamily: "Montserrat_600SemiBold",
+    fontSize: 24,
     fontWeight: "700",
     color: COLORS.title,
   },
@@ -330,17 +322,18 @@ export const globalStyles = StyleSheet.create({
   },
 
   sectionTitle: {
-    fontFamily: "IntelOneMono_700SemiBold",
-    fontWeight: "700",
-    fontSize: 22,
+    fontFamily: "Montserrat_500Medium,",
+    fontWeight: "600",
+    fontSize: 16,
     color: COLORS.text,
     marginLeft: 7,
     marginBottom: 16,
+    marginTop: 16,
   },
 
   subtitle: {
     fontFamily: "IntelOneMono_400Regular",
-    fontSize: 15,
+    fontSize: 12,
     color: COLORS.textSecondary,
   },
 
@@ -350,10 +343,18 @@ export const globalStyles = StyleSheet.create({
   },
 
   section: {
-    marginBottom: 40,
-    backgroundColor: COLORS.backgroundSection,
+    marginBottom: 20,
     padding: 10,
+    paddingHorizontal: 5,
     borderRadius: 12,
+    backgroundColor: "transparent",
+  },
+
+  profileImageIndex: {
+    width: 50,
+    height: 50,
+    marginTop: 5,
+    borderRadius: 999,
   },
 
   /* =========================
@@ -385,15 +386,13 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   dashboardCard: {
-    backgroundColor: COLORS.card,
-
-    padding: 20,
+    backgroundColor: COLORS.textSecondary,
+    flexDirection: "column",
+    padding: 8,
     borderRadius: 18,
-
-    width: "48%",
+    width: "24%",
     marginBottom: 16,
-
-    shadowColor: COLORS.textSecondary,
+    shadowColor: COLORS.danger,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -406,14 +405,16 @@ export const globalStyles = StyleSheet.create({
   },
 
   dashboardCardTitle: {
-    marginBottom: 8,
-    color: COLORS.textSecondary,
+    fontSize: 12,
+    color: COLORS.white,
+    marginBottom: 5,
   },
 
   dashboardCardValue: {
-    fontSize: 24,
+    fontSize: 18,
+    marginTop: 10,
     fontWeight: "bold",
-    color: COLORS.text,
+    color: COLORS.white,
   },
 
   /* =========================
@@ -679,7 +680,7 @@ export const globalStyles = StyleSheet.create({
   quickButton: {
     flex: 1,
 
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.backgroundSection,
 
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.06)",
@@ -690,7 +691,6 @@ export const globalStyles = StyleSheet.create({
     paddingHorizontal: 4,
 
     alignItems: "center",
-
     marginHorizontal: 2,
   },
 
@@ -700,8 +700,11 @@ export const globalStyles = StyleSheet.create({
 
   quickButtonText: {
     marginTop: 10,
+    fontFamily:"Montserrat_400Regular",
+    fontSize:12,
     fontWeight: "600",
     color: COLORS.text,
+    textAlign: "center",
   },
 
   quickAccessEditButton: {
@@ -713,8 +716,6 @@ export const globalStyles = StyleSheet.create({
 
     borderRadius: 12,
 
-    backgroundColor: COLORS.card,
-
     justifyContent: "center",
     alignItems: "center",
   },
@@ -725,41 +726,67 @@ export const globalStyles = StyleSheet.create({
 
   workCard: {
     backgroundColor: COLORS.card,
+    flexDirection: "row",
+    alignItems: "center",
     padding: 18,
     borderRadius: 18,
     marginBottom: 16,
     borderWidth: 0.2,
-    borderColor: COLORS.primary,
+    borderColor: COLORS.text,
+  },
+
+  workCardImage: {
+    width: 120,
+    height: 90,
+    borderRadius: 14,
+    marginRight: 16,
+  },
+
+  workCardContent: {
+    flex: 1,
   },
 
   workCardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
+    fontFamily: "Montserrat_600SemiBold",
+    fontSize: 17,
+    fontWeight: "700",
     color: COLORS.text,
+    marginBottom: 4,
   },
 
   workCardInfo: {
+    fontFamily: "Montserrat_400Regular",
+    fontSize: 13,
+    fontWeight: "400",
     color: COLORS.textSecondary,
-    marginBottom: 10,
+    marginBottom: 12,
   },
 
-  workCardProgress: {
-    marginTop: 8,
-    fontWeight: "600",
-    color: COLORS.text,
+  progressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
 
   progressBarBackground: {
-    height: 10,
-    backgroundColor: COLORS.textSecondary,
-    borderRadius: 99,
+    flex: 1,
+    height: 8,
+    backgroundColor: "#E5E7EB",
+    borderRadius: 999,
+    overflow: "hidden",
   },
 
   progressBarFill: {
-    height: 10,
+    height: "100%",
     backgroundColor: COLORS.primary,
-    borderRadius: 99,
+    borderRadius: 999,
+  },
+
+  workCardProgress: {
+    width: 42,
+    textAlign: "right",
+    marginLeft: 10,
+    fontWeight: "600",
+    color: COLORS.text,
   },
 });
 

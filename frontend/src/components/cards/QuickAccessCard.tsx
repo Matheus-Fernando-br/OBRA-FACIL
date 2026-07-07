@@ -6,17 +6,18 @@ import { globalStyles, COLORS } from "../../styles/globalStyles";
 interface Props {
   title: string;
   icon: any;
+  color:string;
   onPress: () => void;
 }
 
-export function QuickAccessCard({ title, icon, onPress }: Props) {
+export function QuickAccessCard({ title, icon, color, onPress }: Props) {
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       style={globalStyles.quickButton}
     >
-      <Ionicons name={icon} size={28} color={COLORS.primary} />
+      <Ionicons name={icon} size={28} color={color} />
 
       <Text style={globalStyles.quickButtonText}>{title}</Text>
     </TouchableOpacity>

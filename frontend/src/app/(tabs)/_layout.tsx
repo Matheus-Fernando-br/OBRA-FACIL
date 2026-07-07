@@ -17,7 +17,7 @@ export default function TabsLayout() {
             }}
           />
         ),
-        tabBarActiveTintColor: COLORS.primary,
+        tabBarActiveTintColor: COLORS.title,
         tabBarInactiveTintColor: COLORS.textSecondary,
         tabBarStyle: globalStyles.tabBar,
       }}
