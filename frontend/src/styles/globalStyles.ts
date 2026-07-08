@@ -562,33 +562,46 @@ export const globalStyles = StyleSheet.create({
    CLIENT CARD
 ========================= */
 
-  clientCard: {
-    backgroundColor: COLORS.backgroundSection,
-    padding: 18,
-    borderRadius: 18,
-    marginBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+clientCard: {
+  flexDirection: "row",
+  alignItems: "center",
+
+  backgroundColor: COLORS.backgroundSection,
+
+  borderRadius: 10,
+
+  padding: 18,
+
+  marginBottom: 15,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.2,
+  shadowRadius: 5,
+  shadowOffset: {
+    width: 0,
+    height: 3,
   },
 
+  elevation: 4,
+},
+
   clientCardName: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
+    fontFamily:"Montserrat_600SemiBold",
+    fontSize: 18,
     color: COLORS.text,
   },
 
   clientCardInfo: {
     color: COLORS.textSecondary,
     marginTop: 6,
+    fontSize: 10,
   },
 
   clientIcons: {
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 40,
-    marginRight: 20,
+    gap: 25,
+    marginRight: 5,
   },
 
   /* =========================
@@ -660,6 +673,16 @@ export const globalStyles = StyleSheet.create({
     marginVertical: 10,
   },
 
+  dividerVertical:{
+    width: 1,
+    backgroundColor: "#444",
+    height: "100%",
+    marginVertical: 5,
+    marginHorizontal:20,
+  },
+
+
+
   saveTextStack: {
     flexDirection: "column",
     alignItems: "flex-end", // Alinha os textos à direita (perto do ícone)
@@ -725,14 +748,19 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   workCard: {
-    backgroundColor: COLORS.card,
+    backgroundColor: COLORS.backgroundSection,
     flexDirection: "row",
     alignItems: "center",
     padding: 18,
     borderRadius: 18,
     marginBottom: 16,
-    borderWidth: 0.2,
-    borderColor: COLORS.text,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
   },
 
   workCardImage: {

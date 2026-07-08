@@ -37,7 +37,7 @@ export function AppHeader({ onMenu }: Props) {
           alignItems: "center",
         }}
       >
-        <Ionicons name="construct" size={24} color={COLORS.primary} />
+        <Ionicons name="construct" size={24} color={COLORS.title} />
 
         <Text
           style={{
