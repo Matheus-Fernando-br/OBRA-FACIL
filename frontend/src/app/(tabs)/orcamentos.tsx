@@ -13,11 +13,11 @@ import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 import { useAuth } from "@/contexts/AuthContext";
-import { orcamentos } from "../../data/orcamentos";
-
-import { getClients } from "../../services/api";
-
-import { AddOrcamentoModal } from "@/components/modals/AddOrcamentoModal";
+import { getClients, getBudgets } from "../../services/api";
+import { BudgetCard } from "@/components/cards/BudgetCard";
+import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
+import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcamentoModal";
+import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
 
 interface Client {
   _id: string;
@@ -26,15 +26,59 @@ interface Client {
   CPF: string;
 }
 
+interface Budget {
+  _id: string;
+
+  nome: string;
+
+  descricao: string;
+
+  cliente: {
+    _id: string;
+    nome: string;
+  };
+
+  endereco: {
+    CEP: string;
+    estado: string;
+    cidade: string;
+    bairro: string;
+    rua: string;
+    numero: string;
+    complemento: string;
+  };
+
+  categoria: any[];
+
+  preco: number;
+
+  bdi: number;
+
+  preco_com_bdi: number;
+
+  status: string;
+
+  valido_durante: number;
+
+  data_validade: string;
+}
+
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
-  const FilteredOrcamentos = orcamentos.filter((orcamento) =>
-    orcamento.servico.toLowerCase().includes(search.toLowerCase()),
-  );
+  const [budgetsList, setBudgetsList] = useState<Budget[]>([]);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+
+  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+
+  const [editVisible, setEditVisible] = useState(false);
+
+  const [deleteVisible, setDeleteVisible] = useState(false);
+
+  const [statusFilter, setStatusFilter] = useState("Todos");
 
   async function loadClients() {
     try {
@@ -51,9 +95,44 @@ export default function OrcamentosScreen() {
     }
   }
 
+  async function loadBudgets() {
+    try {
+      if (!token) return;
+
+      const data = await getBudgets(token);
+
+      setBudgetsList(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-    loadClients();
-  }, []);
+    if (!token) return;
+
+    async function load() {
+      setLoading(true);
+
+      await Promise.all([loadClients(), loadBudgets()]);
+
+      setLoading(false);
+    }
+
+    load();
+  }, [token]);
+
+  const filteredBudgets = budgetsList.filter((budget) => {
+    const matchSearch =
+      budget.nome.toLowerCase().includes(search.toLowerCase()) ||
+      budget.cliente.nome.toLowerCase().includes(search.toLowerCase());
+
+    const matchStatus =
+      statusFilter === "Todos"
+        ? true
+        : budget.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchSearch && matchStatus;
+  });
 
   const nomeCliente = () => {
     return clientsList.length > 0 ? clientsList[0].nome : "Cliente";
@@ -102,39 +181,44 @@ export default function OrcamentosScreen() {
         />
 
         <View style={globalStyles.filterRow}>
-          {["Todos", "Pendentes", "Aprovados", "Recusados"].map((item) => (
-            <TouchableOpacity key={item} style={globalStyles.filterButton}>
+          {["Todos", "Pendente", "Aprovado", "Recusado"].map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={[
+                globalStyles.filterButton,
+
+                statusFilter === item && {
+                  backgroundColor: "#2563EB",
+                },
+              ]}
+              onPress={() => setStatusFilter(item)}
+            >
               <Text style={globalStyles.filterButtonText}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {orcamentos.map((orcamento) => (
-          <View key={orcamento.id} style={globalStyles.orcamentoCard}>
-            <Text style={globalStyles.orcamentoCliente}>{nomeCliente()}</Text>
-
-            <Text style={globalStyles.orcamentoInfo}>
-              Status: {orcamento.status}
-            </Text>
-
-            <Text style={globalStyles.orcamentoInfo}>
-              Serviço: {orcamento.servico}
-            </Text>
-
-            <Text style={globalStyles.orcamentoInfo}>
-              Valor: {orcamento.valor}
-            </Text>
-
-            <Text style={globalStyles.orcamentoInfo}>
-              Data: {orcamento.data}
-            </Text>
-
-            <TouchableOpacity style={globalStyles.orcamentoDetailsButton}>
-              <Text style={globalStyles.orcamentoDetailsButtonText}>
-                Ver detalhes
-              </Text>
-            </TouchableOpacity>
-          </View>
+        {filteredBudgets.map((budget) => (
+          <BudgetCard
+            key={budget._id}
+            client={budget.cliente.nome}
+            service={budget.nome}
+            status={budget.status}
+            value={budget.preco_com_bdi}
+            date={new Date(budget.data_validade).toLocaleDateString("pt-BR")}
+            onDetails={() => {
+              setSelectedBudget(budget);
+              setDetailsVisible(true);
+            }}
+            onEdit={() => {
+              setSelectedBudget(budget);
+              setEditVisible(true);
+            }}
+            onDelete={() => {
+              setSelectedBudget(budget);
+              setDeleteVisible(true);
+            }}
+          />
         ))}
       </ScrollView>
 
@@ -150,8 +234,26 @@ export default function OrcamentosScreen() {
       </View>
       <AddOrcamentoModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          loadBudgets();
+        }}
       />
+
+      <EditOrcamentoModal
+  visible={editVisible}
+  onClose={() => setEditVisible(false)}
+  budget={selectedBudget}
+  onSuccess={loadBudgets}
+/>
+
+<DeleteOrcamentoModal
+  visible={deleteVisible}
+  budgetId={selectedBudget?._id ?? ""}
+  budgetName={selectedBudget?.nome ?? ""}
+  onClose={() => setDeleteVisible(false)}
+  onSuccess={loadBudgets}
+/>
     </View>
   );
 }

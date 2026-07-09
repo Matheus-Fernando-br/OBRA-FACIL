@@ -10,9 +10,8 @@ import { WorkCard } from "../../components/cards/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
 
 import { obras } from "../../data/obras";
-import { orcamentos } from "../../data/orcamentos";
 
-import { getClients, getUser } from "../../services/api";
+import { getClients, getUser, getBudgets } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
 interface Client {
   _id: string;
@@ -21,21 +20,33 @@ interface Client {
   CPF: string;
 }
 
+interface Budget {
+  _id: string;
+  nome: string;
+  status: string;
+  preco: number;
+  preco_com_bdi: number;
+}
+
 export default function HomeScreen() {
   const { token, user, setUser } = useAuth();
 
   const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
 
   const obrasCount = obras.length;
 
-  const orcamentosPendentesCount = orcamentos.filter(
-    (o) => o.status === "Pendente",
+  const orcamentosPendentesCount = budgets.filter(
+    (budget) => budget.status === "PENDENTE",
   ).length;
 
-  const faturamentoTotal = orcamentos
-    .filter((o) => o.status === "Aprovado")
-    .reduce((acc, o) => acc + o.valor, 0);
+  const faturamentoTotal = budgets
+    .filter((budget) => budget.status === "APROVADO")
+    .reduce(
+      (total, budget) => total + (budget.preco_com_bdi ?? budget.preco ?? 0),
+      0,
+    );
 
   useFocusEffect(
     useCallback(() => {
@@ -52,6 +63,10 @@ export default function HomeScreen() {
           // Busca clientes do usuário
           const clients = await getClients(token);
           setClientsList(clients);
+
+          //Busca orçamentos
+          const budgetsData = await getBudgets(token);
+          setBudgets(budgetsData);
         } catch (error) {
           console.log(error);
         } finally {
@@ -159,7 +174,6 @@ export default function HomeScreen() {
             }}
             color={COLORS.success}
           />
-
 
           <QuickAccessCard
             title="Configurações"

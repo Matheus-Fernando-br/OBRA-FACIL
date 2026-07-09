@@ -2,10 +2,10 @@ import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { globalStyles, COLORS } from "../../styles/globalStyles";
-import { AppInput } from "../forms/AppInput";
-import { AppButton } from "../buttons/AppButton";
-import { getClients } from "../../services/api";
+import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { AppInput } from "@/components/forms/AppInput";
+import { AppButton } from "@/components/buttons/AppButton";
+import { getClients } from "@/services/api";
 import * as Linking from "expo-linking";
 import { useAuth } from "@/contexts/AuthContext";
 interface Props {
