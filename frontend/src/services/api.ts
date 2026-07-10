@@ -170,7 +170,7 @@ export async function deleteClient(id: string, token: string) {
 // ==============================
 
 export async function getBudgets(token: string) {
-  const { data } = await api.get("/budget", {
+  const { data } = await api.get("/orcamento", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -233,7 +233,7 @@ export interface CreateBudgetDTO {
 }
 
 export async function createBudget(budget: CreateBudgetDTO, token: string) {
-  const { data } = await api.post("/budget", budget, {
+  const { data } = await api.post("/orcamento", budget, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -247,7 +247,7 @@ export async function updateBudget(
   budget: CreateBudgetDTO,
   token: string,
 ) {
-  const { data } = await api.put(`/budget/${id}`, budget, {
+  const { data } = await api.put(`/orcamento/${id}`, budget, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -257,7 +257,7 @@ export async function updateBudget(
 }
 
 export async function deleteBudget(id: string, token: string) {
-  const { data } = await api.delete(`/budget/${id}`, {
+  const { data } = await api.delete(`/orcamento/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
