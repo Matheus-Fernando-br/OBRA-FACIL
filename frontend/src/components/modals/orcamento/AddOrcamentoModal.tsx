@@ -13,14 +13,18 @@ import {
   Servico,
   Categoria,
 } from "@/components/layout/interface";
+
 interface Props {
   visible: boolean;
   onClose: () => void;
 }
 
 export function AddOrcamentoModal({ visible, onClose }: Props) {
-  const [name, setName] = useState("");
+  const { token, user } = useAuth();
+  const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [selectedClient, setSelectedClient] = useState("");
   const [validade, setValidade] = useState<number>(0);
   const dataPublicacao = new Date();
 
@@ -28,7 +32,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
     validade > 0
       ? new Date(dataPublicacao.getTime() + validade * 24 * 60 * 60 * 1000)
       : null;
-  const [cep, setCep] = useState("");
+      const [cep, setCep] = useState("");
   const [estado, setEstado] = useState("");
   const [cidade, setCidade] = useState("");
   const [bairro, setBairro] = useState("");
@@ -55,10 +59,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   ]);
 
   const [bdi, setBdi] = useState("");
-  const [clientsList, setClientsList] = useState<Cliente[]>([]);
-  const [selectedClient, setSelectedClient] = useState("");
   const [loading, setLoading] = useState(false);
-  const { token, user } = useAuth();
   const [feedback, setFeedback] = useState("");
   const [feedbackClient, setFeedbackClient] = useState("");
   const [feedbackSinapi, setFeedbackSinapi] = useState("");
@@ -216,7 +217,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   function validateForm(): string | null {
  
     // Dados gerais
-    if (!name.trim()) return "Informe o nome do orçamento.";
+    if (!nome.trim()) return "Informe o nome do orçamento.";
     if (!selectedClient.trim())
       return "Defina o cliente associado a esse orçamento.";
   
@@ -305,7 +306,7 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
 
       await createBudget(
         {
-          nome: name,
+          nome: nome,
 
           endereco: {
             CEP: cep,
@@ -432,8 +433,8 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
               <Text style={globalStyles.label}>Nome do orçamento</Text>
               <AppInput
                 placeholder="Nome do orçamento"
-                value={name}
-                onChangeText={setName}
+                value={nome}
+                onChangeText={setNome}
               />
 
               <Text style={globalStyles.label}>Cliente</Text>
