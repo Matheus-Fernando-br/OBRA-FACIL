@@ -30,53 +30,14 @@ import {
   import { AppInput } from "@/components/forms/AppInput";
   import { AppButton } from "@/components/buttons/AppButton";
   import { AppSelect } from "@/components/forms/AppSelect";
-  
-  interface Client {
-    _id: string;
-    nome: string;
-  }
-  
-  interface Budget {
-    _id: string;
-  
-    nome: string;
-  
-    descricao: string;
-  
-    cliente: {
-      _id: string;
-      nome: string;
-    };
-  
-    endereco: {
-      CEP: string;
-      estado: string;
-      cidade: string;
-      bairro: string;
-      rua: string;
-      numero: string;
-      complemento: string;
-    };
-  
-    categoria: any[];
-  
-    preco: number;
-  
-    bdi: number;
-  
-    preco_com_bdi: number;
-  
-    status: string;
-  
-    valido_durante: number;
-  
-    data_validade: string;
-  }
+
+  import { Cliente, Orcamento } from "@/components/layout/interface";
+
   
   interface Props {
     visible: boolean;
   
-    budget: Budget | null;
+    budget: Orcamento | null;
   
     onClose(): void;
   
@@ -92,7 +53,7 @@ import {
     const { token, user } = useAuth();
   
     const [clients, setClients] =
-      useState<Client[]>([]);
+      useState<Cliente[]>([]);
   
     const [nome, setNome] =
       useState("");

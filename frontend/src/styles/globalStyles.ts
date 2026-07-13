@@ -119,13 +119,18 @@ export const globalStyles = StyleSheet.create({
   orcamentoCard: {
     backgroundColor: COLORS.backgroundSection,
 
-    borderWidth: 0.8,
-    borderColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
 
     borderRadius: 18,
 
     padding: 18,
-    marginBottom: 16,
+    marginBottom: 24,
   },
 
   orcamentoCliente: {
@@ -164,6 +169,62 @@ export const globalStyles = StyleSheet.create({
 
   filterButtonText: {
     color: COLORS.text,
+  },
+
+  orcamentoHeader: {
+    flexDirection: "row",
+  
+    justifyContent: "space-between",
+  
+    alignItems: "center",
+  
+    marginBottom: 12,
+  },
+  
+  orcamentoStatusBadge: {
+    paddingHorizontal: 10,
+  
+    paddingVertical: 5,
+  
+    borderRadius: 30,
+  },
+  
+  orcamentoStatusText: {
+    fontWeight: "700",
+  
+    fontSize: 12,
+  },
+  
+  orcamentoButtons: {
+    flexDirection: "row",
+  
+    marginTop: 20,
+  },
+  
+  orcamentoMainButton: {
+    flex: 1,
+  
+    marginRight: 8,
+  
+    flexDirection: "row",
+  
+    justifyContent: "center",
+  
+    alignItems: "center",
+  },
+  
+  orcamentoEditButton: {
+    backgroundColor: COLORS.warning,
+  
+    marginRight: 8,
+  
+    width: 48,
+  },
+  
+  orcamentoDeleteButton: {
+    backgroundColor: COLORS.danger,
+  
+    width: 48,
   },
 
   /* =========================

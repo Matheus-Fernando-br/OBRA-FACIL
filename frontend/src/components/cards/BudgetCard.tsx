@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   client: string;
@@ -40,29 +40,26 @@ export function BudgetCard({
 
   return (
     <View style={globalStyles.orcamentoCard}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 10,
-        }}
-      >
-        <Text style={globalStyles.orcamentoCliente}>{client}</Text>
+      <View style={globalStyles.orcamentoHeader}>
+        <Text style={globalStyles.orcamentoCliente}>
+          {service}
+        </Text>
 
         <View
-          style={{
-            backgroundColor: `${getStatusColor()}20`,
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            borderRadius: 30,
-          }}
+          style={[
+            globalStyles.orcamentoStatusBadge,
+            {
+              backgroundColor: `${getStatusColor()}20`,
+            },
+          ]}
         >
           <Text
-            style={{
-              color: getStatusColor(),
-              fontWeight: "700",
-            }}
+            style={[
+              globalStyles.orcamentoStatusText,
+              {
+                color: getStatusColor(),
+              },
+            ]}
           >
             {status}
           </Text>
@@ -70,7 +67,7 @@ export function BudgetCard({
       </View>
 
       <Text style={globalStyles.orcamentoInfo}>
-        Serviço: {service}
+        Cliente: {client}
       </Text>
 
       <Text style={globalStyles.orcamentoInfo}>
@@ -81,19 +78,11 @@ export function BudgetCard({
         Criado em: {date}
       </Text>
 
-      <View
-        style={{
-          flexDirection: "row",
-          marginTop: 20,
-        }}
-      >
+      <View style={globalStyles.orcamentoButtons}>
         <Pressable
           style={[
             globalStyles.orcamentoDetailsButton,
-            {
-              flex: 1,
-              marginRight: 8,
-            },
+            globalStyles.orcamentoMainButton,
           ]}
           onPress={onDetails}
         >
@@ -103,14 +92,7 @@ export function BudgetCard({
             color="#FFF"
           />
 
-          <Text
-            style={[
-              globalStyles.orcamentoDetailsButtonText,
-              {
-                marginLeft: 8,
-              },
-            ]}
-          >
+          <Text style={globalStyles.orcamentoDetailsButtonText}>
             Detalhes
           </Text>
         </Pressable>
@@ -118,10 +100,7 @@ export function BudgetCard({
         <Pressable
           style={[
             globalStyles.orcamentoDetailsButton,
-            {
-              backgroundColor: COLORS.warning,
-              marginRight: 8,
-            },
+            globalStyles.orcamentoEditButton,
           ]}
           onPress={onEdit}
         >
@@ -135,9 +114,7 @@ export function BudgetCard({
         <Pressable
           style={[
             globalStyles.orcamentoDetailsButton,
-            {
-              backgroundColor: COLORS.danger,
-            },
+            globalStyles.orcamentoDeleteButton,
           ]}
           onPress={onDelete}
         >

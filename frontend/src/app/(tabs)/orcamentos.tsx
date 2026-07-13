@@ -18,61 +18,18 @@ import { BudgetCard } from "@/components/cards/BudgetCard";
 import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
 import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcamentoModal";
 import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
-
-interface Client {
-  _id: string;
-  nome: string;
-  email: string;
-  CPF: string;
-}
-
-interface Budget {
-  _id: string;
-
-  nome: string;
-
-  descricao: string;
-
-  cliente: {
-    _id: string;
-    nome: string;
-  };
-
-  endereco: {
-    CEP: string;
-    estado: string;
-    cidade: string;
-    bairro: string;
-    rua: string;
-    numero: string;
-    complemento: string;
-  };
-
-  categoria: any[];
-
-  preco: number;
-
-  bdi: number;
-
-  preco_com_bdi: number;
-
-  status: string;
-
-  valido_durante: number;
-
-  data_validade: string;
-}
+import { Cliente, Orcamento } from "@/components/layout/interface";
 
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [clientsList, setClientsList] = useState<Client[]>([]);
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
-  const [budgetsList, setBudgetsList] = useState<Budget[]>([]);
+  const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
   const [detailsVisible, setDetailsVisible] = useState(false);
 
-  const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null);
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
 
   const [editVisible, setEditVisible] = useState(false);
 
@@ -93,6 +50,12 @@ export default function OrcamentosScreen() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function getClientName(clienteId: string) {
+    const client = clientsList.find((c) => c._id === clienteId);
+
+    return client ? client.nome : "Cliente não encontrado";
   }
 
   async function loadBudgets() {
@@ -124,7 +87,7 @@ export default function OrcamentosScreen() {
   const filteredBudgets = budgetsList.filter((budget) => {
     const matchSearch =
       budget.nome.toLowerCase().includes(search.toLowerCase()) ||
-      budget.cliente.nome.toLowerCase().includes(search.toLowerCase());
+      (budget.cliente?.nome ?? "").toLowerCase().includes(search.toLowerCase());
 
     const matchStatus =
       statusFilter === "Todos"
@@ -133,10 +96,6 @@ export default function OrcamentosScreen() {
 
     return matchSearch && matchStatus;
   });
-
-  const nomeCliente = () => {
-    return clientsList.length > 0 ? clientsList[0].nome : "Cliente";
-  };
 
   if (loading) {
     return (
@@ -201,7 +160,7 @@ export default function OrcamentosScreen() {
         {filteredBudgets.map((budget) => (
           <BudgetCard
             key={budget._id}
-            client={budget.cliente.nome}
+            client={getClientName(budget.cliente as unknown as string)}
             service={budget.nome}
             status={budget.status}
             value={budget.preco_com_bdi}
@@ -241,19 +200,19 @@ export default function OrcamentosScreen() {
       />
 
       <EditOrcamentoModal
-  visible={editVisible}
-  onClose={() => setEditVisible(false)}
-  budget={selectedBudget}
-  onSuccess={loadBudgets}
-/>
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        budget={selectedBudget}
+        onSuccess={loadBudgets}
+      />
 
-<DeleteOrcamentoModal
-  visible={deleteVisible}
-  budgetId={selectedBudget?._id ?? ""}
-  budgetName={selectedBudget?.nome ?? ""}
-  onClose={() => setDeleteVisible(false)}
-  onSuccess={loadBudgets}
-/>
+      <DeleteOrcamentoModal
+        visible={deleteVisible}
+        budgetId={selectedBudget?._id ?? ""}
+        budgetName={selectedBudget?.nome ?? ""}
+        onClose={() => setDeleteVisible(false)}
+        onSuccess={loadBudgets}
+      />
     </View>
   );
 }

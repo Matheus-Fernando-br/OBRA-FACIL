@@ -10,29 +10,15 @@ import { WorkCard } from "../../components/cards/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
 
 import { obras } from "../../data/obras";
-
+import { Cliente, Orcamento } from "@/components/layout/interface";
 import { getClients, getUser, getBudgets } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
-interface Client {
-  _id: string;
-  nome: string;
-  email: string;
-  CPF: string;
-}
-
-interface Budget {
-  _id: string;
-  nome: string;
-  status: string;
-  preco: number;
-  preco_com_bdi: number;
-}
 
 export default function HomeScreen() {
   const { token, user, setUser } = useAuth();
 
-  const [clientsList, setClientsList] = useState<Client[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [budgets, setBudgets] = useState<Orcamento[]>([]);
   const [loading, setLoading] = useState(true);
 
   const obrasCount = obras.length;
