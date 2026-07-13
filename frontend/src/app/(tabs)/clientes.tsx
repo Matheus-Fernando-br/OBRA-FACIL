@@ -11,25 +11,18 @@ import { globalStyles } from "../../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
-
 import { AddClientModal } from "../../components/modals/cliente/AddClientModal";
 import { EditClientModal } from "../../components/modals/cliente/EditClientModal";
 import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientModal";
-
 import { getClients } from "../../services/api";
+import { Cliente } from "@/components/layout/interface";
 
-interface Client {
-  _id: string;
-  nome: string;
-  email: string;
-  CPF: string;
-}
 
 export default function ClientesScreen() {
   const { token } = useAuth();
 
-  const [clientsList, setClientsList] = useState<Client[]>([]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
 
   const [search, setSearch] = useState("");
 
@@ -112,8 +105,8 @@ export default function ClientesScreen() {
             <ClientCard
               key={client._id}
               name={client.nome}
-              phone={client.email}
-              cpf={client.CPF}
+              phone={client.telefone}
+              email={client.email}
               onEdit={() => {
                 setSelectedClient(client);
                 setEditVisible(true);

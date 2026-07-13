@@ -5,7 +5,12 @@ import { COLORS, globalStyles } from "../../../styles/globalStyles";
 import { AppInput } from "../../forms/AppInput";
 import { AppButton } from "../../buttons/AppButton";
 import { Ionicons } from "@expo/vector-icons";
-import { documentMask, emailMask } from "@/components/forms/mask";
+import {
+  documentMask,
+  emailMask,
+  phoneMask,
+  onlyNumbers,
+} from "@/components/forms/mask";
 
 import { createClient } from "../../../services/api";
 
@@ -17,24 +22,36 @@ interface Props {
 }
 
 export function AddClientModal({ visible, onClose }: Props) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
   const [feedback, setFeedback] = useState("");
+  const documento = onlyNumbers(cpf);
+  const telefoneLimpo = onlyNumbers(telefone);
 
   async function handleSave() {
     try {
       setFeedback("");
-
       if (!token) {
         setFeedback("Sessão expirada. Faça login novamente.");
         return;
       }
 
-      if (!name.trim()) {
+      if (!nome.trim()) {
         setFeedback("Informe o nome do cliente");
+        return;
+      }
+
+      if (!documento.trim()) {
+        setFeedback("Informe o CPF/CNPJ do cliente");
+        return;
+      }
+      
+      if (documento.length !== 11 && documento.length !== 14) {
+        setFeedback("O CPF deve conter 11 dígitos ou o CNPJ 14 dígitos.");
         return;
       }
 
@@ -47,9 +64,13 @@ export function AddClientModal({ visible, onClose }: Props) {
         setFeedback("Informe um e-mail válido.");
         return;
       }
+      if (!telefoneLimpo.trim()) {
+        setFeedback("Informe o telefone do cliente");
+        return;
+      }
 
-      if (!cpf.trim()) {
-        setFeedback("Informe o CPF/CNPJ do cliente");
+      if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+        setFeedback("O telefone deve conter 10 ou 11 dígitos.");
         return;
       }
 
@@ -57,16 +78,18 @@ export function AddClientModal({ visible, onClose }: Props) {
 
       await createClient(
         {
-          nome: name.trim(),
+          nome: nome.trim(),
           email: email.trim(),
-          CPF: cpf.trim(),
+          telefone: telefoneLimpo,
+          CPF: documento.length === 11 ? documento : undefined,
+          CNPJ: documento.length === 14 ? documento : undefined,
         },
         token,
       );
 
       setFeedback("Cliente cadastrado com sucesso!");
 
-      setName("");
+      setNome("");
       setEmail("");
       setCpf("");
       setTimeout(() => {
@@ -124,9 +147,19 @@ export function AddClientModal({ visible, onClose }: Props) {
             <Text style={globalStyles.label}>Nome</Text>
             <AppInput
               placeholder="Informe o nome do cliente completo"
-              value={name}
-              onChangeText={setName}
+              value={nome}
+              onChangeText={setNome}
             />
+
+            <Text style={globalStyles.label}>CPF / CNPJ</Text>
+            <AppInput
+              placeholder="Informe o CPF / CNPJ do cliente a ser cadastrado"
+              value={cpf}
+              onChangeText={(text) => setCpf(documentMask(text))}
+            />
+
+            <Text style={globalStyles.subtitle}>Contato</Text>
+            <View style={globalStyles.divider} />
 
             <Text style={globalStyles.label}>E-mail</Text>
             <AppInput
@@ -135,11 +168,11 @@ export function AddClientModal({ visible, onClose }: Props) {
               onChangeText={(text) => setEmail(emailMask(text))}
             />
 
-            <Text style={globalStyles.label}>CPF / CNPJ</Text>
+            <Text style={globalStyles.label}>Telefone</Text>
             <AppInput
-              placeholder="Informe o CPF / CNPJ do cliente a ser cadastrado"
-              value={cpf}
-              onChangeText={(text) => setCpf(documentMask(text))}
+              placeholder="Informe o Telefone do cliente a ser cadastrado"
+              value={telefone}
+              onChangeText={(text) => setTelefone(phoneMask(text))}
             />
 
             <View style={globalStyles.divider} />

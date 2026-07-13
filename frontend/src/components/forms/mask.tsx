@@ -36,13 +36,19 @@ export function cnpjMask(value: string) {
     .slice(0, 18);
 }
   
-  export function phoneMask(value: string) {
-    return value
-      .replace(/\D/g, "")
+export function phoneMask(value: string) {
+  const numbers = value.replace(/\D/g, "").slice(0, 11);
+
+  if (numbers.length <= 10) {
+    return numbers
       .replace(/^(\d{2})(\d)/, "($1) $2")
-      .replace(/(\d{5})(\d)/, "$1-$2")
-      .slice(0, 15);
+      .replace(/(\d{4})(\d)/, "$1-$2");
   }
+
+  return numbers
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+}
   
   export function cepMask(value: string) {
     return value

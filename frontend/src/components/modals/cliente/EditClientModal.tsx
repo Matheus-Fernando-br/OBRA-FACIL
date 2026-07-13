@@ -7,8 +7,13 @@ import { AppButton } from "../../buttons/AppButton";
 import { Ionicons } from "@expo/vector-icons";
 
 import { updateClient } from "../../../services/api";
-import { documentMask, emailMask } from "@/components/forms/mask";
-
+import {
+  documentMask,
+  emailMask,
+  phoneMask,
+  onlyNumbers,
+} from "@/components/forms/mask";
+import { Cliente } from "@/components/layout/interface";
 import { useAuth } from "@/contexts/AuthContext";
 import { COLORS } from "../../../styles/globalStyles";
 
@@ -16,12 +21,7 @@ interface Props {
   visible: boolean;
   onClose: () => void;
   onSuccess?: () => void;
-  client: {
-    _id: string;
-    nome: string;
-    email: string;
-    CPF: string;
-  } | null;
+  client: Cliente | null;
 }
 
 export function EditClientModal({
@@ -32,11 +32,14 @@ export function EditClientModal({
 }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
-  const [CPF, setCPF] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [telefone, setTelefone] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingClose, setLoadingClose] = useState(false);
   const { token } = useAuth();
   const [feedback, setFeedback] = useState("");
+  const documento = onlyNumbers(cpf);
+  const telefoneLimpo = onlyNumbers(telefone);
 
   async function handleSave() {
     try {
@@ -52,6 +55,16 @@ export function EditClientModal({
         return;
       }
 
+      if (!documento.trim()) {
+        setFeedback("Informe o CPF/CNPJ do cliente");
+        return;
+      }
+
+      if (documento.length !== 11 && documento.length !== 14) {
+        setFeedback("O CPF deve conter 11 dígitos ou o CNPJ 14 dígitos.");
+        return;
+      }
+
       if (!email.trim()) {
         setFeedback("Informe o e-mail do cliente");
         return;
@@ -61,9 +74,13 @@ export function EditClientModal({
         setFeedback("Informe um e-mail válido.");
         return;
       }
+      if (!telefoneLimpo.trim()) {
+        setFeedback("Informe o telefone do cliente");
+        return;
+      }
 
-      if (!CPF.trim()) {
-        setFeedback("Informe o CPF/CNPJ do cliente");
+      if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
+        setFeedback("O telefone deve conter 10 ou 11 dígitos.");
         return;
       }
 
@@ -74,9 +91,11 @@ export function EditClientModal({
       await updateClient(
         client._id,
         {
-          nome,
-          email,
-          CPF,
+          nome: nome.trim(),
+          email: email.trim(),
+          telefone: telefoneLimpo,
+          CPF: documento.length === 11 ? documento : undefined,
+          CNPJ: documento.length === 14 ? documento : undefined,
         },
         token || "",
       );
@@ -85,7 +104,7 @@ export function EditClientModal({
 
       setNome("");
       setEmail("");
-      setCPF("");
+      setCpf("");
       onSuccess?.();
       setTimeout(() => {
         onClose();
@@ -112,7 +131,8 @@ export function EditClientModal({
     if (client) {
       setNome(client.nome);
       setEmail(client.email);
-      setCPF(client.CPF || "");
+      setCpf(documentMask(client.CPF || client.CNPJ || ""));
+      setTelefone(phoneMask(client.telefone || ""));
     }
   }, [client]);
 
@@ -160,6 +180,16 @@ export function EditClientModal({
             <Text style={globalStyles.label}>Nome</Text>
             <AppInput placeholder="Nome" value={nome} onChangeText={setNome} />
 
+            <Text style={globalStyles.label}>CPF / CNPJ</Text>
+            <AppInput
+              placeholder="CPF"
+              value={cpf}
+              onChangeText={(text) => setCpf(documentMask(text))}
+            />
+
+            <Text style={globalStyles.subtitle}>Contato</Text>
+            <View style={globalStyles.divider} />
+
             <Text style={globalStyles.label}>E-mail</Text>
             <AppInput
               placeholder="cliente@email.com"
@@ -167,11 +197,11 @@ export function EditClientModal({
               onChangeText={(text) => setEmail(emailMask(text))}
             />
 
-            <Text style={globalStyles.label}>CPF</Text>
+            <Text style={globalStyles.label}>Telefone</Text>
             <AppInput
-              placeholder="CPF"
-              value={CPF}
-              onChangeText={(text) => setCPF(documentMask(text))}
+              placeholder="Informe o Telefone do cliente a ser cadastrado"
+              value={telefone}
+              onChangeText={(text) => setTelefone(phoneMask(text))}
             />
 
             <View style={globalStyles.divider} />

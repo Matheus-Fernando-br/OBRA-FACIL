@@ -1,24 +1,17 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { phoneMask } from "@/components/forms/mask";
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 interface Props {
   name: string;
   phone: string;
-  cpf: string;
-
+  email: string;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export function ClientCard({
-  name,
-  phone,
-  cpf,
-  onEdit,
-  onDelete,
-}: Props) {
+export function ClientCard({ name, phone, email, onEdit, onDelete }: Props) {
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
 
@@ -26,10 +19,7 @@ export function ClientCard({
       return nomes[0][0].toUpperCase();
     }
 
-    return (
-      nomes[0][0] +
-      nomes[1][0]
-    ).toUpperCase();
+    return (nomes[0][0] + nomes[1][0]).toUpperCase();
   }
 
   function getAvatarColor(nome: string) {
@@ -54,6 +44,8 @@ export function ClientCard({
 
     return colors[Math.abs(hash) % colors.length];
   }
+
+  const telefone = phoneMask(phone || "");
 
   return (
     <View style={globalStyles.clientCard}>
@@ -84,40 +76,24 @@ export function ClientCard({
       {/* Informações */}
 
       <View style={{ flex: 1 }}>
-        <Text style={globalStyles.clientCardName}>
-          {name}
-        </Text>
+        <Text style={globalStyles.clientCardName}>{name}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>
-          {phone}
-        </Text>
+        <Text style={globalStyles.clientCardInfo}>{email}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>
-          {cpf}
-        </Text>
+        <Text style={globalStyles.clientCardInfo}>{telefone}</Text>
       </View>
 
       <View style={globalStyles.dividerVertical} />
 
       {/* Ações */}
 
-      <View
-        style={globalStyles.clientIcons}
-      >
+      <View style={globalStyles.clientIcons}>
         <Pressable onPress={onEdit}>
-          <Ionicons
-            name="pencil"
-            size={30}
-            color={COLORS.primary}
-          />
+          <Ionicons name="pencil" size={30} color={COLORS.primary} />
         </Pressable>
 
         <Pressable onPress={onDelete}>
-          <Ionicons
-            name="trash-outline"
-            size={30}
-            color={COLORS.danger}
-          />
+          <Ionicons name="trash-outline" size={30} color={COLORS.danger} />
         </Pressable>
       </View>
     </View>

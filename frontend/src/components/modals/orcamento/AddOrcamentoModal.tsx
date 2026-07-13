@@ -12,7 +12,6 @@ import {
   Cliente,
   Servico,
   Categoria,
-  Orcamento,
 } from "@/components/layout/interface";
 interface Props {
   visible: boolean;
@@ -214,15 +213,95 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
     }
   }
 
+  function validateForm(): string | null {
+ 
+    // Dados gerais
+    if (!name.trim()) return "Informe o nome do orçamento.";
+    if (!selectedClient.trim())
+      return "Defina o cliente associado a esse orçamento.";
+  
+    // Endereço
+    if (!cep.trim()) return "Informe o CEP.";
+    if (!estado.trim()) return "Informe o estado.";
+    if (!cidade.trim()) return "Informe a cidade.";
+    if (!bairro.trim()) return "Informe o bairro.";
+    if (!logradouro.trim()) return "Informe a rua.";
+    if (!numero.trim()) return "Informe o número.";
+  
+    // Categorias
+    if (categorias.length === 0)
+      return "Adicione pelo menos uma categoria.";
+  
+    for (const categoria of categorias) {
+      if (!categoria.nome.trim())
+        return "Todas as categorias precisam ter um nome.";
+  
+      if (categoria.preco_total_da_categoria <= 0)
+        return `Informe um preço válido para a categoria "${categoria.nome}".`;
+  
+      if (categoria.servicos.length === 0)
+        return `A categoria "${categoria.nome}" precisa ter pelo menos um serviço.`;
+  
+      for (const servico of categoria.servicos) {
+        if (!servico.nome.trim())
+          return `Informe o nome de todos os serviços da categoria "${categoria.nome}".`;
+  
+        // descricao NÃO é obrigatória
+  
+        if (!servico.unidade.trim())
+          return `Informe a unidade do serviço "${servico.nome}".`;
+  
+        if (servico.quantidade_unidade <= 0)
+          return `Informe uma quantidade válida para "${servico.nome}".`;
+  
+        if (servico.preco_da_unidade <= 0)
+          return `Informe um preço por unidade válido para "${servico.nome}".`;
+  
+        if (servico.preco_total <= 0)
+          return `Informe o preço total do serviço "${servico.nome}".`;
+      }
+    }
+  
+    // Valores
+    if (custoObraCalculado <= 0)
+      return "O valor do orçamento deve ser maior que zero.";
+  
+    if (Number(bdi) < 0)
+      return "Informe um BDI válido.";
+  
+    if (custoTotalComBDI <= 0)
+      return "O valor total com BDI é inválido.";
+  
+    // Datas
+    if (!dataPublicacao)
+      return "Informe a data de publicação.";
+  
+    if (!validade)
+      return "Informe a validade do orçamento.";
+  
+    if (!dataValidade)
+      return "Informe a data de validade.";
+  
+    return null;
+  }
+
   async function handleSave() {
     try {
+      setFeedback("");
+
       if (!token) {
         setFeedback("Sessão expirada.");
         return;
       }
 
+      const error = validateForm();
+
+      if (error) {
+        setFeedback(error);
+        return;
+      }
+
       setLoading(true);
-      setFeedback("");
 
       await createBudget(
         {
