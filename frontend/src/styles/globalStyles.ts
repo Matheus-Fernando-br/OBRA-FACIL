@@ -118,7 +118,6 @@ export const globalStyles = StyleSheet.create({
 
   orcamentoCard: {
     backgroundColor: COLORS.backgroundSection,
-
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -130,7 +129,7 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 18,
 
     padding: 18,
-    marginBottom: 24,
+    marginBottom: 30,
   },
 
   orcamentoCliente: {
@@ -596,7 +595,7 @@ export const globalStyles = StyleSheet.create({
   bottomActionContainer: {
     position: "absolute",
 
-    bottom: 20,
+    bottom: 10,
     left: 24,
     right: 24,
   },
