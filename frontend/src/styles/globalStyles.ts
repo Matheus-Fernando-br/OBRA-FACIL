@@ -106,7 +106,7 @@ export const globalStyles = StyleSheet.create({
   feedback: {
     color: "#EF4444",
     fontSize: 14,
-    marginTop: -5,
+    marginTop: 5,
     marginBottom: 15,
     textAlign: "center",
     fontWeight: "600",
@@ -172,58 +172,102 @@ export const globalStyles = StyleSheet.create({
 
   orcamentoHeader: {
     flexDirection: "row",
-  
+
     justifyContent: "space-between",
-  
+
     alignItems: "center",
-  
+
     marginBottom: 12,
   },
-  
+
   orcamentoStatusBadge: {
     paddingHorizontal: 10,
-  
+
     paddingVertical: 5,
-  
+
     borderRadius: 30,
   },
-  
+
   orcamentoStatusText: {
     fontWeight: "700",
-  
+
     fontSize: 12,
   },
-  
+
   orcamentoButtons: {
     flexDirection: "row",
-  
+
     marginTop: 20,
   },
-  
+
   orcamentoMainButton: {
     flex: 1,
-  
+
     marginRight: 8,
-  
+
     flexDirection: "row",
-  
+
     justifyContent: "center",
-  
+
     alignItems: "center",
   },
-  
+
   orcamentoEditButton: {
     backgroundColor: COLORS.warning,
-  
+
     marginRight: 8,
-  
+
     width: 48,
   },
-  
+
   orcamentoDeleteButton: {
     backgroundColor: COLORS.danger,
-  
+
     width: 48,
+  },
+
+  card: {
+    backgroundColor: COLORS.backgroundSection,
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  picker: {
+    padding: 15,
+    borderRadius: 10,
+    width: "100%",
+    backgroundColor: COLORS.backgroundSection,
+  },
+
+  row: { flexDirection: "row", gap: 10 },
+  column: { flex: 1 },
+
+  serviceContainer: {
+    padding: 10,
+    backgroundColor: COLORS.background,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  serviceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 5 },
+  serviceTotalText: {
+    textAlign: "right",
+    fontWeight: "bold",
+    color: COLORS.success,
+    marginTop: 5,
+  },
+  categoryTotalText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.primary,
+    textAlign: "right",
   },
 
   /* =========================
@@ -622,31 +666,31 @@ export const globalStyles = StyleSheet.create({
    CLIENT CARD
 ========================= */
 
-clientCard: {
-  flexDirection: "row",
-  alignItems: "center",
+  clientCard: {
+    flexDirection: "row",
+    alignItems: "center",
 
-  backgroundColor: COLORS.backgroundSection,
+    backgroundColor: COLORS.backgroundSection,
 
-  borderRadius: 10,
+    borderRadius: 10,
 
-  padding: 18,
+    padding: 18,
 
-  marginBottom: 15,
+    marginBottom: 15,
 
-  shadowColor: "#000",
-  shadowOpacity: 0.2,
-  shadowRadius: 5,
-  shadowOffset: {
-    width: 0,
-    height: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+
+    elevation: 4,
   },
 
-  elevation: 4,
-},
-
   clientCardName: {
-    fontFamily:"Montserrat_600SemiBold",
+    fontFamily: "Montserrat_600SemiBold",
     fontSize: 18,
     color: COLORS.text,
   },
@@ -720,7 +764,7 @@ clientCard: {
   },
 
   label: {
-    fontFamily: "Poppins_800SemiBold",
+    fontFamily: "Montserrat_500Medium,",
     alignSelf: "flex-start",
     color: COLORS.text,
     marginBottom: 6,
@@ -733,15 +777,13 @@ clientCard: {
     marginVertical: 10,
   },
 
-  dividerVertical:{
+  dividerVertical: {
     width: 1,
     backgroundColor: "#444",
     height: "100%",
     marginVertical: 5,
-    marginHorizontal:20,
+    marginHorizontal: 20,
   },
-
-
 
   saveTextStack: {
     flexDirection: "column",
@@ -783,8 +825,8 @@ clientCard: {
 
   quickButtonText: {
     marginTop: 10,
-    fontFamily:"Montserrat_400Regular",
-    fontSize:12,
+    fontFamily: "Montserrat_400Regular",
+    fontSize: 12,
     fontWeight: "600",
     color: COLORS.text,
     textAlign: "center",

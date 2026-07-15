@@ -18,6 +18,7 @@ import { BudgetCard } from "@/components/cards/BudgetCard";
 import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
 import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcamentoModal";
 import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
+import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsModal";
 import { Cliente, Orcamento } from "@/components/layout/interface";
 
 export default function OrcamentosScreen() {
@@ -212,6 +213,12 @@ export default function OrcamentosScreen() {
         budgetName={selectedBudget?.nome ?? ""}
         onClose={() => setDeleteVisible(false)}
         onSuccess={loadBudgets}
+      />
+
+      <BudgetDetailsModal
+        visible={detailsVisible}
+        budget={selectedBudget}
+        onClose={() => setDeleteVisible(false)}
       />
     </View>
   );
