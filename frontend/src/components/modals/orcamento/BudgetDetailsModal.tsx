@@ -5,6 +5,7 @@ import { Orcamento, Cliente } from "@/components/layout/interface";
 import { getClients } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { PdfViewerModal } from "@/components/modals/PdfViewerModal";
+import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
 
 interface Props {
   visible: boolean;
@@ -23,22 +24,50 @@ export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
     if (visible && token) getClients(token).then(setClientsList);
   }, [visible, token]);
 
-  {/*const handleGeneratePdf = async (b: Orcamento) => {
+  const handleGeneratePdf = async () => {
+    if (!budget) return;
+
     setPdfLoading(true);
+
     try {
-      const uri = await generateBudgetPdf(b._id, token!);
-      setPdfUri(uri); setShowPdfViewer(true);
-    } catch { alert("Erro ao gerar PDF."); }
-    finally { setPdfLoading(false); }
-  };*/}
+      const uri = await generateBudgetPdf(budget);
+
+      setPdfUri(uri);
+
+      setShowPdfViewer(true);
+    } catch (e) {
+      console.log(e);
+
+      alert("Erro ao gerar PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   if (!budget) return null;
   return (
-    <Modal visible={visible} animationType="slide" transparent statusBarTranslucent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+    >
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}>
-        <OrcamentoForm mode="details" initialData={budget} onClose={onClose} clientsList={clientsList} />
+        <OrcamentoForm
+          mode="details"
+          initialData={budget}
+          onClose={onClose}
+          clientsList={clientsList}
+          loading={pdfLoading}
+          onGeneratePdf={handleGeneratePdf}
+        />{" "}
       </View>
-      <PdfViewerModal visible={showPdfViewer} onClose={() => setShowPdfViewer(false)} pdfUri={pdfUri} budgetTitle={budget.nome} />
+      <PdfViewerModal
+        visible={showPdfViewer}
+        onClose={() => setShowPdfViewer(false)}
+        pdfUri={pdfUri}
+        budgetTitle={budget.nome}
+      />
     </Modal>
   );
 }

@@ -35,6 +35,7 @@ interface OrcamentoFormProps {
   initialData?: Orcamento | null;
   onClose: () => void;
   onSave?: (data: any) => Promise<void>;
+  onGeneratePdf?: () => void;
   clientsList: Cliente[];
   feedbackMessage?: string;
   loading?: boolean;
@@ -46,6 +47,7 @@ export function OrcamentoForm({
   initialData,
   onClose,
   onSave,
+  onGeneratePdf,
   clientsList,
   feedbackMessage,
   loading,
@@ -297,7 +299,17 @@ export function OrcamentoForm({
               : "Detalhes"}
         </Text>
 
-        <Pressable onPress={handleSubmit} style={globalStyles.rightAction}>
+        <Pressable
+          onPress={() => {
+            if (mode === "details") {
+              onGeneratePdf?.();
+              return;
+            }
+
+            handleSubmit();
+          }}
+          style={globalStyles.rightAction}
+        >
           {loading ? (
             <ActivityIndicator color={COLORS.white} />
           ) : (
