@@ -6,7 +6,13 @@ import { getClients } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { PdfViewerModal } from "@/components/modals/PdfViewerModal";
 
-export function BudgetDetailsModal({ visible, budget, onClose }: { visible: boolean; budget: Orcamento | null; onClose(): void }) {
+interface Props {
+  visible: boolean;
+  budget: Orcamento | null;
+  onClose(): void;
+}
+
+export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [pdfLoading, setPdfLoading] = useState(false);

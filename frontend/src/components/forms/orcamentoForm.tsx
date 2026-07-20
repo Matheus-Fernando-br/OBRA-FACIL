@@ -56,9 +56,23 @@ export function OrcamentoForm({
 
   const [nome, setNome] = useState(initialData?.nome || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
-  const [selectedClient, setSelectedClient] = useState(
-    initialData?.cliente._id || "",
-  );
+  const [selectedClient, setSelectedClient] = useState(() => {
+    if (!initialData?.cliente) return "";
+
+    return typeof initialData.cliente === "string"
+      ? initialData.cliente
+      : initialData.cliente._id;
+  });
+  useEffect(() => {
+    if (!initialData?.cliente) return;
+
+    setSelectedClient(
+      typeof initialData.cliente === "string"
+        ? initialData.cliente
+        : initialData.cliente._id,
+    );
+  }, [initialData]);
+
   const [validade, setValidade] = useState<number>(
     initialData?.valido_durante || 0,
   );
@@ -293,7 +307,7 @@ export function OrcamentoForm({
                 {mode === "add"
                   ? "Salvar Novo Orçamento"
                   : mode === "edit"
-                    ? "Salavar Alterações"
+                    ? "Salvar Alterações"
                     : "Gerar PDF"}
               </Text>
             </View>

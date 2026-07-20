@@ -218,7 +218,7 @@ export default function OrcamentosScreen() {
       <BudgetDetailsModal
         visible={detailsVisible}
         budget={selectedBudget}
-        onClose={() => setDeleteVisible(false)}
+        onClose={() => setDetailsVisible(false)}
       />
     </View>
   );

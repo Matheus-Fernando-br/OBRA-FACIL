@@ -788,7 +788,6 @@ export const globalStyles = StyleSheet.create({
   saveTextStack: {
     flexDirection: "column",
     alignItems: "flex-end", // Alinha os textos à direita (perto do ícone)
-    marginRight: 6, // Dá um respiro entre o texto e o ícone
   },
 
   saveText: {
