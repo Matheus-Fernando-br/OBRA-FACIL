@@ -60,14 +60,14 @@ export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
           clientsList={clientsList}
           loading={pdfLoading}
           onGeneratePdf={handleGeneratePdf}
-        />{" "}
-      </View>
+        />
       <PdfViewerModal
         visible={showPdfViewer}
         onClose={() => setShowPdfViewer(false)}
         pdfUri={pdfUri}
         budgetTitle={budget.nome}
-      />
+        />
+        </View>
     </Modal>
   );
 }
