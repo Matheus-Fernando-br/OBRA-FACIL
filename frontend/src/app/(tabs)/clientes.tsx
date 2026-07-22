@@ -7,7 +7,7 @@ import {
 } from "react-native";
 import { useState, useEffect } from "react";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { COLORS, globalStyles } from "../../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "../../components/forms/AppInput";
 import { ClientCard } from "../../components/cards/ClientCard";
@@ -84,16 +84,20 @@ export default function ClientesScreen() {
 
         {loading ? (
           <View
-            style={{
-              marginTop: 40,
+          style={[
+            globalStyles.screen,
+            {
+              justifyContent: "center",
               alignItems: "center",
-            }}
+              marginTop: 40,
+            },
+          ]}
           >
-            <ActivityIndicator size="large" color="#3B82F6" />
+            <ActivityIndicator size="large" color={COLORS.primary} />
 
             <Text
               style={{
-                color: "#FFF",
+                color: COLORS.text,
                 marginTop: 15,
               }}
             >

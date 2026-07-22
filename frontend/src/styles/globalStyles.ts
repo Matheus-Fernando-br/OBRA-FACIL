@@ -1,5 +1,3 @@
-import { Background } from "expo-router/build/react-navigation";
-import { Section } from "lucide-react-native";
 import { StyleSheet } from "react-native";
 
 /* =========================
@@ -18,6 +16,7 @@ export const COLORS = {
 
   white: "#FFFFFF",
   title: "#c45f00",
+  titleBackground: "#c45f0080",
   text: "#000000",
   textSecondary: "#474242e5",
 
@@ -82,6 +81,12 @@ export const globalStyles = StyleSheet.create({
     marginBottom: 16,
   },
 
+  loginImage: {
+    width: 250,
+    height: 250,
+    marginTop: -20,
+  },
+
   /* =========================
      LAYOUT
   ========================= */
@@ -110,6 +115,12 @@ export const globalStyles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
     fontWeight: "600",
+  },
+
+  logoHeaderImg: {
+    width: 80,
+    height: 80,
+    marginTop: 5,
   },
 
   /* =========================

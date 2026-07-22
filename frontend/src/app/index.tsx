@@ -1,7 +1,7 @@
 import {
   View,
   Text,
-  TextInput,
+  Image,
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
@@ -12,6 +12,7 @@ import { COLORS, globalStyles } from "../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { emailMask } from "@/components/forms/mask";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function LoginScreen() {
   const { login, loading } = useAuth();
@@ -48,67 +49,86 @@ export default function LoginScreen() {
   }
 
   return (
-    <View style={globalStyles.loginContainer}>
-      <Text style={globalStyles.loginTitle}>OBRA-FÁCIL</Text>
-
-      <Text style={globalStyles.label}>E-mail</Text>
-
-      <AppInput
-        placeholder="Informe seu e-mail"
-        value={email}
-        onChangeText={(text) => {
-          setEmail(emailMask(text));
-
-          if (feedback) setFeedback("");
+    <LinearGradient
+      colors={[COLORS.white, COLORS.titleBackground]}
+      locations={[0.7, 1.0]}
+      start={{ x: 0.6, y: 0 }}
+      end={{ x: 0.4, y: 1 }}
+      style={globalStyles.loginContainer}
+    >
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
         }}
-      />
-
-      <Text style={globalStyles.label}>Senha</Text>
-
-      <AppInput
-        placeholder="Informe sua senha"
-        placeholderTextColor="#94A3B8"
-        secureTextEntry
-        value={password}
-        onChangeText={(text) => {
-          setPassword(text);
-
-          if (feedback) setFeedback("");
-        }}
-      />
-      <View style={globalStyles.divider} />
-
-      {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
-
-      <TouchableOpacity
-        onPress={handleLogin}
-        style={[
-          globalStyles.loginButton,
-          loading && {
-            opacity: 0.7,
-          },
-        ]}
-        disabled={loading}
       >
-        {loading ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : (
-          <Text style={globalStyles.loginButtonText}>Entrar</Text>
-        )}
-      </TouchableOpacity>
+        <Image
+          source={require("../assets/images/logo_titulo_frase.png")}
+          style={globalStyles.loginImage}
+        />
+      </View>
+      <View style={{ marginTop: -20 }}>
+        <Text style={globalStyles.label}>E-mail</Text>
 
-      <Text style={globalStyles.loginText}>Ainda não tem conta?</Text>
+        <AppInput
+          placeholder="Informe seu e-mail"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(emailMask(text));
 
-      <TouchableOpacity
-        style={globalStyles.loginButtonCadastro}
-        onPress={() => router.push("/cadastro")}
-      >
-        {loadingRegister ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : (
-          <Text style={globalStyles.loginButtonText}>Cadastre-se</Text>
+            if (feedback) setFeedback("");
+          }}
+        />
+
+        <Text style={globalStyles.label}>Senha</Text>
+
+        <AppInput
+          placeholder="Informe sua senha"
+          placeholderTextColor="#94A3B8"
+          secureTextEntry
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+
+            if (feedback) setFeedback("");
+          }}
+        />
+        <View style={globalStyles.divider} />
+
+        {feedback !== "" && (
+          <Text style={globalStyles.feedback}>{feedback}</Text>
         )}
-      </TouchableOpacity>
-    </View>
+
+        <TouchableOpacity
+          onPress={handleLogin}
+          style={[
+            globalStyles.loginButton,
+            loading && {
+              opacity: 0.7,
+            },
+          ]}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={globalStyles.loginButtonText}>Entrar</Text>
+          )}
+        </TouchableOpacity>
+
+        <Text style={globalStyles.loginText}>Ainda não tem conta?</Text>
+
+        <TouchableOpacity
+          style={globalStyles.loginButtonCadastro}
+          onPress={() => router.push("/cadastro")}
+        >
+          {loadingRegister ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <Text style={globalStyles.loginButtonText}>Cadastre-se</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
   );
 }

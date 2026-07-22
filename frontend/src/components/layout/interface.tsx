@@ -151,9 +151,9 @@ export interface CategoriaObra {
 export interface Obra {
   _id: string;
 
-  orcamento: Orcamento;
+  orcamento: string | Orcamento;
 
-  responsavel: string;
+  responsavel: string | Usuario;
 
   categoria: CategoriaObra[];
 

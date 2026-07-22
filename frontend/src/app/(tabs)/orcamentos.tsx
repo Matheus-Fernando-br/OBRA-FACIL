@@ -9,7 +9,7 @@ import {
 
 import { useState, useEffect } from "react";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 import { useAuth } from "@/contexts/AuthContext";
@@ -98,25 +98,6 @@ export default function OrcamentosScreen() {
     return matchSearch && matchStatus;
   });
 
-  if (loading) {
-    return (
-      <View
-        style={[
-          globalStyles.screen,
-          {
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#3B82F6" />
-        <Text style={{ color: "#FFF", marginTop: 15 }}>
-          Carregando clientes...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <View style={globalStyles.screen}>
       <ScrollView
@@ -158,28 +139,46 @@ export default function OrcamentosScreen() {
           ))}
         </View>
 
-        {filteredBudgets.map((budget) => (
-          <BudgetCard
-            key={budget._id}
-            client={getClientName(budget.cliente as unknown as string)}
-            service={budget.nome}
-            status={budget.status}
-            value={budget.preco_com_bdi}
-            date={new Date(budget.data_validade).toLocaleDateString("pt-BR")}
-            onDetails={() => {
-              setSelectedBudget(budget);
-              setDetailsVisible(true);
-            }}
-            onEdit={() => {
-              setSelectedBudget(budget);
-              setEditVisible(true);
-            }}
-            onDelete={() => {
-              setSelectedBudget(budget);
-              setDeleteVisible(true);
-            }}
-          />
-        ))}
+        {loading ? (
+          <View
+            style={[
+              globalStyles.screen,
+              {
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 40,
+              },
+            ]}
+          >
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ color: COLORS.text, marginTop: 15 }}>
+              Carregando Orçamentos...
+            </Text>
+          </View>
+        ) : (
+          filteredBudgets.map((budget) => (
+            <BudgetCard
+              key={budget._id}
+              client={getClientName(budget.cliente as unknown as string)}
+              service={budget.nome}
+              status={budget.status}
+              value={budget.preco_com_bdi}
+              date={new Date(budget.data_validade).toLocaleDateString("pt-BR")}
+              onDetails={() => {
+                setSelectedBudget(budget);
+                setDetailsVisible(true);
+              }}
+              onEdit={() => {
+                setSelectedBudget(budget);
+                setEditVisible(true);
+              }}
+              onDelete={() => {
+                setSelectedBudget(budget);
+                setDeleteVisible(true);
+              }}
+            />
+          ))
+        )}
       </ScrollView>
 
       <View style={globalStyles.bottomActionContainer}>

@@ -9,7 +9,7 @@ import {
 
 import { useEffect, useState } from "react";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 
@@ -20,6 +20,8 @@ import { getWork } from "../../services/api";
 import { ObrasCard } from "@/components/cards/ObrasCard";
 
 import { Obra, Orcamento } from "@/components/layout/interface";
+import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
+import { CreateObraModal } from "@/components/modals/obras/CreateObraModal";
 
 export default function ObrasScreen() {
   const { token } = useAuth();
@@ -32,6 +34,12 @@ export default function ObrasScreen() {
 
   const [statusFilter, setStatusFilter] = useState("Todos");
 
+  const [addObraVisible, setAddObraVisible] = useState(false);
+
+  const [createVisible, setCreateVisible] = useState(false);
+
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
+
   async function loadWorks() {
     try {
       if (!token) return;
@@ -41,8 +49,16 @@ export default function ObrasScreen() {
       const data = await getWork(token);
 
       setWorksList(data);
-    } catch (error) {
-      console.log(error);
+    } catch (err:any) {
+      console.log("ERRO COMPLETO");
+
+      console.log(err);
+  
+      console.log(err.response);
+  
+      console.log(err.response?.data);
+  
+      console.log(err.response?.status);
     } finally {
       setLoading(false);
     }
@@ -51,6 +67,12 @@ export default function ObrasScreen() {
   useEffect(() => {
     loadWorks();
   }, [token]);
+
+  useEffect(() => {
+    if (selectedBudget) {
+      console.log(selectedBudget.nome);
+    }
+  }, [selectedBudget]);
 
   const filteredWorks = worksList.filter((work) => {
     if (typeof work.orcamento === "string") return true;
@@ -68,26 +90,6 @@ export default function ObrasScreen() {
 
     return matchSearch && matchStatus;
   });
-
-  if (loading) {
-    return (
-      <View
-        style={[
-          globalStyles.screen,
-          {
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
-      >
-        <ActivityIndicator size="large" color="#2563EB" />
-
-        <Text style={{ color: "#FFF", marginTop: 15 }}>
-          Carregando obras...
-        </Text>
-      </View>
-    );
-  }
 
   return (
     <View style={globalStyles.screen}>
@@ -133,33 +135,84 @@ export default function ObrasScreen() {
           ))}
         </View>
 
-        {filteredWorks.map((work) => {
-          if (typeof work.orcamento === "string") return null;
-
-          const budget = work.orcamento as Orcamento;
-
-          return (
-            <ObrasCard
-              key={work._id}
-              title={budget.nome}
-              client={budget.cliente.nome}
-              status={work.status}
-              progress={work.porcentagem_de_conclusao ?? 0}
-              type="Residencial"
-              meters={0}
-              startDate={new Date(work.data_inicio_prevista).toLocaleDateString(
-                "pt-BR",
-              )}
-            />
-          );
-        })}
+        {loading ? (
+          <View
+            style={[
+              globalStyles.screen,
+              {
+                justifyContent: "center",
+                alignItems: "center",
+                marginTop: 40,
+              },
+            ]}
+          >
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={{ color: COLORS.text, marginTop: 15 }}>
+              Carregando Serviços...
+            </Text>
+          </View>
+        ) : (
+          filteredWorks.map((work) => {
+            const budget =
+              typeof work.orcamento === "string"
+                ? null
+                : work.orcamento;
+          
+            return (
+              <ObrasCard
+                key={work._id}
+                title={budget?.nome ?? "Orçamento"}
+                client={budget?.cliente.nome ?? "Cliente"}
+                status={work.status}
+                progress={work.porcentagem_de_conclusao ?? 0}
+                type="Residencial"
+                meters={0}
+                startDate={new Date(
+                  work.data_inicio_prevista
+                ).toLocaleDateString("pt-BR")}
+              />
+            );
+          }))}
       </ScrollView>
 
       <View style={globalStyles.bottomActionContainer}>
-        <Pressable style={globalStyles.bottomActionButton}>
+        <Pressable
+          style={globalStyles.bottomActionButton}
+          onPress={() => setAddObraVisible(true)}
+        >
           <Text style={globalStyles.bottomActionButtonText}>+ Nova Obra</Text>
         </Pressable>
       </View>
+      <AddObrasModal
+        visible={addObraVisible}
+        onClose={() => setAddObraVisible(false)}
+        onSelect={(budget) => {
+          setSelectedBudget(budget);
+
+          setAddObraVisible(false);
+
+          setTimeout(() => {
+            setCreateVisible(true);
+          }, 250);
+        }}
+      />
+
+      <CreateObraModal
+        visible={createVisible}
+        budget={selectedBudget}
+        onClose={() => {
+          setCreateVisible(false);
+
+          setSelectedBudget(null);
+        }}
+        onSuccess={() => {
+          loadWorks();
+
+          setCreateVisible(false);
+
+          setSelectedBudget(null);
+        }}
+      />
     </View>
   );
 }

@@ -100,7 +100,7 @@ export default function HomeScreen() {
         <View style={globalStyles.dashboardGrid}>
           <DashboardCard
             title="Orçamentos"
-            value={orcamentosPendentesCount.toString()}
+            value={loading ? "..." : orcamentosPendentesCount.toString()}
             icon="document-text"
             color={COLORS.title}
           />
@@ -114,14 +114,14 @@ export default function HomeScreen() {
 
           <DashboardCard
             title="Obras"
-            value={obrasCount.toString()}
+            value={loading ? "..." : obrasCount.toString()}
             icon="hammer"
             color={COLORS.primary}
           />
 
           <DashboardCard
             title="Faturamento"
-            value={faturamentoTotal.toLocaleString("pt-BR", {
+            value={loading ? "..." : faturamentoTotal.toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
               minimumFractionDigits: 0,

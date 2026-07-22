@@ -221,7 +221,7 @@ export async function deleteBudget(id: string, token: string) {
 import { Obra } from "../components/layout/interface";
 
 export async function getWork(token: string) {
-  const { data } = await api.get("/work", {
+  const { data } = await api.get("/work/userObras", {
     headers: {
       Authorization: `Bearer ${token}`,
     },

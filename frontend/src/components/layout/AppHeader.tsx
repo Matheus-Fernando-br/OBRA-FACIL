@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, Image } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { NotificationModal } from "../modals/NotificationModal";
-import { COLORS } from "@/styles/globalStyles";
+import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   onMenu?: () => void;
@@ -11,6 +11,7 @@ interface Props {
 
 export function AppHeader({ onMenu }: Props) {
   const [notificationVisible, setNotificationVisible] = useState(false);
+
   return (
     <View
       style={{
@@ -37,19 +38,10 @@ export function AppHeader({ onMenu }: Props) {
           alignItems: "center",
         }}
       >
-        <Ionicons name="construct" size={24} color={COLORS.title} />
-
-        <Text
-          style={{
-            color: COLORS.text,
-            fontFamily: "Montserrat_800ExtraBold",
-            fontSize: 22,
-   
-            marginLeft: 8,
-          }}
-        >
-          OBRAfácil
-        </Text>
+        <Image
+          source={require("../../assets/images/logo_titulo.png")}
+          style={globalStyles.logoHeaderImg}
+        />
       </View>
 
       {/* Direita */}

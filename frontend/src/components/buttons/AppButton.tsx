@@ -10,6 +10,7 @@ interface Props {
   title: string;
   onPress: () => void;
   loading?: boolean;
+  disabled?: boolean;
   color?: string;
 }
 
@@ -17,11 +18,14 @@ export function AppButton({
   title,
   onPress,
   loading = false,
+  disabled = false,
   color = COLORS.title,
 }: Props) {
+  const isDisabled = loading || disabled;
+
   return (
     <TouchableOpacity
-      disabled={loading}
+      disabled={isDisabled}
       onPress={onPress}
       activeOpacity={0.8}
       style={{
@@ -32,7 +36,7 @@ export function AppButton({
         borderRadius: 12,
         justifyContent: "center",
         alignItems: "center",
-        opacity: loading ? 0.8 : 1,
+        opacity: isDisabled ? 0.5 : 1,
       }}
     >
       {loading ? (
