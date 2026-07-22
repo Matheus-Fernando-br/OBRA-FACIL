@@ -16,7 +16,7 @@ import { EditClientModal } from "../../components/modals/cliente/EditClientModal
 import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientModal";
 import { getClients } from "../../services/api";
 import { Cliente } from "@/components/layout/interface";
-
+import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function ClientesScreen() {
   const { token } = useAuth();
@@ -60,69 +60,70 @@ export default function ClientesScreen() {
 
   return (
     <View style={globalStyles.screen}>
-      <ScrollView
-        style={globalStyles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={globalStyles.pageHeaderRow}>
-          <Text style={globalStyles.title}>Clientes</Text>
+      <GradientBackground style={globalStyles.container}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={globalStyles.pageHeaderRow}>
+            <Text style={globalStyles.title}>Clientes</Text>
 
-          <Pressable
-            style={globalStyles.pageHeaderButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={globalStyles.pageHeaderButtonText}>+</Text>
-          </Pressable>
-        </View>
-
-        <AppInput
-          placeholder="Buscar cliente..."
-          value={search}
-          onChangeText={setSearch}
-        />
-
-        {loading ? (
-          <View
-          style={[
-            globalStyles.screen,
-            {
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 40,
-            },
-          ]}
-          >
-            <ActivityIndicator size="large" color={COLORS.primary} />
-
-            <Text
-              style={{
-                color: COLORS.text,
-                marginTop: 15,
-              }}
+            <Pressable
+              style={globalStyles.pageHeaderButton}
+              onPress={() => setModalVisible(true)}
             >
-              Carregando clientes...
-            </Text>
+              <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+            </Pressable>
           </View>
-        ) : (
-          filteredClients.map((client) => (
-            <ClientCard
-              key={client._id}
-              name={client.nome}
-              phone={client.telefone}
-              email={client.email}
-              onEdit={() => {
-                setSelectedClient(client);
-                setEditVisible(true);
-              }}
-              onDelete={() => {
-                setSelectedClient(client);
-                setDeleteVisible(true);
-              }}
-            />
-          ))
-        )}
-      </ScrollView>
+
+          <AppInput
+            placeholder="Buscar cliente..."
+            value={search}
+            onChangeText={setSearch}
+          />
+
+          {loading ? (
+            <View
+              style={[
+                globalStyles.screen,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 40,
+                },
+              ]}
+            >
+              <ActivityIndicator size="large" color={COLORS.primary} />
+
+              <Text
+                style={{
+                  color: COLORS.text,
+                  marginTop: 15,
+                }}
+              >
+                Carregando clientes...
+              </Text>
+            </View>
+          ) : (
+            filteredClients.map((client) => (
+              <ClientCard
+                key={client._id}
+                name={client.nome}
+                phone={client.telefone}
+                email={client.email}
+                onEdit={() => {
+                  setSelectedClient(client);
+                  setEditVisible(true);
+                }}
+                onDelete={() => {
+                  setSelectedClient(client);
+                  setDeleteVisible(true);
+                }}
+              />
+            ))
+          )}
+        </ScrollView>
+      </GradientBackground>
 
       <View style={globalStyles.bottomActionContainer}>
         <Pressable

@@ -28,8 +28,8 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   }, [visible, token]);
 
   const handleSave = async (formData: any) => {
-    setLoading(true);
     try {
+      setLoading(true);
       await createBudget(formData, token!);
       onClose();
     } catch (error) { setFeedback("Erro ao salvar."); }

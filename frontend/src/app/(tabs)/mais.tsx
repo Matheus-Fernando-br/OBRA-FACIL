@@ -9,9 +9,9 @@ import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { OptionsCard } from "../../components/cards/OptionsCard";
 import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
+import { GradientBackground } from "@/styles/GradientBackground";
 
 const options = [
-
   {
     title: "Configurações Gerais",
     icon: "settings",
@@ -70,32 +70,34 @@ export default function MaisScreen() {
 
   return (
     <View style={globalStyles.screen}>
-      <ScrollView style={globalStyles.maisContainer}>
-        <ProfileCard
-          nome={user?.nome || ""}
-          email={user?.email || ""}
-          onPress={() => setProfileVisible(true)}
-        />
-
-        {options.map((item) => (
-          <OptionsCard
-            key={item.title}
-            title={item.title}
-            description={item.description}
-            icon={item.icon as any}
-            onPress={() => router.push(item.route as any)}
+      <GradientBackground style={globalStyles.maisContainer}>
+        <ScrollView>
+          <ProfileCard
+            nome={user?.nome || ""}
+            email={user?.email || ""}
+            onPress={() => setProfileVisible(true)}
           />
-        ))}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[globalStyles.menuCard, { backgroundColor: COLORS.danger }]}
-          onPress={handleLogout}
-        >
-          <Text style={globalStyles.menuText}>Logout</Text>
 
-          <Ionicons name="exit" size={20} color="#f2edec" />
-        </TouchableOpacity>
-      </ScrollView>
+          {options.map((item) => (
+            <OptionsCard
+              key={item.title}
+              title={item.title}
+              description={item.description}
+              icon={item.icon as any}
+              onPress={() => router.push(item.route as any)}
+            />
+          ))}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={[globalStyles.menuCard, { backgroundColor: COLORS.danger }]}
+            onPress={handleLogout}
+          >
+            <Text style={globalStyles.menuText}>Logout</Text>
+
+            <Ionicons name="exit" size={20} color="#f2edec" />
+          </TouchableOpacity>
+        </ScrollView>
+      </GradientBackground>
       <EditUserModal
         visible={profileVisible}
         onClose={() => setProfileVisible(false)}

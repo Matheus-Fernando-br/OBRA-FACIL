@@ -8,11 +8,11 @@ import {
 
 import { router } from "expo-router";
 import { useState } from "react";
-import { COLORS, globalStyles } from "../styles/globalStyles";
+import { globalStyles } from "../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { emailMask } from "@/components/forms/mask";
-import { LinearGradient } from "expo-linear-gradient";
+import { GradientBackground } from "../styles/GradientBackground";
 
 export default function LoginScreen() {
   const { login, loading } = useAuth();
@@ -49,13 +49,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <LinearGradient
-      colors={[COLORS.white, COLORS.titleBackground]}
-      locations={[0.7, 1.0]}
-      start={{ x: 0.6, y: 0 }}
-      end={{ x: 0.4, y: 1 }}
-      style={globalStyles.loginContainer}
-    >
+    <GradientBackground style={globalStyles.loginContainer}>
       <View
         style={{
           alignItems: "center",
@@ -129,6 +123,6 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
       </View>
-    </LinearGradient>
+    </GradientBackground>
   );
 }

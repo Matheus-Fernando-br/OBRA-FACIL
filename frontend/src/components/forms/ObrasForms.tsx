@@ -14,19 +14,27 @@ import { AppButton } from "@/components/buttons/AppButton";
 
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 
-import { Orcamento } from "@/components/layout/interface";
+import { Orcamento, Cliente } from "@/components/layout/interface";
 
 interface Props {
   budget: Orcamento;
 
   loading?: boolean;
 
+  clientsList: Cliente[];
+
   onClose(): void;
 
   onSave(data: any): Promise<void>;
 }
 
-export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
+export function ObrasForm({
+  budget,
+  loading,
+  clientsList,
+  onClose,
+  onSave,
+}: Props) {
   const [status, setStatus] = useState("NO_PRAZO");
 
   const [dataInicio, setDataInicio] = useState("");
@@ -34,6 +42,14 @@ export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
   const [dataFim, setDataFim] = useState("");
 
   const [observacoes, setObservacoes] = useState("");
+
+  const cliente = clientsList.find(
+    (c) =>
+      c._id ===
+      (typeof budget.cliente === "string"
+        ? budget.cliente
+        : budget.cliente._id),
+  );
 
   return (
     <View style={globalStyles.container}>
@@ -97,16 +113,16 @@ export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
         <View style={globalStyles.card}>
           <Text style={globalStyles.label}>Nome da Obra</Text>
 
-          <AppInput value={budget.nome} editable={false} />
+          <AppInput value={budget.nome ?? ""} editable={false} />
 
           <Text style={globalStyles.label}>Cliente</Text>
 
-          <AppInput value={budget.cliente.nome} editable={false} />
+          <AppInput value={cliente?.nome ?? ""} editable={false} />
 
           <Text style={globalStyles.label}>Descrição</Text>
 
           <AppInput
-            value={budget.descricao}
+            value={budget.descricao ?? ""}
             editable={false}
             multiline
             numberOfLines={4}
@@ -115,7 +131,7 @@ export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
           <Text style={globalStyles.label}>Valor Total</Text>
 
           <AppInput
-            value={`R$ ${budget.preco_com_bdi.toFixed(2)}`}
+            value={`R$ ${(budget.preco_com_bdi ?? 0).toFixed(2)}`}
             editable={false}
           />
         </View>
@@ -133,13 +149,16 @@ export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>CEP</Text>
 
-              <AppInput value={budget.endereco.CEP} editable={false} />
+              <AppInput value={budget.endereco?.CEP ?? ""} editable={false} />
             </View>
 
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Estado</Text>
 
-              <AppInput value={budget.endereco.estado} editable={false} />
+              <AppInput
+                value={budget.endereco?.estado ?? ""}
+                editable={false}
+              />
             </View>
           </View>
 
@@ -147,31 +166,43 @@ export function ObrasForm({ budget, loading, onClose, onSave }: Props) {
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Cidade</Text>
 
-              <AppInput value={budget.endereco.cidade} editable={false} />
+              <AppInput
+                value={budget.endereco?.cidade ?? ""}
+                editable={false}
+              />
             </View>
 
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Bairro</Text>
 
-              <AppInput value={budget.endereco.bairro} editable={false} />
+              <AppInput
+                value={budget.endereco?.bairro ?? ""}
+                editable={false}
+              />
             </View>
           </View>
 
           <Text style={globalStyles.label}>Rua</Text>
 
-          <AppInput value={budget.endereco.rua} editable={false} />
+          <AppInput value={budget.endereco?.rua ?? ""} editable={false} />
 
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Número</Text>
 
-              <AppInput value={budget.endereco.numero} editable={false} />
+              <AppInput
+                value={budget.endereco?.numero ?? ""}
+                editable={false}
+              />
             </View>
 
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Complemento</Text>
 
-              <AppInput value={budget.endereco.complemento} editable={false} />
+              <AppInput
+                value={budget.endereco?.complemento ?? ""}
+                editable={false}
+              />
             </View>
           </View>
         </View>

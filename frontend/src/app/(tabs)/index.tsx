@@ -13,6 +13,7 @@ import { obras } from "../../data/obras";
 import { Cliente, Orcamento } from "@/components/layout/interface";
 import { getClients, getUser, getBudgets } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function HomeScreen() {
   const { token, user, setUser } = useAuth();
@@ -69,123 +70,126 @@ export default function HomeScreen() {
   );
 
   return (
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={globalStyles.homeHeader}>
-        <View style={{ flexDirection: "column" }}>
-          <Text style={globalStyles.title}>
-            <Text style={{ color: COLORS.text }}>Olá, </Text>
-            {user?.nome || "Usuário"} 👋
-          </Text>
+    <GradientBackground style={globalStyles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={globalStyles.homeHeader}>
+          <View style={{ flexDirection: "column" }}>
+            <Text style={globalStyles.title}>
+              <Text style={{ color: COLORS.text }}>Olá, </Text>
+              {user?.nome || "Usuário"} 👋
+            </Text>
 
-          <Text style={globalStyles.subtitle}>
-            Aqui está o resumo dos seus projetos!
-          </Text>
-        </View>
-        <Image
-          source={require("../../assets/images/profile.png")}
-          style={globalStyles.profileImageIndex}
-        />
-      </View>
-      <View
-        style={[
-          globalStyles.section,
-          { backgroundColor: COLORS.backgroundSection },
-        ]}
-      >
-        <Text style={globalStyles.sectionTitle}>Resumo geral:</Text>
-
-        <View style={globalStyles.dashboardGrid}>
-          <DashboardCard
-            title="Orçamentos"
-            value={loading ? "..." : orcamentosPendentesCount.toString()}
-            icon="document-text"
-            color={COLORS.title}
-          />
-
-          <DashboardCard
-            title="Clientes"
-            value={loading ? "..." : clientsList.length.toString()}
-            icon="people"
-            color={COLORS.warning}
-          />
-
-          <DashboardCard
-            title="Obras"
-            value={loading ? "..." : obrasCount.toString()}
-            icon="hammer"
-            color={COLORS.primary}
-          />
-
-          <DashboardCard
-            title="Faturamento"
-            value={loading ? "..." : faturamentoTotal.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}
-            icon="cash"
-            color={COLORS.success}
-            valueStyle={{ fontSize: 13 }}
+            <Text style={globalStyles.subtitle}>
+              Aqui está o resumo dos seus projetos!
+            </Text>
+          </View>
+          <Image
+            source={require("../../assets/images/profile.png")}
+            style={globalStyles.profileImageIndex}
           />
         </View>
-      </View>
-      <View style={globalStyles.divider} />
-      <View style={globalStyles.section}>
-        <View style={globalStyles.quickAccessHeader}>
-          <Text style={globalStyles.sectionTitle}>Acesso rápido:</Text>
+        <View
+          style={[
+            globalStyles.section,
+            { backgroundColor: COLORS.backgroundSection },
+          ]}
+        >
+          <Text style={globalStyles.sectionTitle}>Resumo geral:</Text>
 
-          <Pressable style={globalStyles.quickAccessEditButton}>
-            <Ionicons name="pencil" size={25} color={COLORS.primary} />
-          </Pressable>
+          <View style={globalStyles.dashboardGrid}>
+            <DashboardCard
+              title="Orçamentos"
+              value={loading ? "..." : orcamentosPendentesCount.toString()}
+              icon="document-text"
+              color={COLORS.title}
+            />
+
+            <DashboardCard
+              title="Clientes"
+              value={loading ? "..." : clientsList.length.toString()}
+              icon="people"
+              color={COLORS.warning}
+            />
+
+            <DashboardCard
+              title="Obras"
+              value={loading ? "..." : obrasCount.toString()}
+              icon="hammer"
+              color={COLORS.primary}
+            />
+
+            <DashboardCard
+              title="Faturamento"
+              value={
+                loading
+                  ? "..."
+                  : faturamentoTotal.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    })
+              }
+              icon="cash"
+              color={COLORS.success}
+              valueStyle={{ fontSize: 13 }}
+            />
+          </View>
         </View>
-        <View style={globalStyles.quickAccessRow}>
-          <QuickAccessCard
-            title="Novo Orçamento"
-            icon="document-text"
-            onPress={() => {
-              router.replace("/orcamentos");
-            }}
-            color={COLORS.title}
-          />
+        <View style={globalStyles.divider} />
+        <View style={globalStyles.section}>
+          <View style={globalStyles.quickAccessHeader}>
+            <Text style={globalStyles.sectionTitle}>Acesso rápido:</Text>
 
-          <QuickAccessCard
-            title="Novo Cliente"
-            icon="people"
-            onPress={() => {
-              router.replace("/clientes");
-            }}
-            color={COLORS.success}
-          />
+            <Pressable style={globalStyles.quickAccessEditButton}>
+              <Ionicons name="pencil" size={25} color={COLORS.primary} />
+            </Pressable>
+          </View>
+          <View style={globalStyles.quickAccessRow}>
+            <QuickAccessCard
+              title="Novo Orçamento"
+              icon="document-text"
+              onPress={() => {
+                router.replace("/orcamentos");
+              }}
+              color={COLORS.title}
+            />
 
-          <QuickAccessCard
-            title="Configurações"
-            icon="cog"
-            onPress={() => {
-              router.replace("/configuracoes");
-            }}
-            color={COLORS.textSecondary}
-          />
+            <QuickAccessCard
+              title="Novo Cliente"
+              icon="people"
+              onPress={() => {
+                router.replace("/clientes");
+              }}
+              color={COLORS.success}
+            />
+
+            <QuickAccessCard
+              title="Configurações"
+              icon="cog"
+              onPress={() => {
+                router.replace("/configuracoes");
+              }}
+              color={COLORS.textSecondary}
+            />
+          </View>
         </View>
-      </View>
-      <View style={globalStyles.divider} />
+        <View style={globalStyles.divider} />
 
-      <View style={globalStyles.section}>
-        <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
+        <View style={globalStyles.section}>
+          <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
 
-        {obras.map((obra) => (
-          <WorkCard
-            key={obra.id}
-            title={obra.nome}
-            progress={obra.progresso}
-            type={obra.tipo}
-            meters={obra.metros}
-          />
-        ))}
-      </View>
-    </ScrollView>
+          {obras.map((obra) => (
+            <WorkCard
+              key={obra.id}
+              title={obra.nome}
+              progress={obra.progresso}
+              type={obra.tipo}
+              meters={obra.metros}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </GradientBackground>
   );
 }

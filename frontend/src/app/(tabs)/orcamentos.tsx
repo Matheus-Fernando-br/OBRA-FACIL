@@ -20,6 +20,7 @@ import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcame
 import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
 import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsModal";
 import { Cliente, Orcamento } from "@/components/layout/interface";
+import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
@@ -100,86 +101,87 @@ export default function OrcamentosScreen() {
 
   return (
     <View style={globalStyles.screen}>
-      <ScrollView
-        style={globalStyles.container}
-        contentContainerStyle={{ paddingBottom: 30 }}
-      >
-        <View style={globalStyles.pageHeaderRow}>
-          <Text style={globalStyles.title}>Orçamentos</Text>
+      <GradientBackground style={globalStyles.container}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+          <View style={globalStyles.pageHeaderRow}>
+            <Text style={globalStyles.title}>Orçamentos</Text>
 
-          <Pressable
-            style={globalStyles.pageHeaderButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Text style={globalStyles.pageHeaderButtonText}>+</Text>
-          </Pressable>
-        </View>
+            <Pressable
+              style={globalStyles.pageHeaderButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+            </Pressable>
+          </View>
 
-        <AppInput
-          placeholder="Buscar orçamento..."
-          value={search}
-          onChangeText={setSearch}
-        />
+          <AppInput
+            placeholder="Buscar orçamento..."
+            value={search}
+            onChangeText={setSearch}
+          />
 
-        <View style={globalStyles.filterRow}>
-          {["Todos", "Pendente", "Aprovado", "Recusado"].map((item) => (
-            <TouchableOpacity
-              key={item}
+          <View style={globalStyles.filterRow}>
+            {["Todos", "Pendente", "Aprovado", "Recusado"].map((item) => (
+              <TouchableOpacity
+                key={item}
+                style={[
+                  globalStyles.filterButton,
+
+                  statusFilter === item && {
+                    backgroundColor: "#2563EB",
+                  },
+                ]}
+                onPress={() => setStatusFilter(item)}
+              >
+                <Text style={globalStyles.filterButtonText}>{item}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {loading ? (
+            <View
               style={[
-                globalStyles.filterButton,
-
-                statusFilter === item && {
-                  backgroundColor: "#2563EB",
+                globalStyles.screen,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginTop: 40,
                 },
               ]}
-              onPress={() => setStatusFilter(item)}
             >
-              <Text style={globalStyles.filterButtonText}>{item}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {loading ? (
-          <View
-            style={[
-              globalStyles.screen,
-              {
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: 40,
-              },
-            ]}
-          >
-            <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={{ color: COLORS.text, marginTop: 15 }}>
-              Carregando Orçamentos...
-            </Text>
-          </View>
-        ) : (
-          filteredBudgets.map((budget) => (
-            <BudgetCard
-              key={budget._id}
-              client={getClientName(budget.cliente as unknown as string)}
-              service={budget.nome}
-              status={budget.status}
-              value={budget.preco_com_bdi}
-              date={new Date(budget.data_validade).toLocaleDateString("pt-BR")}
-              onDetails={() => {
-                setSelectedBudget(budget);
-                setDetailsVisible(true);
-              }}
-              onEdit={() => {
-                setSelectedBudget(budget);
-                setEditVisible(true);
-              }}
-              onDelete={() => {
-                setSelectedBudget(budget);
-                setDeleteVisible(true);
-              }}
-            />
-          ))
-        )}
-      </ScrollView>
+              <ActivityIndicator size="large" color={COLORS.primary} />
+              <Text style={{ color: COLORS.text, marginTop: 15 }}>
+                Carregando Orçamentos...
+              </Text>
+            </View>
+          ) : (
+            filteredBudgets.map((budget) => (
+              <BudgetCard
+                key={budget._id}
+                client={getClientName(budget.cliente as unknown as string)}
+                service={budget.nome}
+                status={budget.status}
+                value={budget.preco_com_bdi}
+                date={new Date(budget.data_validade).toLocaleDateString(
+                  "pt-BR",
+                )}
+                onDetails={() => {
+                  setSelectedBudget(budget);
+                  setDetailsVisible(true);
+                }}
+                onEdit={() => {
+                  setSelectedBudget(budget);
+                  setEditVisible(true);
+                }}
+                onDelete={() => {
+                  setSelectedBudget(budget);
+                  setDeleteVisible(true);
+                }}
+              />
+            ))
+          )}
+        </ScrollView>
+      </GradientBackground>
 
       <View style={globalStyles.bottomActionContainer}>
         <Pressable

@@ -18,10 +18,7 @@ import { AppButton } from "@/components/buttons/AppButton";
 import { useAuth } from "@/contexts/AuthContext";
 import { getBudgets, getWork } from "@/services/api";
 
-import {
-  Obra,
-  Orcamento,
-} from "@/components/layout/interface";
+import { Obra, Orcamento } from "@/components/layout/interface";
 
 import { AvailableBudgetCard } from "../../cards/AvailableBudgetCard";
 
@@ -33,11 +30,7 @@ interface Props {
   onSelect?(budget: Orcamento): void;
 }
 
-export function AddObrasModal({
-  visible,
-  onClose,
-  onSelect,
-}: Props) {
+export function AddObrasModal({ visible, onClose, onSelect }: Props) {
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -48,49 +41,40 @@ export function AddObrasModal({
 
   const [works, setWorks] = useState<Obra[]>([]);
 
-  const [selectedBudget, setSelectedBudget] =
-    useState<Orcamento | null>(null);
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
 
-    async function loadData() {
-        if (!token) return;
-      
-        setLoading(true);
-      
-        let budgetsData: Orcamento[] = [];
-        let worksData: Obra[] = [];
-      
-        // Busca os orçamentos
-        try {
-          budgetsData = await getBudgets(token);
-      
-          console.log("========== ORÇAMENTOS ==========");
-          console.log(budgetsData);
-      
-        } catch (error) {
-          console.log("ERRO AO BUSCAR ORÇAMENTOS");
-          console.log(error);
-        }
-      
-        // Busca as obras
-        try {
-          worksData = await getWork(token);
-      
-          console.log("========== OBRAS ==========");
-          console.log(worksData);
-      
-        } catch (error) {
-          console.log("ERRO AO BUSCAR OBRAS");
-          console.log(error);
-      
-          // Mesmo que dê erro, continua funcionando
-          worksData = [];
-        }
-      
-        setBudgets(budgetsData);
-        setWorks(worksData);
-      
-        setLoading(false);
-      }
+  async function loadData() {
+    if (!token) return;
+
+    setLoading(true);
+
+    let budgetsData: Orcamento[] = [];
+    let worksData: Obra[] = [];
+
+    // Busca os orçamentos
+    try {
+      budgetsData = await getBudgets(token);
+    } catch (error) {
+      console.log("ERRO AO BUSCAR ORÇAMENTOS");
+      console.log(error);
+    }
+
+    // Busca as obras
+    try {
+      worksData = await getWork(token);
+    } catch (error) {
+      console.log("ERRO AO BUSCAR OBRAS");
+      console.log(error);
+
+      // Mesmo que dê erro, continua funcionando
+      worksData = [];
+    }
+
+    setBudgets(budgetsData);
+    setWorks(worksData);
+
+    setLoading(false);
+  }
 
   useEffect(() => {
     if (!visible) return;
@@ -122,10 +106,7 @@ export function AddObrasModal({
 
     return availableBudgets.filter((budget) => {
       return (
-        budget.nome
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-
+        budget.nome.toLowerCase().includes(search.toLowerCase()) ||
         (budget.cliente?.nome ?? "")
           .toLowerCase()
           .includes(search.toLowerCase())
@@ -134,11 +115,7 @@ export function AddObrasModal({
   }, [availableBudgets, search]);
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent
-    >
+    <Modal visible={visible} animationType="slide" transparent>
       <View
         style={{
           flex: 1,
@@ -148,20 +125,11 @@ export function AddObrasModal({
         {/* Header */}
 
         <View style={globalStyles.modalHeader}>
-          <Pressable
-            onPress={onClose}
-            style={globalStyles.leftAction}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={25}
-              color={COLORS.text}
-            />
+          <Pressable onPress={onClose} style={globalStyles.leftAction}>
+            <Ionicons name="arrow-back" size={25} color={COLORS.text} />
           </Pressable>
 
-          <Text style={globalStyles.addTitle}>
-            Nova Obra
-          </Text>
+          <Text style={globalStyles.addTitle}>Nova Obra</Text>
 
           <View style={globalStyles.rightAction} />
         </View>
@@ -193,10 +161,7 @@ export function AddObrasModal({
                 alignItems: "center",
               }}
             >
-              <ActivityIndicator
-                size="large"
-                color={COLORS.primary}
-              />
+              <ActivityIndicator size="large" color={COLORS.primary} />
 
               <Text
                 style={{
@@ -215,11 +180,7 @@ export function AddObrasModal({
                 alignItems: "center",
               }}
             >
-              <Ionicons
-                name="folder-open-outline"
-                size={70}
-                color="#9CA3AF"
-              />
+              <Ionicons name="folder-open-outline" size={70} color="#9CA3AF" />
 
               <Text
                 style={{
@@ -239,8 +200,7 @@ export function AddObrasModal({
                   textAlign: "center",
                 }}
               >
-                Apenas orçamentos aprovados e sem
-                obra criada aparecem aqui.
+                Apenas orçamentos aprovados e sem obra criada aparecem aqui.
               </Text>
             </View>
           ) : (
@@ -254,12 +214,8 @@ export function AddObrasModal({
                 <AvailableBudgetCard
                   key={budget._id}
                   budget={budget}
-                  selected={
-                    selectedBudget?._id === budget._id
-                  }
-                  onPress={() =>
-                    setSelectedBudget(budget)
-                  }
+                  selected={selectedBudget?._id === budget._id}
+                  onPress={() => setSelectedBudget(budget)}
                 />
               ))}
             </ScrollView>

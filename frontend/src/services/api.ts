@@ -62,6 +62,8 @@ export async function registerUser(data: {
 // USER
 // ==========================
 
+import { Usuario } from "@/components/layout/interface";
+
 export async function getUser(token: string) {
   const { data } = await api.get("/user/me", {
     headers: {
@@ -72,17 +74,7 @@ export async function getUser(token: string) {
   return data;
 }
 
-export async function updateUser(
-  id: string,
-  body: {
-    nome: string;
-    email: string;
-    CPF?: string;
-    CNPJ?: string;
-    senha?: string;
-  },
-  token: string,
-) {
+export async function updateUser(id: string, body: Usuario, token: string) {
   const { data } = await api.put(`/user/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -106,6 +98,8 @@ export async function deleteUser(id: string, token: string) {
 // CLIENTS
 // ==========================
 
+import { Cliente } from "@/components/layout/interface";
+
 export async function getClients(token: string) {
   const { data } = await api.get("/client/userClients", {
     headers: {
@@ -116,16 +110,7 @@ export async function getClients(token: string) {
   return data;
 }
 
-export async function createClient(
-  body: {
-    nome: string;
-    email: string;
-    CPF?: string;
-    CNPJ?: string;
-    telefone?: string;
-  },
-  token: string,
-) {
+export async function createClient(body: Cliente, token: string) {
   const { data } = await api.post("/client", body, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -135,17 +120,7 @@ export async function createClient(
   return data;
 }
 
-export async function updateClient(
-  id: string,
-  body: {
-    nome: string;
-    email: string;
-    CPF?: string;
-    CNPJ?: string;
-    telefone?: string;
-  },
-  token: string,
-) {
+export async function updateClient(id: string, body: Cliente, token: string) {
   const { data } = await api.put(`/client/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -221,7 +196,7 @@ export async function deleteBudget(id: string, token: string) {
 import { Obra } from "../components/layout/interface";
 
 export async function getWork(token: string) {
-  const { data } = await api.get("/work/userObras", {
+  const { data } = await api.get("/obra/userObras", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -231,7 +206,7 @@ export async function getWork(token: string) {
 }
 
 export async function createWork(Work: Obra, token: string) {
-  const { data } = await api.post("/work", Work, {
+  const { data } = await api.post("/obra", Work, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -241,7 +216,7 @@ export async function createWork(Work: Obra, token: string) {
 }
 
 export async function updateWork(id: string, work: Obra, token: string) {
-  const { data } = await api.put(`/work/${id}`, work, {
+  const { data } = await api.put(`/obra/${id}`, work, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -251,7 +226,7 @@ export async function updateWork(id: string, work: Obra, token: string) {
 }
 
 export async function deleteWork(id: string, token: string) {
-  const { data } = await api.delete(`/work/${id}`, {
+  const { data } = await api.delete(`/obra/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
