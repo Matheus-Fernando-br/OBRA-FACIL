@@ -273,76 +273,105 @@ export const globalStyles = StyleSheet.create({
   /* =========================
    OBRAS
 ========================= */
+  /*workCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 18,
+  marginBottom: 18,
+  overflow: "hidden",
 
-  obraCard: {
-    backgroundColor: COLORS.card,
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
 
-    borderWidth: 1,
-    borderColor: COLORS.border,
+  shadowColor: "#000",
+  shadowOffset: {
+    width: 0,
+    height: 2,
+  },
+  shadowOpacity: 0.08,
+  shadowRadius: 6,
+  elevation: 3,
+},
 
-    borderRadius: 18,
+workCardImage: {
+  width: "100%",
+  height: 170,
+},*/
 
+  workCardBody: {
     padding: 16,
-    marginBottom: 16,
   },
 
-  obraImagePlaceholder: {
-    height: 180,
-
-    borderRadius: 14,
-
-    backgroundColor: COLORS.textSecondary,
-
-    justifyContent: "center",
+  workCardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-
-    marginBottom: 16,
   },
 
-  obraImageText: {
-    color: COLORS.textSecondary,
+  /*workCardTitle: {
+  flex: 1,
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#111827",
+  marginRight: 10,
+},*/
+
+  workStatusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 30,
+    backgroundColor: "#DBEAFE",
   },
 
-  obraNome: {
-    fontSize: 20,
+  workStatusText: {
+    fontSize: 12,
     fontWeight: "700",
-
-    color: COLORS.text,
-
-    marginBottom: 12,
+    color: "#2563EB",
+    textTransform: "uppercase",
   },
 
-  obraInfo: {
-    color: COLORS.textSecondary,
-
-    marginBottom: 6,
-  },
-
-  obraProgressText: {
+  workCardSubtitle: {
     marginTop: 10,
-
-    color: COLORS.text,
-
-    fontWeight: "600",
+    fontSize: 14,
+    color: "#6B7280",
   },
 
-  obraDetailsButton: {
-    marginTop: 16,
-
-    height: 45,
-
-    borderRadius: 12,
-
-    backgroundColor: COLORS.primary,
-
-    justifyContent: "center",
-    alignItems: "center",
+  workCardClient: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "500",
   },
 
-  obraDetailsButtonText: {
-    color: "#FFF",
+  /*progressContainer: {
+  marginTop: 18,
+},
 
-    fontWeight: "700",
+progressBarBackground: {
+  width: "100%",
+  height: 8,
+  backgroundColor: "#E5E7EB",
+  borderRadius: 999,
+  overflow: "hidden",
+},
+
+progressBarFill: {
+  height: "100%",
+  backgroundColor: "#2563EB",
+  borderRadius: 999,
+},
+
+workCardProgress: {
+  marginTop: 8,
+  alignSelf: "flex-end",
+  fontSize: 13,
+  fontWeight: "700",
+  color: "#2563EB",
+},*/
+
+  workCardDate: {
+    marginTop: 14,
+    fontSize: 13,
+    color: "#6B7280",
   },
 
   /* =========================

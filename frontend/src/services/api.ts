@@ -168,6 +168,7 @@ export async function deleteClient(id: string, token: string) {
 // ==============================
 // ORÇAMENTOS
 // ==============================
+import { Orcamento } from "@/components/layout/interface";
 
 export async function getBudgets(token: string) {
   const { data } = await api.get("/orcamento", {
@@ -179,60 +180,7 @@ export async function getBudgets(token: string) {
   return data;
 }
 
-export interface BudgetService {
-  nome: string;
-  descricao: string;
-  unidade: string;
-  quantidade_unidade: number;
-  preco_da_unidade: number;
-  preco_total: number;
-}
-
-export interface BudgetCategory {
-  nome: string;
-  servicos: BudgetService[];
-  preco_total_da_categoria: number;
-}
-
-export interface BudgetAddress {
-  CEP: string;
-  estado: string;
-  cidade: string;
-  bairro: string;
-  rua: string;
-  numero: string;
-  complemento: string;
-}
-
-export interface CreateBudgetDTO {
-  nome: string;
-
-  endereco: BudgetAddress;
-
-  descricao: string;
-
-  cliente: string;
-
-  responsavel: string;
-
-  categoria: BudgetCategory[];
-
-  status: string;
-
-  preco: number;
-
-  bdi: number;
-
-  preco_com_bdi: number;
-
-  data_publicacao?: Date;
-
-  valido_durante: number;
-
-  data_validade: Date;
-}
-
-export async function createBudget(budget: CreateBudgetDTO, token: string) {
+export async function createBudget(budget: Orcamento, token: string) {
   const { data } = await api.post("/orcamento", budget, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -244,7 +192,7 @@ export async function createBudget(budget: CreateBudgetDTO, token: string) {
 
 export async function updateBudget(
   id: string,
-  budget: CreateBudgetDTO,
+  budget: Orcamento,
   token: string,
 ) {
   const { data } = await api.put(`/orcamento/${id}`, budget, {
@@ -258,6 +206,52 @@ export async function updateBudget(
 
 export async function deleteBudget(id: string, token: string) {
   const { data } = await api.delete(`/orcamento/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+// ==============================
+// OBRAS
+// ==============================
+
+import { Obra } from "../components/layout/interface";
+
+export async function getWork(token: string) {
+  const { data } = await api.get("/work", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function createWork(Work: Obra, token: string) {
+  const { data } = await api.post("/work", Work, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function updateWork(id: string, work: Obra, token: string) {
+  const { data } = await api.put(`/work/${id}`, work, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function deleteWork(id: string, token: string) {
+  const { data } = await api.delete(`/work/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

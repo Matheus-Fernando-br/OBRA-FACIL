@@ -4,28 +4,96 @@ import {
   ScrollView,
   TouchableOpacity,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { globalStyles } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
 
-import { obras } from "../../data/obras";
+import { useAuth } from "@/contexts/AuthContext";
+
+import { getWork } from "../../services/api";
+
+import { ObrasCard } from "@/components/cards/ObrasCard";
+
+import { Obra, Orcamento } from "@/components/layout/interface";
 
 export default function ObrasScreen() {
+  const { token } = useAuth();
+
+  const [loading, setLoading] = useState(true);
+
   const [search, setSearch] = useState("");
 
-  const FilteredObras = obras.filter((obra) =>
-    obra.nome.toLowerCase().includes(search.toLowerCase()),
-  );
+  const [worksList, setWorksList] = useState<Obra[]>([]);
+
+  const [statusFilter, setStatusFilter] = useState("Todos");
+
+  async function loadWorks() {
+    try {
+      if (!token) return;
+
+      setLoading(true);
+
+      const data = await getWork(token);
+
+      setWorksList(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadWorks();
+  }, [token]);
+
+  const filteredWorks = worksList.filter((work) => {
+    if (typeof work.orcamento === "string") return true;
+
+    const budget = work.orcamento as Orcamento;
+
+    const matchSearch =
+      budget.nome.toLowerCase().includes(search.toLowerCase()) ||
+      budget.cliente.nome.toLowerCase().includes(search.toLowerCase());
+
+    const matchStatus =
+      statusFilter === "Todos"
+        ? true
+        : work.status === statusFilter.replace(" ", "").toUpperCase();
+
+    return matchSearch && matchStatus;
+  });
+
+  if (loading) {
+    return (
+      <View
+        style={[
+          globalStyles.screen,
+          {
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <ActivityIndicator size="large" color="#2563EB" />
+
+        <Text style={{ color: "#FFF", marginTop: 15 }}>
+          Carregando obras...
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={globalStyles.screen}>
       <ScrollView
         style={globalStyles.container}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
       >
         <View style={globalStyles.pageHeaderRow}>
           <Text style={globalStyles.title}>Obras</Text>
@@ -36,62 +104,55 @@ export default function ObrasScreen() {
         </View>
 
         <AppInput
-          placeholder="Buscar Obra..."
+          placeholder="Buscar obra..."
           value={search}
           onChangeText={setSearch}
         />
 
         <View style={globalStyles.filterRow}>
-          {["Todos", "Pendentes", "Finalizadas", "Canceladas"].map((item) => (
-            <TouchableOpacity key={item} style={globalStyles.filterButton}>
+          {[
+            "Todos",
+            "No Prazo",
+            "Atrasado",
+            "Adiantado",
+            "Entregue",
+            "Cancelado",
+          ].map((item) => (
+            <TouchableOpacity
+              key={item}
+              style={[
+                globalStyles.filterButton,
+                statusFilter === item && {
+                  backgroundColor: "#2563EB",
+                },
+              ]}
+              onPress={() => setStatusFilter(item)}
+            >
               <Text style={globalStyles.filterButtonText}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {obras.map((obra) => (
-          <View key={obra.id} style={globalStyles.obraCard}>
-            {/* Imagem */}
-            <View style={globalStyles.obraImagePlaceholder}>
-              <Text style={globalStyles.obraImageText}>Imagem da Obra</Text>
-            </View>
+        {filteredWorks.map((work) => {
+          if (typeof work.orcamento === "string") return null;
 
-            {/* Informações */}
-            <Text style={globalStyles.obraNome}>{obra.nome}</Text>
+          const budget = work.orcamento as Orcamento;
 
-            <Text style={globalStyles.obraInfo}>Status: {obra.status}</Text>
-
-            <Text style={globalStyles.obraInfo}>Empresa: {obra.empresa}</Text>
-
-            <Text style={globalStyles.obraInfo}>Endereço: {obra.endereco}</Text>
-
-            <Text style={globalStyles.obraInfo}>Tipo: {obra.tipo}</Text>
-
-            <Text style={globalStyles.obraInfo}>Área: {obra.metros}m²</Text>
-
-            {/* Barra de progresso */}
-            <View style={globalStyles.progressBarBackground}>
-              <View
-                style={[
-                  globalStyles.progressBarFill,
-                  {
-                    width: `${obra.progresso}%`,
-                  },
-                ]}
-              />
-            </View>
-
-            <Text style={globalStyles.obraProgressText}>
-              {obra.progresso}% concluído
-            </Text>
-
-            <TouchableOpacity style={globalStyles.obraDetailsButton}>
-              <Text style={globalStyles.obraDetailsButtonText}>
-                Ver detalhes
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+          return (
+            <ObrasCard
+              key={work._id}
+              title={budget.nome}
+              client={budget.cliente.nome}
+              status={work.status}
+              progress={work.porcentagem_de_conclusao ?? 0}
+              type="Residencial"
+              meters={0}
+              startDate={new Date(work.data_inicio_prevista).toLocaleDateString(
+                "pt-BR",
+              )}
+            />
+          );
+        })}
       </ScrollView>
 
       <View style={globalStyles.bottomActionContainer}>
