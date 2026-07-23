@@ -1,44 +1,69 @@
-import { Modal } from "react-native";
-
-import { ObrasForm } from "../../forms/ObrasForms";
-
-import { Cliente, Obra, Orcamento } from "@/components/layout/interface";
+import { Modal, View } from "react-native";
+import { useState, useEffect } from "react";
+import { ObrasForm } from "@/components/forms/ObrasForms";
+import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
+import { getClients } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { PdfViewerModal } from "@/components/modals/PdfViewerModal";
+import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
 
 interface Props {
   visible: boolean;
-
   work: Obra | null;
-
-  budget: Orcamento | null;
-
-  clientsList: Cliente[];
-
   onClose(): void;
 }
 
-export function DetailsObraModal({
-  visible,
-  work,
-  budget,
-  clientsList,
-  onClose,
-}: Props) {
-  if (!work || !budget) return null;
+export function DetailsObraModal({ visible, work, onClose }: Props) {
+  const { token } = useAuth();
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfUri, setPdfUri] = useState<string | null>(null);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+
+  useEffect(() => {
+    if (visible && token) getClients(token).then(setClientsList);
+  }, [visible, token]);
+
+  const handleGeneratePdf = async () => {
+    if (!work) return;
+
+    setPdfLoading(true);
+
+    try {
+      /*
+      const uri = await generateBudgetPdf(work);
+
+      setPdfUri(uri);
+
+      setShowPdfViewer(true);*/
+    } catch (e) {
+      console.log(e);
+
+      alert("Erro ao gerar PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  };
+
+  if (!work) return null;
 
   return (
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle="fullScreen"
+      transparent
+      statusBarTranslucent
     >
-      <ObrasForm
-        mode="details"
-        budget={budget}
-        work={work}
-        clientsList={clientsList}
-        onClose={onClose}
-        onSave={async () => {}}
-      />
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}>
+        <ObrasForm
+          mode="details"
+          initialData={work}
+          onClose={onClose}
+          clientsList={clientsList}
+          loading={pdfLoading}
+          onGeneratePdf={handleGeneratePdf}
+        />
+      </View>
     </Modal>
   );
 }

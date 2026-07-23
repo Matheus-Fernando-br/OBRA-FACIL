@@ -1,4 +1,4 @@
-import { Modal, View, Text, Alert } from "react-native";
+import { Modal, View, Text } from "react-native";
 
 import { useState } from "react";
 
@@ -12,13 +12,9 @@ import { AppButton } from "@/components/buttons/AppButton";
 
 interface Props {
   visible: boolean;
-
   budgetId: string;
-
   budgetName: string;
-
   onClose(): void;
-
   onSuccess(): void;
 }
 
@@ -30,27 +26,31 @@ export function DeleteOrcamentoModal({
   onSuccess,
 }: Props) {
   const { token } = useAuth();
-
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   async function handleDelete() {
     try {
+      setFeedback("");
       if (!token) return;
-
       setLoading(true);
 
       await deleteBudget(budgetId, token);
 
-      Alert.alert("Sucesso", "Orçamento excluído com sucesso.");
+      setFeedback("Serviço Deletado com sucesso!");
 
       onSuccess();
-
       onClose();
     } catch (error: any) {
-      Alert.alert(
-        "Erro",
-        error?.response?.data?.message ?? "Erro ao excluir orçamento.",
+      console.log("ERRO AO DELETAR ORÇAMENTO:", error?.response?.data);
+
+      setFeedback(
+        error?.response?.data?.message ?? "Erro ao deletar Orçamento.",
       );
+
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     } finally {
       setLoading(false);
     }
@@ -106,6 +106,10 @@ export function DeleteOrcamentoModal({
             ?{"\n\n"}
             Essa ação não poderá ser desfeita.
           </Text>
+
+          {feedback !== "" && (
+            <Text style={globalStyles.feedback}>{feedback}</Text>
+          )}
 
           <AppButton
             title="Excluir Orçamento"

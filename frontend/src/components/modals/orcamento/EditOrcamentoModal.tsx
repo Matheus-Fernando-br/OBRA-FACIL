@@ -44,7 +44,7 @@ export function EditOrcamentoModal({
       onClose();
       onSuccess();
     } catch (error) {
-      setFeedback("Erro ao atualizar.");
+      setFeedback("Erro ao atualizar Orçamento.");
     } finally {
       setLoading(false);
     }

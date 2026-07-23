@@ -1,64 +1,71 @@
-import { useState } from "react";
-import { Modal } from "react-native";
-
+import { Modal, View } from "react-native";
+import { useState, useEffect } from "react";
 import { ObrasForm } from "../../forms/ObrasForms";
-
-import { Cliente, Obra, Orcamento } from "@/components/layout/interface";
-
-import { updateWork } from "@/services/api";
-
+import { getClients, updateWork } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { Cliente, Obra } from "@/components/layout/interface";
 
 interface Props {
   visible: boolean;
   work: Obra | null;
-  budget: Orcamento |null;
-  clientsList: Cliente[];
   onClose(): void;
   onSuccess(): void;
 }
 
-export function EditObraModal({visible, work, budget, clientsList, onClose, onSuccess}: Props) {
+export function EditObraModal({
+  visible,
+  work,
+  onClose,
+  onSuccess,
+}: Props) {
   const { token } = useAuth();
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  if (!work || !budget) return null;
+  useEffect(() => {
+    async function loadClients() {
+      try {
+        if (!token) return;
+        const data = await getClients(token);
+        setClientsList(data);
+      } catch (error) {
+        setFeedback("Erro ao carregar clientes.");
+      }
+    }
+    if (visible) loadClients();
+  }, [visible, token]);
 
-  async function handleSave(data: any) {
+  const handleSave = async (formData: any) => {
+    if (!work) return;
+    setLoading(true);
     try {
-      if (!token) return;
-
-      setLoading(true);
-
-      await updateWork(
-        token,
-        work._id,
-        data,
-      );
+      await updateWork(work._id, formData, token!);
       onClose();
       onSuccess();
     } catch (error) {
-      console.log(error);
+      setFeedback("Erro ao atualizar Orçamento.");
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  if (!work) return null;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="fullScreen"
-    >
-      <ObrasForm
-        mode="edit"
-        budget={budget}
-        work={work}
-        clientsList={clientsList}
-        loading={loading}
-        onClose={onClose}
-        onSave={handleSave}
-      />
+    <Modal visible={visible} animationType="slide" transparent>
+      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+        <ObrasForm
+          mode="edit"
+          initialData={work}
+          work={work}
+          onClose={onClose}
+          onSave={handleSave}
+          clientsList={clientsList}
+          feedbackMessage={feedback}
+          loading={loading}
+        />
+      </View>
     </Modal>
   );
 }

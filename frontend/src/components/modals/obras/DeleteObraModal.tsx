@@ -1,175 +1,125 @@
-import { Modal, View, Text, Pressable, ActivityIndicator } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Modal, View, Text } from "react-native";
+import { useState } from "react";
 
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 
-import { Obra } from "@/components/layout/interface";
+import { useAuth } from "@/contexts/AuthContext";
 
 import { deleteWork } from "@/services/api";
 
-import { useAuth } from "@/contexts/AuthContext";
-
-import { useState } from "react";
+import { AppButton } from "@/components/buttons/AppButton";
 
 interface Props {
   visible: boolean;
-
-  work: Obra | null;
-
+  WorkId: string;
+  WorkName: string;
   onClose(): void;
-
   onSuccess(): void;
 }
 
 export function DeleteObraModal({
   visible,
-  work,
+  WorkId,
+  WorkName,
   onClose,
   onSuccess,
 }: Props) {
   const { token } = useAuth();
-
   const [loading, setLoading] = useState(false);
-
-  if (!work) return null;
+  const [feedback, setFeedback] = useState("");
 
   async function handleDelete() {
     try {
+      setFeedback("");
       if (!token) return;
-
       setLoading(true);
 
-      await deleteWork(token, work._id);
+      await deleteWork(WorkId, token);
 
+      setFeedback("Serviço Deletado com sucesso!");
       onSuccess();
-    } catch (error) {
-      console.log(error);
+      onClose();
+    } catch (error: any) {
+      console.log("ERRO AO DELETAR SERVIÇO:", error?.response?.data);
+
+      setFeedback(error?.response?.data?.message ?? "Erro ao deletar Serviço.");
+
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-    >
+    <Modal visible={visible} transparent animationType="fade">
       <View
-        style={[
-          globalStyles.overlay,
-          {
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
+        style={{
+          flex: 1,
+          backgroundColor: "rgba(0,0,0,.6)",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <View
-          style={[
-            globalStyles.modalContainer,
-            {
-              width: "90%",
-              maxWidth: 420,
-            },
-          ]}
+          style={{
+            width: "90%",
+            backgroundColor: COLORS.white,
+            borderRadius: 20,
+            padding: 25,
+          }}
         >
-          <View
+          <Text
             style={{
-              alignItems: "center",
-              marginBottom: 20,
+              fontSize: 22,
+              fontWeight: "700",
+              marginBottom: 15,
+              textAlign: "center",
             }}
           >
-            <Ionicons
-              name="warning"
-              size={60}
-              color={COLORS.danger}
-            />
+            Excluir Serviço
+          </Text>
 
+          <Text
+            style={{
+              fontSize: 16,
+              color: "#64748B",
+              textAlign: "center",
+              marginBottom: 25,
+              lineHeight: 24,
+            }}
+          >
+            Tem certeza que deseja excluir o Serviço{" "}
             <Text
-              style={[
-                globalStyles.title,
-                {
-                  marginTop: 15,
-                  textAlign: "center",
-                },
-              ]}
+              style={{
+                fontWeight: "700",
+                color: COLORS.text,
+              }}
             >
-              Excluir Obra
+              {WorkName}
             </Text>
+            ?{"\n\n"}
+            Essa ação não poderá ser desfeita.
+          </Text>
 
-            <Text
-              style={[
-                globalStyles.subtitle,
-                {
-                  textAlign: "center",
-                  marginTop: 10,
-                },
-              ]}
-            >
-              Tem certeza que deseja excluir esta obra?
-            </Text>
+          {feedback !== "" && (
+            <Text style={globalStyles.feedback}>{feedback}</Text>
+          )}
 
-            <Text
-              style={[
-                globalStyles.orcamentoInfo,
-                {
-                  textAlign: "center",
-                  marginTop: 8,
-                },
-              ]}
-            >
-              Esta ação não poderá ser desfeita.
-            </Text>
-          </View>
+          <AppButton
+            title="Excluir Serviço"
+            loading={loading}
+            onPress={handleDelete}
+          />
 
           <View
             style={{
-              flexDirection: "row",
-              gap: 10,
+              height: 10,
             }}
-          >
-            <Pressable
-              style={[
-                globalStyles.cancelButton,
-                {
-                  flex: 1,
-                },
-              ]}
-              onPress={onClose}
-              disabled={loading}
-            >
-              <Text style={globalStyles.cancelButtonText}>
-                Cancelar
-              </Text>
-            </Pressable>
+          />
 
-            <Pressable
-              style={[
-                globalStyles.deleteButton,
-                {
-                  flex: 1,
-                },
-              ]}
-              onPress={handleDelete}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFF" />
-              ) : (
-                <>
-                  <Ionicons
-                    name="trash"
-                    size={18}
-                    color="#FFF"
-                  />
-
-                  <Text style={globalStyles.deleteButtonText}>
-                    Excluir
-                  </Text>
-                </>
-              )}
-            </Pressable>
-          </View>
+          <AppButton title="Cancelar" onPress={onClose} />
         </View>
       </View>
     </Modal>

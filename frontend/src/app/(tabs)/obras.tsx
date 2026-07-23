@@ -115,6 +115,14 @@ export default function ObrasScreen() {
     return matchSearch && matchStatus;
   });
 
+  const selectedBudgetObra = selectedWork
+    ? budgetsMap[
+        typeof selectedWork.orcamento === "string"
+          ? selectedWork.orcamento
+          : selectedWork.orcamento._id
+      ]
+    : null;
+
   return (
     <View style={globalStyles.screen}>
       <GradientBackground style={globalStyles.container}>
@@ -251,65 +259,25 @@ export default function ObrasScreen() {
           setSelectedBudget(null);
         }}
       />
-      <DetailsObraModal
-        visible={detailsVisible}
-        work={selectedWork}
-        budget={
-          selectedWork
-            ? budgetsMap[
-                typeof selectedWork.orcamento === "string"
-                  ? selectedWork.orcamento
-                  : selectedWork.orcamento._id
-              ]
-            : null
-        }
-        clientsList={[]}
-        onClose={() => {
-          setDetailsVisible(false);
-          setSelectedWork(null);
-        }}
-      />
 
       <EditObraModal
         visible={editVisible}
+        onClose={() => setEditVisible(false)}
         work={selectedWork}
-        budget={
-          selectedWork
-            ? budgetsMap[
-                typeof selectedWork.orcamento === "string"
-                  ? selectedWork.orcamento
-                  : selectedWork.orcamento._id
-              ]
-            : null
-        }
-        clientsList={[]}
-        onClose={() => {
-          setEditVisible(false);
-          setSelectedWork(null);
-        }}
-        onSuccess={() => {
-          loadWorks();
-
-          setEditVisible(false);
-
-          setSelectedWork(null);
-        }}
+        onSuccess={loadWorks}
       />
 
       <DeleteObraModal
         visible={deleteVisible}
+        WorkId={selectedWork?._id ?? ""}
+        WorkName={selectedBudgetObra?.nome ?? "Obra"}
+        onClose={() => setDeleteVisible(false)}
+        onSuccess={loadWorks}
+      />
+      <DetailsObraModal
+        visible={detailsVisible}
         work={selectedWork}
-        onClose={() => {
-          setDeleteVisible(false);
-          setSelectedWork(null);
-        }}
-        onSuccess={() => {
-          loadWorks();
-
-          setDeleteVisible(false);
-
-          setSelectedWork(null);
-        }}
+        onClose={() => setDetailsVisible(false)}
       />
     </View>
   );

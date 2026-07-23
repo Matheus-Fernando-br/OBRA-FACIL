@@ -45,6 +45,7 @@ export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
   };
 
   if (!budget) return null;
+  
   return (
     <Modal
       visible={visible}
