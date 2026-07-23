@@ -15,13 +15,16 @@ import { AppInput } from "../../components/forms/AppInput";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getWork } from "../../services/api";
+import { getWork, getBudgets } from "../../services/api";
 
 import { ObrasCard } from "@/components/cards/ObrasCard";
 
 import { Obra, Orcamento } from "@/components/layout/interface";
 import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
 import { CreateObraModal } from "@/components/modals/obras/CreateObraModal";
+import { DetailsObraModal } from "@/components/modals/obras/DetailsObraModal";
+import { EditObraModal } from "@/components/modals/obras/EditObraModal";
+import { DeleteObraModal } from "@/components/modals/obras/DeleteObraModal";
 import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function ObrasScreen() {
@@ -32,7 +35,15 @@ export default function ObrasScreen() {
   const [search, setSearch] = useState("");
 
   const [worksList, setWorksList] = useState<Obra[]>([]);
+  const [budgets, setBudgets] = useState<Orcamento[]>([]);
 
+  const [selectedWork, setSelectedWork] = useState<Obra | null>(null);
+
+  const [detailsVisible, setDetailsVisible] = useState(false);
+
+  const [editVisible, setEditVisible] = useState(false);
+
+  const [deleteVisible, setDeleteVisible] = useState(false);
   const [statusFilter, setStatusFilter] = useState("Todos");
 
   const [addObraVisible, setAddObraVisible] = useState(false);
@@ -47,18 +58,19 @@ export default function ObrasScreen() {
 
       setLoading(true);
 
-      const data = await getWork(token);
+      const [worksData, budgetsData] = await Promise.all([
+        getWork(token),
+        getBudgets(token),
+      ]);
 
-      setWorksList(data);
+      setWorksList(Array.isArray(worksData) ? worksData : worksData.obras);
+
+      setBudgets(budgetsData);
     } catch (err: any) {
       console.log("ERRO COMPLETO");
-
       console.log(err);
-
       console.log(err.response);
-
       console.log(err.response?.data);
-
       console.log(err.response?.status);
     } finally {
       setLoading(false);
@@ -75,14 +87,25 @@ export default function ObrasScreen() {
     }
   }, [selectedBudget]);
 
-  const filteredWorks = worksList.filter((work) => {
-    if (typeof work.orcamento === "string") return true;
+  const budgetsMap = budgets.reduce(
+    (acc, budget) => {
+      acc[budget._id] = budget;
 
-    const budget = work.orcamento as Orcamento;
+      return acc;
+    },
+    {} as Record<string, Orcamento>,
+  );
+
+  const filteredWorks = worksList.filter((work) => {
+    const budgetId =
+      typeof work.orcamento === "string" ? work.orcamento : work.orcamento._id;
+
+    const budget = budgetsMap[budgetId];
 
     const matchSearch =
-      budget.nome.toLowerCase().includes(search.toLowerCase()) ||
-      budget.cliente.nome.toLowerCase().includes(search.toLowerCase());
+      !search ||
+      budget?.nome.toLowerCase().includes(search.toLowerCase()) ||
+      budget?.cliente.nome.toLowerCase().includes(search.toLowerCase());
 
     const matchStatus =
       statusFilter === "Todos"
@@ -152,14 +175,18 @@ export default function ObrasScreen() {
             </View>
           ) : (
             filteredWorks.map((work) => {
-              const budget =
-                typeof work.orcamento === "string" ? null : work.orcamento;
+              const budgetId =
+                typeof work.orcamento === "string"
+                  ? work.orcamento
+                  : work.orcamento._id;
+
+              const budget = budgetsMap[budgetId];
 
               return (
                 <ObrasCard
                   key={work._id}
-                  title={budget?.nome ?? "Orçamento"}
-                  client={budget?.cliente.nome ?? "Cliente"}
+                  title={budget?.nome ?? "Obra"}
+                  client={budget?.cliente.nome ?? ""}
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
                   type="Residencial"
@@ -167,6 +194,18 @@ export default function ObrasScreen() {
                   startDate={new Date(
                     work.data_inicio_prevista,
                   ).toLocaleDateString("pt-BR")}
+                  onDetails={() => {
+                    setSelectedWork(work);
+                    setDetailsVisible(true);
+                  }}
+                  onEdit={() => {
+                    setSelectedWork(work);
+                    setEditVisible(true);
+                  }}
+                  onDelete={() => {
+                    setSelectedWork(work);
+                    setDeleteVisible(true);
+                  }}
                 />
               );
             })
@@ -210,6 +249,66 @@ export default function ObrasScreen() {
           setCreateVisible(false);
 
           setSelectedBudget(null);
+        }}
+      />
+      <DetailsObraModal
+        visible={detailsVisible}
+        work={selectedWork}
+        budget={
+          selectedWork
+            ? budgetsMap[
+                typeof selectedWork.orcamento === "string"
+                  ? selectedWork.orcamento
+                  : selectedWork.orcamento._id
+              ]
+            : null
+        }
+        clientsList={[]}
+        onClose={() => {
+          setDetailsVisible(false);
+          setSelectedWork(null);
+        }}
+      />
+
+      <EditObraModal
+        visible={editVisible}
+        work={selectedWork}
+        budget={
+          selectedWork
+            ? budgetsMap[
+                typeof selectedWork.orcamento === "string"
+                  ? selectedWork.orcamento
+                  : selectedWork.orcamento._id
+              ]
+            : null
+        }
+        clientsList={[]}
+        onClose={() => {
+          setEditVisible(false);
+          setSelectedWork(null);
+        }}
+        onSuccess={() => {
+          loadWorks();
+
+          setEditVisible(false);
+
+          setSelectedWork(null);
+        }}
+      />
+
+      <DeleteObraModal
+        visible={deleteVisible}
+        work={selectedWork}
+        onClose={() => {
+          setDeleteVisible(false);
+          setSelectedWork(null);
+        }}
+        onSuccess={() => {
+          loadWorks();
+
+          setDeleteVisible(false);
+
+          setSelectedWork(null);
         }}
       />
     </View>

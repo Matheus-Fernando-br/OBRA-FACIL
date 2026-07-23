@@ -215,7 +215,21 @@ export async function createWork(Work: Obra, token: string) {
   return data;
 }
 
-export async function updateWork(id: string, work: Obra, token: string) {
+/*export async function updateWork(id: string, work: Obra, token: string) {
+  const { data } = await api.put(`/obra/${id}`, work, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}*/
+
+export async function updateWork(
+  token: string,
+  id: string,
+  work: Partial<Obra>,
+) {
   const { data } = await api.put(`/obra/${id}`, work, {
     headers: {
       Authorization: `Bearer ${token}`,

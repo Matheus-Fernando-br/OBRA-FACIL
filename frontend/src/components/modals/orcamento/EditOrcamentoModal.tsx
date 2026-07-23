@@ -12,7 +12,12 @@ interface Props {
   onSuccess(): void;
 }
 
-export function EditOrcamentoModal({ visible, budget, onClose, onSuccess }: Props) {
+export function EditOrcamentoModal({
+  visible,
+  budget,
+  onClose,
+  onSuccess,
+}: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,7 +29,9 @@ export function EditOrcamentoModal({ visible, budget, onClose, onSuccess }: Prop
         if (!token) return;
         const data = await getClients(token);
         setClientsList(data);
-      } catch (error) { setFeedback("Erro ao carregar clientes."); }
+      } catch (error) {
+        setFeedback("Erro ao carregar clientes.");
+      }
     }
     if (visible) loadClients();
   }, [visible, token]);
@@ -36,8 +43,11 @@ export function EditOrcamentoModal({ visible, budget, onClose, onSuccess }: Prop
       await updateBudget(budget._id, formData, token!);
       onClose();
       onSuccess();
-    } catch (error) { setFeedback("Erro ao atualizar."); }
-    finally { setLoading(false); }
+    } catch (error) {
+      setFeedback("Erro ao atualizar.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!budget) return null;
@@ -45,7 +55,15 @@ export function EditOrcamentoModal({ visible, budget, onClose, onSuccess }: Prop
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
-        <OrcamentoForm mode="edit" initialData={budget} onClose={onClose} onSave={handleSave} clientsList={clientsList} feedbackMessage={feedback} loading={loading} />
+        <OrcamentoForm
+          mode="edit"
+          initialData={budget}
+          onClose={onClose}
+          onSave={handleSave}
+          clientsList={clientsList}
+          feedbackMessage={feedback}
+          loading={loading}
+        />
       </View>
     </Modal>
   );

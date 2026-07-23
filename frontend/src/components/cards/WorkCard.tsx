@@ -6,10 +6,10 @@ interface Props {
   title: string;
   progress: number;
   type: string;
-  meters: number;
+  diasReal: number;
 }
 
-export function WorkCard({ title, progress, type, meters }: Props) {
+export function WorkCard({ title, progress, type, diasReal }: Props) {
   return (
     <View style={globalStyles.workCard}>
       <Image
@@ -21,7 +21,10 @@ export function WorkCard({ title, progress, type, meters }: Props) {
         <Text style={globalStyles.workCardTitle}>{title}</Text>
 
         <Text style={globalStyles.workCardInfo}>
-          {type} • {meters}m²
+          Status: {type}
+        </Text>
+        <Text style={globalStyles.workCardInfo}>
+          Previsão de tempo para finalização: {diasReal} dias
         </Text>
 
         <View style={globalStyles.progressContainer}>

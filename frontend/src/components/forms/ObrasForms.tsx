@@ -10,14 +10,17 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 
 import { AppInput } from "@/components/forms/AppInput";
-import { AppButton } from "@/components/buttons/AppButton";
 
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 
-import { Orcamento, Cliente } from "@/components/layout/interface";
+import { Orcamento, Cliente, Obra } from "@/components/layout/interface";
 
 interface Props {
+  mode: "create" | "edit" | "details";
+
   budget: Orcamento;
+
+  work?: Obra;
 
   loading?: boolean;
 
@@ -29,19 +32,41 @@ interface Props {
 }
 
 export function ObrasForm({
+  mode,
   budget,
+  work,
   loading,
   clientsList,
   onClose,
   onSave,
 }: Props) {
+  const isCreate = mode === "create";
+  const isEdit = mode === "edit";
+  const isDetails = mode === "details";
+
   const [status, setStatus] = useState("NO_PRAZO");
 
   const [dataInicio, setDataInicio] = useState("");
 
   const [dataFim, setDataFim] = useState("");
 
-  const [observacoes, setObservacoes] = useState("");
+  useEffect(() => {
+    if (!work) return;
+
+    setStatus(work.status);
+
+    setDataInicio(
+      work.data_inicio_prevista
+        ? new Date(work.data_inicio_prevista).toISOString().split("T")[0]
+        : "",
+    );
+
+    setDataFim(
+      work.data_fim_prevista
+        ? new Date(work.data_fim_prevista).toISOString().split("T")[0]
+        : "",
+    );
+  }, [work]);
 
   const cliente = clientsList.find(
     (c) =>
@@ -50,6 +75,26 @@ export function ObrasForm({
         ? budget.cliente
         : budget.cliente._id),
   );
+
+  const headerTitle = isCreate
+    ? "Nova Obra"
+    : isEdit
+      ? "Editar Obra"
+      : "Detalhes da Obra";
+
+  const buttonText = isCreate ? "Criar Obra" : "Salvar Alterações";
+
+  const editable = !isDetails;
+
+  async function handleSave() {
+    const workData = {
+      data_inicio_prevista: dataInicio,
+      data_fim_prevista: dataFim,
+      status,
+    };
+
+    await onSave(workData);
+  }
 
   return (
     <View style={globalStyles.container}>
@@ -60,38 +105,25 @@ export function ObrasForm({
           <Ionicons name="arrow-back" size={25} color={COLORS.text} />
         </Pressable>
 
-        <Text style={globalStyles.addTitle}>Nova Obra</Text>
+        <Text style={globalStyles.addTitle}>{headerTitle}</Text>
 
-        <Pressable
-          onPress={async () => {
-            const workData = {
-              data_inicio_prevista: dataInicio,
+        {!isDetails && (
+          <Pressable onPress={handleSave} style={globalStyles.rightAction}>
+            {loading ? (
+              <ActivityIndicator color={COLORS.white} />
+            ) : (
+              <>
+                <Text style={globalStyles.saveText}>{buttonText}</Text>
 
-              data_fim_prevista: dataFim,
-
-              status,
-
-              observacoes,
-            };
-
-            await onSave(workData);
-          }}
-          style={globalStyles.rightAction}
-        >
-          {loading ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <>
-              <Text style={globalStyles.saveText}>Criar Obra</Text>
-
-              <Ionicons
-                name="checkmark-circle"
-                size={20}
-                color={COLORS.white}
-              />
-            </>
-          )}
-        </Pressable>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={20}
+                  color={COLORS.white}
+                />
+              </>
+            )}
+          </Pressable>
+        )}
       </View>
 
       {/* BODY */}
@@ -221,6 +253,7 @@ export function ObrasForm({
           <AppInput
             placeholder="dd/mm/aaaa"
             value={dataInicio}
+            editable={editable}
             onChangeText={setDataInicio}
           />
 
@@ -229,22 +262,13 @@ export function ObrasForm({
           <AppInput
             placeholder="dd/mm/aaaa"
             value={dataFim}
+            editable={editable}
             onChangeText={setDataFim}
           />
 
           <Text style={globalStyles.label}>Status da Obra</Text>
 
           <AppInput value={status} editable={false} />
-
-          <Text style={globalStyles.label}>Observações</Text>
-
-          <AppInput
-            placeholder="Observações da obra..."
-            value={observacoes}
-            onChangeText={setObservacoes}
-            multiline
-            numberOfLines={5}
-          />
         </View>
 
         {/* ========================= */}
@@ -342,12 +366,12 @@ export function ObrasForm({
                     fontWeight: "700",
                   }}
                 >
-                  0%
+                  {work?.categoria?.[categoriaIndex]
+                    ?.porcentagem_de_conclusao ?? 0}
+                  %
                 </Text>
               </View>
             </View>
-
-            {/* Barra */}
 
             <View
               style={{
@@ -360,7 +384,10 @@ export function ObrasForm({
             >
               <View
                 style={{
-                  width: "0%",
+                  width: `${
+                    work?.categoria?.[categoriaIndex]
+                      ?.porcentagem_de_conclusao ?? 0
+                  }%`,
                   height: "100%",
                   backgroundColor: "#22C55E",
                 }}
@@ -415,6 +442,19 @@ export function ObrasForm({
                     </Text>
                   )}
                 </View>
+
+                {isDetails && (
+                  <Text
+                    style={{
+                      color: COLORS.primary,
+                      fontWeight: "700",
+                    }}
+                  >
+                    {work?.categoria?.[categoriaIndex]?.servicos?.[index]
+                      ?.porcentagem_de_conclusao ?? 0}
+                    %
+                  </Text>
+                )}
               </View>
             ))}
 
