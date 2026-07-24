@@ -68,38 +68,10 @@ export function CreateObraModal({
 
       setLoading(true);
 
-      // Converte todas as categorias do orçamento
-      // para categorias da obra
-
-      const categoriasDaObra = budget.categoria.map((categoria) => ({
-        nome: categoria.nome,
-
-        qt_dias_prevista: 0,
-        qt_dias_real: 0,
-        porcentagem_de_conclusao: 0,
-
-        servicos: categoria.servicos.map((servico) => ({
-          nome: servico.nome,
-          descricao: servico.descricao ?? "",
-
-          qt_dias_prevista: 0,
-          qt_dias_real: 0,
-          porcentagem_de_conclusao: 0,
-        })),
-      }));
-
       const work = {
+        ...formData,
         orcamento: budget._id,
-
         responsavel: user._id,
-
-        categoria: categoriasDaObra,
-
-        status: "NOPRAZO",
-
-        data_inicio_prevista: formData.data_inicio_prevista,
-
-        data_fim_prevista: formData.data_fim_prevista,
       };
 
       console.log("========== CREATE WORK ==========");
@@ -147,6 +119,7 @@ export function CreateObraModal({
         }}
       >
         <ObrasForm
+          mode="add"
           budget={budget}
           clientsList={clientsList}
           loading={loading}

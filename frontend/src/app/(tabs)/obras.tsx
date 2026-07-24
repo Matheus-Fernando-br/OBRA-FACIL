@@ -197,11 +197,14 @@ export default function ObrasScreen() {
                   client={budget?.cliente.nome ?? ""}
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
-                  type="Residencial"
-                  meters={0}
+                  EndDate={new Date(
+                    work.data_fim_prevista,
+                  ).toLocaleDateString("pt-BR")}
+
                   startDate={new Date(
                     work.data_inicio_prevista,
                   ).toLocaleDateString("pt-BR")}
+
                   onDetails={() => {
                     setSelectedWork(work);
                     setDetailsVisible(true);
@@ -210,6 +213,7 @@ export default function ObrasScreen() {
                     setSelectedWork(work);
                     setEditVisible(true);
                   }}
+                  
                   onDelete={() => {
                     setSelectedWork(work);
                     setDeleteVisible(true);

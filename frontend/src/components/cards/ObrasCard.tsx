@@ -10,9 +10,7 @@ interface Props {
 
   progress: number;
 
-  type: string;
-
-  meters: number;
+  EndDate?: string;
 
   client: string;
 
@@ -29,8 +27,7 @@ export function ObrasCard({
   title,
   status,
   progress,
-  type,
-  meters,
+  EndDate,
   client,
   startDate,
   onDetails,
@@ -94,12 +91,18 @@ export function ObrasCard({
         </View>
 
         <Text style={globalStyles.workCardSubtitle}>
-          {type} • {meters} m²
-        </Text>
-
-        <Text style={globalStyles.workCardSubtitle}>
           Cliente: {client}
         </Text>
+        {startDate && (
+          <Text style={globalStyles.workCardDate}>
+            Início: {startDate}
+          </Text>
+        )}
+        {EndDate && (
+        <Text style={globalStyles.workCardDate}>
+          Previsão de Término: {EndDate}
+        </Text>
+        )}
 
         <View style={globalStyles.progressContainer}>
           <View style={globalStyles.progressBarBackground}>
@@ -118,11 +121,6 @@ export function ObrasCard({
           </Text>
         </View>
 
-        {startDate && (
-          <Text style={globalStyles.workCardDate}>
-            Início: {startDate}
-          </Text>
-        )}
 
         {/* BOTÕES */}
 

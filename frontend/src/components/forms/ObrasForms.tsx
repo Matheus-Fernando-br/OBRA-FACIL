@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Alert,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -12,293 +14,408 @@ import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "@/components/buttons/AppButton";
 import { useAuth } from "@/contexts/AuthContext";
-
 import {
   Cliente,
   Obra,
   Orcamento,
   CategoriaObra,
   ServicoObra,
+  Usuario,
 } from "@/components/layout/interface";
 
-/////////////////////////////
-// Interfaces Locais
-/////////////////////////////
+type ObraStatus = Obra["status"];
 
 interface ServicoObraForm extends ServicoObra {
-  id: string;
-  // Campos adicionais de controle de datas como string para o form
-  data_inicio_prevista_str?: string;
-  data_fim_prevista_str?: string;
-  data_inicio_real_str?: string;
-  data_fim_real_str?: string;
-  qt_dias_prevista?: number;
-  qt_dias_real?: number;
+  id: number;
+  data_prevista_str: string;
+  data_real_str: string;
+  status: ObraStatus;
 }
 
 interface CategoriaObraForm extends CategoriaObra {
-  id: string;
+  id: number;
   servicos: ServicoObraForm[];
+  data_prevista_inicial?: string;
+  data_prevista_final?: string;
+  data_real_inicial?: string;
+  data_real_final?: string;
+  status?: ObraStatus;
 }
 
 interface ObrasFormProps {
-  mode: "create" | "edit" | "details";
+  mode: "add" | "edit" | "details";
   initialData?: Obra | null;
+  budget?: Orcamento | null;
   onClose: () => void;
   onSave?: (data: any) => Promise<void>;
+  onGeneratePdf?: () => void;
   clientsList: Cliente[];
   feedbackMessage?: string;
   loading?: boolean;
+  onSuccess?: () => void;
+}
+
+function formatDateInput(value?: Date | string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
+}
+
+function getServicoDateStr(
+  serv: ServicoObra & {
+    data_prevista?: Date | string;
+    data_real?: Date | string;
+    data_prevista_str?: string;
+    data_real_str?: string;
+  },
+  field: "prevista" | "real",
+): string {
+  if (field === "prevista") {
+    return (
+      serv.data_prevista_str ||
+      formatDateInput(serv.data_prevista) ||
+      ""
+    );
+  }
+
+  return serv.data_real_str || formatDateInput(serv.data_real) || "";
+}
+
+const calculateServiceStatus = (service: ServicoObraForm): ObraStatus => {
+  const prevDate = service.data_prevista_str
+    ? new Date(service.data_prevista_str)
+    : null;
+  const realDate = service.data_real_str
+    ? new Date(service.data_real_str)
+    : null;
+
+  if (!prevDate || !realDate) return "NOPRAZO";
+  if (realDate > prevDate) return "ATRASADO";
+  if (realDate < prevDate) return "ADIANTADO";
+  return "NOPRAZO";
+};
+
+const calculateCategoryProgressAndDates = (services: ServicoObraForm[]) => {
+  if (services.length === 0) {
+    return {
+      porcentagem_de_conclusao: 0,
+      data_prevista_inicial: undefined,
+      data_prevista_final: undefined,
+      data_real_inicial: undefined,
+      data_real_final: undefined,
+      status: "NOPRAZO" as ObraStatus,
+    };
+  }
+
+  const totalProgress = services.reduce(
+    (sum, s) => sum + (s.porcentagem_de_conclusao || 0),
+    0,
+  );
+  const porcentagem_de_conclusao = Math.round(totalProgress / services.length);
+
+  const allPrevDates = services
+    .map((s) => s.data_prevista_str)
+    .filter(Boolean)
+    .map((d) => new Date(d).getTime());
+  const allRealDates = services
+    .map((s) => s.data_real_str)
+    .filter(Boolean)
+    .map((d) => new Date(d).getTime());
+
+  const data_prevista_inicial = allPrevDates.length
+    ? new Date(Math.min(...allPrevDates)).toISOString().split("T")[0]
+    : undefined;
+  const data_prevista_final = allPrevDates.length
+    ? new Date(Math.max(...allPrevDates)).toISOString().split("T")[0]
+    : undefined;
+  const data_real_inicial = allRealDates.length
+    ? new Date(Math.min(...allRealDates)).toISOString().split("T")[0]
+    : undefined;
+  const data_real_final = allRealDates.length
+    ? new Date(Math.max(...allRealDates)).toISOString().split("T")[0]
+    : undefined;
+
+  let categoryStatus: ObraStatus = "NOPRAZO";
+  if (services.some((s) => s.status === "ATRASADO")) {
+    categoryStatus = "ATRASADO";
+  } else if (services.every((s) => s.status === "ADIANTADO")) {
+    categoryStatus = "ADIANTADO";
+  } else if (services.every((s) => s.status === "ENTREGUE")) {
+    categoryStatus = "ENTREGUE";
+  } else if (services.every((s) => s.status === "CANCELADO")) {
+    categoryStatus = "CANCELADO";
+  }
+
+  return {
+    porcentagem_de_conclusao,
+    data_prevista_inicial,
+    data_prevista_final,
+    data_real_inicial,
+    data_real_final,
+    status: categoryStatus,
+  };
+};
+
+function mapCategoriasFromObra(categorias: CategoriaObra[]): CategoriaObraForm[] {
+  return categorias.map((cat, catIdx) => ({
+    ...cat,
+    id: Date.now() + catIdx,
+    servicos: cat.servicos.map((serv, servIdx) => {
+      const servicoForm: ServicoObraForm = {
+        ...serv,
+        id: Date.now() + catIdx + servIdx + 1,
+        data_prevista_str: getServicoDateStr(serv, "prevista"),
+        data_real_str: getServicoDateStr(serv, "real"),
+        status: "NOPRAZO",
+      };
+      servicoForm.status = calculateServiceStatus(servicoForm);
+      return servicoForm;
+    }),
+  }));
+}
+
+function mapCategoriasFromBudget(budget: Orcamento): CategoriaObraForm[] {
+  return budget.categoria.map((cat, catIdx) => ({
+    id: Date.now() + catIdx,
+    nome: cat.nome,
+    servicos: cat.servicos.map((serv, servIdx) => ({
+      id: Date.now() + catIdx + servIdx + 1,
+      nome: serv.nome,
+      descricao: serv.descricao,
+      porcentagem_de_conclusao: 0,
+      qt_dias_prevista: 0,
+      qt_dias_real: 0,
+      data_prevista_str: "",
+      data_real_str: "",
+      status: "NOPRAZO" as ObraStatus,
+    })),
+    porcentagem_de_conclusao: 0,
+    status: "NOPRAZO" as ObraStatus,
+  }));
 }
 
 export function ObrasForm({
   mode,
   initialData,
+  budget,
   onClose,
   onSave,
+  onGeneratePdf,
   clientsList,
   feedbackMessage,
   loading,
+  onSuccess,
 }: ObrasFormProps) {
   const { token, user } = useAuth();
-  
-  const isCreate = mode === "create";
+
+  const isAdd = mode === "add";
   const isEdit = mode === "edit";
   const isDetails = mode === "details";
-  const isReadOnly = mode === "details";
+  const isReadOnly = isDetails;
 
-  // O orçamento atrelado à obra
-  const orcamento = initialData?.orcamento as Orcamento | undefined;
-  
-  // Encontrar o cliente na lista
-  const clienteObra = clientsList.find((c) => {
-    if (!orcamento?.cliente) return false;
-    return c._id === (typeof orcamento.cliente === "string" ? orcamento.cliente : orcamento.cliente._id);
-  });
-
-  /////////////////////////////
-  // Estados da Obra
-  /////////////////////////////
-  
-  const [status, setStatus] = useState(initialData?.status || "NOPRAZO");
-  
-  // Datas globais da obra
+  const [obraStatus, setObraStatus] = useState<ObraStatus>(
+    initialData?.status || "NOPRAZO",
+  );
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   const [dataFimPrevista, setDataFimPrevista] = useState("");
   const [dataInicioReal, setDataInicioReal] = useState("");
   const [dataFimReal, setDataFimReal] = useState("");
-
-  // Progresso global
-  const [porcentagemConclusaoGeral, setPorcentagemConclusaoGeral] = useState(
-    initialData?.porcentagem_de_conclusao || 0
-  );
-
-  // Categorias e Serviços
   const [categorias, setCategorias] = useState<CategoriaObraForm[]>([]);
+  const [formFeedback, setFormFeedback] = useState("");
 
-  const [feedback, setFeedback] = useState("");
-
-  /////////////////////////////
-  // Inicialização de Dados
-  /////////////////////////////
+  const clienteObra = useMemo(() => {
+    if (budget) {
+      return budget.cliente;
+    }
   
+    if (
+      initialData &&
+      typeof initialData.orcamento === "object"
+    ) {
+      return initialData.orcamento.cliente;
+    }
+  
+    return undefined;
+  }, [budget, initialData]);
+
+  const orcamentoAtrelado = useMemo(() => {
+    if (initialData && typeof initialData.orcamento === "object") {
+      return initialData.orcamento;
+    }
+    if (budget) {
+      return budget;
+    }
+    return undefined;
+  }, [initialData, budget]);
+
   useEffect(() => {
-    if (!initialData) return;
-
-    // Configura as datas globais da obra
-    if (initialData.data_inicio_prevista) {
-      setDataInicioPrevista(new Date(initialData.data_inicio_prevista).toISOString().split("T")[0]);
-    }
-    if (initialData.data_fim_prevista) {
-      setDataFimPrevista(new Date(initialData.data_fim_prevista).toISOString().split("T")[0]);
-    }
-    if (initialData.data_inicio_real) {
-      setDataInicioReal(new Date(initialData.data_inicio_real).toISOString().split("T")[0]);
-    }
-    if (initialData.data_fim_real) {
-      setDataFimReal(new Date(initialData.data_fim_real).toISOString().split("T")[0]);
-    }
-
-    // Se for modo CREATE, precisamos montar as categorias da obra baseadas nas categorias do orçamento
-    if (isCreate && orcamento) {
-      const categoriasIniciais: CategoriaObraForm[] = orcamento.categoria.map((cat, catIdx) => ({
-        id: `cat-${catIdx}-${Date.now()}`,
-        nome: cat.nome,
-        porcentagem_de_conclusao: 0,
-        qt_dias_prevista: 0,
-        qt_dias_real: 0,
-        servicos: cat.servicos.map((serv, servIdx) => ({
-          id: `serv-${catIdx}-${servIdx}-${Date.now()}`,
-          nome: serv.nome,
-          descricao: serv.descricao,
-          porcentagem_de_conclusao: 0,
-          qt_dias_prevista: 0,
-          qt_dias_real: 0,
-          data_inicio_prevista_str: "",
-          data_fim_prevista_str: "",
-          data_inicio_real_str: "",
-          data_fim_real_str: "",
-        })),
-      }));
-      setCategorias(categoriasIniciais);
-    } 
-    // Se for EDIT ou DETAILS, carregamos os dados que já existem na obra
-    else if (initialData.categoria) {
-      const categoriasCarregadas: CategoriaObraForm[] = initialData.categoria.map((cat, catIdx) => ({
-        ...cat,
-        id: `cat-${catIdx}-${Date.now()}`,
-        servicos: cat.servicos.map((serv, servIdx) => ({
-          ...serv,
-          id: `serv-${catIdx}-${servIdx}-${Date.now()}`,
-          // Assumindo que os serviços da Obra já possuem campos de data no backend, mapeamos para string
-          // Se não existirem, iniciamos vazios
-          data_inicio_prevista_str: "", 
-          data_fim_prevista_str: "",
-          data_inicio_real_str: "",
-          data_fim_real_str: "",
-        })),
-      }));
-      setCategorias(categoriasCarregadas);
-      setPorcentagemConclusaoGeral(initialData.porcentagem_de_conclusao || 0);
-    }
-  }, [initialData, isCreate, orcamento]);
-
-  /////////////////////////////
-  // Cálculos Automáticos
-  /////////////////////////////
-
-  function updateServico(
-    categoriaId: string,
-    servicoId: string,
-    field: keyof ServicoObraForm,
-    value: string | number
-  ) {
-    setCategorias((prevCategorias) => {
-      const novasCategorias = prevCategorias.map((cat) => {
-        if (cat.id !== categoriaId) return cat;
-
-        const novosServicos = cat.servicos.map((serv) => {
-          if (serv.id !== servicoId) return serv;
-          return { ...serv, [field]: value };
-        });
-
-        // Se o campo alterado foi a porcentagem, recalcula a média da categoria
-        let novaPorcentagemCat = cat.porcentagem_de_conclusao;
-        if (field === "porcentagem_de_conclusao") {
-          const somaPorcentagem = novosServicos.reduce(
-            (acc, s) => acc + (Number(s.porcentagem_de_conclusao) || 0),
-            0
-          );
-          novaPorcentagemCat =
-            novosServicos.length > 0
-              ? Math.round(somaPorcentagem / novosServicos.length)
-              : 0;
-        }
-
-        // Se alterou os dias reais ou previstos, você pode querer recalcular os totais da categoria aqui
-        // Para simplificar, focaremos na porcentagem conforme seu requisito, 
-        // mas você pode expandir a lógica para dias_previstos_categoria = soma(dias_previstos_servicos)
-
-        return {
-          ...cat,
-          servicos: novosServicos,
-          porcentagem_de_conclusao: novaPorcentagemCat,
-        };
-      });
-
-      // Se atualizamos a porcentagem, recalcula a geral da obra
-      if (field === "porcentagem_de_conclusao") {
-        const somaGeral = novasCategorias.reduce(
-          (acc, c) => acc + (c.porcentagem_de_conclusao || 0),
-          0
-        );
-        const mediaGeral =
-          novasCategorias.length > 0
-            ? Math.round(somaGeral / novasCategorias.length)
-            : 0;
-        setPorcentagemConclusaoGeral(mediaGeral);
-      }
-
-      return novasCategorias;
-    });
-  }
-
-  /////////////////////////////
-  // Handlers
-  /////////////////////////////
-
-  async function handleSave() {
-    if (isReadOnly) return;
-    setFeedback("");
-
-    if (!token || !user) {
-      setFeedback("Sessão expirada.");
+    if (initialData) {
+      setObraStatus(initialData.status);
+      setDataInicioPrevista(formatDateInput(initialData.data_inicio_prevista));
+      setDataFimPrevista(formatDateInput(initialData.data_fim_prevista));
+      setDataInicioReal(formatDateInput(initialData.data_inicio_real));
+      setDataFimReal(formatDateInput(initialData.data_fim_real));
+      setCategorias(mapCategoriasFromObra(initialData.categoria));
       return;
     }
 
-    // Prepara o payload seguindo a estrutura da interface Obra
+    if (isAdd && budget) {
+      setObraStatus("NOPRAZO");
+      setDataInicioPrevista("");
+      setDataFimPrevista("");
+      setDataInicioReal("");
+      setDataFimReal("");
+      setCategorias(mapCategoriasFromBudget(budget));
+    }
+  }, [initialData, isAdd, budget]);
+
+  const categoriasCalculadas = useMemo(() => {
+    return categorias.map((cat) => {
+      const servicesWithStatus = cat.servicos.map((serv) => ({
+        ...serv,
+        status: calculateServiceStatus(serv),
+      }));
+      const calculated = calculateCategoryProgressAndDates(servicesWithStatus);
+      return {
+        ...cat,
+        servicos: servicesWithStatus,
+        ...calculated,
+      };
+    });
+  }, [categorias]);
+
+  const porcentagemConclusaoGeral = useMemo(() => {
+    if (categoriasCalculadas.length === 0) {
+      return initialData?.porcentagem_de_conclusao || 0;
+    }
+
+    const totalObraProgress = categoriasCalculadas.reduce(
+      (sum, cat) => sum + (cat.porcentagem_de_conclusao || 0),
+      0,
+    );
+
+    return Math.round(totalObraProgress / categoriasCalculadas.length);
+  }, [categoriasCalculadas, initialData]);
+
+  const updateServico = useCallback(
+    (
+      categoriaId: number,
+      servicoId: number,
+      field: keyof ServicoObraForm,
+      value: string | number,
+    ) => {
+      setCategorias((prevCategorias) =>
+        prevCategorias.map((cat) => {
+          if (cat.id !== categoriaId) return cat;
+
+          const novosServicos = cat.servicos.map((serv) => {
+            if (serv.id !== servicoId) return serv;
+            return { ...serv, [field]: value };
+          });
+
+          return {
+            ...cat,
+            servicos: novosServicos,
+          };
+        }),
+      );
+    },
+    [],
+  );
+
+  const handleSave = async () => {
+    if (isReadOnly) return;
+    setFormFeedback("");
+
+    if (!token || !user) {
+      setFormFeedback("Sessão expirada.");
+      return;
+    }
+
+    if (!orcamentoAtrelado) {
+      Alert.alert("Erro", "Orçamento não encontrado para a obra.");
+      return;
+    }
+
+    if (!dataInicioPrevista || !dataFimPrevista) {
+      Alert.alert(
+        "Atenção",
+        "As datas previstas de início e fim da obra são obrigatórias.",
+      );
+      return;
+    }
+
     const workData = {
-      status,
-      data_inicio_prevista: dataInicioPrevista ? new Date(dataInicioPrevista) : undefined,
-      data_fim_prevista: dataFimPrevista ? new Date(dataFimPrevista) : undefined,
+      orcamento: orcamentoAtrelado._id,
+      responsavel: user._id,
+      status: obraStatus,
+      data_inicio_prevista: new Date(dataInicioPrevista),
+      data_fim_prevista: new Date(dataFimPrevista),
       data_inicio_real: dataInicioReal ? new Date(dataInicioReal) : undefined,
       data_fim_real: dataFimReal ? new Date(dataFimReal) : undefined,
       porcentagem_de_conclusao: porcentagemConclusaoGeral,
-      categoria: categorias.map((cat) => ({
+      categoria: categoriasCalculadas.map((cat) => ({
         nome: cat.nome,
-        porcentagem_de_conclusao: cat.porcentagem_de_conclusao,
         qt_dias_prevista: cat.qt_dias_prevista,
         qt_dias_real: cat.qt_dias_real,
+        porcentagem_de_conclusao: cat.porcentagem_de_conclusao,
         servicos: cat.servicos.map((s) => ({
           nome: s.nome,
           descricao: s.descricao,
-          porcentagem_de_conclusao: s.porcentagem_de_conclusao,
           qt_dias_prevista: s.qt_dias_prevista,
           qt_dias_real: s.qt_dias_real,
-          // Dependendo do seu backend, você pode precisar converter as datas de string para Date aqui também
+          porcentagem_de_conclusao: s.porcentagem_de_conclusao,
         })),
       })),
     };
 
     if (onSave) await onSave(workData);
-  }
+    if (onSuccess) onSuccess();
+  };
 
-  const headerTitle = isCreate
+  const handleHeaderAction = () => {
+    if (isDetails) {
+      onGeneratePdf?.();
+      return;
+    }
+
+    handleSave();
+  };
+
+  const headerTitle = isAdd
     ? "Nova Obra"
     : isEdit
       ? "Editar Obra"
       : "Detalhes da Obra";
 
-  const buttonText = isCreate ? "Iniciar Obra" : "Salvar Alterações";
+  const buttonText = isAdd
+    ? "Iniciar Obra"
+    : isEdit
+      ? "Salvar Alterações"
+      : "Gerar PDF";
 
   return (
     <View style={globalStyles.container}>
-      
-      {/* ========================= */}
-      {/* 1. Cabeçalho */}
-      {/* ========================= */}
-
       <View style={globalStyles.modalHeader}>
         <Pressable onPress={onClose} style={globalStyles.leftAction}>
           <Ionicons name="arrow-back" size={25} color={COLORS.text} />
         </Pressable>
-        
+
         <Text style={globalStyles.addTitle}>{headerTitle}</Text>
 
-        {!isDetails && (
-          <Pressable onPress={handleSave} style={globalStyles.rightAction}>
-            {loading ? (
-              <ActivityIndicator color={COLORS.white} />
-            ) : (
-              <View style={globalStyles.saveTextStack}>
-                <Text style={globalStyles.saveText}>{buttonText}</Text>
-              </View>
-            )}
-            {!loading && (
-              <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
-            )}
-          </Pressable>
-        )}
+        <Pressable onPress={handleHeaderAction} style={globalStyles.rightAction}>
+          {loading ? (
+            <ActivityIndicator color={COLORS.white} />
+          ) : (
+            <View style={globalStyles.saveTextStack}>
+              <Text style={globalStyles.saveText}>{buttonText}</Text>
+            </View>
+          )}
+          {!loading && (
+            <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
+          )}
+        </Pressable>
       </View>
 
       <ScrollView
@@ -307,43 +424,32 @@ export function ObrasForm({
           paddingRight: 20,
         }}
       >
-        {/* ========================= */}
-        {/* 2. Informações Gerais */}
-        {/* ========================= */}
-
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
 
         <View style={globalStyles.card}>
           <Text style={globalStyles.label}>Nome da Obra / Orçamento:</Text>
-          <AppInput 
-            value={orcamento?.nome ?? ""} 
-            editable={false} 
-          />
+          <AppInput value={orcamentoAtrelado?.nome ?? ""} editable={false} />
 
           <Text style={globalStyles.label}>Cliente:</Text>
-          <AppInput 
-            value={clienteObra?.nome ?? ""} 
-            editable={false} 
-          />
+          <AppInput value={clienteObra?.nome ?? ""} editable={false} />
 
           <Text style={globalStyles.label}>Responsável:</Text>
-          <AppInput 
-            value={typeof initialData?.responsavel === "object" ? initialData.responsavel.nome : "Responsável atual"} 
-            editable={false} 
+          <AppInput
+            value={
+              typeof initialData?.responsavel === "object"
+                ? (initialData.responsavel as Usuario).nome
+                : user?.nome || ""
+            }
+            editable={false}
           />
 
           <Text style={globalStyles.label}>Status da Obra:</Text>
           <Picker
-            selectedValue={status}
-            onValueChange={(itemValue) => setStatus(itemValue)}
-            style={{
-              padding: 15,
-              borderRadius: 10,
-              width: "100%",
-              backgroundColor: COLORS.backgroundSection,
-            }}
-            enabled={!isReadOnly}
+            selectedValue={obraStatus}
+            onValueChange={(itemValue) => setObraStatus(itemValue)}
+            style={globalStyles.picker}
+            enabled={isEdit && !isReadOnly}
           >
             <Picker.Item label="NO PRAZO" value="NOPRAZO" />
             <Picker.Item label="ATRASADO" value="ATRASADO" />
@@ -354,14 +460,15 @@ export function ObrasForm({
 
           <Text style={globalStyles.label}>Valor do Orçamento Aprovado:</Text>
           <AppInput
-            value={`R$ ${(orcamento?.preco_com_bdi ?? 0).toFixed(2)}`}
+            value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
             editable={false}
           />
-        </View>
 
-        {/* ========================= */}
-        {/* 3. Endereço */}
-        {/* ========================= */}
+          <Text style={globalStyles.label}>
+            Porcentagem de Conclusão Geral:
+          </Text>
+          <AppInput value={`${porcentagemConclusaoGeral}%`} editable={false} />
+        </View>
 
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
         <View style={globalStyles.divider} />
@@ -370,15 +477,15 @@ export function ObrasForm({
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>CEP</Text>
-              <AppInput 
-                value={orcamento?.endereco?.CEP ?? ""} 
-                editable={false} 
+              <AppInput
+                value={orcamentoAtrelado?.endereco?.CEP ?? ""}
+                editable={false}
               />
             </View>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Estado:</Text>
               <AppInput
-                value={orcamento?.endereco?.estado ?? ""}
+                value={orcamentoAtrelado?.endereco?.estado ?? ""}
                 editable={false}
               />
             </View>
@@ -387,377 +494,203 @@ export function ObrasForm({
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Cidade:</Text>
               <AppInput
-                value={orcamento?.endereco?.cidade ?? ""}
+                value={orcamentoAtrelado?.endereco?.cidade ?? ""}
                 editable={false}
               />
             </View>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Bairro:</Text>
               <AppInput
-                value={orcamento?.endereco?.bairro ?? ""}
+                value={orcamentoAtrelado?.endereco?.bairro ?? ""}
                 editable={false}
               />
             </View>
           </View>
           <View style={globalStyles.row}>
             <Text style={globalStyles.label}>Logradouro:</Text>
-            <AppInput 
-              value={orcamento?.endereco?.rua ?? ""} 
-              editable={false} 
+            <AppInput
+              value={orcamentoAtrelado?.endereco?.rua ?? ""}
+              editable={false}
             />
           </View>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Número:</Text>
               <AppInput
-                value={orcamento?.endereco?.numero ?? ""}
+                value={orcamentoAtrelado?.endereco?.numero ?? ""}
                 editable={false}
               />
             </View>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Complemento:</Text>
               <AppInput
-                value={orcamento?.endereco?.complemento ?? ""}
+                value={orcamentoAtrelado?.endereco?.complemento ?? ""}
                 editable={false}
               />
             </View>
           </View>
         </View>
 
-        {/* ========================= */}
-        {/* 4. Cronograma Geral */}
-        {/* ========================= */}
-
-        <Text style={globalStyles.subtitle}>Cronograma Geral</Text>
+        <Text style={globalStyles.subtitle}>Datas da Obra</Text>
         <View style={globalStyles.divider} />
-
         <View style={globalStyles.card}>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data Prevista de Início</Text>
+              <Text style={globalStyles.label}>Início Previsto:</Text>
               <AppInput
-                placeholder="dd/mm/aaaa ou aaaa-mm-dd"
+                placeholder="YYYY-MM-DD"
                 value={dataInicioPrevista}
-                editable={!isReadOnly}
                 onChangeText={setDataInicioPrevista}
+                editable={!isReadOnly}
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data Prevista de Término</Text>
+              <Text style={globalStyles.label}>Fim Previsto:</Text>
               <AppInput
-                placeholder="dd/mm/aaaa ou aaaa-mm-dd"
+                placeholder="YYYY-MM-DD"
                 value={dataFimPrevista}
-                editable={!isReadOnly}
                 onChangeText={setDataFimPrevista}
+                editable={!isReadOnly}
               />
             </View>
           </View>
-
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data Real de Início</Text>
+              <Text style={globalStyles.label}>Início Real:</Text>
               <AppInput
-                placeholder="dd/mm/aaaa ou aaaa-mm-dd"
+                placeholder="YYYY-MM-DD"
                 value={dataInicioReal}
-                editable={!isReadOnly}
                 onChangeText={setDataInicioReal}
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data Real de Término</Text>
-              <AppInput
-                placeholder="dd/mm/aaaa ou aaaa-mm-dd"
-                value={dataFimReal}
                 editable={!isReadOnly}
+              />
+            </View>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Fim Real:</Text>
+              <AppInput
+                placeholder="YYYY-MM-DD"
+                value={dataFimReal}
                 onChangeText={setDataFimReal}
+                editable={!isReadOnly}
               />
             </View>
           </View>
-
-          <Text style={globalStyles.label}>Status de Execução</Text>
-          <AppInput value={status} editable={false} />
         </View>
 
-        {/* ========================= */}
-        {/* 5. Resumo */}
-        {/* ========================= */}
-
-        <Text style={globalStyles.subtitle}>Resumo da Obra</Text>
+        <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
         <View style={globalStyles.divider} />
 
-        <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>Valor da Obra</Text>
-          <Text style={globalStyles.categoryTotalText}>
-            R$ {(orcamento?.preco_com_bdi ?? 0).toFixed(2)}
-          </Text>
-
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Categorias</Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                {categorias.length}
-              </Text>
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Serviços</Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                {categorias.reduce((acc, cat) => acc + cat.servicos.length, 0)}
-              </Text>
-            </View>
-          </View>
-
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Dias Previstos Totais</Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                {categorias.reduce((acc, cat) => acc + (cat.qt_dias_prevista || 0), 0)}
-              </Text>
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Dias Executados Totais</Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                {categorias.reduce((acc, cat) => acc + (cat.qt_dias_real || 0), 0)}
-              </Text>
-            </View>
-          </View>
-
-          <Text style={[globalStyles.label, { marginTop: 10 }]}>Progresso Geral da Obra</Text>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 5 }}>
-            <Text style={{ color: COLORS.primary, fontWeight: "bold", fontSize: 24, flex: 1 }}>
-              {porcentagemConclusaoGeral}%
+        {categoriasCalculadas.map((categoria) => (
+          <View key={categoria.id} style={globalStyles.card}>
+            <Text style={globalStyles.label}>Categoria: {categoria.nome}</Text>
+            <Text style={globalStyles.label}>
+              Progresso da Categoria: {categoria.porcentagem_de_conclusao || 0}%
             </Text>
-          </View>
-          <View
-            style={{
-              height: 12,
-              backgroundColor: "#E5E7EB",
-              borderRadius: 20,
-              overflow: "hidden",
-            }}
-          >
-            <View
-              style={{
-                width: `${Math.min(Math.max(porcentagemConclusaoGeral, 0), 100)}%`,
-                height: "100%",
-                backgroundColor: COLORS.primary,
-              }}
-            />
-          </View>
-        </View>
-
-        {/* ========================= */}
-        {/* 6. Categorias e 7. Serviços */}
-        {/* ========================= */}
-
-        <Text style={globalStyles.subtitle}>Planejamento e Execução</Text>
-        <View style={globalStyles.divider} />
-
-        {categorias.map((categoria, catIndex) => (
-          <View
-            key={categoria.id}
-            style={[globalStyles.card, { marginBottom: 20 }]}
-          >
-            {/* ========================= */}
-            {/* Categoria Header */}
-            {/* ========================= */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 15,
-              }}
-            >
-              <Text style={[globalStyles.title, { flex: 1 }]}>
-                {catIndex + 1}. {categoria.nome}
-              </Text>
-
-              <View
-                style={{
-                  backgroundColor: "#EEF2FF",
-                  paddingHorizontal: 12,
-                  paddingVertical: 5,
-                  borderRadius: 20,
-                }}
-              >
-                <Text style={{ color: COLORS.primary, fontWeight: "700" }}>
-                  {categoria.porcentagem_de_conclusao ?? 0}%
-                </Text>
-              </View>
-            </View>
-
-            {/* Barra de Progresso da Categoria */}
-            <View
-              style={{
-                height: 8,
-                backgroundColor: "#E5E7EB",
-                borderRadius: 20,
-                overflow: "hidden",
-                marginBottom: 15,
-              }}
-            >
-              <View
-                style={{
-                  width: `${Math.min(Math.max(categoria.porcentagem_de_conclusao || 0, 0), 100)}%`,
-                  height: "100%",
-                  backgroundColor: COLORS.primary, // ou "#22C55E" para verde
-                }}
-              />
-            </View>
-
-            <View style={[globalStyles.row, { marginBottom: 15 }]}>
-              <Text style={globalStyles.orcamentoInfo}>
-                Serviços: {categoria.servicos.length}
-              </Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                Dias Previstos: {categoria.qt_dias_prevista || 0}
-              </Text>
-              <Text style={globalStyles.orcamentoInfo}>
-                Dias Executados: {categoria.qt_dias_real || 0}
-              </Text>
-            </View>
-
-            <View style={globalStyles.divider} />
-            <Text style={[globalStyles.label, { marginBottom: 10, fontSize: 16 }]}>
-              Serviços da Categoria
+            <Text style={globalStyles.label}>
+              Status da Categoria: {categoria.status}
+            </Text>
+            <Text style={globalStyles.label}>
+              Início Previsto Categoria:{" "}
+              {categoria.data_prevista_inicial || "N/A"}
+            </Text>
+            <Text style={globalStyles.label}>
+              Fim Previsto Categoria: {categoria.data_prevista_final || "N/A"}
+            </Text>
+            <Text style={globalStyles.label}>
+              Início Real Categoria: {categoria.data_real_inicial || "N/A"}
+            </Text>
+            <Text style={globalStyles.label}>
+              Fim Real Categoria: {categoria.data_real_final || "N/A"}
             </Text>
 
-            {/* ========================= */}
-            {/* Serviços da Categoria */}
-            {/* ========================= */}
-            {categoria.servicos.map((servico, servIndex) => (
-              <View key={servico.id} style={globalStyles.serviceContainer}>
-                
-                <Text style={globalStyles.serviceTitle}>
-                  {catIndex + 1}.{servIndex + 1} {servico.nome}
+            {categoria.servicos.map((servico) => (
+              <View key={servico.id} style={styles.serviceCard}>
+                <Text style={globalStyles.label}>Serviço: {servico.nome}</Text>
+                <Text style={globalStyles.label}>
+                  Descrição: {servico.descricao}
                 </Text>
-                
-                {!!servico.descricao && (
-                  <Text style={{ color: "#6B7280", marginBottom: 15 }}>
-                    {servico.descricao}
-                  </Text>
-                )}
 
-                <View style={globalStyles.row}>
-                  <View style={[globalStyles.column, { flex: 2 }]}>
-                    <Text style={globalStyles.label}>Progresso do Serviço (%)</Text>
-                    <AppInput
-                      placeholder="0 a 100"
-                      value={String(servico.porcentagem_de_conclusao ?? 0)}
-                      onChangeText={(val) => {
-                        const num = Number(val);
-                        if (!isNaN(num) && num >= 0 && num <= 100) {
-                          updateServico(categoria.id, servico.id, "porcentagem_de_conclusao", num);
-                        } else if (val === "") {
-                          updateServico(categoria.id, servico.id, "porcentagem_de_conclusao", 0);
-                        }
-                      }}
-                      editable={!isReadOnly}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
+                <Text style={globalStyles.label}>Data Prevista:</Text>
+                <AppInput
+                  placeholder="YYYY-MM-DD"
+                  value={servico.data_prevista_str}
+                  onChangeText={(text) =>
+                    updateServico(
+                      categoria.id,
+                      servico.id,
+                      "data_prevista_str",
+                      text,
+                    )
+                  }
+                  editable={!isReadOnly}
+                />
 
-                {/* Barra de Progresso do Serviço */}
-                <View
-                  style={{
-                    height: 6,
-                    backgroundColor: "#E5E7EB",
-                    borderRadius: 20,
-                    overflow: "hidden",
-                    marginBottom: 20,
-                    marginTop: 5,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: `${Math.min(Math.max(servico.porcentagem_de_conclusao || 0, 0), 100)}%`,
-                      height: "100%",
-                      backgroundColor: "#22C55E",
-                    }}
-                  />
-                </View>
+                <Text style={globalStyles.label}>Data Real:</Text>
+                <AppInput
+                  placeholder="YYYY-MM-DD"
+                  value={servico.data_real_str}
+                  onChangeText={(text) =>
+                    updateServico(
+                      categoria.id,
+                      servico.id,
+                      "data_real_str",
+                      text,
+                    )
+                  }
+                  editable={!isReadOnly}
+                />
 
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Início Previsto</Text>
-                    <AppInput
-                      placeholder="dd/mm/aaaa"
-                      value={servico.data_inicio_prevista_str || ""}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "data_inicio_prevista_str", val)}
-                      editable={!isReadOnly}
-                    />
-                  </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Término Previsto</Text>
-                    <AppInput
-                      placeholder="dd/mm/aaaa"
-                      value={servico.data_fim_prevista_str || ""}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "data_fim_prevista_str", val)}
-                      editable={!isReadOnly}
-                    />
-                  </View>
-                </View>
-
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Início Real</Text>
-                    <AppInput
-                      placeholder="dd/mm/aaaa"
-                      value={servico.data_inicio_real_str || ""}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "data_inicio_real_str", val)}
-                      editable={!isReadOnly}
-                    />
-                  </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Término Real</Text>
-                    <AppInput
-                      placeholder="dd/mm/aaaa"
-                      value={servico.data_fim_real_str || ""}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "data_fim_real_str", val)}
-                      editable={!isReadOnly}
-                    />
-                  </View>
-                </View>
-
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Dias Previstos</Text>
-                    <AppInput
-                      placeholder="Qtd"
-                      value={String(servico.qt_dias_prevista ?? 0)}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "qt_dias_prevista", Number(val))}
-                      editable={!isReadOnly}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Dias Executados</Text>
-                    <AppInput
-                      placeholder="Qtd"
-                      value={String(servico.qt_dias_real ?? 0)}
-                      onChangeText={(val) => updateServico(categoria.id, servico.id, "qt_dias_real", Number(val))}
-                      editable={!isReadOnly}
-                      keyboardType="numeric"
-                    />
-                  </View>
-                </View>
-
+                <Text style={globalStyles.label}>
+                  Porcentagem de Conclusão:
+                </Text>
+                <AppInput
+                  placeholder="%"
+                  value={String(servico.porcentagem_de_conclusao || 0)}
+                  onChangeText={(text) =>
+                    updateServico(
+                      categoria.id,
+                      servico.id,
+                      "porcentagem_de_conclusao",
+                      Number(text) || 0,
+                    )
+                  }
+                  keyboardType="numeric"
+                  editable={!isReadOnly}
+                />
+                <Text style={globalStyles.label}>
+                  Status do Serviço: {servico.status}
+                </Text>
               </View>
             ))}
           </View>
         ))}
 
-        {feedback !== "" && (
-          <Text style={globalStyles.feedback}>{feedback}</Text>
+        {formFeedback !== "" && (
+          <Text style={globalStyles.feedback}>{formFeedback}</Text>
         )}
-        {feedbackMessage !== "" && (
+
+        {feedbackMessage && feedbackMessage !== "" && (
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
         )}
-        
-        {/* Espaço extra no final para scroll confortável */}
-        <View style={{ height: 40 }} />
+
+        {!isDetails && (
+          <AppButton
+            title={buttonText}
+            onPress={handleSave}
+            loading={loading}
+          />
+        )}
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  serviceCard: {
+    backgroundColor: COLORS.background,
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+});

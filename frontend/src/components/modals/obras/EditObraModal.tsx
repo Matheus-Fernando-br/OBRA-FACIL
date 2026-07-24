@@ -58,7 +58,6 @@ export function EditObraModal({
         <ObrasForm
           mode="edit"
           initialData={work}
-          work={work}
           onClose={onClose}
           onSave={handleSave}
           clientsList={clientsList}

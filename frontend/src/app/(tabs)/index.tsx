@@ -160,7 +160,7 @@ export default function HomeScreen() {
             />
 
             <DashboardCard
-              title="Faturamento"
+              title="Faturamento Aprovado"
               value={
                 loading ? (
                   <ActivityIndicator size="small" color={COLORS.white} />
