@@ -1,5 +1,11 @@
-import { Modal, View, Text, Pressable } from "react-native";
-import { useState, useEffect } from "react";
+import {
+  Modal,
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+} from "react-native";
+import { useState, useEffect, useRef } from "react";
 
 import { globalStyles } from "../../../styles/globalStyles";
 import { AppInput } from "../../forms/AppInput";
@@ -40,7 +46,13 @@ export function EditClientModal({
   const [feedback, setFeedback] = useState("");
   const documento = onlyNumbers(cpf);
   const telefoneLimpo = onlyNumbers(telefone);
-
+  const scrollRef = useRef<ScrollView>(null);
+  const salvarRef = useRef<View>(null);
+  const irParaSalvar = () => {
+    scrollRef.current?.scrollToEnd({
+      animated: true,
+    });
+  };
   async function handleSave() {
     try {
       setFeedback("");
@@ -91,6 +103,7 @@ export function EditClientModal({
       await updateClient(
         client._id,
         {
+          _id: client._id,
           nome: nome.trim(),
           email: email.trim(),
           telefone: telefoneLimpo,
@@ -156,6 +169,10 @@ export function EditClientModal({
         }}
         onPress={onClose}
       >
+        <ScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+        >
         <Pressable onPress={(e) => e.stopPropagation()}>
           <View style={globalStyles.addCard}>
             <View style={globalStyles.modalHeader}>
@@ -165,7 +182,10 @@ export function EditClientModal({
 
               <Text style={globalStyles.addTitle}>Editar cliente</Text>
 
-              <Pressable onPress={handleSave} style={globalStyles.rightAction}>
+              <Pressable
+                onPress={irParaSalvar}
+                style={globalStyles.rightAction}
+              >
                 <View style={globalStyles.saveTextStack}>
                   <Text style={globalStyles.saveText}>Atualizar</Text>
                   <Text style={globalStyles.saveText}>Cliente</Text>
@@ -173,57 +193,63 @@ export function EditClientModal({
                 <Ionicons name="download" size={20} color={COLORS.title} />
               </Pressable>
             </View>
+              <Text style={globalStyles.subtitle}>Informações Pessoais</Text>
+              <View style={globalStyles.divider} />
 
-            <Text style={globalStyles.subtitle}>Informações Pessoais</Text>
-            <View style={globalStyles.divider} />
+              <Text style={globalStyles.label}>Nome</Text>
+              <AppInput
+                placeholder="Nome"
+                value={nome}
+                onChangeText={setNome}
+              />
 
-            <Text style={globalStyles.label}>Nome</Text>
-            <AppInput placeholder="Nome" value={nome} onChangeText={setNome} />
+              <Text style={globalStyles.label}>CPF / CNPJ</Text>
+              <AppInput
+                placeholder="CPF"
+                value={cpf}
+                onChangeText={(text) => setCpf(documentMask(text))}
+              />
 
-            <Text style={globalStyles.label}>CPF / CNPJ</Text>
-            <AppInput
-              placeholder="CPF"
-              value={cpf}
-              onChangeText={(text) => setCpf(documentMask(text))}
-            />
+              <Text style={globalStyles.subtitle}>Contato</Text>
+              <View style={globalStyles.divider} />
 
-            <Text style={globalStyles.subtitle}>Contato</Text>
-            <View style={globalStyles.divider} />
+              <Text style={globalStyles.label}>E-mail</Text>
+              <AppInput
+                placeholder="cliente@email.com"
+                value={email}
+                onChangeText={(text) => setEmail(emailMask(text))}
+              />
 
-            <Text style={globalStyles.label}>E-mail</Text>
-            <AppInput
-              placeholder="cliente@email.com"
-              value={email}
-              onChangeText={(text) => setEmail(emailMask(text))}
-            />
+              <Text style={globalStyles.label}>Telefone</Text>
+              <AppInput
+                placeholder="Informe o Telefone do cliente a ser cadastrado"
+                value={telefone}
+                onChangeText={(text) => setTelefone(phoneMask(text))}
+              />
 
-            <Text style={globalStyles.label}>Telefone</Text>
-            <AppInput
-              placeholder="Informe o Telefone do cliente a ser cadastrado"
-              value={telefone}
-              onChangeText={(text) => setTelefone(phoneMask(text))}
-            />
-
-            <View style={globalStyles.divider} />
-            {feedback !== "" && (
-              <Text style={globalStyles.feedback}>{feedback}</Text>
-            )}
-            <AppButton
-              title="Salvar Alterações do cliente"
-              loading={loading}
-              onPress={handleSave}
-              color={COLORS.primary}
-            />
-
-            <AppButton
-              title="Cancelar alterações do cliente"
-              onPress={handleClose}
-              loading={loadingClose}
-              color={COLORS.danger}
-            />
+              <View style={globalStyles.divider} />
+              {feedback !== "" && (
+                <Text style={globalStyles.feedback}>{feedback}</Text>
+              )}
+              
+              <View ref={salvarRef}>
+                <AppButton
+                  title="Salvar Alterações do cliente"
+                  loading={loading}
+                  onPress={handleSave}
+                  color={COLORS.primary}
+                />
+              </View>
+              <AppButton
+                title="Cancelar alterações do cliente"
+                onPress={handleClose}
+                loading={loadingClose}
+                color={COLORS.danger}
+              />
           </View>
         </Pressable>
+            </ScrollView>
       </Pressable>
     </Modal>
   );
-}
+} 

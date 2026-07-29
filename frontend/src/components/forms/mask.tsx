@@ -26,6 +26,7 @@ export function cpfMask(value: string) {
     .slice(0, 14);
 }
 
+
 export function cnpjMask(value: string) {
   return value
     .replace(/\D/g, "")

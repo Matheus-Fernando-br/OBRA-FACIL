@@ -1,40 +1,23 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useState } from "react";
 import { AppButton } from "../buttons/AppButton";
-import { COLORS } from "../../styles/globalStyles";
+import { COLORS, globalStyles } from "../../styles/globalStyles";
 
 interface Props {
   loading: boolean;
+  feedback: string;
   onBack: () => void;
   onContinue: () => void;
 }
 
-export function PaymentStep({
-  loading,
-  onBack,
-  onContinue,
-}: Props) {
+export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
   return (
     <View>
+      <Text style={globalStyles.title}>Escolha seu plano</Text>
 
       <Text
-        style={{
-          color: "#FFF",
-          fontSize: 22,
-          fontWeight: "bold",
-          marginBottom: 10,
-        }}
-      >
-        Escolha seu plano
-      </Text>
-
-      <Text
-        style={{
-          color: "#94A3B8",
-          marginBottom: 25,
-          lineHeight: 22,
-        }}
+        style={[globalStyles.subtitle, { marginTop: 10, marginBottom: 10 }]}
       >
         Você pode utilizar gratuitamente durante o período de testes ou
         contratar um plano institucional.
@@ -44,17 +27,13 @@ export function PaymentStep({
         style={{
           backgroundColor: COLORS.card,
           borderRadius: 15,
-          padding: 20,
+          padding: 15,
           marginBottom: 20,
           borderWidth: 1,
-          borderColor: COLORS.primary,
+          borderColor: COLORS.title,
         }}
       >
-        <Ionicons
-          name="card"
-          color={COLORS.primary}
-          size={40}
-        />
+        <Ionicons name="card" color={COLORS.primary} size={40} />
 
         <Text
           style={{
@@ -112,27 +91,22 @@ export function PaymentStep({
         </Text>
       </View>
 
+      {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
+
       <AppButton
-        title={
-          loading
-            ? "Processando..."
-            : "Efetuar pagamento"
-        }
+        title={loading ? "Processando..." : "Efetuar pagamento"}
         onPress={onContinue}
         loading={loading}
+        color={COLORS.primary}
       />
-
+{/*
       <AppButton
         title="Usar plano gratuito para teste"
         onPress={onContinue}
         color={COLORS.success}
       />
-
-      <AppButton
-        title="Voltar"
-        onPress={onBack}
-        color={COLORS.danger}
-      />
+*/}
+      <AppButton title="Voltar" onPress={onBack} color={COLORS.title} />
     </View>
   );
 }

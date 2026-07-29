@@ -124,6 +124,7 @@ export function CadastroStep({
 
   return (
     <View>
+
       <Text style={globalStyles.title}>Criar Conta</Text>
 
       <Text
@@ -148,7 +149,7 @@ export function CadastroStep({
             flex: 1,
             padding: 14,
             borderRadius: 12,
-            marginRight: 5,
+            marginRight: 10,
             alignItems: "center",
             backgroundColor:
               tipoDocumento === "CPF" ? COLORS.primary : COLORS.card,
@@ -160,7 +161,8 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: COLORS.text,
+              color: 
+              tipoDocumento === "CPF" ? COLORS.white : COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -185,7 +187,8 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: COLORS.text,
+              color:
+              tipoDocumento === "CNPJ" ? COLORS.white : COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -274,11 +277,11 @@ export function CadastroStep({
       </View>
       <View style={globalStyles.divider} />
       {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
-      <AppButton title="Continuar →" onPress={continuar} />
+      <AppButton title="Continuar →" onPress={continuar} color={COLORS.primary} />
       <AppButton
         title="Voltar para tela de Login←"
         onPress={voltar}
-        color={COLORS.danger}
+        color={COLORS.title}
       />
     </View>
   );

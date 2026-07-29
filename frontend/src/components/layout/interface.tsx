@@ -26,6 +26,16 @@ export interface Cliente {
   CNPJ?: string;
 }
 
+export interface AddCliente {
+
+  nome: string;
+  email: string;
+  telefone: string;
+
+  CPF?: string;
+  CNPJ?: string;
+}
+
 // ==============================
 // ENDEREÇO
 // ==============================

@@ -98,7 +98,7 @@ export async function deleteUser(id: string, token: string) {
 // CLIENTS
 // ==========================
 
-import { Cliente } from "@/components/layout/interface";
+import { Cliente, AddCliente } from "@/components/layout/interface";
 
 export async function getClients(token: string) {
   const { data } = await api.get("/client/userClients", {
@@ -110,7 +110,7 @@ export async function getClients(token: string) {
   return data;
 }
 
-export async function createClient(body: Cliente, token: string) {
+export async function createClient(body: AddCliente, token: string) {
   const { data } = await api.post("/client", body, {
     headers: {
       Authorization: `Bearer ${token}`,

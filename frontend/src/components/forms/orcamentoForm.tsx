@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
-  StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -55,7 +54,6 @@ export function OrcamentoForm({
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
-
   const [nome, setNome] = useState(initialData?.nome || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
   const [selectedClient, setSelectedClient] = useState(() => {
@@ -115,8 +113,7 @@ export function OrcamentoForm({
     ],
   );
   const [bdi, setBdi] = useState(initialData?.bdi.toString() || "");
-  const [status, setStatus] = useState(initialData?.status || "PENDENTE");
-  const [feedback, setFeedback] = useState("");
+   const [feedback, setFeedback] = useState("");
   const [feedbackSinapi, setFeedbackSinapi] = useState("");
 
   const dataPublicacao = initialData
@@ -283,6 +280,14 @@ export function OrcamentoForm({
       "https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-05-formato-pdf.zip";
     if (await Linking.canOpenURL(url)) await Linking.openURL(url);
     else setFeedbackSinapi("Erro ao abrir link.");
+  };
+
+  const scrollRef = useRef<ScrollView>(null);
+  const salvarRef = useRef<View>(null);
+  const irParaSalvar = () => {
+    scrollRef.current?.scrollToEnd({
+      animated: true,
+    });
   };
 
   return (
@@ -602,6 +607,7 @@ export function OrcamentoForm({
             )}
           </View>
         ))}
+        
         {!isReadOnly && (
           <AppButton
             title="+ Categoria"

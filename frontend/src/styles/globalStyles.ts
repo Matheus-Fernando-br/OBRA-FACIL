@@ -37,8 +37,8 @@ export const globalStyles = StyleSheet.create({
   loginContainer: {
     flex: 1,
     justifyContent: "center",
-    padding: 24,
-    paddingHorizontal: 40,
+    padding: 20,
+    paddingHorizontal: 30,
     backgroundColor: COLORS.background,
   },
 
@@ -754,13 +754,13 @@ workCardProgress: {
 
   addCard: {
     flex: 1,
+    maxHeight: "100%",
     backgroundColor: COLORS.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    marginTop: 50,
   },
 
   addTitle: {
