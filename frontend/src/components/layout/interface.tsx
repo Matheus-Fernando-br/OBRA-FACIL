@@ -27,7 +27,6 @@ export interface Cliente {
 }
 
 export interface AddCliente {
-
   nome: string;
   email: string;
   telefone: string;
@@ -101,7 +100,7 @@ export interface Orcamento {
 
   descricao: string;
 
-  cliente: Cliente;
+  cliente: Cliente | string;
 
   categoria: Categoria[];
 

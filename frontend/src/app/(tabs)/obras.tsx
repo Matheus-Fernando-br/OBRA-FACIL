@@ -105,7 +105,9 @@ export default function ObrasScreen() {
     const matchSearch =
       !search ||
       budget?.nome.toLowerCase().includes(search.toLowerCase()) ||
-      budget?.cliente.nome.toLowerCase().includes(search.toLowerCase());
+      (typeof budget?.cliente === "string"
+        ? budget?.cliente.toLowerCase().includes(search.toLowerCase())
+        : budget?.cliente.nome.toLowerCase().includes(search.toLowerCase()));
 
     const matchStatus =
       statusFilter === "Todos"
@@ -194,17 +196,19 @@ export default function ObrasScreen() {
                 <ObrasCard
                   key={work._id}
                   title={budget?.nome ?? "Obra"}
-                  client={budget?.cliente.nome ?? ""}
+                  client={
+                    typeof budget?.cliente === "string"
+                      ? budget?.cliente
+                      : (budget?.cliente.nome ?? "")
+                  }
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
-                  EndDate={new Date(
-                    work.data_fim_prevista,
-                  ).toLocaleDateString("pt-BR")}
-
+                  EndDate={new Date(work.data_fim_prevista).toLocaleDateString(
+                    "pt-BR",
+                  )}
                   startDate={new Date(
                     work.data_inicio_prevista,
                   ).toLocaleDateString("pt-BR")}
-
                   onDetails={() => {
                     setSelectedWork(work);
                     setDetailsVisible(true);
@@ -213,7 +217,6 @@ export default function ObrasScreen() {
                     setSelectedWork(work);
                     setEditVisible(true);
                   }}
-                  
                   onDelete={() => {
                     setSelectedWork(work);
                     setDeleteVisible(true);

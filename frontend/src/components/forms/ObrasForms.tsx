@@ -21,6 +21,8 @@ import {
   ServicoObra,
   Usuario,
 } from "@/components/layout/interface";
+import { getBudgetById, getClientById } from "@/services/api";
+import { maskDate } from "./mask";
 
 type ObraStatus = Obra["status"];
 
@@ -42,7 +44,7 @@ interface ObrasFormProps {
   onClose: () => void;
   onSave?: (data: any) => Promise<void>;
   onGeneratePdf?: () => void;
-  client: Cliente[];
+  client?: Cliente[];
   feedbackMessage?: string;
   loading?: boolean;
   onSuccess?: () => void;
@@ -158,60 +160,73 @@ export function ObrasForm({
   onSuccess,
 }: ObrasFormProps) {
   const { token, user } = useAuth();
-
+  const isReadOnly = mode === "details";
   const isAdd = mode === "add";
-  const isEdit = mode === "edit";
-  const isDetails = mode === "details";
-  const isReadOnly = isDetails;
-
-  const [obraStatus, setObraStatus] = useState<ObraStatus>(
-    initialData?.status || "NOPRAZO",
+  const [obraStatus, setObraStatus] = useState<ObraStatus>("NOPRAZO");
+  const [orcamentoAtrelado, setOrcamentoAtrelado] = useState<Orcamento | null>(
+    budget ?? null,
   );
+
+  useEffect(() => {
+    async function carregarOrcamento() {
+      if (budget) {
+        setOrcamentoAtrelado(budget);
+        return;
+      }
+
+      if (initialData && typeof initialData.orcamento === "string") {
+        const response = await getBudgetById(initialData.orcamento, token!);
+
+        setOrcamentoAtrelado(response);
+      }
+
+      if (initialData && typeof initialData.orcamento === "object") {
+        setOrcamentoAtrelado(initialData.orcamento);
+      }
+    }
+
+    carregarOrcamento();
+  }, [budget, initialData, token]);
+
+  const [cliente, setCliente] = useState<Cliente | null>(null);
+
+  useEffect(() => {
+    async function carregarDados() {
+      if (!token) return;
+
+      let orcamento: Orcamento;
+
+      if (budget) {
+        orcamento = budget;
+      } else if (initialData && typeof initialData.orcamento === "string") {
+        orcamento = await getBudgetById(initialData.orcamento, token);
+      } else if (initialData && typeof initialData.orcamento === "object") {
+        orcamento = initialData.orcamento;
+      } else {
+        return;
+      }
+
+      setOrcamentoAtrelado(orcamento);
+
+      // Agora busca o cliente
+      if (typeof orcamento.cliente === "string") {
+        const cliente = await getClientById(orcamento.cliente, token);
+
+        setCliente(cliente);
+      } else {
+        setCliente(orcamento.cliente);
+      }
+    }
+
+    carregarDados();
+  }, [budget, initialData, token]);
+
   // Âncora prevista: só é definida na criação (add) e fica travada depois
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   // Âncora real: só passa a existir a partir do edit (quando a execução começa de fato)
   const [dataInicioReal, setDataInicioReal] = useState("");
   const [categorias, setCategorias] = useState<CategoriaObraForm[]>([]);
   const [formFeedback, setFormFeedback] = useState("");
-
-  const clienteObra = useMemo(() => {
-    if (budget) {
-      return budget.cliente;
-    }
-
-    if (initialData && typeof initialData.orcamento === "object") {
-      return initialData.orcamento.cliente;
-    }
-
-    return undefined;
-  }, [budget, initialData]);
-
-  const orcamentoAtrelado = useMemo(() => {
-    if (initialData && typeof initialData.orcamento === "object") {
-      return initialData.orcamento;
-    }
-    if (budget) {
-      return budget;
-    }
-    return undefined;
-  }, [initialData, budget]);
-
-  useEffect(() => {
-    if (initialData) {
-      setObraStatus(initialData.status);
-      setDataInicioPrevista(formatDateInput(initialData.data_inicio_prevista));
-      setDataInicioReal(formatDateInput(initialData.data_inicio_real));
-      setCategorias(mapCategoriasFromObra(initialData.categoria));
-      return;
-    }
-
-    if (isAdd && budget) {
-      setObraStatus("NOPRAZO");
-      setDataInicioPrevista("");
-      setDataInicioReal("");
-      setCategorias(mapCategoriasFromBudget(budget));
-    }
-  }, [initialData, isAdd, budget]);
 
   // Recalcula status/dias/porcentagem de cada categoria a partir dos serviços
   const categoriasCalculadas = useMemo(() => {
@@ -307,6 +322,12 @@ export function ObrasForm({
     [],
   );
 
+  function parseDate(date: string): Date {
+    const [dia, mes, ano] = date.split("/");
+
+    return new Date(Number(ano), Number(mes) - 1, Number(dia));
+  }
+
   const handleSave = async () => {
     if (isReadOnly) return;
     setFormFeedback("");
@@ -330,11 +351,11 @@ export function ObrasForm({
       orcamento: orcamentoAtrelado._id,
       responsavel: user._id,
       status: obraStatus,
-      data_inicio_prevista: new Date(dataInicioPrevista),
-      data_fim_prevista: new Date(dataFimPrevistaCalculada),
-      data_inicio_real: dataInicioReal ? new Date(dataInicioReal) : undefined,
+      data_inicio_prevista: parseDate(dataInicioPrevista),
+      data_fim_prevista: parseDate(dataFimPrevistaCalculada),
+      data_inicio_real: dataInicioReal ? parseDate(dataInicioReal) : undefined,
       data_fim_real: dataFimRealCalculada
-        ? new Date(dataFimRealCalculada)
+        ? parseDate(dataFimRealCalculada)
         : undefined,
       qt_dias_prevista: totalQtDiasPrevista,
       qt_dias_real: totalQtDiasReal,
@@ -358,18 +379,6 @@ export function ObrasForm({
     if (onSuccess) onSuccess();
   };
 
-  const headerTitle = isAdd
-    ? "Nova Obra"
-    : isEdit
-      ? "Editar Obra"
-      : "Detalhes da Obra";
-
-  const buttonText = isAdd
-    ? "Iniciar Obra"
-    : isEdit
-      ? "Salvar Alterações"
-      : "Gerar PDF";
-
   const scrollRef = useRef<ScrollView>(null);
   const irParaSalvar = () => {
     scrollRef.current?.scrollToEnd({
@@ -384,18 +393,15 @@ export function ObrasForm({
           <Ionicons name="arrow-back" size={25} color={COLORS.text} />
         </Pressable>
 
-        <Text style={globalStyles.addTitle}>{headerTitle}</Text>
+        <Text style={globalStyles.addTitle}>
+          {mode === "add"
+            ? "Novo Serviço"
+            : mode === "edit"
+              ? "Editar Serviço"
+              : "Detalhes"}
+        </Text>
 
-        <Pressable
-          onPress={() => {
-            if (isDetails) {
-              onGeneratePdf?.();
-              return;
-            }
-            irParaSalvar();
-          }}
-          style={globalStyles.rightAction}
-        >
+        <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
           <Ionicons name="download" size={25} color={COLORS.title} />
         </Pressable>
       </View>
@@ -405,17 +411,23 @@ export function ObrasForm({
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
           <Text style={globalStyles.label}>Nome da Obra:</Text>
-          <AppInput value={orcamentoAtrelado?.nome ?? ""} editable={false} />
-
+          <AppInput
+            value={orcamentoAtrelado?.nome ?? ""}
+            editable={false}
+            selectTextOnFocus={false}
+          />
           <Text style={globalStyles.label}>Cliente:</Text>
-          <AppInput value={clienteObra?.nome ?? ""} editable={false} />
-
+          <AppInput
+            value={cliente?.nome ?? ""}
+            editable={false}
+            selectTextOnFocus={false}
+          />
           <Text style={globalStyles.label}>Status da Obra:</Text>
           <Picker
             selectedValue={obraStatus}
             onValueChange={(itemValue) => setObraStatus(itemValue)}
             style={globalStyles.picker}
-            enabled={isEdit && !isReadOnly}
+            enabled={!isReadOnly && !isAdd}
           >
             <Picker.Item label="NO PRAZO" value="NOPRAZO" />
             <Picker.Item label="ATRASADO" value="ATRASADO" />
@@ -423,42 +435,47 @@ export function ObrasForm({
             <Picker.Item label="ENTREGUE" value="ENTREGUE" />
             <Picker.Item label="CANCELADO" value="CANCELADO" />
           </Picker>
-
           <Text style={globalStyles.label}>Data de Início Prevista:</Text>
           <AppInput
-            placeholder="YYYY-MM-DD"
+            placeholder="DD/MM/YYYY"
             value={dataInicioPrevista}
-            onChangeText={setDataInicioPrevista}
-            editable={isAdd}
+            keyboardType="numeric"
+            maxLength={10}
+            onChangeText={(text) => setDataInicioPrevista(maskDate(text))}
+            editable={!isReadOnly}
           />
-
           {!isAdd && (
             <>
               <Text style={globalStyles.label}>Data de Início Real:</Text>
               <AppInput
-                placeholder="YYYY-MM-DD"
+                placeholder="DD/MM/YYYY"
                 value={dataInicioReal}
-                onChangeText={setDataInicioReal}
-                editable={isEdit && !isReadOnly}
+                keyboardType="numeric"
+                maxLength={10}
+                onChangeText={(text) => setDataInicioReal(maskDate(text))}
+                editable={!isReadOnly}
               />
             </>
           )}
-
           <Text style={globalStyles.label}>Valor do Orçamento Aprovado:</Text>
           <AppInput
             value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
             editable={false}
           />
-
-          <Text style={globalStyles.label}>
-            Porcentagem de Conclusão Geral:
-          </Text>
-          <AppInput value={`${porcentagemConclusaoGeral}%`} editable={false} />
+          {!isAdd && (
+            <>
+              <Text style={globalStyles.label}>
+                Porcentagem de Conclusão Geral:
+              </Text>
+              <AppInput
+                value={`${porcentagemConclusaoGeral}%`}
+                editable={false}
+              />
+            </>
+          )}
         </View>
-
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
         <View style={globalStyles.divider} />
-
         <View style={globalStyles.card}>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
@@ -516,10 +533,8 @@ export function ObrasForm({
             </View>
           </View>
         </View>
-
         <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
         <View style={globalStyles.divider} />
-
         {categoriasCalculadas.map((categoria) => (
           <View key={categoria.id} style={globalStyles.card}>
             <Text style={globalStyles.label}>Categoria: {categoria.nome}</Text>
@@ -599,7 +614,6 @@ export function ObrasForm({
             ))}
           </View>
         ))}
-
         <Text style={globalStyles.subtitle}>Datas Calculadas da Obra</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
@@ -621,18 +635,21 @@ export function ObrasForm({
             </>
           )}
         </View>
-
         {formFeedback !== "" && (
           <Text style={globalStyles.feedback}>{formFeedback}</Text>
         )}
-
         {feedbackMessage && feedbackMessage !== "" && (
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
         )}
-
-        {!isDetails && (
+        {!isReadOnly && (
           <AppButton
-            title={buttonText}
+            title={
+              mode === "add"
+                ? "Salvar Novo Serviço"
+                : mode === "edit"
+                  ? "Salvar Alterações"
+                  : "Gerar PDF"
+            }
             onPress={handleSave}
             loading={loading}
           />

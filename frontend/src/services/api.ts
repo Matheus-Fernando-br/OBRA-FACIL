@@ -110,6 +110,16 @@ export async function getClients(token: string) {
   return data;
 }
 
+export async function getClientById(id: string, token: string) {
+  const { data } = await api.get(`/client/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
 export async function createClient(body: AddCliente, token: string) {
   const { data } = await api.post("/client", body, {
     headers: {
@@ -147,6 +157,16 @@ import { Orcamento } from "@/components/layout/interface";
 
 export async function getBudgets(token: string) {
   const { data } = await api.get("/orcamento", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function getBudgetById(id: string, token: string) {
+  const { data } = await api.get(`/orcamento/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
