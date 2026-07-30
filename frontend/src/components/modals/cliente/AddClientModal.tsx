@@ -143,11 +143,7 @@ export function AddClientModal({ visible, onClose }: Props) {
                   onPress={irParaSalvar}
                   style={globalStyles.rightAction}
                 >
-                  <View style={globalStyles.saveTextStack}>
-                    <Text style={globalStyles.saveText}>Salvar</Text>
-                    <Text style={globalStyles.saveText}>Cliente</Text>
-                  </View>
-                  <Ionicons name="person-add" size={20} color={COLORS.title} />
+                  <Ionicons name="person-add" size={25} color={COLORS.title} />
                 </Pressable>
               </View>
 
@@ -194,6 +190,7 @@ export function AddClientModal({ visible, onClose }: Props) {
                   title="Salvar cliente"
                   loading={loading}
                   onPress={handleSave}
+                  color={COLORS.primary}
                 />
               </View>
             </View>

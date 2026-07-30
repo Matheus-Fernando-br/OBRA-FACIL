@@ -55,6 +55,7 @@ export function OrcamentoForm({
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const [nome, setNome] = useState(initialData?.nome || "");
+  const [status, setStatus] = useState(initialData?.status || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
   const [selectedClient, setSelectedClient] = useState(() => {
     if (!initialData?.cliente) return "";
@@ -113,9 +114,8 @@ export function OrcamentoForm({
     ],
   );
   const [bdi, setBdi] = useState(initialData?.bdi.toString() || "");
-   const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [feedbackSinapi, setFeedbackSinapi] = useState("");
-
   const dataPublicacao = initialData
     ? new Date(initialData.data_publicacao)
     : new Date();
@@ -283,7 +283,6 @@ export function OrcamentoForm({
   };
 
   const scrollRef = useRef<ScrollView>(null);
-  const salvarRef = useRef<View>(null);
   const irParaSalvar = () => {
     scrollRef.current?.scrollToEnd({
       animated: true,
@@ -311,32 +310,16 @@ export function OrcamentoForm({
               return;
             }
 
-            handleSubmit();
+            irParaSalvar();
           }}
           style={globalStyles.rightAction}
         >
-          {loading ? (
-            <ActivityIndicator color={COLORS.white} />
-          ) : (
-            <View style={globalStyles.saveTextStack}>
-              <Text style={globalStyles.saveText}>
-                {" "}
-                {mode === "add"
-                  ? "Salvar Novo Orçamento"
-                  : mode === "edit"
-                    ? "Salvar Alterações"
-                    : "Gerar PDF"}
-              </Text>
-            </View>
-          )}
-          <Ionicons name="checkmark-circle" size={20} color={COLORS.white} />
+          <Ionicons name="download" size={25} color={COLORS.title} />
         </Pressable>
       </View>
       <ScrollView
+        ref={scrollRef}
         style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingRight: 20,
-        }}
       >
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
@@ -607,7 +590,7 @@ export function OrcamentoForm({
             )}
           </View>
         ))}
-        
+
         {!isReadOnly && (
           <AppButton
             title="+ Categoria"
@@ -642,6 +625,20 @@ export function OrcamentoForm({
         )}
         {feedbackMessage !== "" && (
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
+        )}
+        <View style={globalStyles.divider}></View>
+        {!isReadOnly && (
+          <AppButton
+            title={
+              mode === "add"
+                ? "Salvar Novo Orçamento"
+                : mode === "edit"
+                  ? "Salvar Alterações"
+                  : "Gerar PDF"
+            }
+            onPress={handleSubmit}
+            color={COLORS.primary}
+          />
         )}
       </ScrollView>
     </View>

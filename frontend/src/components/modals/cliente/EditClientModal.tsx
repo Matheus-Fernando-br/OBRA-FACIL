@@ -186,11 +186,7 @@ export function EditClientModal({
                 onPress={irParaSalvar}
                 style={globalStyles.rightAction}
               >
-                <View style={globalStyles.saveTextStack}>
-                  <Text style={globalStyles.saveText}>Atualizar</Text>
-                  <Text style={globalStyles.saveText}>Cliente</Text>
-                </View>
-                <Ionicons name="download" size={20} color={COLORS.title} />
+                <Ionicons name="download" size={25} color={COLORS.title} />
               </Pressable>
             </View>
               <Text style={globalStyles.subtitle}>Informações Pessoais</Text>

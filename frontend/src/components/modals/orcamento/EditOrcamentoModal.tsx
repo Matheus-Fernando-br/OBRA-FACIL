@@ -1,6 +1,6 @@
 import { Modal, View } from "react-native";
 import { useEffect, useState } from "react";
-import { OrcamentoForm } from "@/components/forms/orcamentoForm";
+import { OrcamentoForm } from "../../forms/OrcamentoForm";
 import { getClients, updateBudget } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Cliente, Orcamento } from "@/components/layout/interface";

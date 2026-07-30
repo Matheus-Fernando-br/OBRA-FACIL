@@ -318,13 +318,6 @@ workCardImage: {
     alignItems: "center",
   },
 
-  /*workCardTitle: {
-  flex: 1,
-  fontSize: 18,
-  fontWeight: "700",
-  color: "#111827",
-  marginRight: 10,
-},*/
 
   workStatusBadge: {
     paddingHorizontal: 10,
@@ -786,7 +779,7 @@ workCardProgress: {
   },
 
   rightAction: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "center",
     zIndex: 1, // Garante clique sobre o título
   },
