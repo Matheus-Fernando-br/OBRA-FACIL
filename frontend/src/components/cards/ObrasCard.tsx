@@ -1,25 +1,29 @@
-import { View, Text, Image, Pressable } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
+
 import { Ionicons } from "@expo/vector-icons";
 
 import { globalStyles } from "../../styles/globalStyles";
 
 interface Props {
   title: string;
-
   status: string;
-
   progress: number;
 
   EndDate?: string;
+  startDate?: string;
 
   client: string;
 
-  startDate?: string;
-
   onDetails(): void;
-
   onEdit(): void;
-
   onDelete(): void;
 }
 
@@ -28,12 +32,14 @@ export function ObrasCard({
   status,
   progress,
   EndDate,
-  client,
   startDate,
+  client,
   onDetails,
   onEdit,
   onDelete,
 }: Props) {
+  const [menuVisible, setMenuVisible] = useState(false);
+
   function getStatusColor() {
     switch (status.toUpperCase()) {
       case "ADIANTADO":
@@ -54,128 +60,167 @@ export function ObrasCard({
   }
 
   return (
-    <View style={globalStyles.workCard}>
-      <Image
-        source={require("../../assets/images/house.jpg")}
-        style={globalStyles.workCardImage}
-      />
+    <>
+      <View style={globalStyles.obrasCard}>
+        {/* ==========================
+            IMAGEM DE FUNDO
+        ========================== */}
 
-      <View style={globalStyles.workCardBody}>
-        <View style={globalStyles.workCardHeader}>
-          <Text
-            numberOfLines={1}
-            style={globalStyles.workCardTitle}
-          >
-            {title}
-          </Text>
+        <Image
+          source={require("../../assets/images/house.jpg")}
+          style={globalStyles.obrasCardBackground}
+        />
 
-          <View
-            style={[
-              globalStyles.workStatusBadge,
-              {
-                backgroundColor: `${getStatusColor()}20`,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                globalStyles.workStatusText,
-                {
-                  color: getStatusColor(),
-                },
-              ]}
-            >
-              {status}
-            </Text>
-          </View>
-        </View>
+        {/* Overlay branco */}
+        <View style={globalStyles.obrasCardOverlay} />
 
-        <Text style={globalStyles.workCardSubtitle}>
-          Cliente: {client}
-        </Text>
-        {startDate && (
-          <Text style={globalStyles.workCardDate}>
-            Início: {startDate}
-          </Text>
-        )}
-        {EndDate && (
-        <Text style={globalStyles.workCardDate}>
-          Previsão de Término: {EndDate}
-        </Text>
-        )}
+        {/* ==========================
+            CONTEÚDO
+        ========================== */}
 
-        <View style={globalStyles.progressContainer}>
-          <View style={globalStyles.progressBarBackground}>
+        <View style={globalStyles.obrasCardContent}>
+          {/* HEADER */}
+
+          <View style={globalStyles.obrasCardHeader}>
+            <View style={{ flex: 1 }}>
+              <Text numberOfLines={1} style={globalStyles.obrasCardTitle}>
+                {title}
+              </Text>
+            </View>
+
+            {/* STATUS */}
+
             <View
               style={[
-                globalStyles.progressBarFill,
+                globalStyles.obrasStatusBadge,
                 {
-                  width: `${progress}%`,
+                  backgroundColor: `${getStatusColor()}20`,
                 },
               ]}
-            />
+            >
+              <Text
+                style={[
+                  globalStyles.obrasStatusText,
+                  {
+                    color: getStatusColor(),
+                  },
+                ]}
+              >
+                {status}
+              </Text>
+            </View>
+
+            <Pressable
+              style={globalStyles.menuButton}
+              onPress={() => setMenuVisible(true)}
+            >
+              <Ionicons name="ellipsis-vertical" size={22} color="#555" />
+            </Pressable>
           </View>
 
-          <Text style={globalStyles.workCardProgress}>
-            {progress}%
-          </Text>
-        </View>
+          {/* CLIENTE */}
 
+          <Text style={globalStyles.workCardDate}>Cliente: {client}</Text>
 
-        {/* BOTÕES */}
+          {/* DATAS */}
 
-        <View style={globalStyles.orcamentoButtons}>
+          {startDate && (
+            <Text style={globalStyles.workCardDate}>Início: {startDate}</Text>
+          )}
+
+          {EndDate && (
+            <Text style={globalStyles.workCardDate}>
+              Previsão de término: {EndDate}
+            </Text>
+          )}
+
+          {/* PROGRESSO */}
+
+          <View style={globalStyles.progressContainer}>
+            <View style={globalStyles.progressBarBackground}>
+              <View
+                style={[
+                  globalStyles.progressBarFill,
+                  {
+                    width: `${progress}%`,
+                  },
+                ]}
+              />
+            </View>
+
+            <Text style={globalStyles.workCardProgress}>{progress}%</Text>
+          </View>
+
+          {/* BOTÃO PRINCIPAL */}
+
           <Pressable
-            style={[
-              globalStyles.orcamentoDetailsButton,
-              globalStyles.orcamentoMainButton,
-            ]}
+            style={globalStyles.orcamentoMainButton}
             onPress={onDetails}
           >
-            <Ionicons
-              name="eye"
-              size={18}
-              color="#FFF"
-            />
+            <Ionicons name="eye" size={20} color="#FFF" />
 
-            <Text
-              style={
-                globalStyles.orcamentoDetailsButtonText
-              }
-            >
-              Detalhes
+            <Text style={globalStyles.orcamentoDetailsButtonText}>
+              Ver detalhes
             </Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              globalStyles.orcamentoDetailsButton,
-              globalStyles.orcamentoEditButton,
-            ]}
-            onPress={onEdit}
-          >
-            <Ionicons
-              name="create"
-              size={18}
-              color="#FFF"
-            />
-          </Pressable>
-
-          <Pressable
-            style={[
-              globalStyles.orcamentoDetailsButton,
-              globalStyles.orcamentoDeleteButton,
-            ]}
-            onPress={onDelete}
-          >
-            <Ionicons
-              name="trash"
-              size={18}
-              color="#FFF"
-            />
           </Pressable>
         </View>
       </View>
-    </View>
+
+      {/* =======================================================
+          MENU
+      ======================================================== */}
+
+      <Modal
+        visible={menuVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMenuVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setMenuVisible(false)}>
+          <View style={globalStyles.menuOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={globalStyles.menuContainer}>
+                {/* FECHAR */}
+
+                <Pressable
+                  style={globalStyles.closeButton}
+                  onPress={() => setMenuVisible(false)}
+                >
+                  <Ionicons name="close" size={22} color="#666" />
+                </Pressable>
+
+                {/* EDITAR */}
+
+                <Pressable
+                  style={globalStyles.menuItem}
+                  onPress={() => {
+                    setMenuVisible(false);
+                    onEdit();
+                  }}
+                >
+                  <Ionicons name="create-outline" size={20} color="#2563EB" />
+
+                  <Text style={globalStyles.obrasMenuText}>Editar</Text>
+                </Pressable>
+
+                {/* EXCLUIR */}
+
+                <Pressable
+                  style={globalStyles.menuItem}
+                  onPress={() => {
+                    setMenuVisible(false);
+                    onDelete();
+                  }}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#DC2626" />
+
+                  <Text style={globalStyles.obrasMenuText}>Excluir</Text>
+                </Pressable>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </>
   );
 }

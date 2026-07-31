@@ -212,15 +212,23 @@ export const globalStyles = StyleSheet.create({
   },
 
   orcamentoMainButton: {
-    flex: 1,
-
-    marginRight: 8,
-
     flexDirection: "row",
 
     justifyContent: "center",
 
     alignItems: "center",
+
+    textAlign: "center",
+
+    backgroundColor: COLORS.primary,
+
+    borderRadius: 5,
+
+    marginTop: 5,
+
+    marginHorizontal: 60,
+
+    padding: 5,
   },
 
   orcamentoEditButton: {
@@ -281,33 +289,6 @@ export const globalStyles = StyleSheet.create({
     textAlign: "right",
   },
 
-  /* =========================
-   OBRAS
-========================= */
-  /*workCard: {
-  backgroundColor: "#FFFFFF",
-  borderRadius: 18,
-  marginBottom: 18,
-  overflow: "hidden",
-
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-
-  shadowColor: "#000",
-  shadowOffset: {
-    width: 0,
-    height: 2,
-  },
-  shadowOpacity: 0.08,
-  shadowRadius: 6,
-  elevation: 3,
-},
-
-workCardImage: {
-  width: "100%",
-  height: 170,
-},*/
-
   workCardBody: {
     padding: 16,
   },
@@ -317,7 +298,6 @@ workCardImage: {
     justifyContent: "space-between",
     alignItems: "center",
   },
-
 
   workStatusBadge: {
     paddingHorizontal: 10,
@@ -949,6 +929,206 @@ workCardProgress: {
     marginLeft: 10,
     fontWeight: "600",
     color: COLORS.text,
+  },
+  /* ==========================================================
+   OBRAS CARD
+========================================================== */
+
+  obrasCard: {
+    position: "relative",
+    overflow: "hidden",
+
+    backgroundColor: COLORS.textSecondary,
+
+    borderRadius: 22,
+
+    marginBottom: 18,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+
+    shadowOffset: {
+      width: 0,
+      height: 5,
+    },
+
+    elevation: 5,
+  },
+
+  /* =========================
+   IMAGEM DE FUNDO
+========================= */
+
+  obrasCardBackground: {
+    position: "absolute",
+
+    width: "100%",
+    height: "100%",
+
+    resizeMode: "cover",
+  },
+
+  obrasCardOverlay: {
+    position: "absolute",
+
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+
+    backgroundColor: "rgba(255, 255, 255, 0.91)",
+  },
+
+  /* =========================
+   CONTEÚDO
+========================= */
+
+  obrasCardContent: {
+    padding: 18,
+  },
+
+  /* =========================
+   HEADER
+========================= */
+
+  obrasCardHeader: {
+    flexDirection: "row",
+
+    justifyContent: "space-between",
+
+    alignItems: "center",
+
+    marginBottom: 10,
+  },
+
+  menuButton: {
+    width: 36,
+
+    height: 36,
+
+    borderRadius: 18,
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    backgroundColor: "#FFFFFFAA",
+  },
+
+  /* =========================
+   TITULO
+========================= */
+
+  obrasCardTitle: {
+    fontFamily: "Poppins_700Bold",
+
+    fontSize: 20,
+
+    color: COLORS.title,
+  },
+
+  /* =========================
+   STATUS
+========================= */
+
+  obrasStatusBadge: {
+    alignSelf: "flex-start",
+
+    paddingHorizontal: 12,
+
+    paddingVertical: 5,
+
+    borderRadius: 30,
+
+    marginRight: 14,
+
+    marginTop: 5,
+  },
+
+  obrasStatusText: {
+    fontFamily: "Poppins_600SemiBold",
+
+    fontSize: 12,
+  },
+
+  /* =========================
+   TEXTOS
+========================= */
+
+  obrasCardDate: {
+    fontFamily: "Poppins_400Regular",
+
+    fontSize: 13,
+
+    color: COLORS.text,
+
+    marginBottom: 4,
+  },
+
+  /* ==========================================================
+   MENU
+========================================================== */
+
+  menuOverlay: {
+    flex: 1,
+
+    backgroundColor: "rgba(0,0,0,0.20)",
+
+    justifyContent: "flex-start",
+
+    alignItems: "flex-end",
+
+    paddingTop: 120,
+
+    paddingRight: 20,
+  },
+
+  menuContainer: {
+    width: 190,
+
+    backgroundColor: "#FFF",
+
+    borderRadius: 18,
+
+    padding: 16,
+
+    shadowColor: "#000",
+
+    shadowOpacity: 0.2,
+
+    shadowRadius: 12,
+
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+
+    elevation: 10,
+  },
+
+  closeButton: {
+    alignSelf: "flex-end",
+
+    marginBottom: 10,
+  },
+
+  menuItem: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    paddingVertical: 12,
+  },
+
+  obrasMenuText: {
+    marginLeft: 12,
+
+    fontFamily: "Poppins_500Medium",
+
+    fontSize: 15,
+
+    color: COLORS.title,
   },
 });
 
