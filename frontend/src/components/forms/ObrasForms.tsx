@@ -50,11 +50,14 @@ interface ObrasFormProps {
   onSuccess?: () => void;
 }
 
-function formatDateInput(value?: Date | string | null): string {
+function formatDateToBR(value?: Date | string | null): string {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().split("T")[0];
+  const dia = String(date.getDate()).padStart(2, "0");
+  const mes = String(date.getMonth() + 1).padStart(2, "0");
+  const ano = date.getFullYear();
+  return `${dia}/${mes}/${ano}`;
 }
 
 const calculateServiceStatus = (service: ServicoObraForm): ObraStatus => {
@@ -79,15 +82,17 @@ const calculateCategoryProgress = (services: ServicoObraForm[]) => {
   }
 
   const qt_dias_prevista = services.reduce(
-    (sum, s) => sum + (s.qt_dias_prevista || 0),
+    (sum, s) => sum + Number(s.qt_dias_prevista ?? 0),
     0,
   );
+
   const qt_dias_real = services.reduce(
-    (sum, s) => sum + (s.qt_dias_real || 0),
+    (sum, s) => sum + Number(s.qt_dias_real ?? 0),
     0,
   );
+
   const totalProgress = services.reduce(
-    (sum, s) => sum + (s.porcentagem_de_conclusao || 0),
+    (sum, s) => sum + Number(s.porcentagem_de_conclusao ?? 0),
     0,
   );
   const porcentagem_de_conclusao = Math.round(totalProgress / services.length);
@@ -106,6 +111,24 @@ const calculateCategoryProgress = (services: ServicoObraForm[]) => {
   return { porcentagem_de_conclusao, qt_dias_prevista, qt_dias_real, status };
 };
 
+const calculateWorkStatus = (categorias: CategoriaObraForm[]): ObraStatus => {
+  if (categorias.length === 0) return "NOPRAZO";
+
+  if (categorias.every((c) => c.status === "ENTREGUE")) {
+    return "ENTREGUE";
+  }
+
+  if (categorias.some((c) => c.status === "ATRASADO")) {
+    return "ATRASADO";
+  }
+
+  if (categorias.every((c) => c.status === "ADIANTADO")) {
+    return "ADIANTADO";
+  }
+
+  return "NOPRAZO";
+};
+
 function mapCategoriasFromObra(
   categorias: CategoriaObra[],
 ): CategoriaObraForm[] {
@@ -114,9 +137,14 @@ function mapCategoriasFromObra(
       const servicoForm: ServicoObraForm = {
         ...serv,
         id: Date.now() + catIdx * 1000 + servIdx + 1,
+        qt_dias_prevista: Number(serv.qt_dias_prevista ?? 0),
+        qt_dias_real: Number(serv.qt_dias_real ?? 0),
+        porcentagem_de_conclusao: Number(serv.porcentagem_de_conclusao ?? 0),
         status: "NOPRAZO",
       };
+
       servicoForm.status = calculateServiceStatus(servicoForm);
+
       return servicoForm;
     });
 
@@ -223,11 +251,21 @@ export function ObrasForm({
 
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   const [dataInicioReal, setDataInicioReal] = useState("");
-  const [dataFimPrevista, setDataFimPrevista] = useState("");
-  const [dataFimReal, setDataFimReal] = useState("");
-
   const [categorias, setCategorias] = useState<CategoriaObraForm[]>([]);
-  const [formFeedback, setFormFeedback] = useState("");
+  const [feedback, setFeedback] = useState("");
+
+  useEffect(() => {
+    if (initialData) {
+      // Edição / Detalhes: usa os dados reais da obra
+      setCategorias(mapCategoriasFromObra(initialData.categoria));
+      setObraStatus(initialData.status);
+      setDataInicioPrevista(formatDateToBR(initialData.data_inicio_prevista));
+      setDataInicioReal(formatDateToBR(initialData.data_inicio_real));
+    } else if (budget) {
+      // Criação: monta categorias/serviços zerados a partir do orçamento
+      setCategorias(mapCategoriasFromBudget(budget));
+    }
+  }, [initialData, budget]);
 
   // Recalcula status/dias/porcentagem de cada categoria a partir dos serviços
   const categoriasCalculadas = useMemo(() => {
@@ -244,6 +282,10 @@ export function ObrasForm({
       };
     });
   }, [categorias]);
+
+  const obraStatusCalculado = useMemo(() => {
+    return calculateWorkStatus(categoriasCalculadas);
+  }, [categoriasCalculadas]);
 
   const porcentagemConclusaoGeral = useMemo(() => {
     if (categoriasCalculadas.length === 0) {
@@ -262,7 +304,7 @@ export function ObrasForm({
   const totalQtDiasPrevista = useMemo(
     () =>
       categoriasCalculadas.reduce(
-        (sum, cat) => sum + (cat.qt_dias_prevista || 0),
+        (sum, cat) => sum + Number(cat.qt_dias_prevista ?? 0),
         0,
       ),
     [categoriasCalculadas],
@@ -271,30 +313,46 @@ export function ObrasForm({
   const totalQtDiasReal = useMemo(
     () =>
       categoriasCalculadas.reduce(
-        (sum, cat) => sum + (cat.qt_dias_real || 0),
+        (sum, cat) => sum + Number(cat.qt_dias_real ?? 0),
         0,
       ),
     [categoriasCalculadas],
   );
 
-  // Data fim prevista = data início prevista + total de dias previstos
+  const formatDate = (date: Date) => {
+    const dia = String(date.getDate()).padStart(2, "0");
+    const mes = String(date.getMonth() + 1).padStart(2, "0");
+    const ano = date.getFullYear();
+
+    return `${dia}/${mes}/${ano}`;
+  };
+
   const dataFimPrevistaCalculada = useMemo(() => {
     if (!dataInicioPrevista) return "";
-    const start = new Date(dataInicioPrevista);
+
+    const [dia, mes, ano] = dataInicioPrevista.split("/");
+    const start = new Date(Number(ano), Number(mes) - 1, Number(dia));
+
     if (Number.isNaN(start.getTime())) return "";
+
     const end = new Date(start);
     end.setDate(end.getDate() + totalQtDiasPrevista);
-    return end.toISOString().split("T")[0];
+
+    return formatDate(end);
   }, [dataInicioPrevista, totalQtDiasPrevista]);
 
-  // Data fim real = data início real + total de dias reais
   const dataFimRealCalculada = useMemo(() => {
     if (!dataInicioReal) return "";
-    const start = new Date(dataInicioReal);
+
+    const [dia, mes, ano] = dataInicioReal.split("/");
+    const start = new Date(Number(ano), Number(mes) - 1, Number(dia));
+
     if (Number.isNaN(start.getTime())) return "";
+
     const end = new Date(start);
     end.setDate(end.getDate() + totalQtDiasReal);
-    return end.toISOString().split("T")[0];
+
+    return formatDate(end);
   }, [dataInicioReal, totalQtDiasReal]);
 
   const updateServico = useCallback(
@@ -329,29 +387,45 @@ export function ObrasForm({
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
-  const handleSave = async () => {
+  async function handleSubmit() {
     if (isReadOnly) return;
-    setFormFeedback("");
+
+    setFeedback("");
 
     if (!token || !user) {
-      setFormFeedback("Sessão expirada.");
+      setFeedback("Sessão expirada.");
       return;
     }
 
     if (!orcamentoAtrelado) {
-      Alert.alert("Erro", "Orçamento não encontrado para a obra.");
+      setFeedback("Orçamento não encontrado para a obra.");
+      return;
+    }
+
+    if (!cliente) {
+      setFeedback("Cliente não encontrado para o orçamento.");
       return;
     }
 
     if (!dataInicioPrevista) {
-      Alert.alert("Atenção", "Informe a data de início prevista da obra.");
+      setFeedback("Informe a data de início prevista da obra.");
+      return;
+    }
+
+    if (!isAdd && !dataInicioReal) {
+      setFeedback("Informe a data de início real da obra.");
+      return;
+    }
+
+    if (!obraStatus) {
+      setFeedback("Informe o status da obra.");
       return;
     }
 
     const workData = {
       orcamento: orcamentoAtrelado._id,
       responsavel: user._id,
-      status: obraStatus,
+      status: obraStatusCalculado,
       data_inicio_prevista: parseDate(dataInicioPrevista),
       data_fim_prevista: parseDate(dataFimPrevistaCalculada),
       data_inicio_real: dataInicioReal ? parseDate(dataInicioReal) : undefined,
@@ -378,7 +452,7 @@ export function ObrasForm({
 
     if (onSave) await onSave(workData);
     if (onSuccess) onSuccess();
-  };
+  }
 
   const scrollRef = useRef<ScrollView>(null);
   const irParaSalvar = () => {
@@ -454,24 +528,14 @@ export function ObrasForm({
               </View>
             )}
           </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Status da Obra:</Text>
-              <Picker
-                selectedValue={obraStatus}
-                onValueChange={(itemValue) => setObraStatus(itemValue)}
-                style={globalStyles.picker}
-                enabled={!isReadOnly && !isAdd}
-              >
-                <Picker.Item label="NO PRAZO" value="NOPRAZO" />
-                <Picker.Item label="ATRASADO" value="ATRASADO" />
-                <Picker.Item label="ADIANTADO" value="ADIANTADO" />
-                <Picker.Item label="ENTREGUE" value="ENTREGUE" />
-                <Picker.Item label="CANCELADO" value="CANCELADO" />
-              </Picker>
-            </View>
+          {!isAdd && (
+            <View style={globalStyles.row}>
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Status da Obra:</Text>
 
-            {!isAdd && (
+                <AppInput value={obraStatusCalculado} editable={false} />
+              </View>
+
               <View style={globalStyles.column}>
                 <Text style={globalStyles.label}>Conclusão Geral:</Text>
                 <AppInput
@@ -479,8 +543,8 @@ export function ObrasForm({
                   editable={false}
                 />
               </View>
-            )}
-          </View>
+            </View>
+          )}
         </View>
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
         <View style={globalStyles.divider} />
@@ -543,41 +607,53 @@ export function ObrasForm({
         </View>
         <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
         <View style={globalStyles.divider} />
-        {categoriasCalculadas.map((categoria) => (
+        {categoriasCalculadas.map((categoria, idx) => (
           <View key={categoria.id} style={globalStyles.card}>
-            <Text style={globalStyles.label}>Categoria: {categoria.nome}</Text>
+            <Text style={globalStyles.label}>Nome da Categoria {idx + 1}:</Text>
+            <AppInput value={categoria.nome} editable={false} />
             <View style={globalStyles.row}>
               <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
-                  Dias Previstos da Categoria: {categoria.qt_dias_prevista || 0}
-                </Text>
+                <Text style={globalStyles.label}>Dias Previstos:</Text>
+                <AppInput
+                  value={String(categoria.qt_dias_prevista || 0)}
+                  editable={false}
+                />
               </View>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
-                  Dias Reais da Categoria: {categoria.qt_dias_real || 0}
-                </Text>
-              </View>
+              {!isAdd && (
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Dias Reais:</Text>
+                  <AppInput
+                    value={String(categoria.qt_dias_real || 0)}
+                    editable={false}
+                  />
+                </View>
+              )}
             </View>
-            <View style={globalStyles.row}>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
-                  Status da Categoria: {categoria.status}
-                </Text>
+            {!isAdd && (
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Status da Categoria:</Text>
+                  <AppInput value={categoria.status} editable={false} />
+                </View>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>
+                    Progresso da Categoria:
+                  </Text>
+                  <AppInput
+                    value={`${categoria.porcentagem_de_conclusao || 0}%`}
+                    editable={false}
+                  />
+                </View>
               </View>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
-                  Progresso da Categoria:{" "}
-                  {categoria.porcentagem_de_conclusao || 0}%
-                </Text>
-              </View>
-            </View>
-
-            {categoria.servicos.map((servico) => (
+            )}
+            {categoria.servicos.map((servico, sIdx) => (
               <View key={servico.id} style={styles.serviceCard}>
-                <Text style={globalStyles.label}>Serviço: {servico.nome}</Text>
                 <Text style={globalStyles.label}>
-                  Descrição: {servico.descricao}
+                  Nome do Serviço {sIdx + 1}:
                 </Text>
+                <AppInput value={servico.nome} editable={false} />
+                <Text style={globalStyles.label}>Descrição:</Text>
+                <AppInput value={servico.descricao} editable={false} />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
                     <Text style={globalStyles.label}>Dias Previstos:</Text>
@@ -596,50 +672,51 @@ export function ObrasForm({
                       editable={!isReadOnly}
                     />
                   </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Dias Reais:</Text>
-                    <AppInput
-                      placeholder="Dias"
-                      value={String(servico.qt_dias_real ?? 0)}
-                      onChangeText={(text) =>
-                        updateServico(
-                          categoria.id,
-                          servico.id,
-                          "qt_dias_real",
-                          Number(text) || 0,
-                        )
-                      }
-                      keyboardType="numeric"
-                      editable={!isReadOnly}
-                    />
-                  </View>
+                  {!isAdd && (
+                    <View style={globalStyles.column}>
+                      <Text style={globalStyles.label}>Dias Reais:</Text>
+                      <AppInput
+                        placeholder="Dias"
+                        value={String(servico.qt_dias_real ?? 0)}
+                        onChangeText={(text) =>
+                          updateServico(
+                            categoria.id,
+                            servico.id,
+                            "qt_dias_real",
+                            Number(text) || 0,
+                          )
+                        }
+                        keyboardType="numeric"
+                        editable={!isReadOnly}
+                      />
+                    </View>
+                  )}
                 </View>
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
-                      Status do Serviço: {servico.status}
-                    </Text>
+                {!isAdd && (
+                  <View style={globalStyles.row}>
+                    <View style={globalStyles.column}>
+                      <Text style={globalStyles.label}>Status do Serviço:</Text>
+                      <AppInput value={servico.status} editable={false} />
+                    </View>
+                    <View style={globalStyles.column}>
+                      <Text style={globalStyles.label}>Conclusão:</Text>
+                      <AppInput
+                        placeholder="%"
+                        value={String(servico.porcentagem_de_conclusao || 0)}
+                        onChangeText={(text) =>
+                          updateServico(
+                            categoria.id,
+                            servico.id,
+                            "porcentagem_de_conclusao",
+                            Number(text) || 0,
+                          )
+                        }
+                        keyboardType="numeric"
+                        editable={!isReadOnly}
+                      />
+                    </View>
                   </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
-                      Porcentagem de Conclusão:
-                    </Text>
-                    <AppInput
-                      placeholder="%"
-                      value={String(servico.porcentagem_de_conclusao || 0)}
-                      onChangeText={(text) =>
-                        updateServico(
-                          categoria.id,
-                          servico.id,
-                          "porcentagem_de_conclusao",
-                          Number(text) || 0,
-                        )
-                      }
-                      keyboardType="numeric"
-                      editable={!isReadOnly}
-                    />
-                  </View>
-                </View>
+                )}
               </View>
             ))}
           </View>
@@ -653,7 +730,6 @@ export function ObrasForm({
               <AppInput
                 placeholder="DD/MM/YYYY"
                 value={dataFimPrevistaCalculada}
-                onChangeText={(text) => setDataFimPrevista(maskDate(text))}
                 editable={false}
               />
             </View>
@@ -665,7 +741,6 @@ export function ObrasForm({
                   placeholder="DD/MM/YYYY"
                   value={dataFimRealCalculada}
                   editable={false}
-                  onChangeText={(text) => setDataFimReal(maskDate(text))}
                 />
               </View>
             )}
@@ -680,7 +755,7 @@ export function ObrasForm({
             </View>
             {!isAdd && (
               <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Valor do Orçamento Real:</Text>
+                <Text style={globalStyles.label}>Total gasto:</Text>
                 <AppInput
                   placeholder="R$ 0,00"
                   value={"R$ 0.00"}
@@ -691,8 +766,8 @@ export function ObrasForm({
           </View>
         </View>
 
-        {formFeedback !== "" && (
-          <Text style={globalStyles.feedback}>{formFeedback}</Text>
+        {feedback !== "" && (
+          <Text style={globalStyles.feedback}>{feedback}</Text>
         )}
         {feedbackMessage && feedbackMessage !== "" && (
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
@@ -706,7 +781,7 @@ export function ObrasForm({
                 ? "Salvar Alterações"
                 : "Gerar PDF"
           }
-          onPress={handleSave}
+          onPress={handleSubmit}
           loading={loading}
           color={COLORS.primary}
         />

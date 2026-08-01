@@ -236,11 +236,110 @@ export function OrcamentoForm({
     if (isReadOnly) {
       return onGeneratePdf?.();
     }
+
     setFeedback("");
+
     if (!token || !user) {
       setFeedback("Sessão expirada.");
       return;
     }
+
+    if (!nome.trim()) {
+      setFeedback("Informe o nome do orçamento.");
+      return;
+    }
+
+    if (!selectedClient) {
+      setFeedback("Selecione um cliente.");
+      return;
+    }
+
+    if (!status) {
+      setFeedback("Selecione o status do orçamento.");
+      return;
+    }
+
+    if (!dataPublicacao) {
+      setFeedback("Informe a data de publicação.");
+      return;
+    }
+
+    if (!validade) {
+      setFeedback("Informe a validade do orçamento.");
+      return;
+    }
+
+    if (!cep.trim()) {
+      setFeedback("Informe o CEP.");
+      return;
+    }
+
+    if (!estado) {
+      setFeedback("Selecione o estado.");
+      return;
+    }
+
+    if (!cidade.trim()) {
+      setFeedback("Informe a cidade.");
+      return;
+    }
+
+    if (!bairro.trim()) {
+      setFeedback("Informe o bairro.");
+      return;
+    }
+
+    if (!logradouro.trim()) {
+      setFeedback("Informe o logradouro.");
+      return;
+    }
+
+    for (let i = 0; i < categorias.length; i++) {
+      const categoria = categorias[i];
+
+      if (!categoria.nome.trim()) {
+        setFeedback(`Informe o nome da categoria ${i + 1}.`);
+        return;
+      }
+
+      for (let j = 0; j < categoria.servicos.length; j++) {
+        const servico = categoria.servicos[j];
+
+        if (!servico.nome.trim()) {
+          setFeedback(
+            `Informe o nome do serviço ${j + 1} da categoria ${i + 1}.`,
+          );
+          return;
+        }
+
+        if (!servico.unidade) {
+          setFeedback(
+            `Selecione a unidade do serviço ${j + 1} da categoria ${i + 1}.`,
+          );
+          return;
+        }
+
+        if (servico.quantidade_unidade <= 0) {
+          setFeedback(
+            `Informe uma quantidade válida para o serviço ${j + 1} da categoria ${i + 1}.`,
+          );
+          return;
+        }
+
+        if (servico.preco_da_unidade <= 0) {
+          setFeedback(
+            `Informe um valor unitário válido para o serviço ${j + 1} da categoria ${i + 1}.`,
+          );
+          return;
+        }
+      }
+    }
+
+    if (!bdi) {
+      setFeedback("Informe o BDI.");
+      return;
+    }
+
     const budgetData = {
       nome,
       endereco: {
