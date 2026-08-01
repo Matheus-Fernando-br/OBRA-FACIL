@@ -29,7 +29,6 @@ export default function LoginScreen() {
       setFeedback("");
 
       await login(email, password);
-
       router.replace("/(tabs)");
     } catch (error: any) {
       console.log(error);

@@ -221,10 +221,11 @@ export function ObrasForm({
     carregarDados();
   }, [budget, initialData, token]);
 
-  // Âncora prevista: só é definida na criação (add) e fica travada depois
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
-  // Âncora real: só passa a existir a partir do edit (quando a execução começa de fato)
   const [dataInicioReal, setDataInicioReal] = useState("");
+  const [dataFimPrevista, setDataFimPrevista] = useState("");
+  const [dataFimReal, setDataFimReal] = useState("");
+
   const [categorias, setCategorias] = useState<CategoriaObraForm[]>([]);
   const [formFeedback, setFormFeedback] = useState("");
 
@@ -402,6 +403,9 @@ export function ObrasForm({
         </Text>
 
         <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+          <Text style={globalStyles.saveText}>
+            {mode === "details" ? "Gerar PDF" : "Salvar"}
+          </Text>
           <Ionicons name="download" size={25} color={COLORS.title} />
         </Pressable>
       </View>
@@ -422,57 +426,61 @@ export function ObrasForm({
             editable={false}
             selectTextOnFocus={false}
           />
-          <Text style={globalStyles.label}>Status da Obra:</Text>
-          <Picker
-            selectedValue={obraStatus}
-            onValueChange={(itemValue) => setObraStatus(itemValue)}
-            style={globalStyles.picker}
-            enabled={!isReadOnly && !isAdd}
-          >
-            <Picker.Item label="NO PRAZO" value="NOPRAZO" />
-            <Picker.Item label="ATRASADO" value="ATRASADO" />
-            <Picker.Item label="ADIANTADO" value="ADIANTADO" />
-            <Picker.Item label="ENTREGUE" value="ENTREGUE" />
-            <Picker.Item label="CANCELADO" value="CANCELADO" />
-          </Picker>
-          <Text style={globalStyles.label}>Data de Início Prevista:</Text>
-          <AppInput
-            placeholder="DD/MM/YYYY"
-            value={dataInicioPrevista}
-            keyboardType="numeric"
-            maxLength={10}
-            onChangeText={(text) => setDataInicioPrevista(maskDate(text))}
-            editable={!isReadOnly}
-          />
-          {!isAdd && (
-            <>
-              <Text style={globalStyles.label}>Data de Início Real:</Text>
+
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Data de Início Prevista:</Text>
               <AppInput
                 placeholder="DD/MM/YYYY"
-                value={dataInicioReal}
+                value={dataInicioPrevista}
                 keyboardType="numeric"
                 maxLength={10}
-                onChangeText={(text) => setDataInicioReal(maskDate(text))}
+                onChangeText={(text) => setDataInicioPrevista(maskDate(text))}
                 editable={!isReadOnly}
               />
-            </>
-          )}
-          <Text style={globalStyles.label}>Valor do Orçamento Aprovado:</Text>
-          <AppInput
-            value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
-            editable={false}
-          />
-          {!isAdd && (
-            <>
-              <Text style={globalStyles.label}>
-                Porcentagem de Conclusão Geral:
-              </Text>
-              <AppInput
-                value={`${porcentagemConclusaoGeral}%`}
-                editable={false}
-              />
-            </>
-          )}
+            </View>
+
+            {!isAdd && (
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Data de Início Real:</Text>
+                <AppInput
+                  placeholder="DD/MM/YYYY"
+                  value={dataInicioReal}
+                  keyboardType="numeric"
+                  maxLength={10}
+                  onChangeText={(text) => setDataInicioReal(maskDate(text))}
+                  editable={!isReadOnly}
+                />
+              </View>
+            )}
+          </View>
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Status da Obra:</Text>
+              <Picker
+                selectedValue={obraStatus}
+                onValueChange={(itemValue) => setObraStatus(itemValue)}
+                style={globalStyles.picker}
+                enabled={!isReadOnly && !isAdd}
+              >
+                <Picker.Item label="NO PRAZO" value="NOPRAZO" />
+                <Picker.Item label="ATRASADO" value="ATRASADO" />
+                <Picker.Item label="ADIANTADO" value="ADIANTADO" />
+                <Picker.Item label="ENTREGUE" value="ENTREGUE" />
+                <Picker.Item label="CANCELADO" value="CANCELADO" />
+              </Picker>
+            </View>
+
+            {!isAdd && (
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Conclusão Geral:</Text>
+                <AppInput
+                  value={`${porcentagemConclusaoGeral}%`}
+                  editable={false}
+                />
+              </View>
+            )}
+          </View>
         </View>
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
         <View style={globalStyles.divider} />
@@ -509,8 +517,8 @@ export function ObrasForm({
               />
             </View>
           </View>
+          <Text style={globalStyles.label}>Logradouro:</Text>
           <View style={globalStyles.row}>
-            <Text style={globalStyles.label}>Logradouro:</Text>
             <AppInput
               value={orcamentoAtrelado?.endereco?.rua ?? ""}
               editable={false}
@@ -538,18 +546,31 @@ export function ObrasForm({
         {categoriasCalculadas.map((categoria) => (
           <View key={categoria.id} style={globalStyles.card}>
             <Text style={globalStyles.label}>Categoria: {categoria.nome}</Text>
-            <Text style={globalStyles.label}>
-              Dias Previstos da Categoria: {categoria.qt_dias_prevista || 0}
-            </Text>
-            <Text style={globalStyles.label}>
-              Dias Reais da Categoria: {categoria.qt_dias_real || 0}
-            </Text>
-            <Text style={globalStyles.label}>
-              Progresso da Categoria: {categoria.porcentagem_de_conclusao || 0}%
-            </Text>
-            <Text style={globalStyles.label}>
-              Status da Categoria: {categoria.status}
-            </Text>
+            <View style={globalStyles.row}>
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>
+                  Dias Previstos da Categoria: {categoria.qt_dias_prevista || 0}
+                </Text>
+              </View>
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>
+                  Dias Reais da Categoria: {categoria.qt_dias_real || 0}
+                </Text>
+              </View>
+            </View>
+            <View style={globalStyles.row}>
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>
+                  Status da Categoria: {categoria.status}
+                </Text>
+              </View>
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>
+                  Progresso da Categoria:{" "}
+                  {categoria.porcentagem_de_conclusao || 0}%
+                </Text>
+              </View>
+            </View>
 
             {categoria.servicos.map((servico) => (
               <View key={servico.id} style={styles.serviceCard}>
@@ -557,103 +578,138 @@ export function ObrasForm({
                 <Text style={globalStyles.label}>
                   Descrição: {servico.descricao}
                 </Text>
-
-                <Text style={globalStyles.label}>Dias Previstos:</Text>
-                <AppInput
-                  placeholder="Dias"
-                  value={String(servico.qt_dias_prevista ?? 0)}
-                  onChangeText={(text) =>
-                    updateServico(
-                      categoria.id,
-                      servico.id,
-                      "qt_dias_prevista",
-                      Number(text) || 0,
-                    )
-                  }
-                  keyboardType="numeric"
-                  editable={!isReadOnly}
-                />
-
-                <Text style={globalStyles.label}>Dias Reais:</Text>
-                <AppInput
-                  placeholder="Dias"
-                  value={String(servico.qt_dias_real ?? 0)}
-                  onChangeText={(text) =>
-                    updateServico(
-                      categoria.id,
-                      servico.id,
-                      "qt_dias_real",
-                      Number(text) || 0,
-                    )
-                  }
-                  keyboardType="numeric"
-                  editable={!isReadOnly}
-                />
-
-                <Text style={globalStyles.label}>
-                  Porcentagem de Conclusão:
-                </Text>
-                <AppInput
-                  placeholder="%"
-                  value={String(servico.porcentagem_de_conclusao || 0)}
-                  onChangeText={(text) =>
-                    updateServico(
-                      categoria.id,
-                      servico.id,
-                      "porcentagem_de_conclusao",
-                      Number(text) || 0,
-                    )
-                  }
-                  keyboardType="numeric"
-                  editable={!isReadOnly}
-                />
-                <Text style={globalStyles.label}>
-                  Status do Serviço: {servico.status}
-                </Text>
+                <View style={globalStyles.row}>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>Dias Previstos:</Text>
+                    <AppInput
+                      placeholder="Dias"
+                      value={String(servico.qt_dias_prevista ?? 0)}
+                      onChangeText={(text) =>
+                        updateServico(
+                          categoria.id,
+                          servico.id,
+                          "qt_dias_prevista",
+                          Number(text) || 0,
+                        )
+                      }
+                      keyboardType="numeric"
+                      editable={!isReadOnly}
+                    />
+                  </View>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>Dias Reais:</Text>
+                    <AppInput
+                      placeholder="Dias"
+                      value={String(servico.qt_dias_real ?? 0)}
+                      onChangeText={(text) =>
+                        updateServico(
+                          categoria.id,
+                          servico.id,
+                          "qt_dias_real",
+                          Number(text) || 0,
+                        )
+                      }
+                      keyboardType="numeric"
+                      editable={!isReadOnly}
+                    />
+                  </View>
+                </View>
+                <View style={globalStyles.row}>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>
+                      Status do Serviço: {servico.status}
+                    </Text>
+                  </View>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>
+                      Porcentagem de Conclusão:
+                    </Text>
+                    <AppInput
+                      placeholder="%"
+                      value={String(servico.porcentagem_de_conclusao || 0)}
+                      onChangeText={(text) =>
+                        updateServico(
+                          categoria.id,
+                          servico.id,
+                          "porcentagem_de_conclusao",
+                          Number(text) || 0,
+                        )
+                      }
+                      keyboardType="numeric"
+                      editable={!isReadOnly}
+                    />
+                  </View>
+                </View>
               </View>
             ))}
           </View>
         ))}
-        <Text style={globalStyles.subtitle}>Datas Calculadas da Obra</Text>
+        <Text style={globalStyles.subtitle}>Resumo da Obra</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>Data de Fim Prevista:</Text>
-          <AppInput
-            placeholder="YYYY-MM-DD"
-            value={dataFimPrevistaCalculada}
-            editable={false}
-          />
-
-          {!isAdd && (
-            <>
-              <Text style={globalStyles.label}>Data de Fim Real:</Text>
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Data de Fim Prevista:</Text>
               <AppInput
-                placeholder="YYYY-MM-DD"
-                value={dataFimRealCalculada}
+                placeholder="DD/MM/YYYY"
+                value={dataFimPrevistaCalculada}
+                onChangeText={(text) => setDataFimPrevista(maskDate(text))}
                 editable={false}
               />
-            </>
-          )}
+            </View>
+
+            {!isAdd && (
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Data de Fim Real:</Text>
+                <AppInput
+                  placeholder="DD/MM/YYYY"
+                  value={dataFimRealCalculada}
+                  editable={false}
+                  onChangeText={(text) => setDataFimReal(maskDate(text))}
+                />
+              </View>
+            )}
+          </View>
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Orçamento Aprovado:</Text>
+              <AppInput
+                value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
+                editable={false}
+              />
+            </View>
+            {!isAdd && (
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Valor do Orçamento Real:</Text>
+                <AppInput
+                  placeholder="R$ 0,00"
+                  value={"R$ 0.00"}
+                  editable={false}
+                />
+              </View>
+            )}
+          </View>
         </View>
+
         {formFeedback !== "" && (
           <Text style={globalStyles.feedback}>{formFeedback}</Text>
         )}
         {feedbackMessage && feedbackMessage !== "" && (
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
         )}
-        {!isReadOnly && (
-          <AppButton
-            title={
-              mode === "add"
-                ? "Salvar Novo Serviço"
-                : mode === "edit"
-                  ? "Salvar Alterações"
-                  : "Gerar PDF"
-            }
-            onPress={handleSave}
-            loading={loading}
-          />
-        )}
+        <View style={globalStyles.divider}></View>
+        <AppButton
+          title={
+            mode === "add"
+              ? "Salvar Novo Serviço"
+              : mode === "edit"
+                ? "Salvar Alterações"
+                : "Gerar PDF"
+          }
+          onPress={handleSave}
+          loading={loading}
+          color={COLORS.primary}
+        />
       </ScrollView>
     </View>
   );

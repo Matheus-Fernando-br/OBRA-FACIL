@@ -224,6 +224,26 @@ export const globalStyles = StyleSheet.create({
 
     borderRadius: 5,
 
+    width: "65%",
+
+    marginRight: 8,
+
+    padding: 5,
+  },
+
+  obraMainButton: {
+    flexDirection: "row",
+
+    justifyContent: "center",
+
+    alignItems: "center",
+
+    textAlign: "center",
+
+    backgroundColor: COLORS.primary,
+
+    borderRadius: 5,
+
     marginTop: 5,
 
     marginHorizontal: 60,
@@ -247,37 +267,61 @@ export const globalStyles = StyleSheet.create({
 
   card: {
     backgroundColor: COLORS.backgroundSection,
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
+    borderRadius: 20,
+    paddingVertical: 18,
+    paddingHorizontal: 18,
+    marginBottom: 24,
+
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+
+    elevation: 10,
   },
 
   picker: {
-    padding: 15,
-    borderRadius: 10,
     width: "100%",
+    height: 60,
     backgroundColor: COLORS.backgroundSection,
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
   },
 
   row: { flexDirection: "row", gap: 10 },
   column: { flex: 1 },
 
   serviceContainer: {
-    padding: 10,
+    padding: 20,
     backgroundColor: COLORS.background,
     borderRadius: 10,
     marginBottom: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
   },
   serviceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 5 },
   serviceTotalText: {
-    textAlign: "right",
+    fontFamily: "Montserrat_700Bold",
+    textAlign: "left",
     fontWeight: "bold",
     color: COLORS.success,
     marginTop: 5,
@@ -777,7 +821,7 @@ workCardProgress: {
   },
 
   label: {
-    fontFamily: "Montserrat_500Medium,",
+    fontFamily: "Poppins_500Medium",
     alignSelf: "flex-start",
     color: COLORS.text,
     marginBottom: 6,
@@ -1091,7 +1135,7 @@ workCardProgress: {
 
     borderRadius: 18,
 
-    padding: 16,
+    padding: 12,
 
     shadowColor: "#000",
 

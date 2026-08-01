@@ -115,6 +115,7 @@ export function DeleteOrcamentoModal({
             title="Excluir Orçamento"
             loading={loading}
             onPress={handleDelete}
+            color={COLORS.primary}
           />
 
           <View
@@ -123,7 +124,7 @@ export function DeleteOrcamentoModal({
             }}
           />
 
-          <AppButton title="Cancelar" onPress={onClose} />
+          <AppButton title="Cancelar" onPress={onClose} color={COLORS.danger} />
         </View>
       </View>
     </Modal>

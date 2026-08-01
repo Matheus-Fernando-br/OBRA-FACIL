@@ -41,9 +41,7 @@ export function BudgetCard({
   return (
     <View style={globalStyles.orcamentoCard}>
       <View style={globalStyles.orcamentoHeader}>
-        <Text style={globalStyles.orcamentoCliente}>
-          {service}
-        </Text>
+        <Text style={globalStyles.orcamentoCliente}>{service}</Text>
 
         <View
           style={[
@@ -66,17 +64,13 @@ export function BudgetCard({
         </View>
       </View>
 
-      <Text style={globalStyles.orcamentoInfo}>
-        Cliente: {client}
-      </Text>
+      <Text style={globalStyles.orcamentoInfo}>Cliente: {client}</Text>
 
       <Text style={globalStyles.orcamentoInfo}>
         Valor: R$ {value.toFixed(2)}
       </Text>
 
-      <Text style={globalStyles.orcamentoInfo}>
-        Criado em: {date}
-      </Text>
+      <Text style={globalStyles.orcamentoInfo}>Criado em: {date}</Text>
 
       <View style={globalStyles.orcamentoButtons}>
         <Pressable
@@ -86,14 +80,10 @@ export function BudgetCard({
           ]}
           onPress={onDetails}
         >
-          <Ionicons
-            name="eye"
-            size={18}
-            color="#FFF"
-          />
+          <Ionicons name="eye" size={18} color="#FFF" />
 
           <Text style={globalStyles.orcamentoDetailsButtonText}>
-            Detalhes
+            Ver Detalhes
           </Text>
         </Pressable>
 
@@ -104,11 +94,7 @@ export function BudgetCard({
           ]}
           onPress={onEdit}
         >
-          <Ionicons
-            name="create"
-            size={18}
-            color="#FFF"
-          />
+          <Ionicons name="create" size={18} color="#FFF" />
         </Pressable>
 
         <Pressable
@@ -118,11 +104,7 @@ export function BudgetCard({
           ]}
           onPress={onDelete}
         >
-          <Ionicons
-            name="trash"
-            size={18}
-            color="#FFF"
-          />
+          <Ionicons name="trash" size={18} color="#FFF" />
         </Pressable>
       </View>
     </View>

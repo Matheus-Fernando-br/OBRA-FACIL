@@ -111,6 +111,7 @@ export function DeleteObraModal({
             title="Excluir Serviço"
             loading={loading}
             onPress={handleDelete}
+            color={COLORS.primary}
           />
 
           <View
@@ -119,7 +120,7 @@ export function DeleteObraModal({
             }}
           />
 
-          <AppButton title="Cancelar" onPress={onClose} />
+          <AppButton title="Cancelar" onPress={onClose} color={COLORS.danger} />
         </View>
       </View>
     </Modal>

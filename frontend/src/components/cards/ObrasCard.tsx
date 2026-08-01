@@ -10,7 +10,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { COLORS, globalStyles } from "../../styles/globalStyles";
 
 interface Props {
   title: string;
@@ -153,10 +153,7 @@ export function ObrasCard({
 
           {/* BOTÃO PRINCIPAL */}
 
-          <Pressable
-            style={globalStyles.orcamentoMainButton}
-            onPress={onDetails}
-          >
+          <Pressable style={globalStyles.obraMainButton} onPress={onDetails}>
             <Ionicons name="eye" size={20} color="#FFF" />
 
             <Text style={globalStyles.orcamentoDetailsButtonText}>
@@ -198,7 +195,11 @@ export function ObrasCard({
                     onEdit();
                   }}
                 >
-                  <Ionicons name="create-outline" size={20} color="#2563EB" />
+                  <Ionicons
+                    name="create-outline"
+                    size={20}
+                    color={COLORS.primary}
+                  />
 
                   <Text style={globalStyles.obrasMenuText}>Editar</Text>
                 </Pressable>
@@ -212,7 +213,11 @@ export function ObrasCard({
                     onDelete();
                   }}
                 >
-                  <Ionicons name="trash-outline" size={20} color="#DC2626" />
+                  <Ionicons
+                    name="trash-outline"
+                    size={20}
+                    color={COLORS.danger}
+                  />
 
                   <Text style={globalStyles.obrasMenuText}>Excluir</Text>
                 </Pressable>

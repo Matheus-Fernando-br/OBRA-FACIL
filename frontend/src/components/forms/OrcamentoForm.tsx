@@ -10,6 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
+import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
 import * as Linking from "expo-linking";
 import { useAuth } from "@/contexts/AuthContext";
@@ -232,7 +233,9 @@ export function OrcamentoForm({
   }
 
   async function handleSubmit() {
-    if (isReadOnly) return;
+    if (isReadOnly) {
+      return onGeneratePdf?.();
+    }
     setFeedback("");
     if (!token || !user) {
       setFeedback("Sessão expirada.");
@@ -303,24 +306,14 @@ export function OrcamentoForm({
               : "Detalhes"}
         </Text>
 
-        <Pressable
-          onPress={() => {
-            if (mode === "details") {
-              onGeneratePdf?.();
-              return;
-            }
-
-            irParaSalvar();
-          }}
-          style={globalStyles.rightAction}
-        >
+        <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+          <Text style={globalStyles.saveText}>
+            {mode === "details" ? "Gerar PDF" : "Salvar"}
+          </Text>
           <Ionicons name="download" size={25} color={COLORS.title} />
         </Pressable>
       </View>
-      <ScrollView
-        ref={scrollRef}
-        style={{ flex: 1 }}
-      >
+      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
@@ -422,13 +415,45 @@ export function OrcamentoForm({
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Estado:</Text>
-              <AppInput
-                placeholder="Estado"
-                value={estado}
-                onChangeText={setEstado}
-                editable={!isReadOnly}
-              />
+              <View style={globalStyles.column}>
+                <Text style={globalStyles.label}>Estado:</Text>
+
+                <Picker
+                  selectedValue={estado}
+                  onValueChange={(value) => setEstado(value)}
+                  style={globalStyles.picker}
+                  enabled={!isReadOnly}
+                >
+                  <Picker.Item label="Selecione o Estado" value="" />
+                  <Picker.Item label="AC - Acre" value="AC" />
+                  <Picker.Item label="AL - Alagoas" value="AL" />
+                  <Picker.Item label="AP - Amapá" value="AP" />
+                  <Picker.Item label="AM - Amazonas" value="AM" />
+                  <Picker.Item label="BA - Bahia" value="BA" />
+                  <Picker.Item label="CE - Ceará" value="CE" />
+                  <Picker.Item label="DF - Distrito Federal" value="DF" />
+                  <Picker.Item label="ES - Espírito Santo" value="ES" />
+                  <Picker.Item label="GO - Goiás" value="GO" />
+                  <Picker.Item label="MA - Maranhão" value="MA" />
+                  <Picker.Item label="MT - Mato Grosso" value="MT" />
+                  <Picker.Item label="MS - Mato Grosso do Sul" value="MS" />
+                  <Picker.Item label="MG - Minas Gerais" value="MG" />
+                  <Picker.Item label="PA - Pará" value="PA" />
+                  <Picker.Item label="PB - Paraíba" value="PB" />
+                  <Picker.Item label="PR - Paraná" value="PR" />
+                  <Picker.Item label="PE - Pernambuco" value="PE" />
+                  <Picker.Item label="PI - Piauí" value="PI" />
+                  <Picker.Item label="RJ - Rio de Janeiro" value="RJ" />
+                  <Picker.Item label="RN - Rio Grande do Norte" value="RN" />
+                  <Picker.Item label="RS - Rio Grande do Sul" value="RS" />
+                  <Picker.Item label="RO - Rondônia" value="RO" />
+                  <Picker.Item label="RR - Roraima" value="RR" />
+                  <Picker.Item label="SC - Santa Catarina" value="SC" />
+                  <Picker.Item label="SP - São Paulo" value="SP" />
+                  <Picker.Item label="SE - Sergipe" value="SE" />
+                  <Picker.Item label="TO - Tocantins" value="TO" />
+                </Picker>
+              </View>
             </View>
           </View>
           <View style={globalStyles.row}>
@@ -453,9 +478,8 @@ export function OrcamentoForm({
               />
             </View>
           </View>
+          <Text style={globalStyles.label}>Logradouro:</Text>
           <View style={globalStyles.row}>
-            <Text style={globalStyles.label}>Logradouro:</Text>
-
             <AppInput
               placeholder="Rua"
               value={logradouro}
@@ -498,7 +522,7 @@ export function OrcamentoForm({
           <Text style={globalStyles.feedback}>{feedbackSinapi}</Text>
         )}
         {categorias.map((cat, idx) => (
-          <View key={cat.id} style={globalStyles.card}>
+          <View key={cat.id} style={[globalStyles.card, { marginTop: 20 }]}>
             <Text style={globalStyles.label}>Nome da Categoria {idx + 1}:</Text>
             <AppInput
               placeholder="Nome da Categoria"
@@ -521,15 +545,46 @@ export function OrcamentoForm({
                   <View style={globalStyles.column}>
                     <Text style={globalStyles.label}>Unidade do Serviço:</Text>
 
-                    <AppInput
-                      placeholder="Unid. (m, m², m³, HR, etc...)"
-                      value={s.unidade}
-                      onChangeText={(t) =>
-                        updateServico(cat.id, s.id, "unidade", t)
+                    <Picker
+                      selectedValue={s.unidade}
+                      onValueChange={(value) =>
+                        updateServico(cat.id, s.id, "unidade", value)
+                      }
+                      style={globalStyles.picker}
+                      enabled={!isReadOnly}
+                    >
+                      <Picker.Item label="Selecione a Unid. " value="" />
+                      <Picker.Item label="Metro (m)" value="m" />
+                      <Picker.Item label="Metro quadrado (m²)" value="m²" />
+                      <Picker.Item label="Metro cúbico (m³)" value="m³" />
+                      <Picker.Item label="Unidade (UN)" value="UN" />
+                      <Picker.Item label="Quilograma (kg)" value="kg" />
+                      <Picker.Item label="Tonelada (t)" value="t" />
+                      <Picker.Item label="Hora (h)" value="h" />
+                      <Picker.Item label="Dia (dia)" value="dia" />
+                      <Picker.Item label="Mês (mês)" value="mês" />
+                      <Picker.Item label="Verba (VB)" value="VB" />
+                    </Picker>
+                  </View>
+
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>Valor Unitário:</Text>
+
+                    <AppCurrencyInput
+                      value={s.preco_da_unidade}
+                      onChangeValue={(value) =>
+                        updateServico(
+                          cat.id,
+                          s.id,
+                          "preco_da_unidade",
+                          value ?? 0,
+                        )
                       }
                       editable={!isReadOnly}
                     />
                   </View>
+                </View>
+                <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
                     <Text style={globalStyles.label}>Quantidade:</Text>
 
@@ -548,29 +603,9 @@ export function OrcamentoForm({
                       keyboardType="numeric"
                     />
                   </View>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
-                      Valor Unitário do Serviço
-                    </Text>
-
-                    <AppInput
-                      placeholder="R$ Unid."
-                      value={String(s.preco_da_unidade)}
-                      onChangeText={(t) =>
-                        updateServico(
-                          cat.id,
-                          s.id,
-                          "preco_da_unidade",
-                          Number(t),
-                        )
-                      }
-                      editable={!isReadOnly}
-                      keyboardType="numeric"
-                    />
-                  </View>
                 </View>
                 <Text style={globalStyles.serviceTotalText}>
-                  Subtotal do Serviço {sIdx + 1}: R${s.preco_total.toFixed(2)}
+                  Subtotal do Serviço {sIdx + 1}: R$ {s.preco_total.toFixed(2)}
                 </Text>
               </View>
             ))}
@@ -599,26 +634,44 @@ export function OrcamentoForm({
           />
         )}
 
-        <Text style={globalStyles.subtitle}>Valores Financeiros</Text>
+        <Text style={[globalStyles.subtitle, { marginTop: 20 }]}>
+          Valores Financeiros
+        </Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>
-            Custo Obra: R${custoObraCalculado.toFixed(2)}
-          </Text>
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Custo Obra:</Text>
 
-          <Text style={globalStyles.label}>BDI (%):</Text>
+              <AppInput
+                value={custoObraCalculado.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                editable={false}
+              />
+            </View>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>BDI (%):</Text>
 
+              <AppInput
+                placeholder="BDI (%)"
+                value={bdi}
+                onChangeText={setBdi}
+                editable={!isReadOnly}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+
+          <Text style={globalStyles.label}>Custo Total da Obra com BDI:</Text>
           <AppInput
-            placeholder="BDI (%)"
-            value={bdi}
-            onChangeText={setBdi}
-            editable={!isReadOnly}
-            keyboardType="numeric"
+            value={custoTotalComBDI.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
+            editable={false}
           />
-
-          <Text style={globalStyles.categoryTotalText}>
-            Total com BDI: R${custoTotalComBDI.toFixed(2)}
-          </Text>
         </View>
         {feedback !== "" && (
           <Text style={globalStyles.feedback}>{feedback}</Text>
@@ -627,19 +680,17 @@ export function OrcamentoForm({
           <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
         )}
         <View style={globalStyles.divider}></View>
-        {!isReadOnly && (
-          <AppButton
-            title={
-              mode === "add"
-                ? "Salvar Novo Orçamento"
-                : mode === "edit"
-                  ? "Salvar Alterações"
-                  : "Gerar PDF"
-            }
-            onPress={handleSubmit}
-            color={COLORS.primary}
-          />
-        )}
+        <AppButton
+          title={
+            mode === "add"
+              ? "Salvar Novo Orçamento"
+              : mode === "edit"
+                ? "Salvar Alterações"
+                : "Gerar PDF"
+          }
+          onPress={handleSubmit}
+          color={COLORS.primary}
+        />
       </ScrollView>
     </View>
   );
