@@ -19,9 +19,10 @@ import { useAuth } from "@/contexts/AuthContext";
 interface Props {
   visible: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function AddClientModal({ visible, onClose }: Props) {
+export function AddClientModal({ visible, onClose, onSuccess }: Props) {
   const [nome, setNome] = useState("");
   const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
@@ -98,6 +99,7 @@ export function AddClientModal({ visible, onClose }: Props) {
       setNome("");
       setEmail("");
       setCpf("");
+      onSuccess?.();
       setTimeout(() => {
         onClose();
       }, 1200);

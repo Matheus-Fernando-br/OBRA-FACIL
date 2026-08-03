@@ -156,7 +156,7 @@ export async function deleteClient(id: string, token: string) {
 import { Orcamento } from "@/components/layout/interface";
 
 export async function getBudgets(token: string) {
-  const { data } = await api.get("/orcamento", {
+  const { data } = await api.get("/orcamento/userOrcamentos", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -217,6 +217,16 @@ import { Obra } from "../components/layout/interface";
 
 export async function getWork(token: string) {
   const { data } = await api.get("/obra/userObras", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function getWorkById(id: string, token: string) {
+  const { data } = await api.get(`/obra/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

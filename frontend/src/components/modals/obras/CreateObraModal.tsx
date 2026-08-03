@@ -1,18 +1,20 @@
 import { Modal, View, Alert } from "react-native";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { ObrasForm } from "@/components/forms/ObrasForms";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { createWork, getClients } from "@/services/api";
+import { createWork } from "@/services/api";
 
-import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
+import { Cliente, Orcamento } from "@/components/layout/interface";
 
 interface Props {
   visible: boolean;
 
   budget: Orcamento | null;
+
+  clientsList: Cliente[];
 
   onClose(): void;
 
@@ -22,20 +24,13 @@ interface Props {
 export function CreateObraModal({
   visible,
   budget,
+  clientsList,
   onClose,
   onSuccess,
 }: Props) {
   const { token, user } = useAuth();
 
   const [loading, setLoading] = useState(false);
-
-  const [clientsList, setClientsList] = useState<Cliente[]>([]);
-
-  useEffect(() => {
-    if (visible && token) {
-      getClients(token).then(setClientsList);
-    }
-  }, [visible, token]);
 
   const handleSave = async (formData: any) => {
     console.log("HANDLE SAVE CHAMADO");
@@ -121,7 +116,7 @@ export function CreateObraModal({
         <ObrasForm
           mode="add"
           budget={budget}
-          clientsList={clientsList}
+          client={clientsList}
           loading={loading}
           onClose={onClose}
           onSave={handleSave}

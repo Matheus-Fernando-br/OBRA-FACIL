@@ -5,7 +5,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { COLORS, globalStyles } from "../../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
@@ -54,9 +54,13 @@ export default function ClientesScreen() {
     }
   }, [token]);
 
-  const filteredClients = clientsList.filter((client) =>
-    client.nome.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredClients = useMemo(() => {
+    const searchLower = search.trim().toLowerCase();
+  
+    return clientsList.filter((client) =>
+      client.nome.toLowerCase().includes(searchLower),
+    );
+  }, [clientsList, search]);
 
   return (
     <View style={globalStyles.screen}>
@@ -81,6 +85,10 @@ export default function ClientesScreen() {
             value={search}
             onChangeText={setSearch}
           />
+
+          {(!loading && filteredClients.length === 0) && (
+            <Text style={globalStyles.sectionTitle}>Nenhum cliente encontrado.</Text>
+          )}
 
           {loading ? (
             <View
@@ -138,10 +146,8 @@ export default function ClientesScreen() {
 
       <AddClientModal
         visible={modalVisible}
-        onClose={() => {
-          setModalVisible(false);
-          loadClients();
-        }}
+        onClose={() => setEditVisible(false)}
+        onSuccess={loadClients}
       />
 
       <EditClientModal

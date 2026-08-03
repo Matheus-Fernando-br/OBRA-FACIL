@@ -7,33 +7,29 @@ import { Orcamento } from "@/components/layout/interface";
 interface Props {
   budget: Orcamento;
   selected: boolean;
+  clientName: string;
   onPress(): void;
 }
 
 export function AvailableBudgetCard({
   budget,
   selected,
+  clientName,
   onPress,
 }: Props) {
   return (
     <Pressable
-      onPress={onPress}
       style={[
         globalStyles.orcamentoCard,
         {
           marginBottom: 15,
           borderWidth: selected ? 2 : 1,
-          borderColor: selected
-            ? COLORS.primary
-            : "#E5E7EB",
+          borderColor: selected ? COLORS.primary : COLORS.border,
         },
       ]}
     >
       <View style={globalStyles.orcamentoHeader}>
-        <Text
-          style={globalStyles.orcamentoCliente}
-          numberOfLines={1}
-        >
+        <Text style={globalStyles.orcamentoCliente} numberOfLines={1}>
           {budget.nome}
         </Text>
 
@@ -49,7 +45,7 @@ export function AvailableBudgetCard({
             style={[
               globalStyles.orcamentoStatusText,
               {
-                color: "#16A34A",
+                color: COLORS.success,
               },
             ]}
           >
@@ -58,26 +54,23 @@ export function AvailableBudgetCard({
         </View>
       </View>
 
-      <Text style={globalStyles.orcamentoInfo}>
-        Cliente: {budget.cliente.nome}
-      </Text>
+      <Text style={globalStyles.orcamentoInfo}>Cliente: {clientName}</Text>
 
       <Text style={globalStyles.orcamentoInfo}>
-        Valor: R$ {budget.preco_com_bdi.toFixed(2)}
+        Valor:{" "}
+        {budget.preco_com_bdi.toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        })}
       </Text>
 
       <Text style={globalStyles.orcamentoInfo}>
         Publicação:{" "}
-        {new Date(
-          budget.data_publicacao
-        ).toLocaleDateString("pt-BR")}
+        {new Date(budget.data_publicacao).toLocaleDateString("pt-BR")}
       </Text>
 
       <Text style={globalStyles.orcamentoInfo}>
-        Validade:{" "}
-        {new Date(
-          budget.data_validade
-        ).toLocaleDateString("pt-BR")}
+        Validade: {new Date(budget.data_validade).toLocaleDateString("pt-BR")}
       </Text>
 
       <View
@@ -93,20 +86,14 @@ export function AvailableBudgetCard({
               flexDirection: "row",
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: selected
-                ? "#16A34A"
-                : COLORS.primary,
+              backgroundColor: selected ? COLORS.success : COLORS.primary,
             },
           ]}
         >
           <Ionicons
-            name={
-              selected
-                ? "checkmark-circle"
-                : "add-circle-outline"
-            }
+            name={selected ? "checkmark-circle" : "add-circle-outline"}
             size={18}
-            color="#FFF"
+            color={COLORS.white}
           />
 
           <Text
@@ -117,9 +104,7 @@ export function AvailableBudgetCard({
               },
             ]}
           >
-            {selected
-              ? "Selecionado"
-              : "Selecionar"}
+            {selected ? "Selecionado" : "Selecionar"}
           </Text>
         </Pressable>
       </View>

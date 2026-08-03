@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
@@ -15,11 +15,11 @@ import { AppInput } from "../../components/forms/AppInput";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getWork, getBudgets } from "../../services/api";
+import { getWork, getBudgets, getClients } from "../../services/api";
 
 import { ObrasCard } from "@/components/cards/ObrasCard";
 
-import { Obra, Orcamento } from "@/components/layout/interface";
+import { Cliente, Obra, Orcamento } from "@/components/layout/interface";
 import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
 import { CreateObraModal } from "@/components/modals/obras/CreateObraModal";
 import { DetailsObraModal } from "@/components/modals/obras/DetailsObraModal";
@@ -36,7 +36,7 @@ export default function ObrasScreen() {
 
   const [worksList, setWorksList] = useState<Obra[]>([]);
   const [budgets, setBudgets] = useState<Orcamento[]>([]);
-
+  const [clients, setClients] = useState<Cliente[]>([]);
   const [selectedWork, setSelectedWork] = useState<Obra | null>(null);
 
   const [detailsVisible, setDetailsVisible] = useState(false);
@@ -58,14 +58,17 @@ export default function ObrasScreen() {
 
       setLoading(true);
 
-      const [worksData, budgetsData] = await Promise.all([
+      const [worksData, budgetsData, clientsData] = await Promise.all([
         getWork(token),
         getBudgets(token),
+        getClients(token),
       ]);
 
       setWorksList(Array.isArray(worksData) ? worksData : worksData.obras);
 
       setBudgets(budgetsData);
+      
+      setClients(clientsData);
     } catch (err: any) {
       console.log("ERRO COMPLETO");
       console.log(err);
@@ -78,52 +81,61 @@ export default function ObrasScreen() {
   }
 
   useEffect(() => {
+    if (!token) return;
+
     loadWorks();
   }, [token]);
 
-  useEffect(() => {
-    if (selectedBudget) {
-      console.log(selectedBudget.nome);
-    }
-  }, [selectedBudget]);
-
-  const budgetsMap = budgets.reduce(
-    (acc, budget) => {
+  const budgetsMap = useMemo(() => {
+    return budgets.reduce((acc: Record<string, Orcamento>, budget) => {
       acc[budget._id] = budget;
-
       return acc;
-    },
-    {} as Record<string, Orcamento>,
-  );
+    }, {});
+  }, [budgets]);
 
-  const filteredWorks = worksList.filter((work) => {
+  const clientsMap = useMemo(() => {
+    return clients.reduce(
+      (acc: Record<string, Cliente>, client) => {
+        acc[client._id] = client;
+        return acc;
+      },
+      {},
+    );
+  }, [clients]);
+
+  function getClientName(clientId: string) {
+    return clientsMap[clientId]?.nome ?? "Cliente não encontrado";
+  }
+
+  function getBudget(work: Obra) {
     const budgetId =
       typeof work.orcamento === "string" ? work.orcamento : work.orcamento._id;
 
-    const budget = budgetsMap[budgetId];
+    return budgetsMap[budgetId];
+  }
 
-    const matchSearch =
-      !search ||
-      budget?.nome.toLowerCase().includes(search.toLowerCase()) ||
-      (typeof budget?.cliente === "string"
-        ? budget?.cliente.toLowerCase().includes(search.toLowerCase())
-        : budget?.cliente.nome.toLowerCase().includes(search.toLowerCase()));
+  const filteredWorks = useMemo(() => {
+    const searchLower = search.trim().toLowerCase();
 
-    const matchStatus =
-      statusFilter === "Todos"
-        ? true
-        : work.status === statusFilter.replace(" ", "").toUpperCase();
+    return worksList.filter((work) => {
+      const budget = getBudget(work);
 
-    return matchSearch && matchStatus;
-  });
+      const matchSearch =
+        !searchLower ||
+        budget?.nome.toLowerCase().includes(searchLower) ||
+        (typeof budget?.cliente === "string"
+          ? budget.cliente.toLowerCase().includes(searchLower)
+          : budget?.cliente.nome.toLowerCase().includes(searchLower));
 
-  const selectedBudgetObra = selectedWork
-    ? budgetsMap[
-        typeof selectedWork.orcamento === "string"
-          ? selectedWork.orcamento
-          : selectedWork.orcamento._id
-      ]
-    : null;
+      const matchStatus =
+        statusFilter === "Todos" ||
+        work.status === statusFilter.replace(" ", "").toUpperCase();
+
+      return matchSearch && matchStatus;
+    });
+  }, [worksList, budgetsMap, search, statusFilter]);
+
+  const selectedBudgetObra = selectedWork ? getBudget(selectedWork) : null;
 
   return (
     <View style={globalStyles.screen}>
@@ -167,6 +179,10 @@ export default function ObrasScreen() {
             ))}
           </View>
 
+          {(!loading && filteredWorks.length === 0) && (
+            <Text style={globalStyles.sectionTitle}>Nenhum obra encontrada.</Text>
+          )}
+
           {loading ? (
             <View
               style={[
@@ -185,12 +201,7 @@ export default function ObrasScreen() {
             </View>
           ) : (
             filteredWorks.map((work) => {
-              const budgetId =
-                typeof work.orcamento === "string"
-                  ? work.orcamento
-                  : work.orcamento._id;
-
-              const budget = budgetsMap[budgetId];
+              const budget = getBudget(work);
 
               return (
                 <ObrasCard
@@ -198,8 +209,8 @@ export default function ObrasScreen() {
                   title={budget?.nome ?? "Obra"}
                   client={
                     typeof budget?.cliente === "string"
-                      ? budget?.cliente
-                      : (budget?.cliente.nome ?? "")
+                      ? getClientName(budget.cliente)
+                      : budget?.cliente.nome ?? ""
                   }
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
@@ -253,6 +264,7 @@ export default function ObrasScreen() {
       <CreateObraModal
         visible={createVisible}
         budget={selectedBudget}
+        clientsList={clients}
         onClose={() => {
           setCreateVisible(false);
 

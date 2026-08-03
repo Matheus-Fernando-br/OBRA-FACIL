@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useFocusEffect } from "expo-router";
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
@@ -17,13 +17,7 @@ import { WorkCard } from "../../components/cards/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
 
 import { Cliente, Orcamento, Obra } from "@/components/layout/interface";
-import {
-  getClients,
-  getUser,
-  getBudgets,
-  getWork,
-  api,
-} from "../../services/api";
+import { getClients, getUser, getBudgets, getWork } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientBackground } from "@/styles/GradientBackground";
 export default function HomeScreen() {
@@ -35,24 +29,32 @@ export default function HomeScreen() {
 
   const obrasCount = works.length;
 
-  const orcamentosPendentesCount = budgets.filter(
-    (budget) => budget.status === "PENDENTE",
-  ).length;
+  const orcamentosPendentesCount = useMemo(() => {
+    return budgets.filter((budget) => budget.status === "PENDENTE").length;
+  }, [budgets]);
 
-  const faturamentoTotal = budgets
-    .filter((budget) => budget.status === "APROVADO")
-    .reduce(
-      (total, budget) => total + (budget.preco_com_bdi ?? budget.preco ?? 0),
-      0,
-    );
+  const faturamentoTotal = useMemo(() => {
+    return budgets
+      .filter((budget) => budget.status === "APROVADO")
+      .reduce(
+        (total, budget) => total + (budget.preco_com_bdi ?? budget.preco ?? 0),
+        0,
+      );
+  }, [budgets]);
 
-  const budgetsMap = budgets.reduce(
-    (acc, budget) => {
+  const budgetsMap = useMemo(() => {
+    return budgets.reduce((acc: Record<string, Orcamento>, budget) => {
       acc[budget._id] = budget;
       return acc;
-    },
-    {} as Record<string, Orcamento>,
-  );
+    }, {});
+  }, [budgets]);
+
+  function getBudget(work: Obra) {
+    const budgetId =
+      typeof work.orcamento === "string" ? work.orcamento : work.orcamento._id;
+
+    return budgetsMap[budgetId];
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -62,20 +64,17 @@ export default function HomeScreen() {
 
           setLoading(true);
 
-          // Busca usuário logado
-          const loggedUser = await getUser(token);
+          const [loggedUser, clients, budgetsData, worksData] =
+            await Promise.all([
+              getUser(token),
+              getClients(token),
+              getBudgets(token),
+              getWork(token),
+            ]);
+
           setUser(loggedUser);
-
-          // Busca clientes do usuário
-          const clients = await getClients(token);
           setClientsList(clients);
-
-          //Busca orçamentos
-          const budgetsData = await getBudgets(token);
           setBudgets(budgetsData);
-
-          //Busca Obras
-          const worksData = await getWork(token);
           setWorks(worksData);
         } catch (error) {
           console.log(error);
@@ -121,7 +120,7 @@ export default function HomeScreen() {
 
           <View style={globalStyles.dashboardGrid}>
             <DashboardCard
-              title="Orçamentos"
+              title="Orçamentos Pendentes"
               value={
                 loading ? (
                   <ActivityIndicator size="small" color={COLORS.white} />
@@ -223,15 +222,12 @@ export default function HomeScreen() {
           <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
 
           {works.map((work) => {
-            const budgetId =
-              typeof work.orcamento === "string"
-                ? work.orcamento
-                : work.orcamento._id;
+            const budget = getBudget(work);
 
             return (
               <WorkCard
                 key={work._id}
-                title={budgetsMap[budgetId]?.nome ?? { loading }}
+                title={budget?.nome ?? "Obra"}
                 progress={work.porcentagem_de_conclusao ?? 0}
                 type={work.status}
                 diasReal={work.qt_dias_real ?? 0}

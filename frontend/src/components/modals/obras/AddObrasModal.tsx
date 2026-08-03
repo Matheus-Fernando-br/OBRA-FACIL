@@ -16,9 +16,9 @@ import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "@/components/buttons/AppButton";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { getBudgets, getWork } from "@/services/api";
+import { getBudgets, getClients, getWork } from "@/services/api";
 
-import { Obra, Orcamento } from "@/components/layout/interface";
+import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
 
 import { AvailableBudgetCard } from "../../cards/AvailableBudgetCard";
 
@@ -43,6 +43,8 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
 
   const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
 
+  const [clients, setClients] = useState<Cliente[]>([]);
+
   async function loadData() {
     if (!token) return;
 
@@ -50,7 +52,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
 
     let budgetsData: Orcamento[] = [];
     let worksData: Obra[] = [];
-
+    let clientsData: Cliente[] = [];
     // Busca os orçamentos
     try {
       budgetsData = await getBudgets(token);
@@ -70,8 +72,18 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
       worksData = [];
     }
 
+    try {
+      clientsData = await getClients(token);
+    } catch (error) {
+      console.log("ERRO AO BUSCAR CLIENTES");
+      console.log(error);
+
+      clientsData = [];
+    }
+
     setBudgets(budgetsData);
     setWorks(worksData);
+    setClients(clientsData);
 
     setLoading(false);
   }
@@ -101,18 +113,27 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
     });
   }, [budgets, works]);
 
+  const clientsMap = useMemo(() => {
+    return clients.reduce((acc: Record<string, Cliente>, client) => {
+      acc[client._id] = client;
+      return acc;
+    }, {});
+  }, [clients]);
+
   const filteredBudgets = useMemo(() => {
     if (search.trim() === "") return availableBudgets;
 
+    const searchLower = search.toLowerCase();
+
     return availableBudgets.filter((budget) => {
+      const clientName = clientsMap[budget.cliente as string]?.nome ?? "";
+
       return (
-        budget.nome.toLowerCase().includes(search.toLowerCase()) ||
-        (budget.cliente?.nome ?? "")
-          .toLowerCase()
-          .includes(search.toLowerCase())
+        budget.nome.toLowerCase().includes(searchLower) ||
+        clientName.toLowerCase().includes(searchLower)
       );
     });
-  }, [availableBudgets, search]);
+  }, [availableBudgets, clientsMap, search]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -169,7 +190,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                   color: COLORS.text,
                 }}
               >
-                Carregando orçamentos...
+                Carregando orçamentos aprovados...
               </Text>
             </View>
           ) : filteredBudgets.length === 0 ? (
@@ -214,6 +235,10 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                 <AvailableBudgetCard
                   key={budget._id}
                   budget={budget}
+                  clientName={
+                    clientsMap[budget.cliente as string]?.nome ??
+                    "Cliente não encontrado"
+                  }
                   selected={selectedBudget?._id === budget._id}
                   onPress={() => setSelectedBudget(budget)}
                 />

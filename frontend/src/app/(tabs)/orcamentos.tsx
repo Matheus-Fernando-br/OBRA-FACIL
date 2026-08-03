@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
@@ -25,7 +25,7 @@ import { GradientBackground } from "@/styles/GradientBackground";
 export default function OrcamentosScreen() {
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [clientsMap, setClientsMap] = useState<Record<string, Cliente>>({});
   const [loading, setLoading] = useState(true);
   const { token } = useAuth();
   const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
@@ -46,7 +46,15 @@ export default function OrcamentosScreen() {
 
       const data = await getClients(token);
 
-      setClientsList(data);
+      const map = data.reduce(
+        (acc: Record<string, Cliente>, client: Cliente) => {
+          acc[client._id] = client;
+          return acc;
+        },
+        {},
+      );
+      
+      setClientsMap(map);
     } catch (error) {
       console.log(error);
     } finally {
@@ -55,9 +63,7 @@ export default function OrcamentosScreen() {
   }
 
   function getClientName(clienteId: string) {
-    const client = clientsList.find((c) => c._id === clienteId);
-
-    return client ? client.nome : "Cliente não encontrado";
+    return clientsMap[clienteId]?.nome ?? "Cliente não encontrado";
   }
 
   async function loadBudgets() {
@@ -86,18 +92,23 @@ export default function OrcamentosScreen() {
     load();
   }, [token]);
 
-  const filteredBudgets = budgetsList.filter((budget) => {
-    const matchSearch =
-      budget.nome.toLowerCase().includes(search.toLowerCase()) ||
-      (budget.cliente?.nome ?? "").toLowerCase().includes(search.toLowerCase());
-
-    const matchStatus =
-      statusFilter === "Todos"
-        ? true
-        : budget.status.toLowerCase() === statusFilter.toLowerCase();
-
-    return matchSearch && matchStatus;
-  });
+  const filteredBudgets = useMemo(() => {
+    const searchLower = search.trim().toLowerCase();
+  
+    return budgetsList.filter((budget) => {
+      const matchSearch =
+        budget.nome.toLowerCase().includes(searchLower) ||
+        getClientName(budget.cliente as string)
+          .toLowerCase()
+          .includes(searchLower);
+  
+      const matchStatus =
+        statusFilter === "Todos" ||
+        budget.status.toLowerCase() === statusFilter.toLowerCase();
+  
+      return matchSearch && matchStatus;
+    });
+  }, [budgetsList, search, statusFilter, clientsMap]);
 
   return (
     <View style={globalStyles.screen}>
@@ -128,7 +139,7 @@ export default function OrcamentosScreen() {
                   globalStyles.filterButton,
 
                   statusFilter === item && {
-                    backgroundColor: "#2563EB",
+                    backgroundColor: COLORS.primary,
                   },
                 ]}
                 onPress={() => setStatusFilter(item)}
@@ -137,6 +148,10 @@ export default function OrcamentosScreen() {
               </TouchableOpacity>
             ))}
           </View>
+
+          {(!loading && filteredBudgets.length === 0) && (
+            <Text style={globalStyles.sectionTitle}>Nenhum orçamento encontrado.</Text>
+          )}
 
           {loading ? (
             <View
@@ -158,7 +173,7 @@ export default function OrcamentosScreen() {
             filteredBudgets.map((budget) => (
               <BudgetCard
                 key={budget._id}
-                client={getClientName(budget.cliente as unknown as string)}
+                client={getClientName(budget.cliente as string)}
                 service={budget.nome}
                 status={budget.status}
                 value={budget.preco_com_bdi}
