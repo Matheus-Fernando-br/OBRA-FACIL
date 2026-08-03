@@ -15,6 +15,7 @@ import {
 import { createClient } from "../../../services/api";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { ClientForm } from "@/components/forms/ClienteForms";
 
 interface Props {
   visible: boolean;
@@ -123,87 +124,22 @@ export function AddClientModal({ visible, onClose, onSuccess }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <Pressable
+      <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
-          justifyContent: "flex-end",
         }}
-        onPress={onClose}
       >
-        <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
-          <Pressable onPress={(e) => e.stopPropagation()}>
-            <View style={globalStyles.addCard}>
-              <View style={globalStyles.modalHeader}>
-                <Pressable onPress={onClose} style={globalStyles.leftAction}>
-                  <Ionicons name="arrow-back" size={25} color={COLORS.text} />
-                </Pressable>
+        <ClientForm
+          mode="add"
+          onClose={onClose}
+          onSuccess={onSuccess}
+          onSave={async (data) => {
+            if (!token) return;
 
-                <Text style={globalStyles.addTitle}>Novo cliente</Text>
-
-                <Pressable
-                  onPress={irParaSalvar}
-                  style={globalStyles.rightAction}
-                >
-                  <Ionicons name="person-add" size={25} color={COLORS.title} />
-                </Pressable>
-              </View>
-
-              <Text style={globalStyles.subtitle}>Informações Pessoais</Text>
-              <View style={globalStyles.divider} />
-
-              <Text style={globalStyles.label}>Nome</Text>
-              <AppInput
-                placeholder="Informe o nome do cliente completo"
-                value={nome}
-                onChangeText={setNome}
-              />
-
-              <Text style={globalStyles.label}>CPF / CNPJ</Text>
-              <AppInput
-                placeholder="Informe o CPF / CNPJ do cliente a ser cadastrado"
-                value={cpf}
-                onChangeText={(text) => setCpf(documentMask(text))}
-              />
-
-              <Text style={globalStyles.subtitle}>Contato</Text>
-              <View style={globalStyles.divider} />
-
-              <Text style={globalStyles.label}>E-mail</Text>
-              <AppInput
-                placeholder="Informe o e-mail do cliente a ser cadastrado"
-                value={email}
-                onChangeText={(text) => setEmail(emailMask(text))}
-              />
-
-              <Text style={globalStyles.label}>Telefone</Text>
-              <AppInput
-                placeholder="Informe o Telefone do cliente a ser cadastrado"
-                value={telefone}
-                onChangeText={(text) => setTelefone(phoneMask(text))}
-              />
-
-              <View style={globalStyles.divider} />
-              {feedback !== "" && (
-                <Text style={globalStyles.feedback}>{feedback}</Text>
-              )}
-              <View ref={salvarRef}>
-                <AppButton
-                  title="Salvar cliente"
-                  loading={loading}
-                  onPress={handleSave}
-                  color={COLORS.primary}
-                />
-              </View>
-              <AppButton
-                title="Cancelar"
-                onPress={onClose}
-                color={COLORS.danger}
-              />
-            </View>
-          </Pressable>
-        </ScrollView>
-      </Pressable>
+            await createClient(data, token);
+          }}
+        />
+      </View>
     </Modal>
   );
 }

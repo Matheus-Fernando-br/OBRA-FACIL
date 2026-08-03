@@ -143,8 +143,6 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
           backgroundColor: COLORS.background,
         }}
       >
-        {/* Header */}
-
         <View style={globalStyles.modalHeader}>
           <Pressable onPress={onClose} style={globalStyles.leftAction}>
             <Ionicons name="arrow-back" size={25} color={COLORS.text} />
