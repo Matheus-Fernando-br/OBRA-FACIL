@@ -169,7 +169,7 @@ export default function ObrasScreen() {
                 style={[
                   globalStyles.filterButton,
                   statusFilter === item && {
-                    backgroundColor: "#2563EB",
+                    backgroundColor: COLORS.primary,
                   },
                 ]}
                 onPress={() => setStatusFilter(item)}

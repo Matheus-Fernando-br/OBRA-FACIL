@@ -56,7 +56,7 @@ export default function ClientesScreen() {
 
   const filteredClients = useMemo(() => {
     const searchLower = search.trim().toLowerCase();
-  
+
     return clientsList.filter((client) =>
       client.nome.toLowerCase().includes(searchLower),
     );
@@ -86,8 +86,10 @@ export default function ClientesScreen() {
             onChangeText={setSearch}
           />
 
-          {(!loading && filteredClients.length === 0) && (
-            <Text style={globalStyles.sectionTitle}>Nenhum cliente encontrado.</Text>
+          {!loading && filteredClients.length === 0 && (
+            <Text style={globalStyles.sectionTitle}>
+              Nenhum cliente encontrado.
+            </Text>
           )}
 
           {loading ? (
@@ -146,7 +148,7 @@ export default function ClientesScreen() {
 
       <AddClientModal
         visible={modalVisible}
-        onClose={() => setEditVisible(false)}
+        onClose={() => setModalVisible(false)}
         onSuccess={loadClients}
       />
 

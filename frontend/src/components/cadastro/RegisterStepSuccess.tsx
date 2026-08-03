@@ -34,24 +34,13 @@ export function RegisterStepSuccess() {
       />
 
       <Text
-        style={{
-          color: "#FFF",
-          fontSize: 24,
-          fontWeight: "bold",
-          marginTop: 20,
-        }}
+        style={globalStyles.title}
       >
         Cadastro realizado!
       </Text>
 
       <Text
-        style={{
-          color: "#94A3B8",
-          fontSize: 16,
-          textAlign: "center",
-          marginTop: 15,
-          lineHeight: 24,
-        }}
+        style={globalStyles.subtitle}
       >
         Sua conta foi criada com sucesso.
         {"\n\n"}

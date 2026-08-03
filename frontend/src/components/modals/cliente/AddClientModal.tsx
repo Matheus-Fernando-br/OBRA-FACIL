@@ -195,6 +195,11 @@ export function AddClientModal({ visible, onClose, onSuccess }: Props) {
                   color={COLORS.primary}
                 />
               </View>
+              <AppButton
+                title="Cancelar"
+                onPress={onClose}
+                color={COLORS.danger}
+              />
             </View>
           </Pressable>
         </ScrollView>

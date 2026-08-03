@@ -5,7 +5,6 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -19,7 +18,6 @@ import {
   Orcamento,
   CategoriaObra,
   ServicoObra,
-  Usuario,
 } from "@/components/layout/interface";
 import { getBudgetById, getClientById } from "@/services/api";
 import { maskDate } from "./mask";
@@ -461,6 +459,18 @@ export function ObrasForm({
     });
   };
 
+  const [loadingClose, setLoadingClose] = useState(false);
+
+  async function handleClose() {
+    setLoadingClose(true);
+    setFeedback("Cancelando Serviço...");
+    setTimeout(() => {
+      onClose();
+      setLoadingClose(false);
+      setFeedback("");
+    }, 1500);
+  }
+
   return (
     <View style={globalStyles.container}>
       <View style={globalStyles.modalHeader}>
@@ -784,6 +794,18 @@ export function ObrasForm({
           onPress={handleSubmit}
           loading={loading}
           color={COLORS.primary}
+        />
+        <AppButton
+          title={
+            mode === "add"
+              ? "Cancelar Serviço"
+              : mode === "edit"
+                ? "Cancelar Alterações"
+                : "Voltar"
+          }
+          onPress={handleClose}
+          loading={loadingClose}
+          color={COLORS.danger}
         />
       </ScrollView>
     </View>

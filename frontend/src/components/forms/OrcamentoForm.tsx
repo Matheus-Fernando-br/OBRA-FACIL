@@ -38,7 +38,6 @@ interface OrcamentoFormProps {
   onGeneratePdf?: () => void;
   clientsList: Cliente[];
   feedbackMessage?: string;
-  loading?: boolean;
   onSuccess?: () => void;
 }
 
@@ -50,12 +49,13 @@ export function OrcamentoForm({
   onGeneratePdf,
   clientsList,
   feedbackMessage,
-  loading,
   onSuccess,
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const [nome, setNome] = useState(initialData?.nome || "");
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+  const [loadingClose, setLoadingClose] = useState(false);
   const [status, setStatus] = useState(initialData?.status || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
   const [selectedClient, setSelectedClient] = useState(() => {
@@ -232,149 +232,177 @@ export function OrcamentoForm({
     }
   }
 
+  function zerarCampos() {
+    setNome("");
+    setStatus("");
+    setDescricao("");
+    setSelectedClient("");
+    setValidade(0);
+    setCep("");
+    setEstado("");
+  }
+
   async function handleSubmit() {
-    if (isReadOnly) {
-      return onGeneratePdf?.();
-    }
+    try {
+      if (isReadOnly) {
+        return onGeneratePdf?.();
+      }
 
-    setFeedback("");
+      setFeedback("");
 
-    if (!token || !user) {
-      setFeedback("Sessão expirada.");
-      return;
-    }
-
-    if (!nome.trim()) {
-      setFeedback("Informe o nome do orçamento.");
-      return;
-    }
-
-    if (!selectedClient) {
-      setFeedback("Selecione um cliente.");
-      return;
-    }
-
-    if (!status) {
-      setFeedback("Selecione o status do orçamento.");
-      return;
-    }
-
-    if (!dataPublicacao) {
-      setFeedback("Informe a data de publicação.");
-      return;
-    }
-
-    if (!validade) {
-      setFeedback("Informe a validade do orçamento.");
-      return;
-    }
-
-    if (!cep.trim()) {
-      setFeedback("Informe o CEP.");
-      return;
-    }
-
-    if (!estado) {
-      setFeedback("Selecione o estado.");
-      return;
-    }
-
-    if (!cidade.trim()) {
-      setFeedback("Informe a cidade.");
-      return;
-    }
-
-    if (!bairro.trim()) {
-      setFeedback("Informe o bairro.");
-      return;
-    }
-
-    if (!logradouro.trim()) {
-      setFeedback("Informe o logradouro.");
-      return;
-    }
-
-    for (let i = 0; i < categorias.length; i++) {
-      const categoria = categorias[i];
-
-      if (!categoria.nome.trim()) {
-        setFeedback(`Informe o nome da categoria ${i + 1}.`);
+      if (!token || !user) {
+        setFeedback("Sessão expirada.");
         return;
       }
 
-      for (let j = 0; j < categoria.servicos.length; j++) {
-        const servico = categoria.servicos[j];
+      if (!nome.trim()) {
+        setFeedback("Informe o nome do orçamento.");
+        return;
+      }
 
-        if (!servico.nome.trim()) {
-          setFeedback(
-            `Informe o nome do serviço ${j + 1} da categoria ${i + 1}.`,
-          );
+      if (!selectedClient) {
+        setFeedback("Selecione um cliente.");
+        return;
+      }
+
+      if (!status) {
+        setFeedback("Selecione o status do orçamento.");
+        return;
+      }
+
+      if (!dataPublicacao) {
+        setFeedback("Informe a data de publicação.");
+        return;
+      }
+
+      if (!validade) {
+        setFeedback("Informe a validade do orçamento.");
+        return;
+      }
+
+      if (!cep.trim()) {
+        setFeedback("Informe o CEP.");
+        return;
+      }
+
+      if (!estado) {
+        setFeedback("Selecione o estado.");
+        return;
+      }
+
+      if (!cidade.trim()) {
+        setFeedback("Informe a cidade.");
+        return;
+      }
+
+      if (!bairro.trim()) {
+        setFeedback("Informe o bairro.");
+        return;
+      }
+
+      if (!logradouro.trim()) {
+        setFeedback("Informe o logradouro.");
+        return;
+      }
+
+      for (let i = 0; i < categorias.length; i++) {
+        const categoria = categorias[i];
+
+        if (!categoria.nome.trim()) {
+          setFeedback(`Informe o nome da categoria ${i + 1}.`);
           return;
         }
 
-        if (!servico.unidade) {
-          setFeedback(
-            `Selecione a unidade do serviço ${j + 1} da categoria ${i + 1}.`,
-          );
-          return;
-        }
+        for (let j = 0; j < categoria.servicos.length; j++) {
+          const servico = categoria.servicos[j];
 
-        if (servico.quantidade_unidade <= 0) {
-          setFeedback(
-            `Informe uma quantidade válida para o serviço ${j + 1} da categoria ${i + 1}.`,
-          );
-          return;
-        }
+          if (!servico.nome.trim()) {
+            setFeedback(
+              `Informe o nome do serviço ${j + 1} da categoria ${i + 1}.`,
+            );
+            return;
+          }
 
-        if (servico.preco_da_unidade <= 0) {
-          setFeedback(
-            `Informe um valor unitário válido para o serviço ${j + 1} da categoria ${i + 1}.`,
-          );
-          return;
+          if (!servico.unidade) {
+            setFeedback(
+              `Selecione a unidade do serviço ${j + 1} da categoria ${i + 1}.`,
+            );
+            return;
+          }
+
+          if (servico.quantidade_unidade <= 0) {
+            setFeedback(
+              `Informe uma quantidade válida para o serviço ${j + 1} da categoria ${i + 1}.`,
+            );
+            return;
+          }
+
+          if (servico.preco_da_unidade <= 0) {
+            setFeedback(
+              `Informe um valor unitário válido para o serviço ${j + 1} da categoria ${i + 1}.`,
+            );
+            return;
+          }
         }
       }
-    }
 
-    if (!bdi) {
-      setFeedback("Informe o BDI.");
-      return;
-    }
+      if (!bdi) {
+        setFeedback("Informe o BDI.");
+        return;
+      }
 
-    const budgetData = {
-      nome,
-      endereco: {
-        CEP: cep,
-        estado,
-        cidade,
-        bairro,
-        rua: logradouro,
-        numero,
-        complemento,
-      },
-      descricao,
-      cliente: selectedClient,
-      responsavel: user!._id,
-      categoria: categorias.map((cat) => ({
-        nome: cat.nome,
-        preco_total_da_categoria: cat.preco_total_da_categoria,
-        servicos: cat.servicos.map((s) => ({
-          nome: s.nome,
-          descricao: s.descricao,
-          unidade: s.unidade,
-          quantidade_unidade: s.quantidade_unidade,
-          preco_da_unidade: s.preco_da_unidade,
-          preco_total: s.preco_total,
+      setLoadingSubmit(true);
+
+      const budgetData = {
+        nome,
+        endereco: {
+          CEP: cep,
+          estado,
+          cidade,
+          bairro,
+          rua: logradouro,
+          numero,
+          complemento,
+        },
+        descricao,
+        cliente: selectedClient,
+        responsavel: user!._id,
+        categoria: categorias.map((cat) => ({
+          nome: cat.nome,
+          preco_total_da_categoria: cat.preco_total_da_categoria,
+          servicos: cat.servicos.map((s) => ({
+            nome: s.nome,
+            descricao: s.descricao,
+            unidade: s.unidade,
+            quantidade_unidade: s.quantidade_unidade,
+            preco_da_unidade: s.preco_da_unidade,
+            preco_total: s.preco_total,
+          })),
         })),
-      })),
-      status,
-      preco: custoObraCalculado,
-      bdi: Number(bdi),
-      preco_com_bdi: custoTotalComBDI,
-      data_publicacao: dataPublicacao,
-      valido_durante: validade,
-      data_validade: dataValidade!,
-    };
-    if (onSave) await onSave(budgetData);
+        status,
+        preco: custoObraCalculado,
+        bdi: Number(bdi),
+        preco_com_bdi: custoTotalComBDI,
+        data_publicacao: dataPublicacao,
+        valido_durante: validade,
+        data_validade: dataValidade!,
+      };
+      if (onSave) await onSave(budgetData);
+      setFeedback("Orçamento salvo com sucesso!");
+      zerarCampos();
+      onSuccess?.();
+      setTimeout(() => {
+        onClose();
+      }, 1200);
+    } catch (error: any) {
+      console.log("ERRO AO SALVAR ORÇAMENTO:", error?.response?.data || error);
+      setFeedback(error?.response?.data?.message || "Erro ao salvar orçamento");
+    } finally {
+      setLoadingSubmit(true);
+      setTimeout(() => {
+        setFeedback("");
+      }, 5000);
+    }
   }
 
   const handleOpenSinapiLink = async () => {
@@ -390,6 +418,16 @@ export function OrcamentoForm({
       animated: true,
     });
   };
+
+  async function handleClose() {
+    setLoadingClose(true);
+    setFeedback("Cancelando Orçamento...");
+    setTimeout(() => {
+      onClose();
+      setLoadingClose(false);
+      setFeedback("");
+    }, 1500);
+  }
 
   return (
     <View style={globalStyles.container}>
@@ -789,6 +827,19 @@ export function OrcamentoForm({
           }
           onPress={handleSubmit}
           color={COLORS.primary}
+          loading={loadingSubmit}
+        />
+        <AppButton
+          title={
+            mode === "add"
+              ? "Cancelar Orçamento"
+              : mode === "edit"
+                ? "Salvar Alterações"
+                : "Voltar"
+          }
+          onPress={handleClose}
+          color={COLORS.danger}
+          loading={loadingClose}
         />
       </ScrollView>
     </View>

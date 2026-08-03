@@ -62,7 +62,6 @@ export function EditOrcamentoModal({
           onSave={handleSave}
           clientsList={clientsList}
           feedbackMessage={feedback}
-          loading={loading}
         />
       </View>
     </Modal>
