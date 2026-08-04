@@ -268,8 +268,11 @@ export function ClientForm({
               : "Detalhes do Cliente"}
         </Text>
 
-        <Pressable onPress={mode === "details" ? onEdit : irParaSalvar} style={globalStyles.rightAction}>
-        <Text style={globalStyles.saveText}>
+        <Pressable
+          onPress={mode === "details" ? onEdit : irParaSalvar}
+          style={globalStyles.rightAction}
+        >
+          <Text style={globalStyles.saveText}>
             {mode === "details" ? "Editar" : "Salvar"}
           </Text>
           <Ionicons
@@ -292,7 +295,10 @@ export function ClientForm({
 
           <View style={globalStyles.divider} />
 
-          <Text style={globalStyles.label}>Nome</Text>
+          <Text style={globalStyles.label}>
+            Nome:
+            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+          </Text>
 
           <AppInput
             placeholder="Informe o nome do cliente"
@@ -301,7 +307,10 @@ export function ClientForm({
             editable={!isReadOnly}
           />
 
-          <Text style={globalStyles.label}>CPF / CNPJ</Text>
+          <Text style={globalStyles.label}>
+            CPF / CNPJ:
+            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+          </Text>
 
           <AppInput
             placeholder="Informe o CPF ou CNPJ"
@@ -317,7 +326,10 @@ export function ClientForm({
           <View style={globalStyles.divider} />
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>E-mail</Text>
+              <Text style={globalStyles.label}>
+                E-mail:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="cliente@email.com"
@@ -327,7 +339,10 @@ export function ClientForm({
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Telefone</Text>
+              <Text style={globalStyles.label}>
+                Telefone:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="(00) 00000-0000"

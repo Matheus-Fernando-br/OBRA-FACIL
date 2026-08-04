@@ -1,3 +1,4 @@
+import { useState } from "react";
 import CurrencyInput from "react-native-currency-input";
 import { COLORS } from "@/styles/globalStyles";
 
@@ -14,7 +15,7 @@ export function AppCurrencyInput({
   editable = true,
   placeholder,
 }: Props) {
-  const isDisabled = editable === false;
+  const [focused, setFocused] = useState(false);
 
   return (
     <CurrencyInput
@@ -28,21 +29,39 @@ export function AppCurrencyInput({
       separator=","
       precision={2}
       keyboardType="numeric"
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
       style={{
         width: "100%",
-        height: 60,
-        backgroundColor: COLORS.backgroundSection,
-        borderRadius: 8,
-        paddingHorizontal: 20,
+        minHeight: 58,
+
+        backgroundColor: editable ? COLORS.backgroundSection : "#D5D6DB",
+
+        color: editable ? COLORS.text : "#575B69",
+
+        borderWidth: 1.2,
+
+        borderColor: editable
+          ? focused
+            ? COLORS.primary
+            : "#D9E2EC"
+          : "#D7DEE8",
+
+        borderRadius: 10,
+
+        paddingHorizontal: 18,
+        paddingVertical: 14,
+
         marginBottom: 16,
-        shadowColor: "#000",
-        shadowOpacity: 0.3,
-        shadowRadius: 5,
+
+        shadowColor: editable ? "#000" : "transparent",
+        shadowOpacity: editable ? 0.08 : 0,
+        shadowRadius: editable ? 4 : 0,
         shadowOffset: {
           width: 0,
-          height: 3,
+          height: 2,
         },
-        opacity: isDisabled ? 0.6 : 1, // Mesmo comportamento do AppInput
+        elevation: editable ? 2 : 0,
       }}
     />
   );

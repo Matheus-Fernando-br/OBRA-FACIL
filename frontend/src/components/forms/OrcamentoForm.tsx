@@ -1,5 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import { View, Text, ScrollView, Pressable, Modal } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Modal,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
@@ -50,11 +57,13 @@ export function OrcamentoForm({
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
+  const isAdd = mode === "add";
   const [nome, setNome] = useState(initialData?.nome || "");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [loadingClose, setLoadingClose] = useState(false);
   const [status, setStatus] = useState(initialData?.status || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
+  const [loadingClient, setLoadingClient] = useState(mode !== "add");
   const [clientModalVisible, setClientModalVisible] = useState(false);
   const [selectedClient, setSelectedClient] = useState(() => {
     if (!initialData?.cliente) return "";
@@ -72,6 +81,26 @@ export function OrcamentoForm({
         : initialData.cliente._id,
     );
   }, [initialData]);
+
+  useEffect(() => {
+    if (mode === "add") {
+      setLoadingClient(false);
+      return;
+    }
+
+    if (!selectedClient) return;
+
+    if (clientsList.length === 0) {
+      setLoadingClient(true);
+      return;
+    }
+
+    const client = clientsList.find((c) => c._id === selectedClient);
+
+    if (client) {
+      setLoadingClient(false);
+    }
+  }, [clientsList, selectedClient, mode]);
 
   const selectedClientData = clientsList.find((c) => c._id === selectedClient);
 
@@ -398,7 +427,7 @@ export function OrcamentoForm({
       console.log("ERRO AO SALVAR ORÇAMENTO:", error?.response?.data || error);
       setFeedback(error?.response?.data?.message || "Erro ao salvar orçamento");
     } finally {
-      setLoadingSubmit(true);
+      setLoadingSubmit(false);
       setTimeout(() => {
         setFeedback("");
       }, 5000);
@@ -462,16 +491,41 @@ export function OrcamentoForm({
 
         <View style={globalStyles.divider} />
 
-        <ClientCardSelect
-          name={selectedClientData?.nome || "Selecionar Cliente"}
-          phone={selectedClientData?.telefone || ""}
-          abrirModal={() => setClientModalVisible(true)}
-          showArrow
-        />
+        {loadingClient ? (
+          <View
+            style={[
+              globalStyles.clientCard,
+              {
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 90,
+                gap: 20,
+              },
+            ]}
+          >
+            <ActivityIndicator size="large" color={COLORS.primary} />
+
+            <Text style={globalStyles.subtitle}>Carregando cliente...</Text>
+          </View>
+        ) : (
+          <ClientCardSelect
+            name={selectedClientData?.nome || "Selecionar Cliente"}
+            phone={selectedClientData?.telefone || ""}
+            abrirModal={() => {
+              if (!isReadOnly) {
+                setClientModalVisible(true);
+              }
+            }}
+            showArrow={!isReadOnly}
+          />
+        )}
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>Nome do orçamento:</Text>
+          <Text style={globalStyles.label}>
+            Nome do orçamento:
+            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+          </Text>
           <AppInput
             placeholder="Nome do orçamento"
             value={nome}
@@ -490,26 +544,27 @@ export function OrcamentoForm({
             numberOfLines={3}
           />
 
-          <Text style={globalStyles.label}>Status de Orçamento:</Text>
-          <Picker
-            selectedValue={status}
-            onValueChange={(itemValue) => setStatus(itemValue)}
-            style={{
-              padding: 15,
-              borderRadius: 10,
-              width: "100%",
-              backgroundColor: COLORS.backgroundSection,
-            }}
-          >
-            <Picker.Item
-              label={"Selecione o Status do Orçamento " + nome}
-              value=""
-            />
-            <Picker.Item label="PENDENTE" value="PENDENTE" />
-            <Picker.Item label="APROVADO" value="APROVADO" />
-            <Picker.Item label="RECUSADO" value="RECUSADO" />
-          </Picker>
-
+          {!isAdd && (
+            <>
+              <Text style={globalStyles.label}>Status de Orçamento:</Text>
+              <Picker
+                selectedValue={status}
+                onValueChange={(itemValue) => setStatus(itemValue)}
+                style={[
+                  globalStyles.picker,
+                  isReadOnly && globalStyles.pickerReadOnly,
+                ]}
+              >
+                <Picker.Item
+                  label={"Selecione o Status do Orçamento " + nome}
+                  value=""
+                />
+                <Picker.Item label="PENDENTE" value="PENDENTE" />
+                <Picker.Item label="APROVADO" value="APROVADO" />
+                <Picker.Item label="RECUSADO" value="RECUSADO" />
+              </Picker>
+            </>
+          )}
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>Data de Publicação:</Text>
@@ -519,11 +574,17 @@ export function OrcamentoForm({
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Validade (dias):</Text>
+              <Text style={globalStyles.label}>
+                Validade:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
               <Picker
                 selectedValue={validade}
                 onValueChange={(v) => setValidade(Number(v))}
-                style={globalStyles.picker}
+                style={[
+                  globalStyles.picker,
+                  isReadOnly && globalStyles.pickerReadOnly,
+                ]}
                 enabled={!isReadOnly}
               >
                 {Array.from({ length: 15 }, (_, i) => (
@@ -532,9 +593,7 @@ export function OrcamentoForm({
               </Picker>
             </View>
           </View>
-          <Text style={globalStyles.label}>
-            Válido até dia:
-          </Text>
+          <Text style={globalStyles.label}>Válido até dia:</Text>
           <AppInput
             value={
               dataValidade
@@ -549,7 +608,10 @@ export function OrcamentoForm({
         <View style={globalStyles.card}>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>CEP</Text>
+              <Text style={globalStyles.label}>
+                CEP:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
               <AppInput
                 placeholder="CEP"
                 value={cep}
@@ -563,12 +625,20 @@ export function OrcamentoForm({
             </View>
             <View style={globalStyles.column}>
               <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Estado:</Text>
+                <Text style={globalStyles.label}>
+                  Estado:
+                  {!isReadOnly && (
+                    <Text style={globalStyles.obrigatorio}>*</Text>
+                  )}
+                </Text>
 
                 <Picker
                   selectedValue={estado}
                   onValueChange={(value) => setEstado(value)}
-                  style={globalStyles.picker}
+                  style={[
+                    globalStyles.picker,
+                    isReadOnly && globalStyles.pickerReadOnly,
+                  ]}
                   enabled={!isReadOnly}
                 >
                   <Picker.Item label="Selecione o Estado" value="" />
@@ -605,7 +675,10 @@ export function OrcamentoForm({
           </View>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Cidade:</Text>
+              <Text style={globalStyles.label}>
+                Cidade:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="Cidade"
@@ -615,7 +688,10 @@ export function OrcamentoForm({
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Bairro:</Text>
+              <Text style={globalStyles.label}>
+                Bairro:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="Bairro"
@@ -625,7 +701,10 @@ export function OrcamentoForm({
               />
             </View>
           </View>
-          <Text style={globalStyles.label}>Logradouro:</Text>
+          <Text style={globalStyles.label}>
+            Logradouro:
+            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+          </Text>
           <View style={globalStyles.row}>
             <AppInput
               placeholder="Rua"
@@ -636,7 +715,10 @@ export function OrcamentoForm({
           </View>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Número:</Text>
+              <Text style={globalStyles.label}>
+                Número:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="Nº"
@@ -670,7 +752,10 @@ export function OrcamentoForm({
         )}
         {categorias.map((cat, idx) => (
           <View key={cat.id} style={[globalStyles.card, { marginTop: 20 }]}>
-            <Text style={globalStyles.label}>Nome da Categoria {idx + 1}:</Text>
+            <Text style={globalStyles.label}>
+              Nome da Categoria {idx + 1}:
+              {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+            </Text>
             <AppInput
               placeholder="Nome da Categoria"
               value={cat.nome}
@@ -679,8 +764,11 @@ export function OrcamentoForm({
             />
             {cat.servicos.map((s, sIdx) => (
               <View key={s.id} style={globalStyles.serviceContainer}>
-                <Text style={globalStyles.serviceTitle}>
+                <Text style={globalStyles.label}>
                   Nome do Serviço {sIdx + 1}:
+                  {!isReadOnly && (
+                    <Text style={globalStyles.obrigatorio}>*</Text>
+                  )}
                 </Text>
                 <AppInput
                   placeholder="Nome do Serviço"
@@ -690,14 +778,22 @@ export function OrcamentoForm({
                 />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Unidade do Serviço:</Text>
+                    <Text style={globalStyles.label}>
+                      Unidade do Serviço:
+                      {!isReadOnly && (
+                        <Text style={globalStyles.obrigatorio}>*</Text>
+                      )}
+                    </Text>
 
                     <Picker
                       selectedValue={s.unidade}
                       onValueChange={(value) =>
                         updateServico(cat.id, s.id, "unidade", value)
                       }
-                      style={globalStyles.picker}
+                      style={[
+                        globalStyles.picker,
+                        isReadOnly && globalStyles.pickerReadOnly,
+                      ]}
                       enabled={!isReadOnly}
                     >
                       <Picker.Item label="Selecione a Unid. " value="" />
@@ -715,7 +811,12 @@ export function OrcamentoForm({
                   </View>
 
                   <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Valor Unitário:</Text>
+                    <Text style={globalStyles.label}>
+                      Valor Unitário:
+                      {!isReadOnly && (
+                        <Text style={globalStyles.obrigatorio}>*</Text>
+                      )}
+                    </Text>
 
                     <AppCurrencyInput
                       value={s.preco_da_unidade}
@@ -733,7 +834,12 @@ export function OrcamentoForm({
                 </View>
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Quantidade:</Text>
+                    <Text style={globalStyles.label}>
+                      Quantidade:
+                      {!isReadOnly && (
+                        <Text style={globalStyles.obrigatorio}>*</Text>
+                      )}
+                    </Text>
 
                     <AppInput
                       placeholder="Qtd"
@@ -799,7 +905,10 @@ export function OrcamentoForm({
               />
             </View>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>BDI (%):</Text>
+              <Text style={globalStyles.label}>
+                BDI (%):
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
               <AppInput
                 placeholder="BDI (%)"
@@ -865,7 +974,7 @@ export function OrcamentoForm({
               backgroundColor: COLORS.background,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
-              maxHeight: "85%",
+              maxHeight: "90%",
               padding: 30,
             }}
           >

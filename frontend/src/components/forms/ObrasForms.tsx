@@ -1,11 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
@@ -185,6 +179,7 @@ export function ObrasForm({
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const isAdd = mode === "add";
+  const isEdit = mode === "edit";
   const [obraStatus, setObraStatus] = useState<ObraStatus>("NOPRAZO");
   const [orcamentoAtrelado, setOrcamentoAtrelado] = useState<Orcamento | null>(
     budget ?? null,
@@ -483,11 +478,18 @@ export function ObrasForm({
               : "Detalhes"}
         </Text>
 
-        <Pressable onPress={mode === "details" ? onEdit : irParaSalvar} style={globalStyles.rightAction}>
+        <Pressable
+          onPress={mode === "details" ? onEdit : irParaSalvar}
+          style={globalStyles.rightAction}
+        >
           <Text style={globalStyles.saveText}>
-          {mode === "details" ? "Editar" : "Salvar"}
+            {mode === "details" ? "Editar" : "Salvar"}
           </Text>
-          <Ionicons name={mode === "details" ? "pencil-sharp" : "download"} size={25} color={COLORS.title} />
+          <Ionicons
+            name={mode === "details" ? "pencil-sharp" : "download"}
+            size={25}
+            color={COLORS.title}
+          />
         </Pressable>
       </View>
 
@@ -495,35 +497,51 @@ export function ObrasForm({
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>Nome da Obra:</Text>
-          <AppInput
-            value={orcamentoAtrelado?.nome ?? ""}
-            editable={false}
-            selectTextOnFocus={false}
-          />
-          <Text style={globalStyles.label}>Cliente:</Text>
-          <AppInput
-            value={cliente?.nome ?? ""}
-            editable={false}
-            selectTextOnFocus={false}
-          />
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Nome do Serviço:</Text>
+              <AppInput
+                value={orcamentoAtrelado?.nome ?? ""}
+                editable={false}
+                selectTextOnFocus={false}
+              />
+            </View>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Cliente:</Text>
+              <AppInput
+                value={cliente?.nome ?? ""}
+                editable={false}
+                selectTextOnFocus={false}
+              />
+            </View>
+          </View>
 
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data de Início Prevista:</Text>
+              <Text style={globalStyles.label}>
+                Data de Início Prevista:
+                {!isReadOnly && !isEdit && (
+                  <Text style={globalStyles.obrigatorio}>*</Text>
+                )}
+              </Text>
               <AppInput
                 placeholder="DD/MM/YYYY"
                 value={dataInicioPrevista}
                 keyboardType="numeric"
                 maxLength={10}
                 onChangeText={(text) => setDataInicioPrevista(maskDate(text))}
-                editable={!isReadOnly}
+                editable={!isReadOnly && !isEdit}
               />
             </View>
 
             {!isAdd && (
               <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Data de Início Real:</Text>
+                <Text style={globalStyles.label}>
+                  Data de Início Real:
+                  {!isReadOnly && (
+                    <Text style={globalStyles.obrigatorio}>*</Text>
+                  )}
+                </Text>
                 <AppInput
                   placeholder="DD/MM/YYYY"
                   value={dataInicioReal}
@@ -663,7 +681,12 @@ export function ObrasForm({
                 <AppInput value={servico.descricao} editable={false} />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>Dias Previstos:</Text>
+                    <Text style={globalStyles.label}>
+                      Dias Previstos:
+                      {!isReadOnly && !isEdit && (
+                        <Text style={globalStyles.obrigatorio}>*</Text>
+                      )}
+                    </Text>
                     <AppInput
                       placeholder="Dias"
                       value={String(servico.qt_dias_prevista ?? 0)}
@@ -676,12 +699,17 @@ export function ObrasForm({
                         )
                       }
                       keyboardType="numeric"
-                      editable={!isReadOnly}
+                      editable={!isReadOnly && !isEdit}
                     />
                   </View>
                   {!isAdd && (
                     <View style={globalStyles.column}>
-                      <Text style={globalStyles.label}>Dias Reais:</Text>
+                      <Text style={globalStyles.label}>
+                        Dias Reais:
+                        {!isReadOnly && (
+                          <Text style={globalStyles.obrigatorio}>*</Text>
+                        )}
+                      </Text>
                       <AppInput
                         placeholder="Dias"
                         value={String(servico.qt_dias_real ?? 0)}

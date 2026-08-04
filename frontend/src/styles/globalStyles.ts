@@ -123,6 +123,13 @@ export const globalStyles = StyleSheet.create({
     marginTop: 5,
   },
 
+  obrigatorio: {
+    fontFamily: "Montserrat_700Bold",
+    marginLeft: 5,
+    fontSize: 12,
+    color: COLORS.danger,
+  },
+
   /* =========================
    ORÇAMENTOS
 ========================= */
@@ -290,9 +297,8 @@ export const globalStyles = StyleSheet.create({
     width: "100%",
     height: 60,
     backgroundColor: COLORS.backgroundSection,
-    borderRadius: 8,
+    borderRadius: 6,
     paddingHorizontal: 20,
-    marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.3,
     shadowRadius: 5,
@@ -300,6 +306,14 @@ export const globalStyles = StyleSheet.create({
       width: 0,
       height: 3,
     },
+  },
+
+  pickerReadOnly: {
+    backgroundColor: "#D5D6DB",
+    borderColor: "#D5D6DB",
+    color: "#575B69",
+    shadowOpacity: 0,
+    elevation: 0,
   },
 
   row: { flexDirection: "row", gap: 10 },
