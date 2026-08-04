@@ -66,15 +66,19 @@ export function ClientCardSelect({
           marginRight: 15,
         }}
       >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "700",
-            color: COLORS.primary,
-          }}
-        >
-          {getInitials(name)}
-        </Text>
+        {name === "Selecionar Cliente" ? (
+          <Ionicons name="person-outline" size={28} color={COLORS.primary} />
+        ) : (
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "700",
+              color: COLORS.primary,
+            }}
+          >
+            {getInitials(name)}
+          </Text>
+        )}
       </View>
 
       {/* Informações */}
@@ -86,14 +90,10 @@ export function ClientCardSelect({
       </View>
 
       <View style={globalStyles.clientIcons}>
-  {showArrow && (
-    <Ionicons
-      name="chevron-down"
-      size={30}
-      color={COLORS.primary}
-    />
-  )}
-</View>
+        {showArrow && (
+          <Ionicons name="chevron-down" size={30} color={COLORS.primary} />
+        )}
+      </View>
     </Pressable>
   );
 }

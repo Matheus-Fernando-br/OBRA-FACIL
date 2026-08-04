@@ -8,8 +8,8 @@ export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
 
-  background: "#FFFCFC",
-  backgroundSection: "#F0F0F0",
+  background: "#FFFFFF",
+  backgroundSection: "#FCFCFC",
 
   card: "#D9D7D7",
   cardHover: "#1E293B",

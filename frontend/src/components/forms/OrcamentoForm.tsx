@@ -458,20 +458,16 @@ export function OrcamentoForm({
         </Pressable>
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }}>
-        <View style={globalStyles.card}>
-          <Text style={globalStyles.subtitle}>Cliente</Text>
+        <Text style={globalStyles.subtitle}>Cliente</Text>
 
-          <View style={globalStyles.divider} />
+        <View style={globalStyles.divider} />
 
-          <Text style={globalStyles.label}>Selecione o Cliente:</Text>
-
-          <ClientCardSelect
-            name={selectedClientData?.nome || "Selecionar Cliente"}
-            phone={selectedClientData?.telefone || ""}
-            abrirModal={() => setClientModalVisible(true)}
-            showArrow
-          />
-        </View>
+        <ClientCardSelect
+          name={selectedClientData?.nome || "Selecionar Cliente"}
+          phone={selectedClientData?.telefone || ""}
+          abrirModal={() => setClientModalVisible(true)}
+          showArrow
+        />
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
@@ -536,12 +532,17 @@ export function OrcamentoForm({
               </Picker>
             </View>
           </View>
-          <Text style={[globalStyles.label, { marginBottom: 15 }]}>
-            Válido até:{" "}
-            {dataValidade
-              ? dataValidade.toLocaleDateString("pt-BR")
-              : "Selecione a validade acima"}
+          <Text style={globalStyles.label}>
+            Válido até dia:
           </Text>
+          <AppInput
+            value={
+              dataValidade
+                ? dataValidade.toLocaleDateString("pt-BR")
+                : "Selecione a validade acima"
+            }
+            editable={false}
+          />
         </View>
         <Text style={globalStyles.subtitle}>Endereço:</Text>
         <View style={globalStyles.divider} />
@@ -882,7 +883,7 @@ export function OrcamentoForm({
                 <Ionicons name="close" size={35} color={COLORS.danger} />
               </Pressable>
             </View>
-            <View style={globalStyles.divider}/>
+            <View style={globalStyles.divider} />
             <ScrollView>
               {clientsList.map((client) => (
                 <Pressable
