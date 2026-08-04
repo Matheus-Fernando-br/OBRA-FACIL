@@ -9,9 +9,10 @@ interface Props {
   visible: boolean;
   client: Cliente | null;
   onClose(): void;
+  onEdit(): void;
 }
 
-export function ClientDetailsModal({ visible, client, onClose }: Props) {
+export function DetailsClientModal({ visible, client, onClose, onEdit }: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
 
@@ -29,7 +30,7 @@ export function ClientDetailsModal({ visible, client, onClose }: Props) {
       statusBarTranslucent
     >
       <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}>
-        <ClientForm mode="details" initialData={client} onClose={onClose} />
+        <ClientForm mode="details" initialData={client} onClose={onClose} onEdit={onEdit} />
       </View>
     </Modal>
   );

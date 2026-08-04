@@ -5,7 +5,7 @@ import { globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   client: string;
-  service: string;
+  nome: string;
   status: string;
   value: number;
   date: string;
@@ -17,7 +17,7 @@ interface Props {
 
 export function BudgetCard({
   client,
-  service,
+  nome,
   status,
   value,
   date,
@@ -41,7 +41,7 @@ export function BudgetCard({
   return (
     <View style={globalStyles.orcamentoCard}>
       <View style={globalStyles.orcamentoHeader}>
-        <Text style={globalStyles.orcamentoCliente}>{service}</Text>
+        <Text style={globalStyles.orcamentoCliente}>{nome}</Text>
 
         <View
           style={[

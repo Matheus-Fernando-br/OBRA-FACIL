@@ -5,7 +5,7 @@ import { View, Text, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { COLORS, globalStyles } from "@/styles/globalStyles";
-
+import { CardOrcamentoCliente } from "@/components/cards/orcamento/CardOrcamentoCliente";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "@/components/buttons/AppButton";
 
@@ -18,6 +18,7 @@ import {
 
 import { Cliente } from "@/components/layout/interface";
 import { useAuth } from "@/contexts/AuthContext";
+import { EditClientModal } from "../modals/cliente/EditClientModal";
 
 export interface ClientFormData {
   nome: string;
@@ -29,14 +30,11 @@ export interface ClientFormData {
 
 interface ClientFormProps {
   mode: "add" | "edit" | "details";
-
   initialData?: Cliente | null;
-
   onClose: () => void;
-
   onSave?: (data: ClientFormData) => Promise<void>;
-
   onSuccess?: () => void;
+  onEdit?: () => void;
 }
 
 export function ClientForm({
@@ -45,6 +43,7 @@ export function ClientForm({
   onClose,
   onSave,
   onSuccess,
+  onEdit,
 }: ClientFormProps) {
   const { token } = useAuth();
 
@@ -254,7 +253,7 @@ export function ClientForm({
     <View style={globalStyles.container}>
       <View style={globalStyles.modalHeader}>
         <Pressable
-          onPress={handleClose}
+          onPress={onClose}
           style={globalStyles.leftAction}
           disabled={loadingSubmit}
         >
@@ -269,14 +268,17 @@ export function ClientForm({
               : "Detalhes do Cliente"}
         </Text>
 
-        <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+        <Pressable onPress={mode === "details" ? onEdit : irParaSalvar} style={globalStyles.rightAction}>
+        <Text style={globalStyles.saveText}>
+            {mode === "details" ? "Editar" : "Salvar"}
+          </Text>
           <Ionicons
             name={
               mode === "add"
                 ? "person-add"
                 : mode === "edit"
                   ? "download"
-                  : "eye"
+                  : "pencil-sharp"
             }
             size={25}
             color={COLORS.title}
@@ -313,27 +315,41 @@ export function ClientForm({
           </Text>
 
           <View style={globalStyles.divider} />
+          <View style={globalStyles.row}>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>E-mail</Text>
 
-          <Text style={globalStyles.label}>E-mail</Text>
+              <AppInput
+                placeholder="cliente@email.com"
+                value={email}
+                onChangeText={(text) => setEmail(emailMask(text))}
+                editable={!isReadOnly}
+              />
+            </View>
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>Telefone</Text>
 
-          <AppInput
-            placeholder="cliente@email.com"
-            value={email}
-            onChangeText={(text) => setEmail(emailMask(text))}
-            editable={!isReadOnly}
-          />
-
-          <Text style={globalStyles.label}>Telefone</Text>
-
-          <AppInput
-            placeholder="(00) 00000-0000"
-            value={telefone}
-            onChangeText={(text) => setTelefone(phoneMask(text))}
-            editable={!isReadOnly}
-          />
-
-          <View style={globalStyles.divider} />
-
+              <AppInput
+                placeholder="(00) 00000-0000"
+                value={telefone}
+                onChangeText={(text) => setTelefone(phoneMask(text))}
+                editable={!isReadOnly}
+              />
+            </View>
+          </View>
+          {isReadOnly && (
+            <>
+              <Text style={globalStyles.subtitle}>Orçamentos Associados</Text>
+              <View style={globalStyles.divider} />
+              <CardOrcamentoCliente
+                name="Teste"
+                value={1000}
+                status="Aprovado"
+                onClick={onClose}
+              />
+              <View style={globalStyles.divider} />
+            </>
+          )}
           {feedback !== "" && (
             <Text style={globalStyles.feedback}>{feedback}</Text>
           )}

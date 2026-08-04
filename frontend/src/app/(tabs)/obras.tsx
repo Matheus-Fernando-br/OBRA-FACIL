@@ -296,6 +296,13 @@ export default function ObrasScreen() {
         visible={detailsVisible}
         work={selectedWork}
         onClose={() => setDetailsVisible(false)}
+        onEdit={() => {
+          setDetailsVisible(false);
+      
+          setTimeout(() => {
+            setEditVisible(true);
+          }, 200);
+        }}
       />
     </View>
   );

@@ -11,14 +11,13 @@ interface Props {
   visible: boolean;
   work: Obra | null;
   onClose(): void;
+  onEdit(): void;
 }
 
-export function DetailsObraModal({ visible, work, onClose }: Props) {
+export function DetailsObraModal({ visible, work, onClose, onEdit }: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfUri, setPdfUri] = useState<string | null>(null);
-  const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   useEffect(() => {
     if (visible && token) getClients(token).then(setClientsList);
@@ -59,9 +58,8 @@ export function DetailsObraModal({ visible, work, onClose }: Props) {
           mode="details"
           initialData={work}
           onClose={onClose}
-          clientsList={clientsList}
           loading={pdfLoading}
-          onGeneratePdf={handleGeneratePdf}
+          onEdit={onEdit}
         />
       </View>
     </Modal>

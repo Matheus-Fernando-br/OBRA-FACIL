@@ -1,16 +1,12 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-} from "react-native";
+import { View, Text, ScrollView, Pressable, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
+import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
 import * as Linking from "expo-linking";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -38,6 +34,7 @@ interface OrcamentoFormProps {
   clientsList: Cliente[];
   feedbackMessage?: string;
   onSuccess?: () => void;
+  onEdit?: () => void;
 }
 
 export function OrcamentoForm({
@@ -49,6 +46,7 @@ export function OrcamentoForm({
   clientsList,
   feedbackMessage,
   onSuccess,
+  onEdit,
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -57,6 +55,7 @@ export function OrcamentoForm({
   const [loadingClose, setLoadingClose] = useState(false);
   const [status, setStatus] = useState(initialData?.status || "");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
+  const [clientModalVisible, setClientModalVisible] = useState(false);
   const [selectedClient, setSelectedClient] = useState(() => {
     if (!initialData?.cliente) return "";
 
@@ -73,6 +72,8 @@ export function OrcamentoForm({
         : initialData.cliente._id,
     );
   }, [initialData]);
+
+  const selectedClientData = clientsList.find((c) => c._id === selectedClient);
 
   const [validade, setValidade] = useState<number>(
     initialData?.valido_durante || 0,
@@ -442,14 +443,35 @@ export function OrcamentoForm({
               : "Detalhes"}
         </Text>
 
-        <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+        <Pressable
+          onPress={mode === "details" ? onEdit : irParaSalvar}
+          style={globalStyles.rightAction}
+        >
           <Text style={globalStyles.saveText}>
-            {mode === "details" ? "Gerar PDF" : "Salvar"}
+            {mode === "details" ? "Editar" : "Salvar"}
           </Text>
-          <Ionicons name="download" size={25} color={COLORS.title} />
+          <Ionicons
+            name={mode === "details" ? "pencil-sharp" : "download"}
+            size={25}
+            color={COLORS.title}
+          />
         </Pressable>
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+        <View style={globalStyles.card}>
+          <Text style={globalStyles.subtitle}>Cliente</Text>
+
+          <View style={globalStyles.divider} />
+
+          <Text style={globalStyles.label}>Selecione o Cliente:</Text>
+
+          <ClientCardSelect
+            name={selectedClientData?.nome || "Selecionar Cliente"}
+            phone={selectedClientData?.telefone || ""}
+            abrirModal={() => setClientModalVisible(true)}
+            showArrow
+          />
+        </View>
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
@@ -461,18 +483,6 @@ export function OrcamentoForm({
             editable={!isReadOnly}
           />
 
-          <Text style={globalStyles.label}>Cliente:</Text>
-          <Picker
-            selectedValue={selectedClient}
-            onValueChange={(itemValue) => setSelectedClient(itemValue)}
-            style={globalStyles.picker}
-            enabled={!isReadOnly}
-          >
-            <Picker.Item label="Selecione um cliente" value="" />
-            {clientsList.map((c) => (
-              <Picker.Item key={c._id} label={c.nome} value={c._id} />
-            ))}
-          </Picker>
           <Text style={globalStyles.label}>Descrição:</Text>
 
           <AppInput
@@ -841,6 +851,62 @@ export function OrcamentoForm({
           loading={loadingClose}
         />
       </ScrollView>
+      <Modal visible={clientModalVisible} animationType="slide" transparent>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: COLORS.background,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              maxHeight: "85%",
+              padding: 30,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 5,
+              }}
+            >
+              <Text style={globalStyles.subtitle}>Selecione um Cliente</Text>
+
+              <Pressable onPress={() => setClientModalVisible(false)}>
+                <Ionicons name="close" size={35} color={COLORS.danger} />
+              </Pressable>
+            </View>
+            <View style={globalStyles.divider}/>
+            <ScrollView>
+              {clientsList.map((client) => (
+                <Pressable
+                  key={client._id}
+                  onPress={() => {
+                    setSelectedClient(client._id);
+                    setClientModalVisible(false);
+                  }}
+                >
+                  <ClientCardSelect
+                    key={client._id}
+                    name={client.nome}
+                    phone={client.telefone}
+                    abrirModal={() => {
+                      setSelectedClient(client._id);
+                      setClientModalVisible(false);
+                    }}
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

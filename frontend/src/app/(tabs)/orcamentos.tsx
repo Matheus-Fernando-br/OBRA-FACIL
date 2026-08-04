@@ -237,6 +237,13 @@ export default function OrcamentosScreen() {
         visible={detailsVisible}
         budget={selectedBudget}
         onClose={() => setDetailsVisible(false)}
+        onEdit={() => {
+          setDetailsVisible(false);
+      
+          setTimeout(() => {
+            setEditVisible(true);
+          }, 200);
+        }}
       />
     </View>
   );
