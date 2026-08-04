@@ -10,7 +10,7 @@ import {
 
 import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
@@ -67,7 +67,7 @@ export function ObrasCard({
         ========================== */}
 
         <Image
-          source={require("../../assets/images/house.jpg")}
+          source={require("../../../assets/images/house.jpg")}
           style={globalStyles.obrasCardBackground}
         />
 

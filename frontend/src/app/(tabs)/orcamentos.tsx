@@ -14,7 +14,7 @@ import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { AppInput } from "../../components/forms/AppInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { getClients, getBudgets } from "../../services/api";
-import { BudgetCard } from "@/components/cards/BudgetCard";
+import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
 import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
 import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcamentoModal";
 import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
@@ -53,7 +53,7 @@ export default function OrcamentosScreen() {
         },
         {},
       );
-      
+
       setClientsMap(map);
     } catch (error) {
       console.log(error);
@@ -94,18 +94,18 @@ export default function OrcamentosScreen() {
 
   const filteredBudgets = useMemo(() => {
     const searchLower = search.trim().toLowerCase();
-  
+
     return budgetsList.filter((budget) => {
       const matchSearch =
         budget.nome.toLowerCase().includes(searchLower) ||
         getClientName(budget.cliente as string)
           .toLowerCase()
           .includes(searchLower);
-  
+
       const matchStatus =
         statusFilter === "Todos" ||
         budget.status.toLowerCase() === statusFilter.toLowerCase();
-  
+
       return matchSearch && matchStatus;
     });
   }, [budgetsList, search, statusFilter, clientsMap]);
@@ -149,8 +149,10 @@ export default function OrcamentosScreen() {
             ))}
           </View>
 
-          {(!loading && filteredBudgets.length === 0) && (
-            <Text style={globalStyles.sectionTitle}>Nenhum orçamento encontrado.</Text>
+          {!loading && filteredBudgets.length === 0 && (
+            <Text style={globalStyles.sectionTitle}>
+              Nenhum orçamento encontrado.
+            </Text>
           )}
 
           {loading ? (
@@ -174,7 +176,7 @@ export default function OrcamentosScreen() {
               <BudgetCard
                 key={budget._id}
                 client={getClientName(budget.cliente as string)}
-                service={budget.nome}
+                nome={budget.nome}
                 status={budget.status}
                 value={budget.preco_com_bdi}
                 date={new Date(budget.data_validade).toLocaleDateString(

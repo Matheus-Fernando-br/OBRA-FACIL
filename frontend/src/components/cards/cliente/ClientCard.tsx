@@ -1,17 +1,25 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { phoneMask } from "@/components/forms/mask";
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "@/styles/globalStyles";
 
 interface Props {
   name: string;
   phone: string;
   email: string;
+  onDetails: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-export function ClientCard({ name, phone, email, onEdit, onDelete }: Props) {
+export function ClientCard({
+  name,
+  phone,
+  email,
+  onDetails,
+  onEdit,
+  onDelete,
+}: Props) {
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
 
@@ -48,7 +56,7 @@ export function ClientCard({ name, phone, email, onEdit, onDelete }: Props) {
   const telefone = phoneMask(phone || "");
 
   return (
-    <View style={globalStyles.clientCard}>
+    <Pressable onPress={onDetails} style={globalStyles.clientCard}>
       {/* Avatar */}
 
       <View
@@ -96,6 +104,6 @@ export function ClientCard({ name, phone, email, onEdit, onDelete }: Props) {
           <Ionicons name="trash-outline" size={30} color={COLORS.danger} />
         </Pressable>
       </View>
-    </View>
+    </Pressable>
   );
 }

@@ -20,7 +20,7 @@ import { getBudgets, getClients, getWork } from "@/services/api";
 
 import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
 
-import { AvailableBudgetCard } from "../../cards/AvailableBudgetCard";
+import { AvailableBudgetCard } from "../../cards/orcamento/AvailableBudgetCard";
 
 interface Props {
   visible: boolean;

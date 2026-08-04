@@ -45,7 +45,7 @@ export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
   };
 
   if (!budget) return null;
-  
+
   return (
     <Modal
       visible={visible}
@@ -59,16 +59,15 @@ export function BudgetDetailsModal({ visible, budget, onClose }: Props) {
           initialData={budget}
           onClose={onClose}
           clientsList={clientsList}
-          loading={pdfLoading}
           onGeneratePdf={handleGeneratePdf}
         />
-      <PdfViewerModal
-        visible={showPdfViewer}
-        onClose={() => setShowPdfViewer(false)}
-        pdfUri={pdfUri}
-        budgetTitle={budget.nome}
+        <PdfViewerModal
+          visible={showPdfViewer}
+          onClose={() => setShowPdfViewer(false)}
+          pdfUri={pdfUri}
+          budgetTitle={budget.nome}
         />
-        </View>
+      </View>
     </Modal>
   );
 }

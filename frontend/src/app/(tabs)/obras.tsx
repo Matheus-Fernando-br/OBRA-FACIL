@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import { getWork, getBudgets, getClients } from "../../services/api";
 
-import { ObrasCard } from "@/components/cards/ObrasCard";
+import { ObrasCard } from "@/components/cards//obras/ObrasCard";
 
 import { Cliente, Obra, Orcamento } from "@/components/layout/interface";
 import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
@@ -67,7 +67,7 @@ export default function ObrasScreen() {
       setWorksList(Array.isArray(worksData) ? worksData : worksData.obras);
 
       setBudgets(budgetsData);
-      
+
       setClients(clientsData);
     } catch (err: any) {
       console.log("ERRO COMPLETO");
@@ -94,13 +94,10 @@ export default function ObrasScreen() {
   }, [budgets]);
 
   const clientsMap = useMemo(() => {
-    return clients.reduce(
-      (acc: Record<string, Cliente>, client) => {
-        acc[client._id] = client;
-        return acc;
-      },
-      {},
-    );
+    return clients.reduce((acc: Record<string, Cliente>, client) => {
+      acc[client._id] = client;
+      return acc;
+    }, {});
   }, [clients]);
 
   function getClientName(clientId: string) {
@@ -179,8 +176,10 @@ export default function ObrasScreen() {
             ))}
           </View>
 
-          {(!loading && filteredWorks.length === 0) && (
-            <Text style={globalStyles.sectionTitle}>Nenhum obra encontrada.</Text>
+          {!loading && filteredWorks.length === 0 && (
+            <Text style={globalStyles.sectionTitle}>
+              Nenhum obra encontrada.
+            </Text>
           )}
 
           {loading ? (
@@ -210,7 +209,7 @@ export default function ObrasScreen() {
                   client={
                     typeof budget?.cliente === "string"
                       ? getClientName(budget.cliente)
-                      : budget?.cliente.nome ?? ""
+                      : (budget?.cliente.nome ?? "")
                   }
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}

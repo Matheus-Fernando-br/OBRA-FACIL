@@ -339,20 +339,15 @@ export function ClientForm({
           )}
 
           <View ref={salvarRef}>
-            <AppButton
-              title={
-                mode === "add"
-                  ? "Salvar Cliente"
-                  : mode === "edit"
-                    ? "Salvar Alterações"
-                    : "Fechar"
-              }
-              onPress={handleSubmit}
-              loading={loadingSubmit}
-              color={COLORS.primary}
-            />
+            {!isReadOnly && (
+              <AppButton
+                title={mode === "add" ? "Salvar Cliente" : "Salvar Alterações"}
+                onPress={handleSubmit}
+                loading={loadingSubmit}
+                color={COLORS.primary}
+              />
+            )}
           </View>
-
           {!isReadOnly && (
             <AppButton
               title={

@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
@@ -13,16 +13,14 @@ export function WorkCard({ title, progress, type, diasReal }: Props) {
   return (
     <View style={globalStyles.workCard}>
       <Image
-        source={require("../../assets/images/house.jpg")}
+        source={require("../../../assets/images/house.jpg")}
         style={globalStyles.workCardImage}
       />
 
       <View style={globalStyles.workCardContent}>
         <Text style={globalStyles.workCardTitle}>{title}</Text>
 
-        <Text style={globalStyles.workCardInfo}>
-          Status: {type}
-        </Text>
+        <Text style={globalStyles.workCardInfo}>Status: {type}</Text>
         <Text style={globalStyles.workCardInfo}>
           Previsão de tempo para finalização: {diasReal} dias
         </Text>

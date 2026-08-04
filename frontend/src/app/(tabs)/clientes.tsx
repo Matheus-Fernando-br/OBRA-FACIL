@@ -10,7 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 import { COLORS, globalStyles } from "../../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "../../components/forms/AppInput";
-import { ClientCard } from "../../components/cards/ClientCard";
+import { ClientCard } from "@/components/cards/cliente/ClientCard";
 import { AddClientModal } from "../../components/modals/cliente/AddClientModal";
 import { EditClientModal } from "../../components/modals/cliente/EditClientModal";
 import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientModal";
@@ -121,6 +121,10 @@ export default function ClientesScreen() {
                 name={client.nome}
                 phone={client.telefone}
                 email={client.email}
+                onDetails={() => {
+                  setSelectedClient(client);
+                  setEditVisible(true);
+                }}
                 onEdit={() => {
                   setSelectedClient(client);
                   setEditVisible(true);

@@ -13,7 +13,7 @@ import { useFocusEffect } from "expo-router";
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { DashboardCard } from "../../components/cards/DashboardCard";
-import { WorkCard } from "../../components/cards/WorkCard";
+import { WorkCard } from "@/components/cards/obras/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
 
 import { Cliente, Orcamento, Obra } from "@/components/layout/interface";
@@ -159,7 +159,7 @@ export default function HomeScreen() {
             />
 
             <DashboardCard
-              title="Faturamento Aprovado"
+              title="F  aturamento Aprovado"
               value={
                 loading ? (
                   <ActivityIndicator size="small" color={COLORS.white} />
