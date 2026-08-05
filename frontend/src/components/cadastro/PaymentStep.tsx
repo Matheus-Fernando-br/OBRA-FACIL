@@ -1,6 +1,5 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import { AppButton } from "../buttons/AppButton";
 import { COLORS, globalStyles } from "../../styles/globalStyles";
 
@@ -37,7 +36,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
 
         <Text
           style={{
-            color: "#FFF",
+            color: COLORS.white,
             fontSize: 18,
             fontWeight: "bold",
             marginTop: 15,
@@ -48,7 +47,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
 
         <Text
           style={{
-            color: "#94A3B8",
+            color: COLORS.placeholder,
             marginTop: 10,
           }}
         >
@@ -57,7 +56,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
 
         <Text
           style={{
-            color: "#94A3B8",
+            color: COLORS.placeholder,
           }}
         >
           • Obras ilimitadas
@@ -65,7 +64,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
 
         <Text
           style={{
-            color: "#94A3B8",
+            color: COLORS.placeholder,
           }}
         >
           • Orçamentos ilimitados
@@ -73,7 +72,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
 
         <Text
           style={{
-            color: "#94A3B8",
+            color: COLORS.placeholder,
           }}
         >
           • Backup em nuvem

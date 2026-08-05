@@ -1,7 +1,7 @@
 import { TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles } from "../../styles/globalStyles";
+import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 interface Props {
   onPress: () => void;
@@ -14,7 +14,7 @@ export function FabButton({ onPress }: Props) {
       activeOpacity={0.8}
       style={globalStyles.fabButton}
     >
-      <Ionicons name="add" size={30} color="#FFF" />
+      <Ionicons name="add" size={30} color={COLORS.white} />
     </TouchableOpacity>
   );
 }

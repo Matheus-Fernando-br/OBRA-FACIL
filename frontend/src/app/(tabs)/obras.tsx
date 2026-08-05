@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 import { useEffect, useState, useMemo } from "react";
-
+import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 
 import { AppInput } from "../../components/forms/AppInput";
@@ -142,7 +142,7 @@ export default function ObrasScreen() {
             <Text style={globalStyles.title}>Obras</Text>
 
             <Pressable style={globalStyles.pageHeaderButton}>
-              <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+            <Ionicons name="add" color={COLORS.text} size={25}/>
             </Pressable>
           </View>
 

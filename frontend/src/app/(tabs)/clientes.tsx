@@ -20,6 +20,7 @@ import { DeleteClientModal } from "../../components/modals/cliente/DeleteClientM
 import { getClients } from "../../services/api";
 import { Cliente } from "@/components/layout/interface";
 import { GradientBackground } from "@/styles/GradientBackground";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function ClientesScreen() {
   const { token } = useAuth();
@@ -79,7 +80,7 @@ export default function ClientesScreen() {
               style={globalStyles.pageHeaderButton}
               onPress={() => setAddVisible(true)}
             >
-              <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+              <Ionicons name="add" color={COLORS.text} size={25}/>
             </Pressable>
           </View>
 

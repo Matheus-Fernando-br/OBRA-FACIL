@@ -11,7 +11,7 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
     <TextInput
       {...rest}
       editable={editable}
-      placeholderTextColor="#94A3B8"
+      placeholderTextColor={COLORS.placeholder}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       style={[
@@ -19,17 +19,17 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
           width: "100%",
           minHeight: 58,
 
-          backgroundColor: editable ? COLORS.backgroundSection : "#D5D6DB",
+          backgroundColor: editable ? COLORS.white : COLORS.border,
 
-          color: editable ? COLORS.text : "#575B69",
+          color: editable ? COLORS.text : COLORS.placeholder,
 
           borderWidth: 1.2,
 
           borderColor: editable
             ? focused
               ? COLORS.primary
-              : "#D9E2EC"
-            : "#D7DEE8",
+              : COLORS.border
+            : COLORS.borderNull,
 
           borderRadius: 10,
 
@@ -38,7 +38,7 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
 
           marginBottom: 16,
 
-          shadowColor: editable ? "#000" : "transparent",
+          shadowColor: editable ? COLORS.text : "transparent",
           shadowOpacity: editable ? 0.08 : 0,
           shadowRadius: editable ? 4 : 0,
           shadowOffset: {

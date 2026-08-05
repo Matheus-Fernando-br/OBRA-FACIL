@@ -82,7 +82,7 @@ import {
   <Ionicons
   name="close"
   size={28}
-  color="#FFF"
+  color={COLORS.white}
   />
   
   </Pressable>

@@ -39,7 +39,7 @@ export function SettingsItem({
       disabled={disabled || !onPress}
       onPress={onPress}
       style={{
-        backgroundColor: COLORS.backgroundSection,
+        backgroundColor: COLORS.white,
         borderRadius: 18,
         padding: 18,
         marginBottom: 14,

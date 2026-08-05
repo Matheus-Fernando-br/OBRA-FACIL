@@ -40,7 +40,7 @@ export function AppButton({
       }}
     >
       {loading ? (
-        <ActivityIndicator size="small" color="#FFF" />
+        <ActivityIndicator size="small" color={COLORS.white} />
       ) : (
         <Text style={globalStyles.appButtonText}>{title}</Text>
       )}

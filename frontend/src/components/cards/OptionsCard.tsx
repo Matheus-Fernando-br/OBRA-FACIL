@@ -107,7 +107,7 @@ export function OptionsCard({
           >
             <Text
               style={{
-                color: "#FFF",
+                color: COLORS.white,
                 fontSize: 11,
                 fontWeight: "700",
               }}
@@ -130,7 +130,7 @@ export function OptionsCard({
 
         <Ionicons
           name="chevron-forward"
-          color="#64748B"
+          color={COLORS.placeholder}
           size={20}
         />
       </View>

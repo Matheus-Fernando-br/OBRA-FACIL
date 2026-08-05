@@ -113,7 +113,7 @@ export default function HomeScreen() {
         <View
           style={[
             globalStyles.section,
-            { backgroundColor: COLORS.backgroundSection },
+            { backgroundColor: COLORS.white },
           ]}
         >
           <Text style={globalStyles.sectionTitle}>Resumo geral:</Text>
@@ -159,7 +159,7 @@ export default function HomeScreen() {
             />
 
             <DashboardCard
-              title="F  aturamento Aprovado"
+              title="Faturamento Aprovado"
               value={
                 loading ? (
                   <ActivityIndicator size="small" color={COLORS.white} />

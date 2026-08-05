@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles } from "@/styles/globalStyles";
+import { globalStyles, COLORS } from "@/styles/globalStyles";
 
 interface Props {
   client: string;
@@ -28,13 +28,13 @@ export function BudgetCard({
   function getStatusColor() {
     switch (status.toLowerCase()) {
       case "aprovado":
-        return "#16A34A";
+        return COLORS.success;
 
       case "recusado":
-        return "#DC2626";
+        return COLORS.danger;
 
       default:
-        return "#F59E0B";
+        return COLORS.warning;
     }
   }
 
@@ -80,7 +80,7 @@ export function BudgetCard({
           ]}
           onPress={onDetails}
         >
-          <Ionicons name="eye" size={18} color="#FFF" />
+          <Ionicons name="eye" size={18} color={COLORS.white} />
 
           <Text style={globalStyles.orcamentoDetailsButtonText}>
             Ver Detalhes
@@ -94,7 +94,7 @@ export function BudgetCard({
           ]}
           onPress={onEdit}
         >
-          <Ionicons name="create" size={18} color="#FFF" />
+          <Ionicons name="create" size={18} color={COLORS.white} />
         </Pressable>
 
         <Pressable
@@ -104,7 +104,7 @@ export function BudgetCard({
           ]}
           onPress={onDelete}
         >
-          <Ionicons name="trash" size={18} color="#FFF" />
+          <Ionicons name="trash" size={18} color={COLORS.white} />
         </Pressable>
       </View>
     </View>

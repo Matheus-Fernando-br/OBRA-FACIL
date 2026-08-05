@@ -1,7 +1,7 @@
 import { TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { globalStyles } from "../../styles/globalStyles";
 
 interface Props {
   title: string;

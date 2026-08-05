@@ -16,7 +16,7 @@ export function AppHeader({ onMenu }: Props) {
     <View
       style={{
         height: 80,
-        backgroundColor: COLORS.background,
+        backgroundColor: COLORS.white,
         paddingRight: 20,
         paddingLeft: 5,
         flexDirection: "row",

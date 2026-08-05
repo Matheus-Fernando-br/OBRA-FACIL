@@ -971,7 +971,7 @@ export function OrcamentoForm({
         >
           <View
             style={{
-              backgroundColor: COLORS.background,
+              backgroundColor: COLORS.white,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               maxHeight: "90%",

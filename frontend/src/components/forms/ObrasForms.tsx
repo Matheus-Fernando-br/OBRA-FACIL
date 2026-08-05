@@ -747,7 +747,7 @@ export function ObrasForm({
                           )
                         }
                         keyboardType="numeric"
-                        editable={!isReadOnly}
+                        editable={false}
                       />
                     </View>
                   </View>
@@ -839,7 +839,7 @@ export function ObrasForm({
 
 const styles = StyleSheet.create({
   serviceCard: {
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     borderRadius: 8,
     padding: 15,
     marginBottom: 10,

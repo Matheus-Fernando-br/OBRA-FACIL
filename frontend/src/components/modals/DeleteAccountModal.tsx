@@ -116,7 +116,7 @@ import {
                   <Ionicons
                     name="close"
                     size={28}
-                    color="#FFF"
+                    color={COLORS.white}
                   />
                 </Pressable>
               </View>
@@ -160,7 +160,7 @@ import {
                 style={{
                     width: "100%",
                     height: 55,
-                    backgroundColor: "#FFF",
+                    backgroundColor: COLORS.white,
                     borderRadius: 14,
                     paddingHorizontal: 30,
                     marginBottom: 16,

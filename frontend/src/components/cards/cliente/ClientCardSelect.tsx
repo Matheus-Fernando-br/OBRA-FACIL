@@ -52,7 +52,7 @@ export function ClientCardSelect({
   const telefone = phoneMask(phone || "");
 
   return (
-    <Pressable style={globalStyles.clientCard} onPress={abrirModal}>
+    <Pressable style={[globalStyles.clientCard, !showArrow && globalStyles.clientCardDesativado]} onPress={abrirModal}>
       {/* Avatar */}
 
       <View

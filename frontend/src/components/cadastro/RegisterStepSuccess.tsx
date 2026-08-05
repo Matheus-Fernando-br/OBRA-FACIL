@@ -53,7 +53,7 @@ export function RegisterStepSuccess() {
           width: 100,
           height: 100,
           borderRadius: 50,
-          backgroundColor: "#22C55E22",
+          backgroundColor: COLORS.success,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -67,7 +67,7 @@ export function RegisterStepSuccess() {
 
       <Text
         style={{
-          color: "#64748B",
+          color: COLORS.placeholder,
           marginTop: 25,
           textAlign: "center",
         }}

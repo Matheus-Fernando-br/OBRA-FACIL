@@ -8,7 +8,7 @@ import {
 
 import { router } from "expo-router";
 import { useState } from "react";
-import { globalStyles } from "../styles/globalStyles";
+import { globalStyles, COLORS } from "../styles/globalStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { emailMask } from "@/components/forms/mask";
@@ -77,7 +77,7 @@ export default function LoginScreen() {
 
         <AppInput
           placeholder="Informe sua senha"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={COLORS.placeholder}
           secureTextEntry
           value={password}
           onChangeText={(text) => {
@@ -103,7 +103,7 @@ export default function LoginScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator size="small" color="#FFF" />
+            <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
             <Text style={globalStyles.loginButtonText}>Entrar</Text>
           )}
@@ -116,7 +116,7 @@ export default function LoginScreen() {
           onPress={() => router.push("/cadastro")}
         >
           {loadingRegister ? (
-            <ActivityIndicator size="small" color="#FFF" />
+            <ActivityIndicator size="small" color={COLORS.white} />
           ) : (
             <Text style={globalStyles.loginButtonText}>Cadastre-se</Text>
           )}

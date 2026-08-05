@@ -88,7 +88,7 @@ export function DeleteOrcamentoModal({
           <Text
             style={{
               fontSize: 16,
-              color: "#64748B",
+              color: COLORS.placeholder,
               textAlign: "center",
               marginBottom: 25,
               lineHeight: 24,

@@ -234,7 +234,7 @@ export function CadastroStep({
         >
           <Ionicons
             size={24}
-            color="#000"
+            color={COLORS.text}
             name={showPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>
@@ -263,7 +263,7 @@ export function CadastroStep({
         >
           <Ionicons
             size={24}
-            color="#000"
+            color={COLORS.text}
             name={showConfirmPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>

@@ -103,13 +103,13 @@ export default function SegurancaScreen() {
         <TextInput
           secureTextEntry
           placeholder="Senha Atual"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={COLORS.placeholder}
           value={senhaAtual}
           onChangeText={setSenhaAtual}
           style={{
             width: "100%",
             height: 55,
-            backgroundColor: "#FFF",
+            backgroundColor: COLORS.white,
             borderRadius: 14,
             paddingHorizontal: 30,
             marginBottom: 16,
@@ -119,13 +119,13 @@ export default function SegurancaScreen() {
         <TextInput
           secureTextEntry
           placeholder="Nova Senha"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={COLORS.placeholder}
           value={novaSenha}
           onChangeText={setNovaSenha}
           style={{
             width: "100%",
             height: 55,
-            backgroundColor: "#FFF",
+            backgroundColor: COLORS.white,
             borderRadius: 14,
             paddingHorizontal: 30,
             marginBottom: 16,
@@ -135,13 +135,13 @@ export default function SegurancaScreen() {
         <TextInput
           secureTextEntry
           placeholder="Confirmar Nova Senha"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={COLORS.placeholder}
           value={confirmarSenha}
           onChangeText={setConfirmarSenha}
           style={{
             width: "100%",
             height: 55,
-            backgroundColor: "#FFF",
+            backgroundColor: COLORS.white,
             borderRadius: 14,
             paddingHorizontal: 30,
             marginBottom: 16,

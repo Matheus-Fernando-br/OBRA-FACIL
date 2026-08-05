@@ -135,7 +135,7 @@ export function PdfViewerModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,.65)",
+    backgroundColor: COLORS.backgroundDestaque,
     justifyContent: "center",
     alignItems: "center",
     padding: 25,
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   container: {
     width: "100%",
     maxWidth: 520,
-    backgroundColor: "#fff",
+    backgroundColor: COLORS.white,
     borderRadius: 25,
     padding: 25,
   },
@@ -174,13 +174,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
     fontSize: 15,
-    color: "#666",
+    color: COLORS.placeholder,
   },
 
   preview: {
     padding: 25,
     borderRadius: 18,
-    backgroundColor: "#F5F7FA",
+    backgroundColor: COLORS.white,
     alignItems: "center",
     marginBottom: 25,
   },
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
 
   previewSub: {
     marginTop: 8,
-    color: "#777",
+    color: COLORS.border,
     textAlign: "center",
   },
 });

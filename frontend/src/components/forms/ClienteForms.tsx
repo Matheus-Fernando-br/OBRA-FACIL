@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 import { View, Text, Pressable, ScrollView } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 
 import { Ionicons } from "@expo/vector-icons";
 
@@ -296,7 +297,7 @@ export function ClientForm({
           <View style={globalStyles.divider} />
 
           <Text style={globalStyles.label}>
-            Nome:
+            Nome Completo:
             {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
           </Text>
 
@@ -306,18 +307,42 @@ export function ClientForm({
             onChangeText={setNome}
             editable={!isReadOnly}
           />
+          <View style={globalStyles.row}>
+            {/*
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>
+                Tipo:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
+              <Picker
+                selectedValue={}
+                placeholder={COLORS.placeholder}
+                onValueChange={}
+                style={[
+                  globalStyles.picker,
+                  isReadOnly && globalStyles.pickerReadOnly,
+                ]}
+              >
+                <Picker.Item label={"Selecione o tipo de Pessoa"} value="" />
+                <Picker.Item label="Pessoa Física" value="FISICA" />
+                <Picker.Item label="Pessoa Jurídica" value="JURIDICA" />
+              </Picker>
+            </View>
+            */}
+            <View style={globalStyles.column}>
+              <Text style={globalStyles.label}>
+                CPF / CNPJ:
+                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              </Text>
 
-          <Text style={globalStyles.label}>
-            CPF / CNPJ:
-            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
-          </Text>
-
-          <AppInput
-            placeholder="Informe o CPF ou CNPJ"
-            value={cpf}
-            onChangeText={(text) => setCpf(documentMask(text))}
-            editable={!isReadOnly}
-          />
+              <AppInput
+                placeholder="Informe o CPF ou CNPJ"
+                value={cpf}
+                onChangeText={(text) => setCpf(documentMask(text))}
+                editable={!isReadOnly}
+              />
+            </View>
+          </View>
 
           <Text style={[globalStyles.subtitle, { marginTop: 20 }]}>
             Contato

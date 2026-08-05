@@ -37,7 +37,7 @@ export function AvailableBudgetCard({
           style={[
             globalStyles.orcamentoStatusBadge,
             {
-              backgroundColor: "#16A34A20",
+              backgroundColor: COLORS.success,
             },
           ]}
         >

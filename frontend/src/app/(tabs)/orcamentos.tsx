@@ -10,7 +10,7 @@ import {
 import { useState, useEffect, useMemo } from "react";
 
 import { globalStyles, COLORS } from "../../styles/globalStyles";
-
+import { Ionicons } from "@expo/vector-icons";
 import { AppInput } from "../../components/forms/AppInput";
 import { useAuth } from "@/contexts/AuthContext";
 import { getClients, getBudgets } from "../../services/api";
@@ -121,7 +121,7 @@ export default function OrcamentosScreen() {
               style={globalStyles.pageHeaderButton}
               onPress={() => setModalVisible(true)}
             >
-              <Text style={globalStyles.pageHeaderButtonText}>+</Text>
+              <Ionicons name="add" color={COLORS.text} size={25}/>
             </Pressable>
           </View>
 

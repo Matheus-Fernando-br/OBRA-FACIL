@@ -140,7 +140,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
       <View
         style={{
           flex: 1,
-          backgroundColor: COLORS.background,
+          backgroundColor: COLORS.white,
         }}
       >
         <View style={globalStyles.modalHeader}>
@@ -199,7 +199,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                 alignItems: "center",
               }}
             >
-              <Ionicons name="folder-open-outline" size={70} color="#9CA3AF" />
+              <Ionicons name="folder-open-outline" size={70} color={COLORS.placeholder} />
 
               <Text
                 style={{
@@ -215,7 +215,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
               <Text
                 style={{
                   marginTop: 8,
-                  color: "#9CA3AF",
+                  color: COLORS.card,
                   textAlign: "center",
                 }}
               >

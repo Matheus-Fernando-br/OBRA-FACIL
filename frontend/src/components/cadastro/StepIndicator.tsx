@@ -57,7 +57,7 @@ export function StepIndicator({ step }: Props) {
             <Ionicons
               name="person"
               size={28}
-              color="#FFF"
+              color={COLORS.white}
             />
           </View>
         </View>
@@ -95,7 +95,7 @@ export function StepIndicator({ step }: Props) {
             <Ionicons
               name="card"
               size={28}
-              color="#FFF"
+              color={COLORS.white}
             />
           </View>
         </View>
@@ -133,7 +133,7 @@ export function StepIndicator({ step }: Props) {
             <Ionicons
               name="checkmark"
               size={30}
-              color="#FFF"
+              color={COLORS.white}
             />
           </View>
         </View>

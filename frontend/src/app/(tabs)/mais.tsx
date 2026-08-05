@@ -94,7 +94,7 @@ export default function MaisScreen() {
           >
             <Text style={globalStyles.menuText}>Logout</Text>
 
-            <Ionicons name="exit" size={20} color="#f2edec" />
+            <Ionicons name="exit" size={20} color={COLORS.white} />
           </TouchableOpacity>
         </ScrollView>
       </GradientBackground>

@@ -51,7 +51,7 @@ export function NotificationCard({
             height: 10,
             borderRadius: 50,
 
-            backgroundColor: read ? "#64748B" : COLORS.warning,
+            backgroundColor: read ? COLORS.border : COLORS.warning,
 
             marginRight: 12,
           }}
@@ -83,7 +83,7 @@ export function NotificationCard({
 
           <Text
             style={{
-              color: "#94A3B8",
+              color: COLORS.placeholder,
               marginTop: 8,
               fontSize: 12,
             }}

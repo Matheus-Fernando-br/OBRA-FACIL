@@ -12,15 +12,14 @@ export function AppSwitch({
   onValueChange,
 }: Props) {
   return (
-    <Switch
-      value={value}
-      onValueChange={onValueChange}
-      trackColor={{
-        false: "#374151",
-        true: COLORS.primary,
-      }}
-      thumbColor= "#FFFF"
-      
-    />
+<Switch
+  value={value}
+  onValueChange={onValueChange}
+  trackColor={{
+    false: COLORS.border,
+    true: COLORS.success,
+  }}
+  thumbColor={value && COLORS.primary || COLORS.white}
+/>
   );
 }

@@ -43,19 +43,19 @@ export function ObrasCard({
   function getStatusColor() {
     switch (status.toUpperCase()) {
       case "ADIANTADO":
-        return "#16A34A";
+        return COLORS.success;
 
       case "ATRASADO":
-        return "#DC2626";
+        return COLORS.danger;
 
       case "ENTREGUE":
-        return "#2563EB";
+        return COLORS.primary;
 
       case "CANCELADO":
-        return "#6B7280";
+        return COLORS.warning;
 
       default:
-        return "#F59E0B";
+        return COLORS.warning;
     }
   }
 
@@ -64,12 +64,14 @@ export function ObrasCard({
       <View style={globalStyles.obrasCard}>
         {/* ==========================
             IMAGEM DE FUNDO
-        ========================== */}
+        ========================== 
 
         <Image
           source={require("../../../assets/images/house.jpg")}
           style={globalStyles.obrasCardBackground}
         />
+
+        */}
 
         {/* Overlay branco */}
         <View style={globalStyles.obrasCardOverlay} />
@@ -114,7 +116,7 @@ export function ObrasCard({
               style={globalStyles.menuButton}
               onPress={() => setMenuVisible(true)}
             >
-              <Ionicons name="ellipsis-vertical" size={22} color="#555" />
+              <Ionicons name="ellipsis-vertical" size={22} color={COLORS.placeholder} />
             </Pressable>
           </View>
 
@@ -154,7 +156,7 @@ export function ObrasCard({
           {/* BOTÃO PRINCIPAL */}
 
           <Pressable style={globalStyles.obraMainButton} onPress={onDetails}>
-            <Ionicons name="eye" size={20} color="#FFF" />
+            <Ionicons name="eye" size={20} color={COLORS.white} />
 
             <Text style={globalStyles.orcamentoDetailsButtonText}>
               Ver detalhes
@@ -183,7 +185,7 @@ export function ObrasCard({
                   style={globalStyles.closeButton}
                   onPress={() => setMenuVisible(false)}
                 >
-                  <Ionicons name="close" size={22} color="#666" />
+                  <Ionicons name="close" size={22} color={COLORS.danger} />
                 </Pressable>
 
                 {/* EDITAR */}

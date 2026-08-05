@@ -94,7 +94,7 @@ export function NotificationModal({ visible, onClose }: Props) {
           style={{
             width: "80%",
             height: "100%",
-            backgroundColor: COLORS.background,
+            backgroundColor: COLORS.white,
             paddingTop: 60,
             paddingHorizontal: 20,
           }}
@@ -206,11 +206,11 @@ export function NotificationModal({ visible, onClose }: Props) {
                   marginTop: 100,
                 }}
               >
-                <Ionicons name="notifications-off" size={70} color="#64748B" />
+                <Ionicons name="notifications-off" size={70} color={COLORS.placeholder} />
 
                 <Text
                   style={{
-                    color: "#94A3B8",
+                    color: COLORS.placeholder,
                     marginTop: 15,
                     fontSize: 16,
                   }}

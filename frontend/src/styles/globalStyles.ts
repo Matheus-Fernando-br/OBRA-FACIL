@@ -1,3 +1,4 @@
+import { Background } from "expo-router/build/react-navigation";
 import { StyleSheet } from "react-native";
 
 /* =========================
@@ -7,10 +8,7 @@ import { StyleSheet } from "react-native";
 export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
-
-  background: "#FFFFFF",
-  backgroundSection: "#FCFCFC",
-
+  backgroundDestaque:"rgba(0, 0, 0, 0.32)",
   card: "#D9D7D7",
   cardHover: "#1E293B",
 
@@ -19,9 +17,9 @@ export const COLORS = {
   titleBackground: "#c45f0080",
   text: "#000000",
   textSecondary: "#474242e5",
-
-  border: "#1e2c43",
-
+  placeholder: "#575B69",
+  border: "#D5D6DB",
+  borderNull: "#BFC0C7",
   success: "#22C55E",
   warning: "#F59E0B",
   danger: "#EF4444",
@@ -39,7 +37,7 @@ export const globalStyles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
     paddingHorizontal: 30,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
   },
 
   loginTitle: {
@@ -60,7 +58,7 @@ export const globalStyles = StyleSheet.create({
 
   loginButtonCadastro: {
     height: 55,
-    backgroundColor: "#1E293B",
+    backgroundColor: COLORS.cardHover,
     borderRadius: 12,
     width: "100%",
     justifyContent: "center",
@@ -68,7 +66,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   loginButtonText: {
-    color: "#FFFFFF",
+    color: COLORS.white,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -97,19 +95,19 @@ export const globalStyles = StyleSheet.create({
 
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     paddingVertical: 10,
     paddingHorizontal: 10,
   },
 
   pageContainer: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     padding: 24,
   },
 
   feedback: {
-    color: "#EF4444",
+    color: COLORS.danger,
     fontSize: 14,
     marginTop: 5,
     marginBottom: 15,
@@ -135,8 +133,8 @@ export const globalStyles = StyleSheet.create({
 ========================= */
 
   orcamentoCard: {
-    backgroundColor: COLORS.backgroundSection,
-    shadowColor: "#000",
+    backgroundColor: COLORS.white,
+    shadowColor: COLORS.text,
     shadowOpacity: 0.3,
     shadowRadius: 5,
     shadowOffset: {
@@ -179,8 +177,7 @@ export const globalStyles = StyleSheet.create({
   },
 
   orcamentoDetailsButtonText: {
-    color: "#FFF",
-
+    color: COLORS.white,
     fontWeight: "700",
   },
 
@@ -273,22 +270,22 @@ export const globalStyles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: COLORS.backgroundSection,
+    backgroundColor: COLORS.white,
     borderRadius: 20,
     paddingVertical: 18,
     paddingHorizontal: 18,
     marginBottom: 24,
 
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: COLORS.border,
 
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
     shadowOffset: {
       width: 0,
-      height: 10,
+      height: 2,
     },
-    shadowOpacity: 0.35,
-    shadowRadius: 18,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
 
     elevation: 10,
   },
@@ -296,22 +293,23 @@ export const globalStyles = StyleSheet.create({
   picker: {
     width: "100%",
     height: 60,
-    backgroundColor: COLORS.backgroundSection,
-    borderRadius: 6,
+    backgroundColor: COLORS.white,
+    borderRadius: 10,
+    borderColor: COLORS.border,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
+    shadowColor: COLORS.text,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
     shadowOffset: {
       width: 0,
-      height: 3,
+      height: 2,
     },
   },
 
   pickerReadOnly: {
-    backgroundColor: "#D5D6DB",
-    borderColor: "#D5D6DB",
-    color: "#575B69",
+    backgroundColor: COLORS.borderNull,
+    borderColor: COLORS.border,
+    color: COLORS.placeholder,
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -321,10 +319,10 @@ export const globalStyles = StyleSheet.create({
 
   serviceContainer: {
     padding: 20,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     borderRadius: 10,
     marginBottom: 10,
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
     shadowOpacity: 0.3,
     shadowRadius: 5,
     shadowOffset: {
@@ -357,63 +355,10 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
   },
 
-  workStatusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 30,
-    backgroundColor: "#DBEAFE",
-  },
-
-  workStatusText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#2563EB",
-    textTransform: "uppercase",
-  },
-
-  workCardSubtitle: {
-    marginTop: 10,
-    fontSize: 14,
-    color: "#6B7280",
-  },
-
-  workCardClient: {
-    marginTop: 4,
-    fontSize: 14,
-    color: "#374151",
-    fontWeight: "500",
-  },
-
-  /*progressContainer: {
-  marginTop: 18,
-},
-
-progressBarBackground: {
-  width: "100%",
-  height: 8,
-  backgroundColor: "#E5E7EB",
-  borderRadius: 999,
-  overflow: "hidden",
-},
-
-progressBarFill: {
-  height: "100%",
-  backgroundColor: "#2563EB",
-  borderRadius: 999,
-},
-
-workCardProgress: {
-  marginTop: 8,
-  alignSelf: "flex-end",
-  fontSize: 13,
-  fontWeight: "700",
-  color: "#2563EB",
-},*/
-
   workCardDate: {
-    marginTop: 14,
+    marginBottom: 8,
     fontSize: 13,
-    color: "#6B7280",
+    color: COLORS.placeholder,
   },
 
   /* =========================
@@ -424,9 +369,7 @@ workCardProgress: {
     height: COLORS.tabBarHeight,
     paddingTop: 10,
     paddingBottom: 10,
-
-    backgroundColor: COLORS.backgroundSection,
-
+    backgroundColor: COLORS.white,
     borderTopWidth: 3,
     borderTopColor: COLORS.border,
   },
@@ -450,7 +393,6 @@ workCardProgress: {
   pageHeaderRow: {
     marginTop: 10,
     marginBottom: 20,
-
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -459,14 +401,10 @@ workCardProgress: {
   pageHeaderButton: {
     width: 42,
     height: 42,
-
     borderRadius: 12,
-
     backgroundColor: COLORS.title,
-
     borderWidth: 1,
-    borderColor: COLORS.border,
-
+    borderColor: COLORS.text,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -615,7 +553,7 @@ workCardProgress: {
 
   maisContainer: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     padding: 15,
   },
 
@@ -638,7 +576,7 @@ workCardProgress: {
   },
 
   menuCard: {
-    backgroundColor: COLORS.backgroundSection,
+    backgroundColor: COLORS.white,
     padding: 20,
     borderRadius: 18,
     marginBottom: 14,
@@ -674,7 +612,7 @@ workCardProgress: {
   },
 
   appButtonText: {
-    color: "#FFF",
+    color: COLORS.white,
     fontWeight: "bold",
     fontSize: 16,
   },
@@ -727,8 +665,7 @@ workCardProgress: {
   },
 
   bottomActionButtonText: {
-    color: "#FFF",
-
+    color: COLORS.white,
     fontSize: 16,
     fontWeight: "700",
   },
@@ -741,7 +678,7 @@ workCardProgress: {
     flexDirection: "row",
     alignItems: "center",
 
-    backgroundColor: COLORS.backgroundSection,
+    backgroundColor: COLORS.white,
 
     borderRadius: 10,
 
@@ -749,7 +686,30 @@ workCardProgress: {
 
     marginBottom: 15,
 
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+
+    elevation: 4,
+  },
+
+  clientCardDesativado: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: COLORS.border,
+
+    borderRadius: 10,
+
+    padding: 18,
+
+    marginBottom: 15,
+
+    shadowColor: COLORS.text,
     shadowOpacity: 0.2,
     shadowRadius: 5,
     shadowOffset: {
@@ -786,7 +746,7 @@ workCardProgress: {
   addCard: {
     flex: 1,
     maxHeight: "100%",
-    backgroundColor: COLORS.background,
+    backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
@@ -830,10 +790,6 @@ workCardProgress: {
     borderRadius: 18,
   },
 
-  modalCloseButtonHover: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-
   label: {
     fontFamily: "Poppins_500Medium",
     alignSelf: "flex-start",
@@ -843,14 +799,14 @@ workCardProgress: {
   },
   divider: {
     height: 1,
-    backgroundColor: "#444",
+    backgroundColor: COLORS.borderNull,
     width: "100%",
     marginVertical: 10,
   },
 
   dividerVertical: {
     width: 1,
-    backgroundColor: "#444",
+    backgroundColor: COLORS.borderNull,
     height: "100%",
     marginVertical: 5,
     marginHorizontal: 20,
@@ -874,17 +830,13 @@ workCardProgress: {
 
   quickButton: {
     flex: 1,
-
-    backgroundColor: COLORS.backgroundSection,
-
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-
+    borderColor: COLORS.borderNull,
     borderRadius: 18,
     padding: 16,
     paddingVertical: 10,
     paddingHorizontal: 4,
-
     alignItems: "center",
     marginHorizontal: 2,
   },
@@ -905,12 +857,7 @@ workCardProgress: {
   quickAccessEditButton: {
     width: 60,
     height: 60,
-
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-
     borderRadius: 12,
-
     justifyContent: "center",
     alignItems: "center",
   },
@@ -920,13 +867,13 @@ workCardProgress: {
 ========================= */
 
   workCard: {
-    backgroundColor: COLORS.backgroundSection,
+    backgroundColor: COLORS.white,
     flexDirection: "row",
     alignItems: "center",
     padding: 18,
     borderRadius: 18,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
     shadowOpacity: 0.3,
     shadowRadius: 5,
     shadowOffset: {
@@ -970,14 +917,14 @@ workCardProgress: {
   progressBarBackground: {
     flex: 1,
     height: 8,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: COLORS.borderNull,
     borderRadius: 999,
     overflow: "hidden",
   },
 
   progressBarFill: {
     height: "100%",
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.success,
     borderRadius: 999,
   },
 
@@ -1002,7 +949,7 @@ workCardProgress: {
 
     marginBottom: 18,
 
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
     shadowOpacity: 0.15,
     shadowRadius: 10,
 
@@ -1018,24 +965,22 @@ workCardProgress: {
    IMAGEM DE FUNDO
 ========================= */
 
-  obrasCardBackground: {
+  /*obrasCardBackground: {
     position: "absolute",
 
     width: "100%",
     height: "100%",
 
     resizeMode: "cover",
-  },
+  },*/
 
   obrasCardOverlay: {
     position: "absolute",
-
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-
-    backgroundColor: "rgba(255, 255, 255, 0.91)",
+    backgroundColor: COLORS.white,
   },
 
   /* =========================
@@ -1071,7 +1016,7 @@ workCardProgress: {
 
     alignItems: "center",
 
-    backgroundColor: "#FFFFFFAA",
+    backgroundColor: COLORS.white,
   },
 
   /* =========================
@@ -1131,7 +1076,7 @@ workCardProgress: {
   menuOverlay: {
     flex: 1,
 
-    backgroundColor: "rgba(0,0,0,0.20)",
+    backgroundColor: COLORS.backgroundDestaque,
 
     justifyContent: "flex-start",
 
@@ -1145,13 +1090,13 @@ workCardProgress: {
   menuContainer: {
     width: 190,
 
-    backgroundColor: "#FFF",
+    backgroundColor: COLORS.white,
 
     borderRadius: 18,
 
     padding: 12,
 
-    shadowColor: "#000",
+    shadowColor: COLORS.text,
 
     shadowOpacity: 0.2,
 

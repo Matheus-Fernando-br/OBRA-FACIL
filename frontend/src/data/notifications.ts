@@ -31,7 +31,7 @@ export interface Notification {
     {
       id: "2",
       title: "Orçamento aprovado",
-      description: "O orçamento #001 foi aprovado.",
+      description: "O orçamento foi aprovado.",
       date: "Hoje",
       hour: "09:10",
       route: "/orcamentos",

@@ -65,7 +65,7 @@ export function ProfileCard({
         <Ionicons
           name="create-outline"
           size={20}
-          color="#FFF"
+          color={COLORS.white}
         />
       </Pressable>
     </View>
