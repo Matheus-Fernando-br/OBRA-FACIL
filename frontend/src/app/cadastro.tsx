@@ -41,7 +41,7 @@ export default function CadastroScreen() {
         router.replace("/");
       }, 2500);
     } catch (error: any) {
-      console.log(error);
+      console.log(error.data.message);
 
       if (error.response?.status === 409) {
         setFeedback("Já existe um usuário cadastrado com este e-mail.");
