@@ -11,6 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
+import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
+import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
 import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
@@ -22,6 +24,7 @@ import {
   Categoria,
   Orcamento,
 } from "@/components/layout/interface";
+import { getClients } from "@/services/api";
 
 interface ServicoForm extends Servico {
   id: number;
@@ -101,8 +104,29 @@ export function OrcamentoForm({
       setLoadingClient(false);
     }
   }, [clientsList, selectedClient, mode]);
+  async function loadClient() {
+    try {
+      if (!token) return;
+
+      setLoadingClient(true);
+
+      const data = await getClients(token);
+    } catch (error) {
+      console.log("ERRO CLIENTES:", error);
+    } finally {
+      setLoadingClient(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isReadOnly) {
+      loadClient();
+    }
+  }, [isReadOnly, initialData, token]);
 
   const selectedClientData = clientsList.find((c) => c._id === selectedClient);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
 
   const [validade, setValidade] = useState<number>(
     initialData?.valido_durante || 0,
@@ -512,11 +536,13 @@ export function OrcamentoForm({
             name={selectedClientData?.nome || "Selecionar Cliente"}
             phone={selectedClientData?.telefone || ""}
             abrirModal={() => {
-              if (!isReadOnly) {
+              if (mode === "details") {
+                setDetailsVisible(true);
+              } else {
                 setClientModalVisible(true);
               }
             }}
-            showArrow={!isReadOnly}
+            icon={mode === "details" ? "eye" : "chevron-down"}
           />
         )}
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
@@ -1006,6 +1032,7 @@ export function OrcamentoForm({
                     key={client._id}
                     name={client.nome}
                     phone={client.telefone}
+                    icon={"checkbox-outline"}
                     abrirModal={() => {
                       setSelectedClient(client._id);
                       setClientModalVisible(false);
@@ -1017,6 +1044,24 @@ export function OrcamentoForm({
           </View>
         </View>
       </Modal>
+      <DetailsClientModal
+        visible={detailsVisible}
+        client={selectedClientData}
+        onClose={() => setDetailsVisible(false)}
+        onEdit={() => {
+          setDetailsVisible(false);
+
+          setTimeout(() => {
+            setEditVisible(true);
+          }, 200);
+        }}
+      />
+      <EditClientModal
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        client={selectedClientData}
+        onSuccess={loadClient}
+      />
     </View>
   );
 }

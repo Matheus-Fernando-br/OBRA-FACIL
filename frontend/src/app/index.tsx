@@ -1,5 +1,6 @@
 import {
   View,
+  ScrollView,
   Text,
   Image,
   TouchableOpacity,
@@ -49,6 +50,7 @@ export default function LoginScreen() {
 
   return (
     <GradientBackground style={globalStyles.loginContainer}>
+      <ScrollView>
       <View
         style={{
           alignItems: "center",
@@ -122,6 +124,7 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
       </View>
+      </ScrollView>
     </GradientBackground>
   );
 }

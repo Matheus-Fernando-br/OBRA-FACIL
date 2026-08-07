@@ -128,6 +128,13 @@ export const globalStyles = StyleSheet.create({
     color: COLORS.danger,
   },
 
+  checkbox: {
+    marginTop:8,
+    width: 22,
+    height: 22,
+    borderRadius: 5,
+  },
+
   /* =========================
    ORÇAMENTOS
 ========================= */
@@ -204,6 +211,22 @@ export const globalStyles = StyleSheet.create({
   },
 
   orcamentoStatusText: {
+    fontWeight: "700",
+
+    fontSize: 12,
+  },
+
+  obraStatusBadge: {
+    alignContent:"center",
+    alignItems:"center",
+    alignSelf:"center",
+    width:"30%",
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+
+  obraStatusText: {
     fontWeight: "700",
 
     fontSize: 12,
@@ -697,28 +720,7 @@ export const globalStyles = StyleSheet.create({
     elevation: 4,
   },
 
-  clientCardDesativado: {
-    flexDirection: "row",
-    alignItems: "center",
 
-    backgroundColor: COLORS.border,
-
-    borderRadius: 10,
-
-    padding: 18,
-
-    marginBottom: 15,
-
-    shadowColor: COLORS.text,
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-
-    elevation: 4,
-  },
 
   clientCardName: {
     fontFamily: "Montserrat_600SemiBold",

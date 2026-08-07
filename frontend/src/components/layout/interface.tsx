@@ -134,7 +134,8 @@ export interface ServicoObra {
 
   qt_dias_real?: number;
 
-  porcentagem_de_conclusao?: number;
+  concluido?: boolean;
+
 }
 
 // ==============================

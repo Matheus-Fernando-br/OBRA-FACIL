@@ -1,9 +1,19 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
-import Checkbox from "expo-checkbox";
+import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
+import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
+import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
+import { Checkbox } from "expo-checkbox";
 import { AppButton } from "@/components/buttons/AppButton";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -13,7 +23,7 @@ import {
   CategoriaObra,
   ServicoObra,
 } from "@/components/layout/interface";
-import { getBudgetById, getClientById } from "@/services/api";
+import { getBudgetById, getClientById, getClients } from "@/services/api";
 import { maskDate } from "./mask";
 
 type ObraStatus = Obra["status"];
@@ -263,6 +273,9 @@ export function ObrasForm({
   }, [budget, initialData, token]);
 
   const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [loadingClient, setLoadingClient] = useState(mode !== "add");
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [editVisible, setEditVisible] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
@@ -311,6 +324,26 @@ export function ObrasForm({
       setCategorias(mapCategoriasFromBudget(budget));
     }
   }, [initialData, budget]);
+
+  async function loadClient() {
+    try {
+      if (!token) return;
+
+      setLoadingClient(true);
+
+      const data = await getClients(token);
+    } catch (error) {
+      console.log("ERRO CLIENTES:", error);
+    } finally {
+      setLoadingClient(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isReadOnly) {
+      loadClient();
+    }
+  }, [isReadOnly, initialData, token]);
 
   // Recalcula status/dias/porcentagem de cada categoria a partir dos serviços
   const categoriasCalculadas = useMemo(() => {
@@ -375,14 +408,6 @@ export function ObrasForm({
     [categoriasCalculadas],
   );
 
-  const obraStatusCalculado = useMemo(() => {
-    return calculateWorkStatus(
-      categoriasCalculadas,
-      dataFimPrevistaCalculada,
-      porcentagemConclusaoGeral,
-    );
-  }, [categoriasCalculadas]);
-
   const formatDate = (date: Date) => {
     const dia = String(date.getDate()).padStart(2, "0");
     const mes = String(date.getMonth() + 1).padStart(2, "0");
@@ -400,6 +425,7 @@ export function ObrasForm({
     if (Number.isNaN(start.getTime())) return "";
 
     const end = new Date(start);
+
     if (totalQtDiasPrevista > 0) {
       end.setDate(end.getDate() + totalQtDiasPrevista - 1);
     }
@@ -416,12 +442,25 @@ export function ObrasForm({
     if (Number.isNaN(start.getTime())) return "";
 
     const end = new Date(start);
+
     if (totalQtDiasReal > 0) {
       end.setDate(end.getDate() + totalQtDiasReal - 1);
     }
 
     return formatDate(end);
   }, [dataInicioReal, totalQtDiasReal]);
+
+  const obraStatusCalculado = useMemo(() => {
+    return calculateWorkStatus(
+      categoriasCalculadas,
+      dataFimPrevistaCalculada,
+      porcentagemConclusaoGeral,
+    );
+  }, [
+    categoriasCalculadas,
+    dataFimPrevistaCalculada,
+    porcentagemConclusaoGeral,
+  ]);
 
   const updateServico = useCallback(
     (
@@ -565,6 +604,8 @@ export function ObrasForm({
     }
   }
 
+  const [enderecoExpandido, setEnderecoExpandido] = useState(false);
+
   return (
     <View style={globalStyles.container}>
       <View style={globalStyles.modalHeader}>
@@ -599,24 +640,60 @@ export function ObrasForm({
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Nome da Obra/Serviço:</Text>
-              <AppInput
-                value={orcamentoAtrelado?.nome ?? ""}
-                editable={false}
-                selectTextOnFocus={false}
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Cliente:</Text>
-              <AppInput
-                value={cliente?.nome ?? ""}
-                editable={false}
-                selectTextOnFocus={false}
-              />
-            </View>
+          <View
+            style={[
+              globalStyles.obraStatusBadge,
+              {
+                backgroundColor: `${getStatusColor(obraStatusCalculado)}20`,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                globalStyles.obraStatusText,
+                {
+                  color: getStatusColor(obraStatusCalculado),
+                },
+              ]}
+            >
+              {obraStatusCalculado}
+            </Text>
           </View>
+
+          <Text style={globalStyles.label}>
+            {orcamentoAtrelado?.nome ?? ""}
+          </Text>
+
+          <Text style={globalStyles.label}>Cliente:</Text>
+          <View style={globalStyles.divider} />
+
+          {loadingClient ? (
+            <View
+              style={[
+                globalStyles.clientCard,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  minHeight: 90,
+                  gap: 20,
+                },
+              ]}
+            >
+              <ActivityIndicator size="large" color={COLORS.primary} />
+
+              <Text style={globalStyles.subtitle}>Carregando cliente...</Text>
+            </View>
+          ) : (
+            <ClientCardSelect
+              name={cliente?.nome ?? ""}
+              phone={cliente?.telefone ?? ""}
+              abrirModal={() => {
+                setCliente(cliente);
+                setDetailsVisible(true);
+              }}
+              icon={"eye"}
+            />
+          )}
 
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
@@ -657,80 +734,142 @@ export function ObrasForm({
           </View>
           {!isAdd && (
             <View style={globalStyles.row}>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Status da Obra:</Text>
+              <Text style={globalStyles.label}>Conclusão Geral:</Text>
 
-                <AppInput value={obraStatusCalculado} editable={false} />
-              </View>
+              <View style={globalStyles.progressContainer}>
+                <View style={globalStyles.progressBarBackground}>
+                  <View
+                    style={[
+                      globalStyles.progressBarFill,
+                      {
+                        width: `${porcentagemConclusaoGeral}%`,
+                      },
+                    ]}
+                  />
+                </View>
 
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Conclusão Geral:</Text>
-                <AppInput
-                  value={`${porcentagemConclusaoGeral}%`}
-                  editable={false}
-                />
+                <Text style={globalStyles.workCardProgress}>
+                  {porcentagemConclusaoGeral}%
+                </Text>
               </View>
             </View>
           )}
         </View>
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
         <View style={globalStyles.divider} />
+
         <View style={globalStyles.card}>
+          {/* ENDEREÇO RESUMIDO */}
           <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>CEP</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={globalStyles.label}>Endereço:</Text>
+
               <AppInput
-                value={orcamentoAtrelado?.endereco?.CEP ?? ""}
-                editable={false}
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Estado:</Text>
-              <AppInput
-                value={orcamentoAtrelado?.endereco?.estado ?? ""}
+                value={
+                  `${orcamentoAtrelado?.endereco?.rua ?? ""}, ` +
+                  `${orcamentoAtrelado?.endereco?.numero ?? ""} - ` +
+                  `${orcamentoAtrelado?.endereco?.cidade ?? ""}/${orcamentoAtrelado?.endereco?.estado ?? ""}`
+                }
                 editable={false}
               />
             </View>
           </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Cidade:</Text>
+
+          {/* CAMPOS EXPANDIDOS */}
+          {enderecoExpandido && (
+            <>
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>CEP:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.CEP ?? ""}
+                    editable={false}
+                  />
+                </View>
+
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Estado:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.estado ?? ""}
+                    editable={false}
+                  />
+                </View>
+              </View>
+
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Cidade:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.cidade ?? ""}
+                    editable={false}
+                  />
+                </View>
+
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Bairro:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.bairro ?? ""}
+                    editable={false}
+                  />
+                </View>
+              </View>
+
+              <Text style={globalStyles.label}>Logradouro:</Text>
+
               <AppInput
-                value={orcamentoAtrelado?.endereco?.cidade ?? ""}
+                value={orcamentoAtrelado?.endereco?.rua ?? ""}
                 editable={false}
               />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Bairro:</Text>
-              <AppInput
-                value={orcamentoAtrelado?.endereco?.bairro ?? ""}
-                editable={false}
-              />
-            </View>
-          </View>
-          <Text style={globalStyles.label}>Logradouro:</Text>
-          <View style={globalStyles.row}>
-            <AppInput
-              value={orcamentoAtrelado?.endereco?.rua ?? ""}
-              editable={false}
+
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Número:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.numero ?? ""}
+                    editable={false}
+                  />
+                </View>
+
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Complemento:</Text>
+                  <AppInput
+                    value={orcamentoAtrelado?.endereco?.complemento ?? ""}
+                    editable={false}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+
+          {/* TEXTO DO BOTÃO */}
+          <Pressable
+            onPress={() => setEnderecoExpandido((prev) => !prev)}
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 8,
+              paddingVertical: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.primary,
+                fontWeight: "600",
+              }}
+            >
+              {enderecoExpandido
+                ? "Ocultar endereço completo"
+                : "Ver endereço completo"}
+            </Text>
+
+            <Ionicons
+              name={enderecoExpandido ? "chevron-up" : "chevron-down"}
+              size={18}
+              color={COLORS.primary}
+              style={{ marginLeft: 5 }}
             />
-          </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Número:</Text>
-              <AppInput
-                value={orcamentoAtrelado?.endereco?.numero ?? ""}
-                editable={false}
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Complemento:</Text>
-              <AppInput
-                value={orcamentoAtrelado?.endereco?.complemento ?? ""}
-                editable={false}
-              />
-            </View>
-          </View>
+          </Pressable>
         </View>
         <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
         <View style={globalStyles.divider} />
@@ -775,34 +914,30 @@ export function ObrasForm({
             )}
             {categoria.servicos.map((servico, sIdx) => (
               <View key={servico.id} style={styles.serviceCard}>
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
-                      Nome do Serviço {sIdx + 1}:
-                    </Text>
-                  </View>
-                  <View style={globalStyles.column}>
-                    <View
-                      style={[
-                        globalStyles.orcamentoStatusBadge,
-                        {
-                          backgroundColor: `${getStatusColor(servico.status)}20`,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          globalStyles.orcamentoStatusText,
-                          {
-                            color: getStatusColor(servico.status),
-                          },
-                        ]}
-                      >
-                        {servico.status}
-                      </Text>
-                    </View>
-                  </View>
+                <View
+                  style={[
+                    globalStyles.obraStatusBadge,
+                    {
+                      backgroundColor: `${getStatusColor(servico.status)}20`,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      globalStyles.obraStatusText,
+                      {
+                        color: getStatusColor(servico.status),
+                      },
+                    ]}
+                  >
+                    {servico.status}
+                  </Text>
                 </View>
+
+                <Text style={globalStyles.label}>
+                  Nome do Serviço {sIdx + 1}:
+                </Text>
+
                 <AppInput value={servico.nome} editable={false} />
                 <Text style={globalStyles.label}>Descrição:</Text>
                 <AppInput value={servico.descricao} editable={false} />
@@ -856,40 +991,41 @@ export function ObrasForm({
                 </View>
                 {!isAdd && (
                   <View style={globalStyles.row}>
-                    <View style={globalStyles.column}>
-                      <Text style={globalStyles.label}>
-                        O Serviço foi Concluído?
-                      </Text>
-                      <Checkbox
-                        value={servico.concluido ?? false}
-                        onValueChange={(newValue) => {
+                    <Text style={globalStyles.label}>
+                      O Serviço foi Concluído?
+                    </Text>
+                    <Checkbox
+                      color={servico.concluido ? COLORS.primary : undefined}
+                      style={globalStyles.checkbox}
+                      disabled={isReadOnly}
+                      value={servico.concluido ?? false}
+                      onValueChange={(newValue) => {
+                        updateServico(
+                          categoria.id,
+                          servico.id,
+                          "concluido",
+                          newValue,
+                        );
+
+                        if (newValue && !servico.qt_dias_real) {
                           updateServico(
                             categoria.id,
                             servico.id,
-                            "concluido",
-                            newValue,
+                            "qt_dias_real",
+                            servico.qt_dias_prevista ?? 0,
                           );
+                        }
 
-                          if (newValue && !servico.qt_dias_real) {
-                            updateServico(
-                              categoria.id,
-                              servico.id,
-                              "qt_dias_real",
-                              servico.qt_dias_prevista ?? 0,
-                            );
-                          }
-
-                          if (!newValue) {
-                            updateServico(
-                              categoria.id,
-                              servico.id,
-                              "qt_dias_real",
-                              0,
-                            );
-                          }
-                        }}
-                      />
-                    </View>
+                        if (!newValue) {
+                          updateServico(
+                            categoria.id,
+                            servico.id,
+                            "qt_dias_real",
+                            0,
+                          );
+                        }
+                      }}
+                    />
                   </View>
                 )}
               </View>
@@ -973,6 +1109,24 @@ export function ObrasForm({
           color={COLORS.danger}
         />
       </ScrollView>
+      <DetailsClientModal
+        visible={detailsVisible}
+        client={cliente}
+        onClose={() => setDetailsVisible(false)}
+        onEdit={() => {
+          setDetailsVisible(false);
+
+          setTimeout(() => {
+            setEditVisible(true);
+          }, 200);
+        }}
+      />
+      <EditClientModal
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        client={cliente}
+        onSuccess={loadClient}
+      />
     </View>
   );
 }

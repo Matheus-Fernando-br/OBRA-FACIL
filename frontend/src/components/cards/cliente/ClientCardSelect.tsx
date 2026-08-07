@@ -7,14 +7,15 @@ interface Props {
   name: string;
   phone: string;
   abrirModal: () => void;
-  showArrow?: boolean;
+  icon?: keyof typeof Ionicons.glyphMap;
 }
 
 export function ClientCardSelect({
   name,
   phone,
   abrirModal,
-  showArrow,
+  
+  icon = "chevron-down",
 }: Props) {
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
@@ -52,7 +53,7 @@ export function ClientCardSelect({
   const telefone = phoneMask(phone || "");
 
   return (
-    <Pressable style={[globalStyles.clientCard, !showArrow && globalStyles.clientCardDesativado]} onPress={abrirModal}>
+    <Pressable style={globalStyles.clientCard} onPress={abrirModal}>
       {/* Avatar */}
 
       <View
@@ -89,10 +90,14 @@ export function ClientCardSelect({
         <Text style={globalStyles.clientCardInfo}>{telefone}</Text>
       </View>
 
-      <View style={globalStyles.clientIcons}>
-        {showArrow && (
-          <Ionicons name="chevron-down" size={30} color={COLORS.primary} />
-        )}
+         {/* Ação */}
+
+         <View style={globalStyles.clientIcons}>
+        <Ionicons
+          name={icon}
+          size={30}
+          color={COLORS.primary}
+        />
       </View>
     </Pressable>
   );
