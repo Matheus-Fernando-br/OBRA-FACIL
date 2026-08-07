@@ -43,6 +43,19 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
     return colors[Math.abs(hash) % colors.length];
   }
 
+  function getStatusColor() {
+    switch (status.toLowerCase()) {
+      case "aprovado":
+        return COLORS.success;
+
+      case "recusado":
+        return COLORS.danger;
+
+      default:
+        return COLORS.warning;
+    }
+  }
+
   return (
     <View style={globalStyles.clientCard}>
       {/* Avatar */}
@@ -80,7 +93,25 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
           }}
         >
           <Text style={globalStyles.clientCardName}>{name}</Text>
-          <Text style={globalStyles.orcamentoStatusText}>{status}</Text>
+          <View
+            style={[
+              globalStyles.orcamentoStatusBadge,
+              {
+                backgroundColor: `${getStatusColor()}20`,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                globalStyles.orcamentoStatusText,
+                {
+                  color: getStatusColor(),
+                },
+              ]}
+            >
+              {status}
+            </Text>
+          </View>
         </View>
         <Text style={globalStyles.clientCardInfo}>
           R$ {Number(value).toFixed(2)}

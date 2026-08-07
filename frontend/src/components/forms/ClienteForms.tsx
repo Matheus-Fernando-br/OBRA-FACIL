@@ -17,9 +17,11 @@ import {
   onlyNumbers,
 } from "@/components/forms/mask";
 
-import { Cliente } from "@/components/layout/interface";
+import { Cliente, Orcamento } from "@/components/layout/interface";
+import { getBudgetByClient } from "@/services/api";
+import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsModal";
+import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { EditClientModal } from "../modals/cliente/EditClientModal";
 
 export interface ClientFormData {
   nome: string;
@@ -58,7 +60,13 @@ export function ClientForm({
   const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
   const [telefone, setTelefone] = useState("");
-
+  const [descricao, setDescricao] = useState("");
+  const [tipoPessoa, setTipoPessoa] = useState<"FISICA" | "JURIDICA" | "">("");
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
+  const [loadingOrcamentos, setLoadingOrcamentos] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
+  const [detailsVisible, setDetailsVisible] = useState(false);
+  const [editBudgetVisible, setEditBudgetVisible] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -99,6 +107,48 @@ export function ClientForm({
 
     setCpf(documentMask(initialData.CPF || initialData.CNPJ || ""));
   }, [initialData]);
+
+  async function loadOrcamentos() {
+    try {
+      if (!token || !initialData?._id) return;
+
+      setLoadingOrcamentos(true);
+
+      const data = await getBudgetByClient(initialData._id, token);
+
+      setOrcamentos(data);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingOrcamentos(false);
+    }
+  }
+
+  useEffect(() => {
+    async function carregarOrcamentos() {
+      if (!isReadOnly || !initialData?._id || !token) return;
+
+      try {
+        setLoadingOrcamentos(true);
+
+        const data = await getBudgetByClient(initialData._id, token);
+
+        setOrcamentos(data);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoadingOrcamentos(false);
+      }
+    }
+
+    carregarOrcamentos();
+  }, [isReadOnly, initialData, token]);
+
+  useEffect(() => {
+    if (isReadOnly) {
+      loadOrcamentos();
+    }
+  }, [isReadOnly, initialData, token]);
 
   // ===========================
   // HELPERS
@@ -308,16 +358,15 @@ export function ClientForm({
             editable={!isReadOnly}
           />
           <View style={globalStyles.row}>
-            {/*
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>
                 Tipo:
                 {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
               </Text>
               <Picker
-                selectedValue={}
+                selectedValue={tipoPessoa}
                 placeholder={COLORS.placeholder}
-                onValueChange={}
+                onValueChange={setTipoPessoa}
                 style={[
                   globalStyles.picker,
                   isReadOnly && globalStyles.pickerReadOnly,
@@ -328,7 +377,7 @@ export function ClientForm({
                 <Picker.Item label="Pessoa Jurídica" value="JURIDICA" />
               </Picker>
             </View>
-            */}
+
             <View style={globalStyles.column}>
               <Text style={globalStyles.label}>
                 CPF / CNPJ:
@@ -377,16 +426,41 @@ export function ClientForm({
               />
             </View>
           </View>
+
+          <Text style={globalStyles.subtitle}>Observação</Text>
+
+          <View style={globalStyles.divider} />
+
+          <Text style={globalStyles.label}>Descrição:</Text>
+
+          <AppInput
+            placeholder="Descreva o cliente..."
+            value={descricao}
+            onChangeText={setDescricao}
+            editable={!isReadOnly}
+            multiline
+          />
+
           {isReadOnly && (
             <>
               <Text style={globalStyles.subtitle}>Orçamentos Associados</Text>
               <View style={globalStyles.divider} />
-              <CardOrcamentoCliente
-                name="Teste"
-                value={1000}
-                status="Aprovado"
-                onClick={onClose}
-              />
+              {loadingOrcamentos ? (
+                <Text>Carregando...</Text>
+              ) : (
+                orcamentos.map((orcamento) => (
+                  <CardOrcamentoCliente
+                    key={orcamento._id}
+                    name={orcamento.nome}
+                    value={orcamento.preco_com_bdi}
+                    status={orcamento.status}
+                    onClick={() => {
+                      setSelectedBudget(orcamento);
+                      setDetailsVisible(true);
+                    }}
+                  />
+                ))
+              )}
               <View style={globalStyles.divider} />
             </>
           )}
@@ -416,6 +490,27 @@ export function ClientForm({
           )}
         </View>
       </ScrollView>
+      <BudgetDetailsModal
+        visible={detailsVisible}
+        budget={selectedBudget}
+        onClose={() => setDetailsVisible(false)}
+        onEdit={() => {
+          setDetailsVisible(false);
+
+          setTimeout(() => {
+            setEditBudgetVisible(true);
+          }, 200);
+        }}
+      />
+      <EditOrcamentoModal
+        visible={editBudgetVisible}
+        budget={selectedBudget}
+        onClose={() => setEditBudgetVisible(false)}
+        onSuccess={() => {
+          setEditBudgetVisible(false);
+          loadOrcamentos();
+        }}
+      />
     </View>
   );
 }

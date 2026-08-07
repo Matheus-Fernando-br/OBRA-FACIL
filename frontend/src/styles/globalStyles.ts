@@ -8,7 +8,7 @@ import { StyleSheet } from "react-native";
 export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
-  backgroundDestaque:"rgba(0, 0, 0, 0.32)",
+  backgroundDestaque: "rgba(0, 0, 0, 0.32)",
   card: "#D9D7D7",
   cardHover: "#1E293B",
 
@@ -196,11 +196,11 @@ export const globalStyles = StyleSheet.create({
   },
 
   orcamentoStatusBadge: {
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
 
-    paddingVertical: 5,
+    paddingVertical: 10,
 
-    borderRadius: 30,
+    borderRadius: 20,
   },
 
   orcamentoStatusText: {

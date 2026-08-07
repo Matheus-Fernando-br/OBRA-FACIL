@@ -3,6 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
+import Checkbox from "expo-checkbox";
 import { AppButton } from "@/components/buttons/AppButton";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -20,6 +21,7 @@ type ObraStatus = Obra["status"];
 interface ServicoObraForm extends ServicoObra {
   id: number;
   status: ObraStatus;
+  concluido: boolean;
 }
 
 interface CategoriaObraForm extends CategoriaObra {
@@ -51,13 +53,22 @@ function formatDateToBR(value?: Date | string | null): string {
 }
 
 const calculateServiceStatus = (service: ServicoObraForm): ObraStatus => {
-  const prevista = service.qt_dias_prevista || 0;
-  const real = service.qt_dias_real || 0;
+  const prevista = Number(service.qt_dias_prevista ?? 0);
+  const real = Number(service.qt_dias_real ?? 0);
 
-  if (!real) return "NOPRAZO";
-  if (real > prevista) return "ATRASADO";
-  if (real < prevista) return "ADIANTADO";
-  return "NOPRAZO";
+  if (!service.concluido) {
+    return "NOPRAZO";
+  }
+
+  if (real > prevista) {
+    return "ATRASADO";
+  }
+
+  if (real < prevista) {
+    return "ADIANTADO";
+  }
+
+  return "ENTREGUE";
 };
 
 // Progresso, dias e status da categoria são 100% calculados a partir dos serviços
@@ -81,39 +92,85 @@ const calculateCategoryProgress = (services: ServicoObraForm[]) => {
     0,
   );
 
-  const totalProgress = services.reduce(
-    (sum, s) => sum + Number(s.porcentagem_de_conclusao ?? 0),
+  const diasConcluidos = services.reduce(
+    (sum, s) => (s.concluido ? sum + Number(s.qt_dias_real ?? 0) : sum),
     0,
   );
-  const porcentagem_de_conclusao = Math.round(totalProgress / services.length);
+
+  const porcentagem_de_conclusao =
+    qt_dias_real > 0 ? Math.round((diasConcluidos / qt_dias_real) * 100) : 0;
 
   let status: ObraStatus = "NOPRAZO";
-  if (services.some((s) => s.status === "ATRASADO")) {
-    status = "ATRASADO";
-  } else if (services.every((s) => s.status === "ADIANTADO")) {
-    status = "ADIANTADO";
-  } else if (services.every((s) => s.status === "ENTREGUE")) {
-    status = "ENTREGUE";
-  } else if (services.every((s) => s.status === "CANCELADO")) {
-    status = "CANCELADO";
+
+  const todosConcluidos = services.every((s) => s.concluido);
+
+  if (todosConcluidos) {
+    if (qt_dias_real > qt_dias_prevista) {
+      status = "ATRASADO";
+    } else if (qt_dias_real < qt_dias_prevista) {
+      status = "ADIANTADO";
+    } else {
+      status = "ENTREGUE";
+    }
   }
 
-  return { porcentagem_de_conclusao, qt_dias_prevista, qt_dias_real, status };
+  return {
+    porcentagem_de_conclusao,
+    qt_dias_prevista,
+    qt_dias_real,
+    status,
+  };
 };
 
-const calculateWorkStatus = (categorias: CategoriaObraForm[]): ObraStatus => {
-  if (categorias.length === 0) return "NOPRAZO";
+const calculateWorkStatus = (
+  categorias: CategoriaObraForm[],
+  dataFimPrevista?: string,
+  porcentagem?: number,
+): ObraStatus => {
+  if (categorias.length === 0) {
+    return "NOPRAZO";
+  }
 
-  if (categorias.every((c) => c.status === "ENTREGUE")) {
+  const todasConcluidas = categorias.every(
+    (c) => c.porcentagem_de_conclusao === 100,
+  );
+
+  const diasPrevistos = categorias.reduce(
+    (s, c) => s + Number(c.qt_dias_prevista ?? 0),
+    0,
+  );
+
+  const diasReais = categorias.reduce(
+    (s, c) => s + Number(c.qt_dias_real ?? 0),
+    0,
+  );
+
+  if (todasConcluidas) {
+    if (diasReais > diasPrevistos) {
+      return "ATRASADO";
+    }
+
+    if (diasReais < diasPrevistos) {
+      return "ADIANTADO";
+    }
+
     return "ENTREGUE";
   }
 
-  if (categorias.some((c) => c.status === "ATRASADO")) {
-    return "ATRASADO";
-  }
+  if (dataFimPrevista) {
+    const [d, m, a] = dataFimPrevista.split("/");
 
-  if (categorias.every((c) => c.status === "ADIANTADO")) {
-    return "ADIANTADO";
+    const fim = new Date(Number(a), Number(m) - 1, Number(d));
+
+    const hoje = new Date();
+
+    hoje.setHours(0, 0, 0, 0);
+
+    fim.setHours(0, 0, 0, 0);
+
+    if (hoje > fim) {
+      return "ATRASADO";
+    }
   }
 
   return "NOPRAZO";
@@ -129,7 +186,7 @@ function mapCategoriasFromObra(
         id: Date.now() + catIdx * 1000 + servIdx + 1,
         qt_dias_prevista: Number(serv.qt_dias_prevista ?? 0),
         qt_dias_real: Number(serv.qt_dias_real ?? 0),
-        porcentagem_de_conclusao: Number(serv.porcentagem_de_conclusao ?? 0),
+        concluido: Boolean(serv.concluido),
         status: "NOPRAZO",
       };
 
@@ -159,7 +216,7 @@ function mapCategoriasFromBudget(budget: Orcamento): CategoriaObraForm[] {
       descricao: serv.descricao,
       qt_dias_prevista: 0,
       qt_dias_real: 0,
-      porcentagem_de_conclusao: 0,
+      concluido: false,
       status: "NOPRAZO" as ObraStatus,
     })),
   }));
@@ -180,7 +237,6 @@ export function ObrasForm({
   const isReadOnly = mode === "details";
   const isAdd = mode === "add";
   const isEdit = mode === "edit";
-  const [obraStatus, setObraStatus] = useState<ObraStatus>("NOPRAZO");
   const [orcamentoAtrelado, setOrcamentoAtrelado] = useState<Orcamento | null>(
     budget ?? null,
   );
@@ -248,7 +304,6 @@ export function ObrasForm({
     if (initialData) {
       // Edição / Detalhes: usa os dados reais da obra
       setCategorias(mapCategoriasFromObra(initialData.categoria));
-      setObraStatus(initialData.status);
       setDataInicioPrevista(formatDateToBR(initialData.data_inicio_prevista));
       setDataInicioReal(formatDateToBR(initialData.data_inicio_real));
     } else if (budget) {
@@ -267,28 +322,39 @@ export function ObrasForm({
       const calculated = calculateCategoryProgress(servicesWithStatus);
       return {
         ...cat,
+
         servicos: servicesWithStatus,
-        ...calculated,
+
+        qt_dias_prevista: calculated.qt_dias_prevista,
+
+        qt_dias_real: calculated.qt_dias_real,
+
+        porcentagem_de_conclusao: calculated.porcentagem_de_conclusao,
+
+        status: calculated.status,
       };
     });
   }, [categorias]);
 
-  const obraStatusCalculado = useMemo(() => {
-    return calculateWorkStatus(categoriasCalculadas);
-  }, [categoriasCalculadas]);
-
   const porcentagemConclusaoGeral = useMemo(() => {
-    if (categoriasCalculadas.length === 0) {
-      return initialData?.porcentagem_de_conclusao || 0;
-    }
-
-    const total = categoriasCalculadas.reduce(
-      (sum, cat) => sum + (cat.porcentagem_de_conclusao || 0),
+    const diasTotais = categoriasCalculadas.reduce(
+      (sum, cat) => sum + Number(cat.qt_dias_real ?? 0),
       0,
     );
 
-    return Math.round(total / categoriasCalculadas.length);
-  }, [categoriasCalculadas, initialData]);
+    const diasConcluidos = categoriasCalculadas.reduce(
+      (sum, cat) =>
+        sum +
+        Math.round(
+          ((cat.qt_dias_real ?? 0) * (cat.porcentagem_de_conclusao ?? 0)) / 100,
+        ),
+      0,
+    );
+
+    if (diasTotais === 0) return 0;
+
+    return Math.round((diasConcluidos / diasTotais) * 100);
+  }, [categoriasCalculadas]);
 
   // Total de dias previstos/reais da obra = soma dos totais de cada categoria
   const totalQtDiasPrevista = useMemo(
@@ -309,6 +375,14 @@ export function ObrasForm({
     [categoriasCalculadas],
   );
 
+  const obraStatusCalculado = useMemo(() => {
+    return calculateWorkStatus(
+      categoriasCalculadas,
+      dataFimPrevistaCalculada,
+      porcentagemConclusaoGeral,
+    );
+  }, [categoriasCalculadas]);
+
   const formatDate = (date: Date) => {
     const dia = String(date.getDate()).padStart(2, "0");
     const mes = String(date.getMonth() + 1).padStart(2, "0");
@@ -326,7 +400,9 @@ export function ObrasForm({
     if (Number.isNaN(start.getTime())) return "";
 
     const end = new Date(start);
-    end.setDate(end.getDate() + totalQtDiasPrevista);
+    if (totalQtDiasPrevista > 0) {
+      end.setDate(end.getDate() + totalQtDiasPrevista - 1);
+    }
 
     return formatDate(end);
   }, [dataInicioPrevista, totalQtDiasPrevista]);
@@ -340,7 +416,9 @@ export function ObrasForm({
     if (Number.isNaN(start.getTime())) return "";
 
     const end = new Date(start);
-    end.setDate(end.getDate() + totalQtDiasReal);
+    if (totalQtDiasReal > 0) {
+      end.setDate(end.getDate() + totalQtDiasReal - 1);
+    }
 
     return formatDate(end);
   }, [dataInicioReal, totalQtDiasReal]);
@@ -350,7 +428,7 @@ export function ObrasForm({
       categoriaId: number,
       servicoId: number,
       field: keyof ServicoObraForm,
-      value: string | number,
+      value: string | number | boolean,
     ) => {
       setCategorias((prevCategorias) =>
         prevCategorias.map((cat) => {
@@ -358,7 +436,15 @@ export function ObrasForm({
 
           const novosServicos = cat.servicos.map((serv) => {
             if (serv.id !== servicoId) return serv;
-            return { ...serv, [field]: value };
+            const novoServico = {
+              ...serv,
+
+              [field]: value,
+            };
+
+            novoServico.status = calculateServiceStatus(novoServico);
+
+            return novoServico;
           });
 
           return {
@@ -407,11 +493,6 @@ export function ObrasForm({
       return;
     }
 
-    if (!obraStatus) {
-      setFeedback("Informe o status da obra.");
-      return;
-    }
-
     const workData = {
       orcamento: orcamentoAtrelado._id,
       responsavel: user._id,
@@ -430,12 +511,14 @@ export function ObrasForm({
         qt_dias_prevista: cat.qt_dias_prevista,
         qt_dias_real: cat.qt_dias_real,
         porcentagem_de_conclusao: cat.porcentagem_de_conclusao,
+        status: cat.status,
         servicos: cat.servicos.map((s) => ({
           nome: s.nome,
           descricao: s.descricao,
           qt_dias_prevista: s.qt_dias_prevista,
           qt_dias_real: s.qt_dias_real,
-          porcentagem_de_conclusao: s.porcentagem_de_conclusao,
+          concluido: s.concluido,
+          status: s.status,
         })),
       })),
     };
@@ -461,6 +544,25 @@ export function ObrasForm({
       setLoadingClose(false);
       setFeedback("");
     }, 1500);
+  }
+
+  function getStatusColor(status: ObraStatus) {
+    switch (status) {
+      case "ENTREGUE":
+        return COLORS.primary;
+
+      case "ADIANTADO":
+        return COLORS.success;
+
+      case "ATRASADO":
+        return COLORS.danger;
+
+      case "CANCELADO":
+        return COLORS.danger;
+
+      default:
+        return COLORS.warning;
+    }
   }
 
   return (
@@ -499,7 +601,7 @@ export function ObrasForm({
         <View style={globalStyles.card}>
           <View style={globalStyles.row}>
             <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Nome do Serviço:</Text>
+              <Text style={globalStyles.label}>Nome da Obra/Serviço:</Text>
               <AppInput
                 value={orcamentoAtrelado?.nome ?? ""}
                 editable={false}
@@ -673,9 +775,34 @@ export function ObrasForm({
             )}
             {categoria.servicos.map((servico, sIdx) => (
               <View key={servico.id} style={styles.serviceCard}>
-                <Text style={globalStyles.label}>
-                  Nome do Serviço {sIdx + 1}:
-                </Text>
+                <View style={globalStyles.row}>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>
+                      Nome do Serviço {sIdx + 1}:
+                    </Text>
+                  </View>
+                  <View style={globalStyles.column}>
+                    <View
+                      style={[
+                        globalStyles.orcamentoStatusBadge,
+                        {
+                          backgroundColor: `${getStatusColor(servico.status)}20`,
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          globalStyles.orcamentoStatusText,
+                          {
+                            color: getStatusColor(servico.status),
+                          },
+                        ]}
+                      >
+                        {servico.status}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
                 <AppInput value={servico.nome} editable={false} />
                 <Text style={globalStyles.label}>Descrição:</Text>
                 <AppInput value={servico.descricao} editable={false} />
@@ -730,24 +857,37 @@ export function ObrasForm({
                 {!isAdd && (
                   <View style={globalStyles.row}>
                     <View style={globalStyles.column}>
-                      <Text style={globalStyles.label}>Status do Serviço:</Text>
-                      <AppInput value={servico.status} editable={false} />
-                    </View>
-                    <View style={globalStyles.column}>
-                      <Text style={globalStyles.label}>Conclusão:</Text>
-                      <AppInput
-                        placeholder="%"
-                        value={String(servico.porcentagem_de_conclusao || 0)}
-                        onChangeText={(text) =>
+                      <Text style={globalStyles.label}>
+                        O Serviço foi Concluído?
+                      </Text>
+                      <Checkbox
+                        value={servico.concluido ?? false}
+                        onValueChange={(newValue) => {
                           updateServico(
                             categoria.id,
                             servico.id,
-                            "porcentagem_de_conclusao",
-                            Number(text) || 0,
-                          )
-                        }
-                        keyboardType="numeric"
-                        editable={false}
+                            "concluido",
+                            newValue,
+                          );
+
+                          if (newValue && !servico.qt_dias_real) {
+                            updateServico(
+                              categoria.id,
+                              servico.id,
+                              "qt_dias_real",
+                              servico.qt_dias_prevista ?? 0,
+                            );
+                          }
+
+                          if (!newValue) {
+                            updateServico(
+                              categoria.id,
+                              servico.id,
+                              "qt_dias_real",
+                              0,
+                            );
+                          }
+                        }}
                       />
                     </View>
                   </View>

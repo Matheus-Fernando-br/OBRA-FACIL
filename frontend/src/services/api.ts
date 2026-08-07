@@ -175,6 +175,16 @@ export async function getBudgetById(id: string, token: string) {
   return data;
 }
 
+export async function getBudgetByClient(id: string, token: string) {
+  const { data } = await api.get(`/orcamento/client/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
 export async function createBudget(budget: Orcamento, token: string) {
   const { data } = await api.post("/orcamento", budget, {
     headers: {
@@ -227,6 +237,16 @@ export async function getWork(token: string) {
 
 export async function getWorkById(id: string, token: string) {
   const { data } = await api.get(`/obra/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function getWorkByClient(id: string, token: string) {
+  const { data } = await api.get(`/obra/client/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -12,12 +12,7 @@ interface Props {
   onSuccess(): void;
 }
 
-export function EditObraModal({
-  visible,
-  work,
-  onClose,
-  onSuccess,
-}: Props) {
+export function EditObraModal({ visible, work, onClose, onSuccess }: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(false);
@@ -60,7 +55,6 @@ export function EditObraModal({
           initialData={work}
           onClose={onClose}
           onSave={handleSave}
-          clientsList={clientsList}
           feedbackMessage={feedback}
           loading={loading}
         />
