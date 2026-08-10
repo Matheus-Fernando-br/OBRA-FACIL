@@ -11,20 +11,14 @@ import { Cliente, Orcamento } from "@/components/layout/interface";
 
 interface Props {
   visible: boolean;
-
   budget: Orcamento | null;
-
-  clientsList: Cliente[];
-
   onClose(): void;
-
   onSuccess(): void;
 }
 
 export function CreateObraModal({
   visible,
   budget,
-  clientsList,
   onClose,
   onSuccess,
 }: Props) {
@@ -116,7 +110,6 @@ export function CreateObraModal({
         <ObrasForm
           mode="add"
           budget={budget}
-          client={clientsList}
           loading={loading}
           onClose={onClose}
           onSave={handleSave}

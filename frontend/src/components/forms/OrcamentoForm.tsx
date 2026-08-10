@@ -175,7 +175,7 @@ export function OrcamentoForm({
     : new Date();
   const dataValidade =
     validade > 0
-      ? new Date(dataPublicacao.getTime() + validade * 24 * 60 * 60 * 1000)
+      ? new Date(dataPublicacao.getTime() + (validade-1) * 24 * 60 * 60 * 1000)
       : null;
 
   function addCategoria() {
@@ -535,7 +535,7 @@ export function OrcamentoForm({
           <ClientCardSelect
             name={selectedClientData?.nome || "Selecionar Cliente"}
             phone={selectedClientData?.telefone || ""}
-            abrirModal={() => {
+            onClick={() => {
               if (mode === "details") {
                 setDetailsVisible(true);
               } else {
@@ -1033,7 +1033,7 @@ export function OrcamentoForm({
                     name={client.nome}
                     phone={client.telefone}
                     icon={"checkbox-outline"}
-                    abrirModal={() => {
+                    onClick={() => {
                       setSelectedClient(client._id);
                       setClientModalVisible(false);
                     }}

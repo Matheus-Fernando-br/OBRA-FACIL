@@ -85,7 +85,7 @@ export function ObrasCard({
 
           <View style={globalStyles.obrasCardHeader}>
             <View style={{ flex: 1 }}>
-              <Text numberOfLines={1} style={globalStyles.obrasCardTitle}>
+              <Text numberOfLines={1} style={globalStyles.orcamentoCliente}>
                 {title}
               </Text>
             </View>
@@ -94,7 +94,7 @@ export function ObrasCard({
 
             <View
               style={[
-                globalStyles.obrasStatusBadge,
+                globalStyles.orcamentoStatusBadge,
                 {
                   backgroundColor: `${getStatusColor()}20`,
                 },
@@ -102,7 +102,7 @@ export function ObrasCard({
             >
               <Text
                 style={[
-                  globalStyles.obrasStatusText,
+                  globalStyles.orcamentoStatusText,
                   {
                     color: getStatusColor(),
                   },
@@ -122,16 +122,16 @@ export function ObrasCard({
 
           {/* CLIENTE */}
 
-          <Text style={globalStyles.workCardDate}>Cliente: {client}</Text>
+          <Text style={globalStyles.orcamentoInfo}>Cliente: {client}</Text>
 
           {/* DATAS */}
 
           {startDate && (
-            <Text style={globalStyles.workCardDate}>Início: {startDate}</Text>
+            <Text style={globalStyles.orcamentoInfo}>Início: {startDate}</Text>
           )}
 
           {EndDate && (
-            <Text style={globalStyles.workCardDate}>
+            <Text style={globalStyles.orcamentoInfo}>
               Previsão de término: {EndDate}
             </Text>
           )}

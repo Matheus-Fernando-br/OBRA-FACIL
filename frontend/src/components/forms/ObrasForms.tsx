@@ -660,7 +660,7 @@ export function ObrasForm({
             </Text>
           </View>
 
-          <Text style={globalStyles.label}>
+          <Text style={globalStyles.title}>
             {orcamentoAtrelado?.nome ?? ""}
           </Text>
 
@@ -687,7 +687,7 @@ export function ObrasForm({
             <ClientCardSelect
               name={cliente?.nome ?? ""}
               phone={cliente?.telefone ?? ""}
-              abrirModal={() => {
+              onClick={() => {
                 setCliente(cliente);
                 setDetailsVisible(true);
               }}
@@ -940,7 +940,19 @@ export function ObrasForm({
 
                 <AppInput value={servico.nome} editable={false} />
                 <Text style={globalStyles.label}>Descrição:</Text>
-                <AppInput value={servico.descricao} editable={false} />
+                <AppInput
+                placeholder="Informe detalhes sobre esse serviço"
+                onChangeText={(text) =>
+                  updateServico(
+                    categoria.id,
+                    servico.id,
+                    "descricao",
+                    text
+                  )
+                }
+                value={servico.descricao}
+                editable={!isReadOnly}
+                />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
                     <Text style={globalStyles.label}>

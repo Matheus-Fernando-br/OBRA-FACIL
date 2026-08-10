@@ -6,19 +6,22 @@ import { globalStyles, COLORS } from "@/styles/globalStyles";
 interface Props {
   name: string;
   phone: string;
-  abrirModal: () => void;
+  onClick: () => void;
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
 export function ClientCardSelect({
   name,
   phone,
-  abrirModal,
-  
+  onClick,
   icon = "chevron-down",
 }: Props) {
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
+
+    if (!nome.trim()) {
+      return "?";
+    }
 
     if (nomes.length === 1) {
       return nomes[0][0].toUpperCase();
@@ -53,9 +56,11 @@ export function ClientCardSelect({
   const telefone = phoneMask(phone || "");
 
   return (
-    <Pressable style={globalStyles.clientCard} onPress={abrirModal}>
+    <Pressable
+      onPress={onClick}
+      style={globalStyles.clientCard}
+    >
       {/* Avatar */}
-
       <View
         style={{
           width: 55,
@@ -68,7 +73,11 @@ export function ClientCardSelect({
         }}
       >
         {name === "Selecionar Cliente" ? (
-          <Ionicons name="person-outline" size={28} color={COLORS.primary} />
+          <Ionicons
+            name="person-outline"
+            size={28}
+            color={COLORS.primary}
+          />
         ) : (
           <Text
             style={{
@@ -83,16 +92,18 @@ export function ClientCardSelect({
       </View>
 
       {/* Informações */}
-
       <View style={{ flex: 1 }}>
-        <Text style={globalStyles.clientCardName}>{name}</Text>
+        <Text style={globalStyles.clientCardName}>
+          {name}
+        </Text>
 
-        <Text style={globalStyles.clientCardInfo}>{telefone}</Text>
+        <Text style={globalStyles.clientCardInfo}>
+          {telefone}
+        </Text>
       </View>
 
-         {/* Ação */}
-
-         <View style={globalStyles.clientIcons}>
+      {/* Ação */}
+      <View style={globalStyles.clientIcons}>
         <Ionicons
           name={icon}
           size={30}
