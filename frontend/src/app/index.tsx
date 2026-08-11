@@ -46,6 +46,11 @@ export default function LoginScreen() {
         setFeedback("");
       }, 7000);
     }
+    finally{
+      console.log("LOGIN REALIZADO COM SUCESSO!");
+      console.log("----------------------------");
+      console.log("Usuário conectado: "${);
+    }
   }
 
   return (

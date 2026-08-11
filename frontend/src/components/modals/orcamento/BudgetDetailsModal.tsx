@@ -12,9 +12,18 @@ interface Props {
   budget: Orcamento | null;
   onClose(): void;
   onEdit(): void;
+  onClientDetails?: (client: Cliente) => void;
+  onClientEdit?: (client: Cliente) => void;
 }
 
-export function BudgetDetailsModal({ visible, budget, onClose, onEdit }: Props) {
+export function BudgetDetailsModal({
+  visible,
+  budget,
+  onClose,
+  onEdit,
+  onClientDetails,
+  onClientEdit,
+}: Props) {
   const { token } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [pdfLoading, setPdfLoading] = useState(false);
@@ -62,6 +71,8 @@ export function BudgetDetailsModal({ visible, budget, onClose, onEdit }: Props) 
           clientsList={clientsList}
           onGeneratePdf={handleGeneratePdf}
           onEdit={onEdit}
+          onClientDetails={onClientDetails}
+          onClientEdit={onClientEdit}
         />
         <PdfViewerModal
           visible={showPdfViewer}

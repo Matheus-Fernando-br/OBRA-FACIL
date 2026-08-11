@@ -6,26 +6,20 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-
 import { useState, useEffect, useMemo } from "react";
-
 import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { AppInput } from "../../components/forms/AppInput";
-
 import { useAuth } from "@/contexts/AuthContext";
-
 import { getBudgets } from "../../services/api";
-
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
-
+import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
+import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
 import { EditOrcamentoModal } from "@/components/modals/orcamento/EditOrcamentoModal";
 import { DeleteOrcamentoModal } from "@/components/modals/orcamento/DeleteOrcamentoModal";
 import { AddOrcamentoModal } from "@/components/modals/orcamento/AddOrcamentoModal";
 import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsModal";
-
-import { Orcamento } from "@/components/layout/interface";
-
+import { Orcamento, Cliente } from "@/components/layout/interface";
 import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function OrcamentosScreen() {
@@ -36,23 +30,17 @@ export default function OrcamentosScreen() {
   // ============================================================
 
   const [search, setSearch] = useState("");
-
   const [loading, setLoading] = useState(true);
-
   const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
-
   const [addVisible, setAddVisible] = useState(false);
-
   const [detailsVisible, setDetailsVisible] = useState(false);
-
   const [editVisible, setEditVisible] = useState(false);
-
   const [deleteVisible, setDeleteVisible] = useState(false);
-
-  const [selectedBudget, setSelectedBudget] =
-    useState<Orcamento | null>(null);
-
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
   const [statusFilter, setStatusFilter] = useState("Todos");
+  const [detailsClientVisible, setDetailsClientVisible] = useState(false);
+  const [editClientVisible, setEditClientVisible] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
 
   // ============================================================
   // CARREGAR ORÇAMENTOS
@@ -66,31 +54,15 @@ export default function OrcamentosScreen() {
 
       const data = await getBudgets(token);
 
-      setBudgetsList(
-        Array.isArray(data)
-          ? data
-          : [],
-      );
+      setBudgetsList(Array.isArray(data) ? data : []);
     } catch (error: any) {
-      console.log(
-        "ERRO AO CARREGAR ORÇAMENTOS:",
-        error,
-      );
+      console.log("ERRO AO CARREGAR ORÇAMENTOS:", error);
 
-      console.log(
-        "RESPONSE:",
-        error?.response,
-      );
+      console.log("RESPONSE:", error?.response);
 
-      console.log(
-        "DATA:",
-        error?.response?.data,
-      );
+      console.log("DATA:", error?.response?.data);
 
-      console.log(
-        "STATUS:",
-        error?.response?.status,
-      );
+      console.log("STATUS:", error?.response?.status);
     } finally {
       setLoading(false);
     }
@@ -111,22 +83,16 @@ export default function OrcamentosScreen() {
   // ============================================================
 
   const filteredBudgets = useMemo(() => {
-    const searchLower = search
-      .trim()
-      .toLowerCase();
+    const searchLower = search.trim().toLowerCase();
 
     return budgetsList.filter((budget) => {
       // Cliente já vem populado pelo backend
       const nomeCliente =
-        typeof budget.cliente === "object"
-          ? budget.cliente?.nome ?? ""
-          : "";
+        typeof budget.cliente === "object" ? (budget.cliente?.nome ?? "") : "";
 
-      const nomeOrcamento =
-        budget.nome?.toLowerCase() ?? "";
+      const nomeOrcamento = budget.nome?.toLowerCase() ?? "";
 
-      const clienteLower =
-        nomeCliente.toLowerCase();
+      const clienteLower = nomeCliente.toLowerCase();
 
       // Busca por:
       // - nome do orçamento
@@ -141,19 +107,11 @@ export default function OrcamentosScreen() {
 
       const matchStatus =
         statusFilter === "Todos" ||
-        budget.status?.toLowerCase() ===
-          statusFilter.toLowerCase();
+        budget.status?.toLowerCase() === statusFilter.toLowerCase();
 
-      return (
-        matchSearch &&
-        matchStatus
-      );
+      return matchSearch && matchStatus;
     });
-  }, [
-    budgetsList,
-    search,
-    statusFilter,
-  ]);
+  }, [budgetsList, search, statusFilter]);
 
   // ============================================================
   // RENDER
@@ -163,33 +121,19 @@ export default function OrcamentosScreen() {
     <View style={globalStyles.screen}>
       <GradientBackground style={globalStyles.container}>
         <ScrollView
-             contentContainerStyle={{ paddingBottom: 100 }}
-             showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
         >
           {/* CABEÇALHO */}
 
-          <View
-            style={globalStyles.pageHeaderRow}
-          >
-            <Text
-              style={globalStyles.title}
-            >
-              Orçamentos
-            </Text>
+          <View style={globalStyles.pageHeaderRow}>
+            <Text style={globalStyles.title}>Orçamentos</Text>
 
             <Pressable
-              style={
-                globalStyles.pageHeaderButton
-              }
-              onPress={() =>
-                setAddVisible(true)
-              }
+              style={globalStyles.pageHeaderButton}
+              onPress={() => setAddVisible(true)}
             >
-              <Ionicons
-                name="add"
-                color={COLORS.text}
-                size={25}
-              />
+              <Ionicons name="add" color={COLORS.text} size={25} />
             </Pressable>
           </View>
 
@@ -203,52 +147,31 @@ export default function OrcamentosScreen() {
 
           {/* FILTROS */}
 
-          <View
-            style={globalStyles.filterRow}
-          >
-            {[
-              "Todos",
-              "Pendente",
-              "Aprovado",
-              "Recusado",
-            ].map((item) => (
+          <View style={globalStyles.filterRow}>
+            {["Todos", "Pendente", "Aprovado", "Recusado"].map((item) => (
               <TouchableOpacity
                 key={item}
                 style={[
                   globalStyles.filterButton,
 
                   statusFilter === item && {
-                    backgroundColor:
-                      COLORS.primary,
+                    backgroundColor: COLORS.primary,
                   },
                 ]}
-                onPress={() =>
-                  setStatusFilter(item)
-                }
+                onPress={() => setStatusFilter(item)}
               >
-                <Text
-                  style={
-                    globalStyles.filterButtonText
-                  }
-                >
-                  {item}
-                </Text>
+                <Text style={globalStyles.filterButtonText}>{item}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {/* NENHUM ORÇAMENTO */}
 
-          {!loading &&
-            filteredBudgets.length === 0 && (
-              <Text
-                style={
-                  globalStyles.sectionTitle
-                }
-              >
-                Nenhum orçamento encontrado.
-              </Text>
-            )}
+          {!loading && filteredBudgets.length === 0 && (
+            <Text style={globalStyles.sectionTitle}>
+              Nenhum orçamento encontrado.
+            </Text>
+          )}
 
           {/* LOADING */}
 
@@ -263,10 +186,7 @@ export default function OrcamentosScreen() {
                 },
               ]}
             >
-              <ActivityIndicator
-                size="large"
-                color={COLORS.primary}
-              />
+              <ActivityIndicator size="large" color={COLORS.primary} />
 
               <Text
                 style={{
@@ -280,60 +200,40 @@ export default function OrcamentosScreen() {
           ) : (
             /* LISTA */
 
-            filteredBudgets.map(
-              (budget) => {
-                const nomeCliente =
-                  typeof budget.cliente ===
-                  "object"
-                    ? budget.cliente
-                        ?.nome ?? ""
-                    : "Cliente não encontrado";
+            filteredBudgets.map((budget) => {
+              const nomeCliente =
+                typeof budget.cliente === "object"
+                  ? (budget.cliente?.nome ?? "")
+                  : "Cliente não encontrado";
 
-                return (
-                  <BudgetCard
-                    key={budget._id}
-                    client={nomeCliente}
-                    nome={budget.nome}
-                    status={budget.status}
-                    value={
-                      budget.preco_com_bdi
-                    }
-                    date={
-                      new Date(
-                        budget.data_validade,
-                      ).toLocaleDateString(
-                        "pt-BR",
-                      )
-                    }
-                    onDetails={() => {
-                      setSelectedBudget(
-                        budget,
-                      );
+              return (
+                <BudgetCard
+                  key={budget._id}
+                  client={nomeCliente}
+                  nome={budget.nome}
+                  status={budget.status}
+                  value={budget.preco_com_bdi}
+                  date={new Date(budget.data_validade).toLocaleDateString(
+                    "pt-BR",
+                  )}
+                  onDetails={() => {
+                    setSelectedBudget(budget);
 
-                      setDetailsVisible(
-                        true,
-                      );
-                    }}
-                    onEdit={() => {
-                      setSelectedBudget(
-                        budget,
-                      );
+                    setDetailsVisible(true);
+                  }}
+                  onEdit={() => {
+                    setSelectedBudget(budget);
 
-                      setEditVisible(true);
-                    }}
-                    onDelete={() => {
-                      setSelectedBudget(
-                        budget,
-                      );
+                    setEditVisible(true);
+                  }}
+                  onDelete={() => {
+                    setSelectedBudget(budget);
 
-                      setDeleteVisible(
-                        true,
-                      );
-                    }}
-                  />
-                );
-              },
-            )
+                    setDeleteVisible(true);
+                  }}
+                />
+              );
+            })
           )}
         </ScrollView>
       </GradientBackground>
@@ -342,31 +242,19 @@ export default function OrcamentosScreen() {
           BOTÃO NOVO ORÇAMENTO
           ====================================================== */}
 
-      <View
-        style={
-          globalStyles.bottomActionContainer
-        }
-      >
+      <View style={globalStyles.bottomActionContainer}>
         <Pressable
-          style={
-            globalStyles.bottomActionButton
-          }
-          onPress={() =>
-            setAddVisible(true)
-          }
+          style={globalStyles.bottomActionButton}
+          onPress={() => setAddVisible(true)}
         >
-          <Text
-            style={
-              globalStyles.bottomActionButtonText
-            }
-          >
+          <Text style={globalStyles.bottomActionButtonText}>
             + Novo Orçamento
           </Text>
         </Pressable>
       </View>
 
       {/* ======================================================
-          ADICIONAR ORÇAMENTO
+          MODALS
           ====================================================== */}
 
       <AddOrcamentoModal
@@ -377,47 +265,25 @@ export default function OrcamentosScreen() {
         }}
       />
 
-      {/* ======================================================
-          EDITAR ORÇAMENTO
-          ====================================================== */}
-
       <EditOrcamentoModal
         visible={editVisible}
-        onClose={() =>
-          setEditVisible(false)
-        }
+        onClose={() => setEditVisible(false)}
         budget={selectedBudget}
         onSuccess={loadBudgets}
       />
 
-      {/* ======================================================
-          EXCLUIR ORÇAMENTO
-          ====================================================== */}
-
       <DeleteOrcamentoModal
         visible={deleteVisible}
-        budgetId={
-          selectedBudget?._id ?? ""
-        }
-        budgetName={
-          selectedBudget?.nome ?? ""
-        }
-        onClose={() =>
-          setDeleteVisible(false)
-        }
+        budgetId={selectedBudget?._id ?? ""}
+        budgetName={selectedBudget?.nome ?? ""}
+        onClose={() => setDeleteVisible(false)}
         onSuccess={loadBudgets}
       />
-
-      {/* ======================================================
-          DETALHES DO ORÇAMENTO
-          ====================================================== */}
 
       <BudgetDetailsModal
         visible={detailsVisible}
         budget={selectedBudget}
-        onClose={() =>
-          setDetailsVisible(false)
-        }
+        onClose={() => setDetailsVisible(false)}
         onEdit={() => {
           setDetailsVisible(false);
 
@@ -425,7 +291,53 @@ export default function OrcamentosScreen() {
             setEditVisible(true);
           }, 200);
         }}
+        onClientDetails={(client) => {
+          setSelectedClient(client);
+
+          setTimeout(() => {
+            setDetailsClientVisible(true);
+          }, 200);
+        }}
+        onClientEdit={(client) => {
+          setSelectedClient(client);
+
+          setTimeout(() => {
+            setEditClientVisible(true);
+          }, 200);
+        }}
       />
+
+      <DetailsClientModal
+        visible={detailsClientVisible}
+        client={selectedClient}
+        onClose={() => {
+          setDetailsClientVisible(false);
+          setSelectedClient(null);
+        }}
+        onEdit={() => {
+          setDetailsClientVisible(false);
+
+          setTimeout(() => {
+            setEditClientVisible(true);
+          }, 200);
+        }}
+      />
+
+<EditClientModal
+  visible={editClientVisible}
+  client={selectedClient}
+  onClose={() => {
+    setEditClientVisible(false);
+    setSelectedClient(null);
+  }}
+  onSuccess={() => {
+    setEditClientVisible(false);
+    setSelectedClient(null);
+
+    loadBudgets();
+  }}
+/>
+
     </View>
   );
 }

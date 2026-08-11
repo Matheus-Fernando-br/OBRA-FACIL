@@ -11,8 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
-import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
-import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
 import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
@@ -45,6 +43,8 @@ interface OrcamentoFormProps {
   feedbackMessage?: string;
   onSuccess?: () => void;
   onEdit?: () => void;
+  onClientDetails?: (client: Cliente) => void;
+  onClientEdit?: (client: Cliente) => void;
 }
 
 export function OrcamentoForm({
@@ -57,6 +57,8 @@ export function OrcamentoForm({
   feedbackMessage,
   onSuccess,
   onEdit,
+  onClientDetails,
+  onClientEdit,
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -125,9 +127,6 @@ export function OrcamentoForm({
   }, [isReadOnly, initialData, token]);
 
   const selectedClientData = clientsList.find((c) => c._id === selectedClient);
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [editVisible, setEditVisible] = useState(false);
-
   const [validade, setValidade] = useState<number>(
     initialData?.valido_durante || 0,
   );
@@ -175,7 +174,9 @@ export function OrcamentoForm({
     : new Date();
   const dataValidade =
     validade > 0
-      ? new Date(dataPublicacao.getTime() + (validade-1) * 24 * 60 * 60 * 1000)
+      ? new Date(
+          dataPublicacao.getTime() + (validade - 1) * 24 * 60 * 60 * 1000,
+        )
       : null;
 
   function addCategoria() {
@@ -318,7 +319,7 @@ export function OrcamentoForm({
         return;
       }
 
-      if (!status) {
+      if (!isAdd && !status) {
         setFeedback("Selecione o status do orçamento.");
         return;
       }
@@ -537,7 +538,9 @@ export function OrcamentoForm({
             phone={selectedClientData?.telefone || ""}
             onClick={() => {
               if (mode === "details") {
-                setDetailsVisible(true);
+                if (selectedClientData) {
+                  onClientDetails?.(selectedClientData);
+                }
               } else {
                 setClientModalVisible(true);
               }
@@ -1044,24 +1047,6 @@ export function OrcamentoForm({
           </View>
         </View>
       </Modal>
-      <DetailsClientModal
-        visible={detailsVisible}
-        client={selectedClientData}
-        onClose={() => setDetailsVisible(false)}
-        onEdit={() => {
-          setDetailsVisible(false);
-
-          setTimeout(() => {
-            setEditVisible(true);
-          }, 200);
-        }}
-      />
-      <EditClientModal
-        visible={editVisible}
-        onClose={() => setEditVisible(false)}
-        client={selectedClientData}
-        onSuccess={loadClient}
-      />
     </View>
   );
 }

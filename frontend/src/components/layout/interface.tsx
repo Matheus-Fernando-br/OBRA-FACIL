@@ -19,20 +19,22 @@ export interface Cliente {
   _id: string;
 
   nome: string;
-  email: string;
-  telefone: string;
-
+  tipoPessoa: string;
   CPF?: string;
   CNPJ?: string;
+  email: string;
+  telefone: string;
+  descricao?: string;
 }
 
 export interface AddCliente {
   nome: string;
-  email: string;
-  telefone: string;
-
+  tipoPessoa: string;
   CPF?: string;
   CNPJ?: string;
+  email: string;
+  telefone: string;
+  descricao?: string;
 }
 
 // ==============================
