@@ -49,7 +49,6 @@ export default function LoginScreen() {
     finally{
       console.log("LOGIN REALIZADO COM SUCESSO!");
       console.log("----------------------------");
-      console.log("Usuário conectado: "${);
     }
   }
 

@@ -159,7 +159,7 @@ export default function HomeScreen() {
             />
 
             <DashboardCard
-              title="Faturamento Aprovado"
+              title="Orçamento Aprovado"
               value={
                 loading ? (
                   <ActivityIndicator size="small" color={COLORS.white} />

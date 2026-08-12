@@ -82,13 +82,20 @@ const calculateServiceStatus = (service: ServicoObraForm): ObraStatus => {
 };
 
 // Progresso, dias e status da categoria são 100% calculados a partir dos serviços
-const calculateCategoryProgress = (services: ServicoObraForm[]) => {
+const calculateCategoryProgress = (
+  services: ServicoObraForm[],
+): {
+  porcentagem_de_conclusao: number;
+  qt_dias_prevista: number;
+  qt_dias_real: number;
+  status: ObraStatus;
+} => {
   if (services.length === 0) {
     return {
       porcentagem_de_conclusao: 0,
       qt_dias_prevista: 0,
       qt_dias_real: 0,
-      status: "NOPRAZO" as ObraStatus,
+      status: "NOPRAZO",
     };
   }
 
@@ -102,17 +109,30 @@ const calculateCategoryProgress = (services: ServicoObraForm[]) => {
     0,
   );
 
-  const diasConcluidos = services.reduce(
-    (sum, s) => (s.concluido ? sum + Number(s.qt_dias_real ?? 0) : sum),
+  // Dias previstos dos serviços concluídos
+  const diasPrevistosConcluidos = services.reduce(
+    (sum, s) =>
+      s.concluido
+        ? sum + Number(s.qt_dias_prevista ?? 0)
+        : sum,
     0,
   );
 
   const porcentagem_de_conclusao =
-    qt_dias_real > 0 ? Math.round((diasConcluidos / qt_dias_real) * 100) : 0;
+    qt_dias_prevista > 0
+      ? Math.min(
+          100,
+          Math.round(
+            (diasPrevistosConcluidos / qt_dias_prevista) * 100,
+          ),
+        )
+      : 0;
+
+  const todosConcluidos = services.every(
+    (s) => s.concluido === true,
+  );
 
   let status: ObraStatus = "NOPRAZO";
-
-  const todosConcluidos = services.every((s) => s.concluido);
 
   if (todosConcluidos) {
     if (qt_dias_real > qt_dias_prevista) {
@@ -640,6 +660,9 @@ export function ObrasForm({
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
+        <Text style={[globalStyles.title, {marginVertical: 10, textAlign:"center"}]}>
+            {orcamentoAtrelado?.nome ?? ""}
+          </Text>
           <View
             style={[
               globalStyles.obraStatusBadge,
@@ -660,9 +683,7 @@ export function ObrasForm({
             </Text>
           </View>
 
-          <Text style={globalStyles.title}>
-            {orcamentoAtrelado?.nome ?? ""}
-          </Text>
+        
 
           <Text style={globalStyles.label}>Cliente:</Text>
           <View style={globalStyles.divider} />
@@ -733,26 +754,51 @@ export function ObrasForm({
             )}
           </View>
           {!isAdd && (
-            <View style={globalStyles.row}>
-              <Text style={globalStyles.label}>Conclusão Geral:</Text>
+            <View style={{ marginTop: 10 }}>
+  <Text style={globalStyles.label}>Conclusão Geral:</Text>
 
-              <View style={globalStyles.progressContainer}>
-                <View style={globalStyles.progressBarBackground}>
-                  <View
-                    style={[
-                      globalStyles.progressBarFill,
-                      {
-                        width: `${porcentagemConclusaoGeral}%`,
-                      },
-                    ]}
-                  />
-                </View>
+  <View
+    style={[
+      globalStyles.progressContainer,
+      {
+        width: "100%",
+        marginTop: 8,
+      },
+    ]}
+  >
+    <View
+      style={[
+        globalStyles.progressBarBackground,
+        {
+          minWidth: 0,
+        },
+      ]}
+    >
+      <View
+        style={[
+          globalStyles.progressBarFill,
+          {
+            width: `${Math.min(
+              100,
+              Math.max(0, porcentagemConclusaoGeral),
+            )}%`,
+          },
+        ]}
+      />
+    </View>
 
-                <Text style={globalStyles.workCardProgress}>
-                  {porcentagemConclusaoGeral}%
-                </Text>
-              </View>
-            </View>
+    <Text
+      style={[
+        globalStyles.workCardProgress,
+        {
+          marginLeft: 10,
+        },
+      ]}
+    >
+      {porcentagemConclusaoGeral}%
+    </Text>
+  </View>
+</View>
           )}
         </View>
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
