@@ -111,10 +111,7 @@ const calculateCategoryProgress = (
 
   // Dias previstos dos serviços concluídos
   const diasPrevistosConcluidos = services.reduce(
-    (sum, s) =>
-      s.concluido
-        ? sum + Number(s.qt_dias_prevista ?? 0)
-        : sum,
+    (sum, s) => (s.concluido ? sum + Number(s.qt_dias_prevista ?? 0) : sum),
     0,
   );
 
@@ -122,15 +119,11 @@ const calculateCategoryProgress = (
     qt_dias_prevista > 0
       ? Math.min(
           100,
-          Math.round(
-            (diasPrevistosConcluidos / qt_dias_prevista) * 100,
-          ),
+          Math.round((diasPrevistosConcluidos / qt_dias_prevista) * 100),
         )
       : 0;
 
-  const todosConcluidos = services.every(
-    (s) => s.concluido === true,
-  );
+  const todosConcluidos = services.every((s) => s.concluido === true);
 
   let status: ObraStatus = "NOPRAZO";
 
@@ -660,7 +653,12 @@ export function ObrasForm({
         <Text style={globalStyles.subtitle}>Informações Gerais</Text>
         <View style={globalStyles.divider} />
         <View style={globalStyles.card}>
-        <Text style={[globalStyles.title, {marginVertical: 10, textAlign:"center"}]}>
+          <Text
+            style={[
+              globalStyles.title,
+              { marginVertical: 10, textAlign: "center" },
+            ]}
+          >
             {orcamentoAtrelado?.nome ?? ""}
           </Text>
           <View
@@ -682,8 +680,6 @@ export function ObrasForm({
               {obraStatusCalculado}
             </Text>
           </View>
-
-        
 
           <Text style={globalStyles.label}>Cliente:</Text>
           <View style={globalStyles.divider} />
@@ -755,50 +751,50 @@ export function ObrasForm({
           </View>
           {!isAdd && (
             <View style={{ marginTop: 10 }}>
-  <Text style={globalStyles.label}>Conclusão Geral:</Text>
+              <Text style={globalStyles.label}>Conclusão Geral:</Text>
 
-  <View
-    style={[
-      globalStyles.progressContainer,
-      {
-        width: "100%",
-        marginTop: 8,
-      },
-    ]}
-  >
-    <View
-      style={[
-        globalStyles.progressBarBackground,
-        {
-          minWidth: 0,
-        },
-      ]}
-    >
-      <View
-        style={[
-          globalStyles.progressBarFill,
-          {
-            width: `${Math.min(
-              100,
-              Math.max(0, porcentagemConclusaoGeral),
-            )}%`,
-          },
-        ]}
-      />
-    </View>
+              <View
+                style={[
+                  globalStyles.progressContainer,
+                  {
+                    width: "100%",
+                    marginTop: 8,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    globalStyles.progressBarBackground,
+                    {
+                      minWidth: 0,
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      globalStyles.progressBarFill,
+                      {
+                        width: `${Math.min(
+                          100,
+                          Math.max(0, porcentagemConclusaoGeral),
+                        )}%`,
+                      },
+                    ]}
+                  />
+                </View>
 
-    <Text
-      style={[
-        globalStyles.workCardProgress,
-        {
-          marginLeft: 10,
-        },
-      ]}
-    >
-      {porcentagemConclusaoGeral}%
-    </Text>
-  </View>
-</View>
+                <Text
+                  style={[
+                    globalStyles.workCardProgress,
+                    {
+                      marginLeft: 10,
+                    },
+                  ]}
+                >
+                  {porcentagemConclusaoGeral}%
+                </Text>
+              </View>
+            </View>
           )}
         </View>
         <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
@@ -987,17 +983,12 @@ export function ObrasForm({
                 <AppInput value={servico.nome} editable={false} />
                 <Text style={globalStyles.label}>Descrição:</Text>
                 <AppInput
-                placeholder="Informe detalhes sobre esse serviço"
-                onChangeText={(text) =>
-                  updateServico(
-                    categoria.id,
-                    servico.id,
-                    "descricao",
-                    text
-                  )
-                }
-                value={servico.descricao}
-                editable={!isReadOnly}
+                  placeholder="Informe detalhes sobre esse serviço"
+                  onChangeText={(text) =>
+                    updateServico(categoria.id, servico.id, "descricao", text)
+                  }
+                  value={servico.descricao}
+                  editable={!isReadOnly}
                 />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>

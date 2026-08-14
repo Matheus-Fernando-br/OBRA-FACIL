@@ -1,7 +1,6 @@
 import { Stack } from "expo-router";
-
 import { AuthProvider } from "@/contexts/AuthContext";
-
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { useFonts } from "expo-font";
 import {
   IntelOneMono_400Regular,
@@ -33,15 +32,17 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="cadastro" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+      <ThemeProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="cadastro" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </ThemeProvider>
     </AuthProvider>
   );
 }

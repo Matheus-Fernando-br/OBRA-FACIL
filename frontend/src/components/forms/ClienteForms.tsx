@@ -18,7 +18,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export interface ClientFormData {
   nome: string;
-  tipoPessoa: string;
+  tipo: string;
   email: string;
   telefone: string;
   CPF?: string;
@@ -93,7 +93,7 @@ export function ClientForm({
     }
 
     setNome(initialData.nome);
-    setTipoPessoa(initialData.tipoPessoa);
+    setTipoPessoa(initialData.tipo);
     setCpf(documentMask(initialData.CPF || initialData.CNPJ || ""));
     setEmail(initialData.email);
     setTelefone(phoneMask(initialData.telefone));
@@ -284,7 +284,7 @@ export function ClientForm({
 
       const clientData: ClientFormData = {
         nome: nome.trim(),
-        tipoPessoa: tipoPessoa.trim(),
+        tipo: tipoPessoa.trim(),
         CPF: documento.length === 11 ? documento : undefined,
         CNPJ: documento.length === 14 ? documento : undefined,
         email: email.trim(),
@@ -422,10 +422,11 @@ export function ClientForm({
                   globalStyles.picker,
                   isReadOnly && globalStyles.pickerReadOnly,
                 ]}
+                enabled={!isReadOnly}
               >
                 <Picker.Item label={"Selecione o tipo de Pessoa"} value="" />
-                <Picker.Item label="Pessoa Física" value="FISICA" />
-                <Picker.Item label="Pessoa Jurídica" value="JURIDICA" />
+                <Picker.Item label="Pessoa Física" value="FISICO" />
+                <Picker.Item label="Pessoa Jurídica" value="JURIDICO" />
               </Picker>
             </View>
 

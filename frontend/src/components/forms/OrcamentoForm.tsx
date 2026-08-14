@@ -15,6 +15,7 @@ import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
 import * as Linking from "expo-linking";
+import { cepMask } from "./mask";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Cliente,
@@ -63,10 +64,17 @@ export function OrcamentoForm({
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const isAdd = mode === "add";
+  const isLocked =
+    !isAdd &&
+    (initialData?.status === "APROVADO" ||
+      initialData?.status === "RECUSADO" ||
+      initialData?.arquivado === true);
+  const canEdit = !isReadOnly && !isLocked;
+  const [enderecoExpandido, setEnderecoExpandido] = useState(isAdd);
   const [nome, setNome] = useState(initialData?.nome || "");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [loadingClose, setLoadingClose] = useState(false);
-  const [status, setStatus] = useState(initialData?.status || "");
+  const [status, setStatus] = useState(initialData?.status || "PENDENTE");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
   const [loadingClient, setLoadingClient] = useState(mode !== "add");
   const [clientModalVisible, setClientModalVisible] = useState(false);
@@ -288,7 +296,7 @@ export function OrcamentoForm({
 
   function zerarCampos() {
     setNome("");
-    setStatus("");
+    setStatus("PENDENTE");
     setDescricao("");
     setSelectedClient("");
     setValidade(0);
@@ -298,11 +306,18 @@ export function OrcamentoForm({
 
   async function handleSubmit() {
     try {
+      setFeedback("");
+
+      if (isLocked) {
+        setFeedback(
+          "Este orçamento não pode mais ser alterado."
+        );
+        return;
+      }
+
       if (isReadOnly) {
         return onGeneratePdf?.();
       }
-
-      setFeedback("");
 
       if (!token || !user) {
         setFeedback("Sessão expirada.");
@@ -441,18 +456,34 @@ export function OrcamentoForm({
         valido_durante: validade,
         data_validade: dataValidade!,
       };
-      if (onSave) await onSave(budgetData);
+      if (onSave) {
+        await onSave(budgetData);
+      }
+
       setFeedback("Orçamento salvo com sucesso!");
+
       zerarCampos();
       onSuccess?.();
+
       setTimeout(() => {
         onClose();
-      }, 1200);
+      }, 1500);
     } catch (error: any) {
-      console.log("ERRO AO SALVAR ORÇAMENTO:", error?.response?.data || error);
-      setFeedback(error?.response?.data?.message || "Erro ao salvar orçamento");
+      console.log(
+        "ERRO AO SALVAR ORÇAMENTO:",
+        error?.response?.data || error?.message || error,
+      );
+
+      const mensagem =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Erro ao salvar orçamento";
+
+      setFeedback(mensagem);
     } finally {
       setLoadingSubmit(false);
+
       setTimeout(() => {
         setFeedback("");
       }, 5000);
@@ -497,19 +528,19 @@ export function OrcamentoForm({
               : "Detalhes"}
         </Text>
 
-        <Pressable
-          onPress={mode === "details" ? onEdit : irParaSalvar}
-          style={globalStyles.rightAction}
-        >
-          <Text style={globalStyles.saveText}>
-            {mode === "details" ? "Editar" : "Salvar"}
-          </Text>
-          <Ionicons
-            name={mode === "details" ? "pencil-sharp" : "download"}
-            size={25}
-            color={COLORS.title}
-          />
-        </Pressable>
+        {mode === "details" && !isLocked ? (
+          <Pressable onPress={onEdit} style={globalStyles.rightAction}>
+            <Text style={globalStyles.saveText}>Editar</Text>
+
+            <Ionicons name="pencil-sharp" size={25} color={COLORS.title} />
+          </Pressable>
+        ) : mode !== "details" && !isLocked ? (
+          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+            <Text style={globalStyles.saveText}>Salvar</Text>
+
+            <Ionicons name="download" size={25} color={COLORS.title} />
+          </Pressable>
+        ) : null}
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }}>
         <Text style={globalStyles.subtitle}>Cliente</Text>
@@ -559,7 +590,7 @@ export function OrcamentoForm({
             placeholder="Nome do orçamento"
             value={nome}
             onChangeText={setNome}
-            editable={!isReadOnly}
+            editable={canEdit}
           />
 
           <Text style={globalStyles.label}>Descrição:</Text>
@@ -568,7 +599,7 @@ export function OrcamentoForm({
             placeholder="Descrição"
             value={descricao}
             onChangeText={setDescricao}
-            editable={!isReadOnly}
+            editable={canEdit}
             multiline
             numberOfLines={3}
           />
@@ -614,7 +645,7 @@ export function OrcamentoForm({
                   globalStyles.picker,
                   isReadOnly && globalStyles.pickerReadOnly,
                 ]}
-                enabled={!isReadOnly}
+                enabled={canEdit}
               >
                 {Array.from({ length: 15 }, (_, i) => (
                   <Picker.Item key={i} label={`${i} dias`} value={i} />
@@ -632,143 +663,225 @@ export function OrcamentoForm({
             editable={false}
           />
         </View>
-        <Text style={globalStyles.subtitle}>Endereço:</Text>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.card}>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
+        {/* ENDEREÇO RESUMIDO */}
+        {!isAdd && (
+          <View style={globalStyles.card}>
+            <Text style={globalStyles.label}>Endereço:</Text>
+
+            <Pressable
+              onPress={() => setEnderecoExpandido((prev) => !prev)}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <AppInput
+                  value={`${logradouro || ""}${numero ? `, ${numero}` : ""}${
+                    cidade ? ` - ${cidade}` : ""
+                  }${estado ? `/${estado}` : ""}`}
+                  editable={false}
+                  pointerEvents="none"
+                />
+              </View>
+
+              <Ionicons
+                name={enderecoExpandido ? "chevron-up" : "chevron-down"}
+                size={22}
+                color={COLORS.primary}
+                style={{ marginLeft: 8 }}
+              />
+            </Pressable>
+          </View>
+        )}
+
+        {/* ENDEREÇO COMPLETO*/}
+        {(isAdd || enderecoExpandido) && (
+          <>
+            <Text style={globalStyles.subtitle}>Endereço:</Text>
+            <View style={globalStyles.divider} />
+            <View style={globalStyles.card}>
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>
+                    CEP:
+                    {!isReadOnly && (
+                      <Text style={globalStyles.obrigatorio}>*</Text>
+                    )}
+                  </Text>
+                  <AppInput
+                    placeholder="CEP"
+                    value={cep}
+                    onChangeText={(t) => {
+                      const maskedCep = cepMask(t);
+
+                      setCep(maskedCep);
+
+                      if (maskedCep.replace(/\D/g, "").length === 8) {
+                        buscarCep(maskedCep);
+                      }
+                    }}
+                    editable={canEdit}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={globalStyles.column}>
+                  <View style={globalStyles.column}>
+                    <Text style={globalStyles.label}>
+                      Estado:
+                      {!isReadOnly && (
+                        <Text style={globalStyles.obrigatorio}>*</Text>
+                      )}
+                    </Text>
+
+                    <Picker
+                      selectedValue={estado}
+                      onValueChange={(value) => setEstado(value)}
+                      style={[
+                        globalStyles.picker,
+                        isReadOnly && globalStyles.pickerReadOnly,
+                      ]}
+                      enabled={canEdit}
+                    >
+                      <Picker.Item label="Selecione o Estado" value="" />
+                      <Picker.Item label="AC - Acre" value="AC" />
+                      <Picker.Item label="AL - Alagoas" value="AL" />
+                      <Picker.Item label="AP - Amapá" value="AP" />
+                      <Picker.Item label="AM - Amazonas" value="AM" />
+                      <Picker.Item label="BA - Bahia" value="BA" />
+                      <Picker.Item label="CE - Ceará" value="CE" />
+                      <Picker.Item label="DF - Distrito Federal" value="DF" />
+                      <Picker.Item label="ES - Espírito Santo" value="ES" />
+                      <Picker.Item label="GO - Goiás" value="GO" />
+                      <Picker.Item label="MA - Maranhão" value="MA" />
+                      <Picker.Item label="MT - Mato Grosso" value="MT" />
+                      <Picker.Item label="MS - Mato Grosso do Sul" value="MS" />
+                      <Picker.Item label="MG - Minas Gerais" value="MG" />
+                      <Picker.Item label="PA - Pará" value="PA" />
+                      <Picker.Item label="PB - Paraíba" value="PB" />
+                      <Picker.Item label="PR - Paraná" value="PR" />
+                      <Picker.Item label="PE - Pernambuco" value="PE" />
+                      <Picker.Item label="PI - Piauí" value="PI" />
+                      <Picker.Item label="RJ - Rio de Janeiro" value="RJ" />
+                      <Picker.Item
+                        label="RN - Rio Grande do Norte"
+                        value="RN"
+                      />
+                      <Picker.Item label="RS - Rio Grande do Sul" value="RS" />
+                      <Picker.Item label="RO - Rondônia" value="RO" />
+                      <Picker.Item label="RR - Roraima" value="RR" />
+                      <Picker.Item label="SC - Santa Catarina" value="SC" />
+                      <Picker.Item label="SP - São Paulo" value="SP" />
+                      <Picker.Item label="SE - Sergipe" value="SE" />
+                      <Picker.Item label="TO - Tocantins" value="TO" />
+                    </Picker>
+                  </View>
+                </View>
+              </View>
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>
+                    Cidade:
+                    {!isReadOnly && (
+                      <Text style={globalStyles.obrigatorio}>*</Text>
+                    )}
+                  </Text>
+
+                  <AppInput
+                    placeholder="Cidade"
+                    value={cidade}
+                    onChangeText={setCidade}
+                    editable={canEdit}
+                  />
+                </View>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>
+                    Bairro:
+                    {!isReadOnly && (
+                      <Text style={globalStyles.obrigatorio}>*</Text>
+                    )}
+                  </Text>
+
+                  <AppInput
+                    placeholder="Bairro"
+                    value={bairro}
+                    onChangeText={setBairro}
+                    editable={canEdit}
+                  />
+                </View>
+              </View>
               <Text style={globalStyles.label}>
-                CEP:
+                Logradouro:
                 {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
               </Text>
-              <AppInput
-                placeholder="CEP"
-                value={cep}
-                onChangeText={(t) => {
-                  setCep(t);
-                  buscarCep(t);
-                }}
-                editable={!isReadOnly}
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
-                  Estado:
-                  {!isReadOnly && (
-                    <Text style={globalStyles.obrigatorio}>*</Text>
-                  )}
-                </Text>
+              <View style={globalStyles.row}>
+                <AppInput
+                  placeholder="Rua"
+                  value={logradouro}
+                  onChangeText={setLogradouro}
+                  editable={canEdit}
+                />
+              </View>
+              <View style={globalStyles.row}>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>
+                    Número:
+                    {!isReadOnly && (
+                      <Text style={globalStyles.obrigatorio}>*</Text>
+                    )}
+                  </Text>
 
-                <Picker
-                  selectedValue={estado}
-                  onValueChange={(value) => setEstado(value)}
-                  style={[
-                    globalStyles.picker,
-                    isReadOnly && globalStyles.pickerReadOnly,
-                  ]}
-                  enabled={!isReadOnly}
-                >
-                  <Picker.Item label="Selecione o Estado" value="" />
-                  <Picker.Item label="AC - Acre" value="AC" />
-                  <Picker.Item label="AL - Alagoas" value="AL" />
-                  <Picker.Item label="AP - Amapá" value="AP" />
-                  <Picker.Item label="AM - Amazonas" value="AM" />
-                  <Picker.Item label="BA - Bahia" value="BA" />
-                  <Picker.Item label="CE - Ceará" value="CE" />
-                  <Picker.Item label="DF - Distrito Federal" value="DF" />
-                  <Picker.Item label="ES - Espírito Santo" value="ES" />
-                  <Picker.Item label="GO - Goiás" value="GO" />
-                  <Picker.Item label="MA - Maranhão" value="MA" />
-                  <Picker.Item label="MT - Mato Grosso" value="MT" />
-                  <Picker.Item label="MS - Mato Grosso do Sul" value="MS" />
-                  <Picker.Item label="MG - Minas Gerais" value="MG" />
-                  <Picker.Item label="PA - Pará" value="PA" />
-                  <Picker.Item label="PB - Paraíba" value="PB" />
-                  <Picker.Item label="PR - Paraná" value="PR" />
-                  <Picker.Item label="PE - Pernambuco" value="PE" />
-                  <Picker.Item label="PI - Piauí" value="PI" />
-                  <Picker.Item label="RJ - Rio de Janeiro" value="RJ" />
-                  <Picker.Item label="RN - Rio Grande do Norte" value="RN" />
-                  <Picker.Item label="RS - Rio Grande do Sul" value="RS" />
-                  <Picker.Item label="RO - Rondônia" value="RO" />
-                  <Picker.Item label="RR - Roraima" value="RR" />
-                  <Picker.Item label="SC - Santa Catarina" value="SC" />
-                  <Picker.Item label="SP - São Paulo" value="SP" />
-                  <Picker.Item label="SE - Sergipe" value="SE" />
-                  <Picker.Item label="TO - Tocantins" value="TO" />
-                </Picker>
+                  <AppInput
+                    placeholder="Nº"
+                    value={numero}
+                    onChangeText={setNumero}
+                    editable={canEdit}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View style={globalStyles.column}>
+                  <Text style={globalStyles.label}>Complemento:</Text>
+
+                  <AppInput
+                    placeholder="Compl."
+                    value={complemento}
+                    onChangeText={setComplemento}
+                    editable={canEdit}
+                  />
+                </View>
               </View>
             </View>
-          </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
-                Cidade:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
-              </Text>
+          </>
+        )}
+        {/* BOTÃO PARA ABRIR*/}
+        {!isAdd && !enderecoExpandido && (
+          <Pressable
+            onPress={() => setEnderecoExpandido(true)}
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: 8,
+              paddingVertical: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: COLORS.primary,
+                fontWeight: "600",
+              }}
+            >
+              Ver endereço completo
+            </Text>
 
-              <AppInput
-                placeholder="Cidade"
-                value={cidade}
-                onChangeText={setCidade}
-                editable={!isReadOnly}
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
-                Bairro:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
-              </Text>
-
-              <AppInput
-                placeholder="Bairro"
-                value={bairro}
-                onChangeText={setBairro}
-                editable={!isReadOnly}
-              />
-            </View>
-          </View>
-          <Text style={globalStyles.label}>
-            Logradouro:
-            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
-          </Text>
-          <View style={globalStyles.row}>
-            <AppInput
-              placeholder="Rua"
-              value={logradouro}
-              onChangeText={setLogradouro}
-              editable={!isReadOnly}
+            <Ionicons
+              name="chevron-down"
+              size={18}
+              color={COLORS.primary}
+              style={{ marginLeft: 5 }}
             />
-          </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
-                Número:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
-              </Text>
-
-              <AppInput
-                placeholder="Nº"
-                value={numero}
-                onChangeText={setNumero}
-                editable={!isReadOnly}
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Complemento:</Text>
-
-              <AppInput
-                placeholder="Compl."
-                value={complemento}
-                onChangeText={setComplemento}
-                editable={!isReadOnly}
-              />
-            </View>
-          </View>
-        </View>
+          </Pressable>
+        )}
         <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
         <View style={globalStyles.divider} />
         <Text style={globalStyles.label}>Link da tabela SINAPI:</Text>
@@ -789,7 +902,7 @@ export function OrcamentoForm({
               placeholder="Nome da Categoria"
               value={cat.nome}
               onChangeText={(t) => updateCategoria(cat.id, "nome", t)}
-              editable={!isReadOnly}
+              editable={canEdit}
             />
             {cat.servicos.map((s, sIdx) => (
               <View key={s.id} style={globalStyles.serviceContainer}>
@@ -803,7 +916,7 @@ export function OrcamentoForm({
                   placeholder="Nome do Serviço"
                   value={s.nome}
                   onChangeText={(t) => updateServico(cat.id, s.id, "nome", t)}
-                  editable={!isReadOnly}
+                  editable={canEdit}
                 />
                 <View style={globalStyles.row}>
                   <View style={globalStyles.column}>
@@ -823,7 +936,7 @@ export function OrcamentoForm({
                         globalStyles.picker,
                         isReadOnly && globalStyles.pickerReadOnly,
                       ]}
-                      enabled={!isReadOnly}
+                      enabled={canEdit}
                     >
                       <Picker.Item label="Selecione a Unid. " value="" />
                       <Picker.Item label="Metro (m)" value="m" />
@@ -857,7 +970,7 @@ export function OrcamentoForm({
                           value ?? 0,
                         )
                       }
-                      editable={!isReadOnly}
+                      editable={canEdit}
                     />
                   </View>
                 </View>
@@ -881,7 +994,7 @@ export function OrcamentoForm({
                           Number(t),
                         )
                       }
-                      editable={!isReadOnly}
+                      editable={canEdit}
                       keyboardType="numeric"
                     />
                   </View>
@@ -902,13 +1015,13 @@ export function OrcamentoForm({
             </Text>
             <View style={globalStyles.divider} />
 
-            {!isReadOnly && (
+            {canEdit && (
               <AppButton title="+ Serviço" onPress={() => addServico(cat.id)} />
             )}
           </View>
         ))}
 
-        {!isReadOnly && (
+        {canEdit && (
           <AppButton
             title="+ Categoria"
             onPress={addCategoria}
@@ -943,7 +1056,7 @@ export function OrcamentoForm({
                 placeholder="BDI (%)"
                 value={bdi}
                 onChangeText={setBdi}
-                editable={!isReadOnly}
+                editable={canEdit}
                 keyboardType="numeric"
               />
             </View>

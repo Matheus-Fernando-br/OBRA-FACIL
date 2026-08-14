@@ -1,4 +1,3 @@
-import { Background } from "expo-router/build/react-navigation";
 import { StyleSheet } from "react-native";
 
 /* =========================
@@ -27,7 +26,8 @@ export const COLORS = {
   tabBarHeight: 70,
 };
 
-export const globalStyles = StyleSheet.create({
+export function createGlobalStyles(colors: typeof COLORS) {
+  return StyleSheet.create({
   /* =========================
    LOGIN
 ========================= */
@@ -1136,6 +1136,9 @@ export const globalStyles = StyleSheet.create({
     color: COLORS.title,
   },
 });
+}
+
+export const globalStyles = createGlobalStyles(COLORS);
 
 /* =========================
    VARIÁVEIS GLOBAIS

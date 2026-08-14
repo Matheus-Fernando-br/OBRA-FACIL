@@ -30,10 +30,23 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   const handleSave = async (formData: any) => {
     try {
       setLoading(true);
+      setFeedback("");
+  
       await createBudget(formData, token!);
+  
       onClose();
-    } catch (error) { setFeedback("Erro ao salvar."); }
-    finally { setLoading(false); }
+    } catch (error: any) {
+      console.log(
+        "ERRO CREATE BUDGET:",
+        error?.response?.data || error?.message || error
+      );
+  
+      // MUITO IMPORTANTE:
+      // repassa o erro para o OrcamentoForm
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

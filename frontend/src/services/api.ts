@@ -209,6 +209,24 @@ export async function updateBudget(
   return data;
 }
 
+export async function archiveBudget(
+  id: string,
+  arquivado: boolean,
+  token: string,
+) {
+  const { data } = await api.put(
+    `/orcamento/${id}`,
+    { arquivado },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return data;
+}
+
 export async function deleteBudget(id: string, token: string) {
   const { data } = await api.delete(`/orcamento/${id}`, {
     headers: {
@@ -271,6 +289,24 @@ export async function updateWork(id: string, work: Obra, token: string) {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  return data;
+}
+
+export async function archiveWork(
+  id: string,
+  arquivado: boolean,
+  token: string,
+) {
+  const { data } = await api.put(
+    `/obra/${id}`,
+    { arquivado },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 
   return data;
 }

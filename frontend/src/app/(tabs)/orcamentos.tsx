@@ -11,7 +11,7 @@ import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { AppInput } from "../../components/forms/AppInput";
 import { useAuth } from "@/contexts/AuthContext";
-import { getBudgets } from "../../services/api";
+import { getBudgets, archiveBudget } from "../../services/api";
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
 import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
 import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
@@ -31,15 +31,42 @@ export default function OrcamentosScreen() {
 
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
   const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
+
   const [addVisible, setAddVisible] = useState(false);
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
+
   const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
+
+  // ============================================================
+  // FILTRO DE STATUS
+  // ============================================================
+
   const [statusFilter, setStatusFilter] = useState("Todos");
+  const [showArchived, setShowArchived] = useState(false);
+
+  // ============================================================
+  // FILTRO DE ARQUIVAMENTO
+  //
+  // "ativos" = todos os que NÃO estão arquivados
+  // "arquivados" = somente os que estão arquivados
+  // ============================================================
+
+  const [archiveFilter, setArchiveFilter] = useState<"ativos" | "arquivados">(
+    "ativos",
+  );
+
+  // ============================================================
+  // CLIENTE
+  // ============================================================
+
   const [detailsClientVisible, setDetailsClientVisible] = useState(false);
+
   const [editClientVisible, setEditClientVisible] = useState(false);
+
   const [selectedClient, setSelectedClient] = useState<Cliente | null>(null);
 
   // ============================================================
@@ -79,6 +106,27 @@ export default function OrcamentosScreen() {
   }, [token]);
 
   // ============================================================
+  // ARQUIVAR / DESARQUIVAR
+  // ============================================================
+
+  async function handleArchiveBudget(budget: Orcamento) {
+    try {
+      if (!token) return;
+
+      const novoEstado = !budget.arquivado;
+
+      await archiveBudget(budget._id, novoEstado, token);
+
+      await loadBudgets();
+    } catch (error: any) {
+      console.log(
+        "ERRO AO ARQUIVAR ORÇAMENTO:",
+        error?.response?.data || error?.message || error,
+      );
+    }
+  }
+
+  // ============================================================
   // FILTRAR ORÇAMENTOS
   // ============================================================
 
@@ -86,7 +134,6 @@ export default function OrcamentosScreen() {
     const searchLower = search.trim().toLowerCase();
 
     return budgetsList.filter((budget) => {
-      // Cliente já vem populado pelo backend
       const nomeCliente =
         typeof budget.cliente === "object" ? (budget.cliente?.nome ?? "") : "";
 
@@ -94,24 +141,22 @@ export default function OrcamentosScreen() {
 
       const clienteLower = nomeCliente.toLowerCase();
 
-      // Busca por:
-      // - nome do orçamento
-      // - nome do cliente
-
       const matchSearch =
         !searchLower ||
         nomeOrcamento.includes(searchLower) ||
         clienteLower.includes(searchLower);
 
-      // Filtro de status
-
       const matchStatus =
         statusFilter === "Todos" ||
         budget.status?.toLowerCase() === statusFilter.toLowerCase();
 
-      return matchSearch && matchStatus;
+      const matchArchived = showArchived
+        ? budget.arquivado === true
+        : budget.arquivado !== true;
+
+      return matchSearch && matchStatus && matchArchived;
     });
-  }, [budgetsList, search, statusFilter]);
+  }, [budgetsList, search, statusFilter, showArchived]);
 
   // ============================================================
   // RENDER
@@ -121,10 +166,14 @@ export default function OrcamentosScreen() {
     <View style={globalStyles.screen}>
       <GradientBackground style={globalStyles.container}>
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{
+            paddingBottom: 100,
+          }}
           showsVerticalScrollIndicator={false}
         >
-          {/* CABEÇALHO */}
+          {/* ==================================================
+              CABEÇALHO
+          =================================================== */}
 
           <View style={globalStyles.pageHeaderRow}>
             <Text style={globalStyles.title}>Orçamentos</Text>
@@ -137,7 +186,9 @@ export default function OrcamentosScreen() {
             </Pressable>
           </View>
 
-          {/* BUSCA */}
+          {/* ==================================================
+              BUSCA
+          =================================================== */}
 
           <AppInput
             placeholder="Buscar orçamento..."
@@ -145,35 +196,139 @@ export default function OrcamentosScreen() {
             onChangeText={setSearch}
           />
 
-          {/* FILTROS */}
+          {/* ==================================================
+              FILTRO ARQUIVADOS
+          =================================================== */}
 
-          <View style={globalStyles.filterRow}>
-            {["Todos", "Pendente", "Aprovado", "Recusado"].map((item) => (
-              <TouchableOpacity
-                key={item}
+          <View
+            style={[
+              globalStyles.filterRow,
+              {
+                marginBottom: 8,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                globalStyles.filterButton,
+                archiveFilter === "ativos" && {
+                  backgroundColor: COLORS.primary,
+                },
+              ]}
+              onPress={() => {
+                setArchiveFilter("ativos");
+                setStatusFilter("Todos");
+              }}
+            >
+              <Ionicons
+                name="documents-outline"
+                size={17}
+                color={archiveFilter === "ativos" ? COLORS.white : COLORS.text}
+              />
+
+              <Text
                 style={[
-                  globalStyles.filterButton,
-
-                  statusFilter === item && {
-                    backgroundColor: COLORS.primary,
+                  globalStyles.filterButtonText,
+                  archiveFilter === "ativos" && {
+                    color: COLORS.white,
                   },
                 ]}
-                onPress={() => setStatusFilter(item)}
               >
-                <Text style={globalStyles.filterButtonText}>{item}</Text>
-              </TouchableOpacity>
-            ))}
+                Orçamentos
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                globalStyles.filterButton,
+                archiveFilter === "arquivados" && {
+                  backgroundColor: COLORS.primary,
+                },
+              ]}
+              onPress={() => {
+                setArchiveFilter("arquivados");
+                setStatusFilter("Todos");
+              }}
+            >
+              <Ionicons
+                name="archive-outline"
+                size={17}
+                color={
+                  archiveFilter === "arquivados" ? COLORS.white : COLORS.text
+                }
+              />
+
+              <Text
+                style={[
+                  globalStyles.filterButtonText,
+                  archiveFilter === "arquivados" && {
+                    color: COLORS.white,
+                  },
+                ]}
+              >
+                Arquivados
+              </Text>
+            </TouchableOpacity>
           </View>
 
-          {/* NENHUM ORÇAMENTO */}
+          {/* ==================================================
+              FILTROS DE STATUS
+          =================================================== */}
+
+          {archiveFilter === "ativos" && (
+            <View style={globalStyles.filterRow}>
+              {["Todos", "Pendente", "Aprovado", "Recusado", "Arquivados"].map(
+                (item) => (
+                  <TouchableOpacity
+                    key={item}
+                    style={[
+                      globalStyles.filterButton,
+
+                      statusFilter === item && {
+                        backgroundColor: COLORS.primary,
+                      },
+                    ]}
+                    onPress={() => {
+                      if (item === "Arquivados") {
+                        setShowArchived(true);
+                        setStatusFilter("Todos");
+                      } else {
+                        setShowArchived(false);
+                        setStatusFilter(item);
+                      }
+                    }}
+                  >
+                    <Text
+                      style={[
+                        globalStyles.filterButtonText,
+                        statusFilter === item && {
+                          color: COLORS.white,
+                        },
+                      ]}
+                    >
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                ),
+              )}
+            </View>
+          )}
+
+          {/* ==================================================
+              NENHUM ORÇAMENTO
+          =================================================== */}
 
           {!loading && filteredBudgets.length === 0 && (
             <Text style={globalStyles.sectionTitle}>
-              Nenhum orçamento encontrado.
+              {archiveFilter === "arquivados"
+                ? "Nenhum orçamento arquivado encontrado."
+                : "Nenhum orçamento encontrado."}
             </Text>
           )}
 
-          {/* LOADING */}
+          {/* ==================================================
+              LOADING
+          =================================================== */}
 
           {loading ? (
             <View
@@ -198,7 +353,9 @@ export default function OrcamentosScreen() {
               </Text>
             </View>
           ) : (
-            /* LISTA */
+            /* ==================================================
+               LISTA
+            =================================================== */
 
             filteredBudgets.map((budget) => {
               const nomeCliente =
@@ -216,21 +373,20 @@ export default function OrcamentosScreen() {
                   date={new Date(budget.data_validade).toLocaleDateString(
                     "pt-BR",
                   )}
+                  arquivado={budget.arquivado}
                   onDetails={() => {
                     setSelectedBudget(budget);
-
                     setDetailsVisible(true);
                   }}
                   onEdit={() => {
                     setSelectedBudget(budget);
-
                     setEditVisible(true);
                   }}
                   onDelete={() => {
                     setSelectedBudget(budget);
-
                     setDeleteVisible(true);
                   }}
+                  onArchive={() => handleArchiveBudget(budget)}
                 />
               );
             })
@@ -240,7 +396,7 @@ export default function OrcamentosScreen() {
 
       {/* ======================================================
           BOTÃO NOVO ORÇAMENTO
-          ====================================================== */}
+      ====================================================== */}
 
       <View style={globalStyles.bottomActionContainer}>
         <Pressable
@@ -255,7 +411,7 @@ export default function OrcamentosScreen() {
 
       {/* ======================================================
           MODALS
-          ====================================================== */}
+      ====================================================== */}
 
       <AddOrcamentoModal
         visible={addVisible}
@@ -323,21 +479,20 @@ export default function OrcamentosScreen() {
         }}
       />
 
-<EditClientModal
-  visible={editClientVisible}
-  client={selectedClient}
-  onClose={() => {
-    setEditClientVisible(false);
-    setSelectedClient(null);
-  }}
-  onSuccess={() => {
-    setEditClientVisible(false);
-    setSelectedClient(null);
+      <EditClientModal
+        visible={editClientVisible}
+        client={selectedClient}
+        onClose={() => {
+          setEditClientVisible(false);
+          setSelectedClient(null);
+        }}
+        onSuccess={() => {
+          setEditClientVisible(false);
+          setSelectedClient(null);
 
-    loadBudgets();
-  }}
-/>
-
+          loadBudgets();
+        }}
+      />
     </View>
   );
 }

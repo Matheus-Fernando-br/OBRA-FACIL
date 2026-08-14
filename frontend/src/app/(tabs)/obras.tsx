@@ -1,4 +1,3 @@
-
 import {
   View,
   Text,
@@ -16,14 +15,11 @@ import { AppInput } from "../../components/forms/AppInput";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getWork, getBudgets } from "../../services/api";
+import { getWork, getBudgets, archiveWork } from "../../services/api";
 
 import { ObrasCard } from "@/components/cards/obras/ObrasCard";
 
-import {
-  Obra,
-  Orcamento,
-} from "@/components/layout/interface";
+import { Obra, Orcamento } from "@/components/layout/interface";
 
 import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
 import { CreateObraModal } from "@/components/modals/obras/CreateObraModal";
@@ -37,25 +33,19 @@ export default function ObrasScreen() {
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(true);
-
   const [search, setSearch] = useState("");
-
   const [worksList, setWorksList] = useState<Obra[]>([]);
   const [budgets, setBudgets] = useState<Orcamento[]>([]);
-
   const [selectedWork, setSelectedWork] = useState<Obra | null>(null);
-
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
-
   const [statusFilter, setStatusFilter] = useState("Todos");
-
   const [addObraVisible, setAddObraVisible] = useState(false);
   const [createVisible, setCreateVisible] = useState(false);
+  const [selectedBudget, setSelectedBudget] = useState<Orcamento | null>(null);
 
-  const [selectedBudget, setSelectedBudget] =
-    useState<Orcamento | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   // ============================================================
   // CARREGAR OBRAS E ORÇAMENTOS
@@ -73,16 +63,10 @@ export default function ObrasScreen() {
       ]);
 
       setWorksList(
-        Array.isArray(worksData)
-          ? worksData
-          : worksData.obras ?? [],
+        Array.isArray(worksData) ? worksData : (worksData.obras ?? []),
       );
 
-      setBudgets(
-        Array.isArray(budgetsData)
-          ? budgetsData
-          : [],
-      );
+      setBudgets(Array.isArray(budgetsData) ? budgetsData : []);
     } catch (err: any) {
       console.log("ERRO AO CARREGAR OBRAS:", err);
       console.log("RESPONSE:", err?.response);
@@ -99,18 +83,32 @@ export default function ObrasScreen() {
     loadWorks();
   }, [token]);
 
+  async function handleArchiveWork(obra: Obra) {
+    try {
+      if (!token) return;
+
+      const novoEstado = !obra.arquivado;
+
+      await archiveWork(obra._id, novoEstado, token);
+
+      await loadWorks();
+    } catch (error: any) {
+      console.log(
+        "ERRO AO ARQUIVAR OBRA:",
+        error?.response?.data || error?.message || error,
+      );
+    }
+  }
+
   // ============================================================
   // MAPA DE ORÇAMENTOS
   // ============================================================
 
   const budgetsMap = useMemo(() => {
-    return budgets.reduce(
-      (acc: Record<string, Orcamento>, budget) => {
-        acc[budget._id] = budget;
-        return acc;
-      },
-      {},
-    );
+    return budgets.reduce((acc: Record<string, Orcamento>, budget) => {
+      acc[budget._id] = budget;
+      return acc;
+    }, {});
   }, [budgets]);
 
   // ============================================================
@@ -119,9 +117,7 @@ export default function ObrasScreen() {
 
   function getBudget(work: Obra) {
     const budgetId =
-      typeof work.orcamento === "string"
-        ? work.orcamento
-        : work.orcamento?._id;
+      typeof work.orcamento === "string" ? work.orcamento : work.orcamento?._id;
 
     if (!budgetId) {
       return undefined;
@@ -140,42 +136,67 @@ export default function ObrasScreen() {
     return worksList.filter((work) => {
       const budget = getBudget(work);
 
-      const nomeObra =
-        budget?.nome?.toLowerCase() ?? "";
+      const nomeObra = budget?.nome?.toLowerCase() ?? "";
 
-        const nomeCliente =
+      const nomeCliente =
         typeof budget?.cliente === "string"
           ? budget.cliente.toLowerCase()
-          : budget?.cliente?.nome?.toLowerCase() ?? "";
+          : (budget?.cliente?.nome?.toLowerCase() ?? "");
 
+      /*
+       * BUSCA
+       */
       const matchSearch =
         !searchLower ||
         nomeObra.includes(searchLower) ||
         nomeCliente.includes(searchLower);
 
-      const matchStatus =
-        statusFilter === "Todos" ||
-        work.status ===
-          statusFilter
-            .replace(" ", "")
-            .toUpperCase();
+      /*
+       * ARQUIVADOS
+       *
+       * Se estiver em "Arquivados":
+       * mostra somente arquivados.
+       *
+       * Nos demais filtros:
+       * NÃO mostra arquivados.
+       */
+      const matchArchived = showArchived
+        ? work.arquivado === true
+        : work.arquivado !== true;
 
-      return matchSearch && matchStatus;
+      /*
+       * FILTRO DE STATUS
+       *
+       * Quando estiver em Arquivados,
+       * não aplicamos filtro de status.
+       */
+      if (showArchived) {
+        return matchSearch && matchArchived;
+      }
+
+      /*
+       * FILTRO "TODOS"
+       */
+      if (statusFilter === "Todos") {
+        return matchSearch && matchArchived;
+      }
+
+      /*
+       * FILTRO DE STATUS
+       */
+      const matchStatus =
+        work.status?.toUpperCase() ===
+        statusFilter.replace(" ", "").toUpperCase();
+
+      return matchSearch && matchArchived && matchStatus;
     });
-  }, [
-    worksList,
-    budgetsMap,
-    search,
-    statusFilter,
-  ]);
+  }, [worksList, budgetsMap, search, statusFilter, showArchived]);
 
   // ============================================================
   // ORÇAMENTO DA OBRA SELECIONADA
   // ============================================================
 
-  const selectedBudgetObra = selectedWork
-    ? getBudget(selectedWork)
-    : null;
+  const selectedBudgetObra = selectedWork ? getBudget(selectedWork) : null;
 
   // ============================================================
   // RENDER
@@ -189,18 +210,10 @@ export default function ObrasScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={globalStyles.pageHeaderRow}>
-            <Text style={globalStyles.title}>
-              Obras
-            </Text>
+            <Text style={globalStyles.title}>Obras</Text>
 
-            <Pressable
-              style={globalStyles.pageHeaderButton}
-            >
-              <Ionicons
-                name="add"
-                color={COLORS.text}
-                size={25}
-              />
+            <Pressable style={globalStyles.pageHeaderButton}>
+              <Ionicons name="add" color={COLORS.text} size={25} />
             </Pressable>
           </View>
 
@@ -220,6 +233,7 @@ export default function ObrasScreen() {
               "Adiantado",
               "Entregue",
               "Cancelado",
+              "Arquivados",
             ].map((item) => (
               <TouchableOpacity
                 key={item}
@@ -229,31 +243,20 @@ export default function ObrasScreen() {
                     backgroundColor: COLORS.primary,
                   },
                 ]}
-                onPress={() =>
-                  setStatusFilter(item)
-                }
+                onPress={() => setStatusFilter(item)}
               >
-                <Text
-                  style={
-                    globalStyles.filterButtonText
-                  }
-                >
-                  {item}
-                </Text>
+                <Text style={globalStyles.filterButtonText}>{item}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {/* NENHUMA OBRA */}
 
-          {!loading &&
-            filteredWorks.length === 0 && (
-              <Text
-                style={globalStyles.sectionTitle}
-              >
-                Nenhuma obra encontrada.
-              </Text>
-            )}
+          {!loading && filteredWorks.length === 0 && (
+            <Text style={globalStyles.sectionTitle}>
+              Nenhuma obra encontrada.
+            </Text>
+          )}
 
           {/* LOADING */}
 
@@ -268,10 +271,7 @@ export default function ObrasScreen() {
                 },
               ]}
             >
-              <ActivityIndicator
-                size="large"
-                color={COLORS.primary}
-              />
+              <ActivityIndicator size="large" color={COLORS.primary} />
 
               <Text
                 style={{
@@ -290,48 +290,34 @@ export default function ObrasScreen() {
                 <ObrasCard
                   key={work._id}
                   title={budget?.nome ?? "Obra"}
-
                   client={
                     typeof budget?.cliente === "string"
                       ? budget.cliente
-                      : budget?.cliente?.nome ?? "Cliente não encontrado"
+                      : (budget?.cliente?.nome ?? "Cliente não encontrado")
                   }
-
                   status={work.status}
-
-                  progress={
-                    work.porcentagem_de_conclusao ?? 0
-                  }
-
-                  EndDate={
-                    new Date(
-                      work.data_fim_prevista,
-                    ).toLocaleDateString(
-                      "pt-BR",
-                    )
-                  }
-
-                  startDate={
-                    new Date(
-                      work.data_inicio_prevista,
-                    ).toLocaleDateString(
-                      "pt-BR",
-                    )
-                  }
-
+                  progress={work.porcentagem_de_conclusao ?? 0}
+                  EndDate={new Date(work.data_fim_prevista).toLocaleDateString(
+                    "pt-BR",
+                  )}
+                  startDate={new Date(
+                    work.data_inicio_prevista,
+                  ).toLocaleDateString("pt-BR")}
+                  arquivado={work.arquivado}
                   onDetails={() => {
                     setSelectedWork(work);
                     setDetailsVisible(true);
                   }}
-
                   onEdit={() => {
                     setSelectedWork(work);
                     setEditVisible(true);
                   }}
-
                   onDelete={() => {
                     setSelectedWork(work);
                     setDeleteVisible(true);
+                  }}
+                  onArchive={() => {
+                    handleArchiveWork(work);
                   }}
                 />
               );
@@ -342,26 +328,12 @@ export default function ObrasScreen() {
 
       {/* BOTÃO NOVA OBRA */}
 
-      <View
-        style={
-          globalStyles.bottomActionContainer
-        }
-      >
+      <View style={globalStyles.bottomActionContainer}>
         <Pressable
-          style={
-            globalStyles.bottomActionButton
-          }
-          onPress={() =>
-            setAddObraVisible(true)
-          }
+          style={globalStyles.bottomActionButton}
+          onPress={() => setAddObraVisible(true)}
         >
-          <Text
-            style={
-              globalStyles.bottomActionButtonText
-            }
-          >
-            + Nova Obra
-          </Text>
+          <Text style={globalStyles.bottomActionButtonText}>+ Nova Obra</Text>
         </Pressable>
       </View>
 
@@ -369,9 +341,7 @@ export default function ObrasScreen() {
 
       <AddObrasModal
         visible={addObraVisible}
-        onClose={() =>
-          setAddObraVisible(false)
-        }
+        onClose={() => setAddObraVisible(false)}
         onSelect={(budget) => {
           setSelectedBudget(budget);
 
@@ -404,9 +374,7 @@ export default function ObrasScreen() {
 
       <EditObraModal
         visible={editVisible}
-        onClose={() =>
-          setEditVisible(false)
-        }
+        onClose={() => setEditVisible(false)}
         work={selectedWork}
         onSuccess={loadWorks}
       />
@@ -416,12 +384,8 @@ export default function ObrasScreen() {
       <DeleteObraModal
         visible={deleteVisible}
         WorkId={selectedWork?._id ?? ""}
-        WorkName={
-          selectedBudgetObra?.nome ?? "Obra"
-        }
-        onClose={() =>
-          setDeleteVisible(false)
-        }
+        WorkName={selectedBudgetObra?.nome ?? "Obra"}
+        onClose={() => setDeleteVisible(false)}
         onSuccess={loadWorks}
       />
 
@@ -430,9 +394,7 @@ export default function ObrasScreen() {
       <DetailsObraModal
         visible={detailsVisible}
         work={selectedWork}
-        onClose={() =>
-          setDetailsVisible(false)
-        }
+        onClose={() => setDetailsVisible(false)}
         onEdit={() => {
           setDetailsVisible(false);
 

@@ -6,7 +6,7 @@ export interface Usuario {
   _id: string;
   nome: string;
   email: string;
-  
+
   CPF?: string;
   CNPJ?: string;
 }
@@ -19,7 +19,7 @@ export interface Cliente {
   _id: string;
 
   nome: string;
-  tipoPessoa: string;
+  tipo: string;
   CPF?: string;
   CNPJ?: string;
   email: string;
@@ -121,6 +121,8 @@ export interface Orcamento {
   valido_durante: number;
 
   data_validade: Date;
+
+  arquivado: boolean;
 }
 
 // ==============================
@@ -137,7 +139,6 @@ export interface ServicoObra {
   qt_dias_real?: number;
 
   concluido?: boolean;
-
 }
 
 // ==============================
@@ -184,4 +185,6 @@ export interface Obra {
   qt_dias_real?: number;
 
   porcentagem_de_conclusao?: number;
+
+  arquivado: boolean;
 }
