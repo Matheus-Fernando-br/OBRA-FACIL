@@ -309,9 +309,7 @@ export function OrcamentoForm({
       setFeedback("");
 
       if (isLocked) {
-        setFeedback(
-          "Este orçamento não pode mais ser alterado."
-        );
+        setFeedback("Este orçamento não pode mais ser alterado.");
         return;
       }
 
@@ -539,6 +537,16 @@ export function OrcamentoForm({
             <Text style={globalStyles.saveText}>Salvar</Text>
 
             <Ionicons name="download" size={25} color={COLORS.title} />
+          </Pressable>
+        ) : mode === "details" && isLocked ? (
+          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+            <Text style={globalStyles.saveText}>Gerar PDF</Text>
+
+            <Ionicons
+              name="document-text-outline"
+              size={25}
+              color={COLORS.title}
+            />
           </Pressable>
         ) : null}
       </View>

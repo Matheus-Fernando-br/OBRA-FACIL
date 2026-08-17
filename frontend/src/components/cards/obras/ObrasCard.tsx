@@ -170,6 +170,7 @@ export function ObrasCard({
                 onPress={onEdit}
               >
                 <Ionicons name="create" size={18} color={COLORS.white} />
+                <Text style={globalStyles.orcamentoTextButton}>Editar</Text>
               </Pressable>
 
               {/* EXCLUIR */}
@@ -182,6 +183,7 @@ export function ObrasCard({
                 onPress={onDelete}
               >
                 <Ionicons name="trash" size={18} color={COLORS.white} />
+                <Text style={globalStyles.orcamentoTextButton}>Excluir</Text>
               </Pressable>
             </>
           )}
@@ -203,6 +205,7 @@ export function ObrasCard({
                 size={18}
                 color={COLORS.white}
               />
+              <Text style={globalStyles.orcamentoTextButton}>Arquivar</Text>
             </Pressable>
           )}
         </View>

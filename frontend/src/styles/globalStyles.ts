@@ -169,16 +169,17 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     marginBottom: 6,
   },
+  orcamentoTextButton: {
+    color: COLORS.white,
+    marginBottom: 6,
+    fontFamily:"Montserrat_500Bold",
+  },
 
   orcamentoDetailsButton: {
     marginTop: 16,
-
     height: 42,
-
     borderRadius: 12,
-
     backgroundColor: COLORS.primary,
-
     justifyContent: "center",
     alignItems: "center",
   },
@@ -251,7 +252,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     borderRadius: 5,
 
-    width: "65%",
+    width: "70%",
 
     marginRight: 8,
 
@@ -280,15 +281,16 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
   orcamentoEditButton: {
     backgroundColor: COLORS.warning,
-
+    paddingHorizontal:30,
+    padding:15,
     marginRight: 8,
-
     width: 48,
   },
 
   orcamentoDeleteButton: {
     backgroundColor: COLORS.danger,
-
+    paddingHorizontal:30,
+    padding:15,
     width: 48,
   },
 
@@ -426,6 +428,16 @@ export function createGlobalStyles(colors: typeof COLORS) {
     height: 42,
     borderRadius: 12,
     backgroundColor: COLORS.title,
+    borderWidth: 1,
+    borderColor: COLORS.text,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pageHeaderButtonFilter: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: COLORS.primary,
     borderWidth: 1,
     borderColor: COLORS.text,
     justifyContent: "center",

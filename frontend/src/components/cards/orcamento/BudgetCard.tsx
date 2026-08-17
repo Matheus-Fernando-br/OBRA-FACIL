@@ -119,6 +119,7 @@ export function BudgetCard({
               onPress={onEdit}
             >
               <Ionicons name="create" size={18} color={COLORS.white} />
+              <Text style={globalStyles.orcamentoTextButton}>Editar</Text>
             </Pressable>
 
             <Pressable
@@ -129,6 +130,7 @@ export function BudgetCard({
               onPress={onDelete}
             >
               <Ionicons name="trash" size={18} color={COLORS.white} />
+              <Text style={globalStyles.orcamentoTextButton}>Excluir</Text>
             </Pressable>
           </>
         )}
@@ -139,8 +141,9 @@ export function BudgetCard({
           <Pressable
             style={[
               globalStyles.orcamentoDetailsButton,
+              globalStyles.orcamentoEditButton,
               {
-                backgroundColor: arquivado ? COLORS.success : COLORS.primary,
+                backgroundColor: arquivado ? COLORS.success : COLORS.title,
               },
             ]}
             onPress={onArchive}
@@ -150,6 +153,7 @@ export function BudgetCard({
               size={18}
               color={COLORS.white}
             />
+            <Text style={globalStyles.orcamentoTextButton}>Arquivar</Text>
           </Pressable>
         )}
       </View>
