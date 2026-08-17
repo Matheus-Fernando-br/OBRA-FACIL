@@ -252,7 +252,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     borderRadius: 5,
 
-    width: "70%",
+    width: "60%",
 
     marginRight: 8,
 
