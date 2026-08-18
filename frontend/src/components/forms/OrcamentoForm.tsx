@@ -23,7 +23,7 @@ import {
   Categoria,
   Orcamento,
 } from "@/components/layout/interface";
-import { getClients } from "@/services/api";
+import { getClientById } from "@/services/api";
 
 interface ServicoForm extends Servico {
   id: number;
@@ -45,7 +45,6 @@ interface OrcamentoFormProps {
   onSuccess?: () => void;
   onEdit?: () => void;
   onClientDetails?: (client: Cliente) => void;
-  onClientEdit?: (client: Cliente) => void;
 }
 
 export function OrcamentoForm({
@@ -59,7 +58,6 @@ export function OrcamentoForm({
   onSuccess,
   onEdit,
   onClientDetails,
-  onClientEdit,
 }: OrcamentoFormProps) {
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -76,8 +74,9 @@ export function OrcamentoForm({
   const [loadingClose, setLoadingClose] = useState(false);
   const [status, setStatus] = useState(initialData?.status || "PENDENTE");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
-  const [loadingClient, setLoadingClient] = useState(mode !== "add");
   const [clientModalVisible, setClientModalVisible] = useState(false);
+  const [loadingClient, setLoadingClient] = useState(mode !== "add");
+
   const [selectedClient, setSelectedClient] = useState(() => {
     if (!initialData?.cliente) return "";
 
@@ -85,56 +84,66 @@ export function OrcamentoForm({
       ? initialData.cliente
       : initialData.cliente._id;
   });
-  useEffect(() => {
-    if (!initialData?.cliente) return;
 
-    setSelectedClient(
+  const [selectedClientData, setSelectedClientData] = useState<Cliente | null>(
+    () => {
+      if (!initialData?.cliente) return null;
+
+      return typeof initialData.cliente === "string"
+        ? null
+        : initialData.cliente;
+    },
+  );
+
+  useEffect(() => {
+    if (!initialData?.cliente) {
+      setSelectedClient("");
+      setSelectedClientData(null);
+      return;
+    }
+
+    const clientId =
       typeof initialData.cliente === "string"
         ? initialData.cliente
-        : initialData.cliente._id,
-    );
+        : initialData.cliente._id;
+
+    setSelectedClient(clientId);
+
+    if (typeof initialData.cliente !== "string") {
+      setSelectedClientData(initialData.cliente);
+    }
   }, [initialData]);
 
   useEffect(() => {
-    if (mode === "add") {
+    if (!selectedClient || !token) {
+      setSelectedClientData(null);
       setLoadingClient(false);
       return;
     }
 
-    if (!selectedClient) return;
+    async function loadSelectedClient() {
+      try {
+        if (!token) return;
+        setLoadingClient(true);
 
-    if (clientsList.length === 0) {
-      setLoadingClient(true);
-      return;
+        const client = await getClientById(selectedClient, token);
+
+        setSelectedClientData(client);
+      } catch (error: any) {
+        console.log(
+          "ERRO AO CARREGAR CLIENTE:",
+          error?.response?.data || error?.message || error,
+        );
+
+        setSelectedClientData(null);
+      } finally {
+        setLoadingClient(false);
+      }
     }
 
-    const client = clientsList.find((c) => c._id === selectedClient);
+    loadSelectedClient();
+  }, [selectedClient, token, mode]);
 
-    if (client) {
-      setLoadingClient(false);
-    }
-  }, [clientsList, selectedClient, mode]);
-  async function loadClient() {
-    try {
-      if (!token) return;
-
-      setLoadingClient(true);
-
-      const data = await getClients(token);
-    } catch (error) {
-      console.log("ERRO CLIENTES:", error);
-    } finally {
-      setLoadingClient(false);
-    }
-  }
-
-  useEffect(() => {
-    if (isReadOnly) {
-      loadClient();
-    }
-  }, [isReadOnly, initialData, token]);
-
-  const selectedClientData = clientsList.find((c) => c._id === selectedClient);
   const [validade, setValidade] = useState<number>(
     initialData?.valido_durante || 0,
   );
@@ -527,11 +536,18 @@ export function OrcamentoForm({
         </Text>
 
         {mode === "details" && !isLocked ? (
+          <View style={globalStyles.right}>
           <Pressable onPress={onEdit} style={globalStyles.rightAction}>
             <Text style={globalStyles.saveText}>Editar</Text>
 
             <Ionicons name="pencil-sharp" size={25} color={COLORS.title} />
           </Pressable>
+          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
+            <Text style={globalStyles.saveText}>Gerar PDF</Text>
+
+            <Ionicons name="document-text-outline" size={25} color={COLORS.title} />
+          </Pressable>
+          </View>
         ) : mode !== "details" && !isLocked ? (
           <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
             <Text style={globalStyles.saveText}>Salvar</Text>

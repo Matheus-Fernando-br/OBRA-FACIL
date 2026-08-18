@@ -56,8 +56,7 @@ export function ClientCardSelect({
   const telefone = phoneMask(phone || "");
 
   return (
-    <Pressable
-      onPress={onClick}
+    <View
       style={globalStyles.clientCard}
     >
       {/* Avatar */}
@@ -103,13 +102,13 @@ export function ClientCardSelect({
       </View>
 
       {/* Ação */}
-      <View style={globalStyles.clientIcons}>
+      <Pressable onPress={onClick} style={globalStyles.clientIcons}>
         <Ionicons
           name={icon}
           size={30}
           color={COLORS.primary}
         />
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }

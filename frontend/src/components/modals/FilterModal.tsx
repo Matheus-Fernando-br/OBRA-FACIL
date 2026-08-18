@@ -17,11 +17,8 @@ import { COLORS } from "@/styles/globalStyles";
 ============================================================ */
 
 export type FilterMode = "clientes" | "orcamentos" | "obras";
-
 export type SortDirection = "asc" | "desc" | null;
-
 export type DatePreset = "all" | "week" | "month" | "year" | "custom";
-
 export type ArchiveFilter = "all" | "active" | "archived";
 
 /* ============================================================
@@ -30,19 +27,8 @@ export type ArchiveFilter = "all" | "active" | "archived";
 
 export interface DateFilter {
   preset: DatePreset;
-
-  /**
-   * Usado somente quando preset === "custom".
-   * Formato: DD/MM/YYYY
-   */
   from: string;
-
-  /**
-   * Usado somente quando preset === "custom".
-   * Formato: DD/MM/YYYY
-   */
   to: string;
-
   publish: string;
 }
 
@@ -61,9 +47,7 @@ export interface RangeFilter {
 
 export interface ClientFilters {
   sort: SortDirection;
-
   personType: "all" | "FISICO" | "JURIDICO";
-
   budgetQuantity: "all" | "none" | "one" | "two" | "threePlus";
 }
 
@@ -73,19 +57,12 @@ export interface ClientFilters {
 
 export interface BudgetFilters {
   sort: SortDirection;
-
   status: "all" | "pendente" | "aprovado" | "recusado";
-
   clientSort: SortDirection;
-
   publicationDate: DateFilter;
-
   state: string;
-
   city: string;
-
   value: RangeFilter;
-
   archived: ArchiveFilter;
 }
 
@@ -95,15 +72,10 @@ export interface BudgetFilters {
 
 export interface WorkFilters {
   sort: SortDirection;
-
   startDate: DateFilter;
-
   endDate: DateFilter;
-
   state: string;
-
   city: string;
-
   status:
     | "all"
     | "noprazo"
@@ -111,11 +83,8 @@ export interface WorkFilters {
     | "adiantado"
     | "entregue"
     | "cancelado";
-
   clientSort: SortDirection;
-
   value: RangeFilter;
-
   archived: ArchiveFilter;
 }
 
@@ -125,19 +94,12 @@ export interface WorkFilters {
 
 interface FilterModalProps {
   visible: boolean;
-
   mode: FilterMode;
-
   onClose: () => void;
-
   onApply: (filters: ClientFilters | BudgetFilters | WorkFilters) => void;
-
   initialFilters?: ClientFilters | BudgetFilters | WorkFilters;
-
   states?: string[];
-
   cities?: string[];
-
   maxValue?: number;
 }
 
@@ -153,7 +115,7 @@ export const DEFAULT_DATE_FILTER: DateFilter = {
 };
 
 export const DEFAULT_CLIENT_FILTERS: ClientFilters = {
-  sort: null,
+  sort: "asc",
   personType: "all",
   budgetQuantity: "all",
 };

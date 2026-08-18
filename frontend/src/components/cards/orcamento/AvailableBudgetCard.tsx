@@ -1,6 +1,9 @@
-import { View, Text, Pressable } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
+import { Ionicons } from "@expo/vector-icons";
+import { getClientById } from "@/services/api";
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 import { Orcamento } from "@/components/layout/interface";
 
@@ -17,8 +20,71 @@ export function AvailableBudgetCard({
   clientName,
   onPress,
 }: Props) {
+  const { token } = useAuth();
+
+  const [clientDisplayName, setClientDisplayName] = useState(
+    clientName || "Carregando cliente...",
+  );
+
+  const [loadingClient, setLoadingClient] = useState(false);
+
+  useEffect(() => {
+    async function loadClient() {
+      if (!token) {
+        setClientDisplayName(clientName || "Cliente não encontrado");
+        return;
+      }
+
+      if (!budget.cliente) {
+        setClientDisplayName("Cliente não encontrado");
+        return;
+      }
+
+      const clientId =
+        typeof budget.cliente === "string"
+          ? budget.cliente
+          : budget.cliente._id;
+
+      if (!clientId) {
+        setClientDisplayName("Cliente não encontrado");
+        return;
+      }
+
+      try {
+        setLoadingClient(true);
+
+        const client = await getClientById(clientId, token);
+
+        setClientDisplayName(
+          client?.nome || clientName || "Cliente não encontrado",
+        );
+      } catch (error: any) {
+        console.log(
+          "ERRO AO CARREGAR CLIENTE DO ORÇAMENTO:",
+          error?.response?.data || error?.message || error,
+        );
+
+        setClientDisplayName(clientName || "Cliente não encontrado");
+      } finally {
+        setLoadingClient(false);
+      }
+    }
+
+    loadClient();
+  }, [budget.cliente, token, clientName]);
+
+  const logradouro = budget.endereco?.rua || "";
+  const numero = budget.endereco?.numero || "";
+  const cidade = budget.endereco?.cidade || "";
+  const estado = budget.endereco?.estado || "";
+
+  const enderecoCompleto = `${logradouro || ""}${numero ? `, ${numero}` : ""}${
+    cidade ? ` - ${cidade}` : ""
+  }${estado ? `/${estado}` : ""}`.trim();
+
   return (
     <Pressable
+      onPress={onPress}
       style={[
         globalStyles.orcamentoCard,
         {
@@ -28,6 +94,8 @@ export function AvailableBudgetCard({
         },
       ]}
     >
+      {/* HEADER */}
+
       <View style={globalStyles.orcamentoHeader}>
         <Text style={globalStyles.orcamentoCliente} numberOfLines={1}>
           {budget.nome}
@@ -45,7 +113,7 @@ export function AvailableBudgetCard({
             style={[
               globalStyles.orcamentoStatusText,
               {
-                color: COLORS.success,
+                color: COLORS.white,
               },
             ]}
           >
@@ -54,24 +122,42 @@ export function AvailableBudgetCard({
         </View>
       </View>
 
-      <Text style={globalStyles.orcamentoInfo}>Cliente: {clientName}</Text>
+      {/* CLIENTE */}
+
+      {loadingClient ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : (
+          <Text style={globalStyles.orcamentoInfo}>
+            Cliente: {clientDisplayName}
+          </Text>
+        )}
+
+      {/* VALOR */}
 
       <Text style={globalStyles.orcamentoInfo}>
         Valor:{" "}
-        {budget.preco_com_bdi.toLocaleString("pt-BR", {
+        {Number(budget.preco_com_bdi ?? 0).toLocaleString("pt-BR", {
           style: "currency",
           currency: "BRL",
         })}
       </Text>
 
-      <Text style={globalStyles.orcamentoInfo}>
-        Publicação:{" "}
-        {new Date(budget.data_publicacao).toLocaleDateString("pt-BR")}
-      </Text>
+      {/* PUBLICAÇÃO */}
 
       <Text style={globalStyles.orcamentoInfo}>
-        Validade: {new Date(budget.data_validade).toLocaleDateString("pt-BR")}
+        Publicação:{" "}
+        {budget.data_publicacao
+          ? new Date(budget.data_publicacao).toLocaleDateString("pt-BR")
+          : "-"}
       </Text>
+
+      {/* ENDEREÇO */}
+
+      <Text style={globalStyles.orcamentoInfo}>
+        Endereço: {enderecoCompleto || "Não informado"}
+      </Text>
+
+      {/* BOTÃO */}
 
       <View
         style={{
@@ -85,6 +171,7 @@ export function AvailableBudgetCard({
             {
               flexDirection: "row",
               justifyContent: "center",
+              width:"100%",
               alignItems: "center",
               backgroundColor: selected ? COLORS.success : COLORS.primary,
             },

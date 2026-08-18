@@ -476,7 +476,7 @@ export default function OrcamentosScreen() {
     }
 
     // Arquivamento
-    if (filters.archived !== "active") {
+    if (filters.archived !== "all") {
       count++;
     }
 
@@ -556,6 +556,9 @@ export default function OrcamentosScreen() {
 
     if (filters.archived === "archived") {
       labels.push("Arquivados");
+    }
+    if (filters.archived === "active") {
+      labels.push("Não Arquivados");
     }
 
     // ==========================================================

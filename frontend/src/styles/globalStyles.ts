@@ -795,6 +795,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
     alignItems: "center",
     zIndex: 1, // Garante clique sobre o título
   },
+  right: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    zIndex: 10,
+    gap:25, // Garante clique sobre o título
+  },
 
   modalCloseButton: {
     width: 36,

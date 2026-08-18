@@ -661,7 +661,7 @@
         ARQUIVAMENTO
       ======================================================== */
 
-      if (workFilters.archived !== "active") {
+      if (workFilters.archived !== "all") {
         count++;
       }
 
@@ -808,11 +808,11 @@
       ======================================================== */
 
       if (workFilters.archived === "archived") {
-        labels.push("Arquivadas");
+        labels.push("Arquivados");
       }
 
-      if (workFilters.archived === "all") {
-        labels.push("Todas");
+      if (workFilters.archived === "active") {
+        labels.push("Não Arquivados");
       }
 
       return labels;

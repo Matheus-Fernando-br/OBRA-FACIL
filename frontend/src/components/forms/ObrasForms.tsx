@@ -11,8 +11,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
-import { DetailsClientModal } from "@/components/modals/cliente/DetailsClientModal";
-import { EditClientModal } from "@/components/modals/cliente/EditClientModal";
 import { Checkbox } from "expo-checkbox";
 import { AppButton } from "@/components/buttons/AppButton";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +21,7 @@ import {
   CategoriaObra,
   ServicoObra,
 } from "@/components/layout/interface";
-import { getBudgetById, getClientById, getClients } from "@/services/api";
+import { getBudgetById, getClientById } from "@/services/api";
 import { maskDate } from "./mask";
 
 type ObraStatus = Obra["status"];
@@ -263,63 +261,67 @@ export function ObrasForm({
   const [orcamentoAtrelado, setOrcamentoAtrelado] = useState<Orcamento | null>(
     budget ?? null,
   );
-
-  useEffect(() => {
-    async function carregarOrcamento() {
-      if (budget) {
-        setOrcamentoAtrelado(budget);
-        return;
-      }
-
-      if (initialData && typeof initialData.orcamento === "string") {
-        const response = await getBudgetById(initialData.orcamento, token!);
-
-        setOrcamentoAtrelado(response);
-      }
-
-      if (initialData && typeof initialData.orcamento === "object") {
-        setOrcamentoAtrelado(initialData.orcamento);
-      }
-    }
-
-    carregarOrcamento();
-  }, [budget, initialData, token]);
-
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [loadingClient, setLoadingClient] = useState(mode !== "add");
-  const [detailsVisible, setDetailsVisible] = useState(false);
-  const [editVisible, setEditVisible] = useState(false);
 
   useEffect(() => {
     async function carregarDados() {
       if (!token) return;
 
-      let orcamento: Orcamento;
+      try {
+        setLoadingClient(mode !== "add");
 
-      if (budget) {
-        orcamento = budget;
-      } else if (initialData && typeof initialData.orcamento === "string") {
-        orcamento = await getBudgetById(initialData.orcamento, token);
-      } else if (initialData && typeof initialData.orcamento === "object") {
-        orcamento = initialData.orcamento;
-      } else {
-        return;
-      }
+        let orcamento: Orcamento;
 
-      setOrcamentoAtrelado(orcamento);
+        // Se já recebeu o orçamento, não busca novamente
+        if (budget) {
+          orcamento = budget;
+        }
 
-      // Agora busca o cliente
-      if (typeof orcamento.cliente === "string") {
-        const cliente = await getClientById(orcamento.cliente, token);
+        // Se a obra possui apenas o ID do orçamento, busca pelo ID
+        else if (initialData && typeof initialData.orcamento === "string") {
+          orcamento = await getBudgetById(initialData.orcamento, token);
+        }
 
-        setCliente(cliente);
-      } else {
-        setCliente(orcamento.cliente);
+        // Se a obra já possui o objeto orçamento
+        else if (initialData && typeof initialData.orcamento === "object") {
+          orcamento = initialData.orcamento;
+        }
+
+        // Não encontrou orçamento
+        else {
+          setOrcamentoAtrelado(null);
+          setCliente(null);
+          return;
+        }
+
+        // Guarda o orçamento encontrado
+        setOrcamentoAtrelado(orcamento);
+
+        // Agora busca o cliente pelo ID que está dentro do orçamento
+        if (typeof orcamento.cliente === "string") {
+          const clienteEncontrado = await getClientById(
+            orcamento.cliente,
+            token,
+          );
+
+          setCliente(clienteEncontrado);
+        } else {
+          // Caso o orçamento já venha com o cliente completo
+          setCliente(orcamento.cliente);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar orçamento/cliente:", error);
+
+        setOrcamentoAtrelado(null);
+        setCliente(null);
+      } finally {
+        setLoadingClient(false);
       }
     }
 
     carregarDados();
-  }, [budget, initialData, token]);
+  }, [budget, initialData, token, mode]);
 
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   const [dataInicioReal, setDataInicioReal] = useState("");
@@ -337,26 +339,6 @@ export function ObrasForm({
       setCategorias(mapCategoriasFromBudget(budget));
     }
   }, [initialData, budget]);
-
-  async function loadClient() {
-    try {
-      if (!token) return;
-
-      setLoadingClient(true);
-
-      const data = await getClients(token);
-    } catch (error) {
-      console.log("ERRO CLIENTES:", error);
-    } finally {
-      setLoadingClient(false);
-    }
-  }
-
-  useEffect(() => {
-    if (isReadOnly) {
-      loadClient();
-    }
-  }, [isReadOnly, initialData, token]);
 
   // Recalcula status/dias/porcentagem de cada categoria a partir dos serviços
   const categoriasCalculadas = useMemo(() => {
@@ -661,26 +643,27 @@ export function ObrasForm({
           >
             {orcamentoAtrelado?.nome ?? ""}
           </Text>
-          <View
-            style={[
-              globalStyles.obraStatusBadge,
-              {
-                backgroundColor: `${getStatusColor(obraStatusCalculado)}20`,
-              },
-            ]}
-          >
-            <Text
+          {!isAdd && (
+            <View
               style={[
-                globalStyles.obraStatusText,
+                globalStyles.obraStatusBadge,
                 {
-                  color: getStatusColor(obraStatusCalculado),
+                  backgroundColor: `${getStatusColor(obraStatusCalculado)}20`,
                 },
               ]}
             >
-              {obraStatusCalculado}
-            </Text>
-          </View>
-
+              <Text
+                style={[
+                  globalStyles.obraStatusText,
+                  {
+                    color: getStatusColor(obraStatusCalculado),
+                  },
+                ]}
+              >
+                {obraStatusCalculado}
+              </Text>
+            </View>
+          )}
           <Text style={globalStyles.label}>Cliente:</Text>
           <View style={globalStyles.divider} />
 
@@ -706,7 +689,6 @@ export function ObrasForm({
               phone={cliente?.telefone ?? ""}
               onClick={() => {
                 setCliente(cliente);
-                setDetailsVisible(true);
               }}
               icon={"eye"}
             />
@@ -1158,24 +1140,6 @@ export function ObrasForm({
           color={COLORS.danger}
         />
       </ScrollView>
-      <DetailsClientModal
-        visible={detailsVisible}
-        client={cliente}
-        onClose={() => setDetailsVisible(false)}
-        onEdit={() => {
-          setDetailsVisible(false);
-
-          setTimeout(() => {
-            setEditVisible(true);
-          }, 200);
-        }}
-      />
-      <EditClientModal
-        visible={editVisible}
-        onClose={() => setEditVisible(false)}
-        client={cliente}
-        onSuccess={loadClient}
-      />
     </View>
   );
 }

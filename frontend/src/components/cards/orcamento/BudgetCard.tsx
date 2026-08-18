@@ -54,27 +54,55 @@ export function BudgetCard({
     <View style={globalStyles.orcamentoCard}>
       {/* HEADER */}
 
+      {/* HEADER */}
+
       <View style={globalStyles.orcamentoHeader}>
         <Text style={globalStyles.orcamentoCliente}>{nome}</Text>
 
-        <View
-          style={[
-            globalStyles.orcamentoStatusBadge,
-            {
-              backgroundColor: `${getStatusColor()}20`,
-            },
-          ]}
-        >
-          <Text
+        <View style={{ alignItems: "flex-end", gap: 5 }}>
+          {/* STATUS ATUAL */}
+          <View
             style={[
-              globalStyles.orcamentoStatusText,
+              globalStyles.orcamentoStatusBadge,
               {
-                color: getStatusColor(),
+                backgroundColor: `${getStatusColor()}20`,
               },
             ]}
           >
-            {status}
-          </Text>
+            <Text
+              style={[
+                globalStyles.orcamentoStatusText,
+                {
+                  color: getStatusColor(),
+                },
+              ]}
+            >
+              {status}
+            </Text>
+          </View>
+
+          {/* ARQUIVADO */}
+          {arquivado && (
+            <View
+              style={[
+                globalStyles.orcamentoStatusBadge,
+                {
+                  backgroundColor: `${COLORS.textSecondary}20`,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  globalStyles.orcamentoStatusText,
+                  {
+                    color: COLORS.textSecondary,
+                  },
+                ]}
+              >
+                Arquivado
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
