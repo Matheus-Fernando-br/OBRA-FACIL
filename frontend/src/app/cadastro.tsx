@@ -1,10 +1,13 @@
 import { ScrollView, KeyboardAvoidingView, Platform } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
+
 import { CadastroStep } from "../components/cadastro/CadastroStep";
+import { VerificarEmail } from "../components/cadastro/VerificarEmail";
 import { PaymentStep } from "../components/cadastro/PaymentStep";
 import { RegisterStepSuccess } from "../components/cadastro/RegisterStepSuccess";
 import { StepIndicator } from "../components/cadastro/StepIndicator";
+
 import { registerUser } from "../services/api";
 import { globalStyles } from "../styles/globalStyles";
 import { GradientBackground } from "../styles/GradientBackground";
@@ -13,13 +16,14 @@ export default function CadastroScreen() {
   const [step, setStep] = useState(1);
 
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+
   const [documentType, setDocumentType] = useState<"CPF" | "CNPJ">("CPF");
-  const [feedback, setFeedback] = useState("");
 
   const [document, setDocument] = useState("");
 
@@ -27,6 +31,7 @@ export default function CadastroScreen() {
     try {
       setLoading(true);
       setFeedback("");
+
       await registerUser({
         nome,
         email,
@@ -35,13 +40,13 @@ export default function CadastroScreen() {
         CNPJ: documentType === "CNPJ" ? document : "",
       });
 
-      setStep(3);
+      setStep(4);
 
       setTimeout(() => {
         router.replace("/");
       }, 2500);
     } catch (error: any) {
-      console.log(error.data.message);
+      console.log(error);
 
       if (error.response?.status === 409) {
         setFeedback("Já existe um usuário cadastrado com este e-mail.");
@@ -55,6 +60,7 @@ export default function CadastroScreen() {
             "Não foi possível realizar o cadastro.",
         );
       }
+
       setTimeout(() => {
         setFeedback("");
       }, 5000);
@@ -97,15 +103,23 @@ export default function CadastroScreen() {
           )}
 
           {step === 2 && (
+            <VerificarEmail
+              email={email}
+              onBack={() => setStep(1)}
+              onVerified={() => setStep(3)}
+            />
+          )}
+
+          {step === 3 && (
             <PaymentStep
               loading={loading}
               feedback={feedback}
-              onBack={() => setStep(1)}
+              onBack={() => setStep(2)}
               onContinue={handleRegister}
             />
           )}
 
-          {step === 3 && <RegisterStepSuccess />}
+          {step === 4 && <RegisterStepSuccess />}
         </ScrollView>
       </GradientBackground>
     </KeyboardAvoidingView>

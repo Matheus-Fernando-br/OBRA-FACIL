@@ -58,6 +58,26 @@ export async function registerUser(data: {
   return response.data;
 }
 
+export async function checkEmailExists(email: string) {
+  const response = await api.get("/auth/check-email", {
+    params: { email },
+  });
+
+  return response.data;
+}
+
+export async function verifyEmailCode(data: { email: string; codigo: string }) {
+  const response = await api.post("/auth/verify-email", data);
+
+  return response.data;
+}
+
+export async function resendVerificationCode(data: { email: string }) {
+  const response = await api.post("/auth/resend-verification-code", data);
+
+  return response.data;
+}
+
 // ==========================
 // USER
 // ==========================

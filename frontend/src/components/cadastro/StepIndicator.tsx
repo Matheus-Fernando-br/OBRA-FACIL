@@ -25,7 +25,7 @@ export function StepIndicator({ step }: Props) {
         marginBottom: 35,
       }}
     >
-      {/* Linha Superior */}
+      {/* ÍCONES E LINHAS */}
 
       <View
         style={{
@@ -33,7 +33,7 @@ export function StepIndicator({ step }: Props) {
           alignItems: "center",
         }}
       >
-        {/* PASSO 1 */}
+        {/* PASSO 1 - DADOS */}
 
         <View
           style={{
@@ -48,17 +48,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor:
-                step >= 1
-                  ? COLORS.success
-                  : COLORS.card,
+              backgroundColor: step >= 1 ? COLORS.success : COLORS.card,
             }}
           >
-            <Ionicons
-              name="person"
-              size={28}
-              color={COLORS.white}
-            />
+            <Ionicons name="person" size={28} color={COLORS.white} />
           </View>
         </View>
 
@@ -71,7 +64,7 @@ export function StepIndicator({ step }: Props) {
           }}
         />
 
-        {/* PASSO 2 */}
+        {/* PASSO 2 - E-MAIL */}
 
         <View
           style={{
@@ -86,17 +79,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor:
-                step >= 2
-                  ? COLORS.success
-                  : COLORS.card,
+              backgroundColor: step >= 2 ? COLORS.success : COLORS.card,
             }}
           >
-            <Ionicons
-              name="card"
-              size={28}
-              color={COLORS.white}
-            />
+            <Ionicons name="mail" size={28} color={COLORS.white} />
           </View>
         </View>
 
@@ -109,7 +95,7 @@ export function StepIndicator({ step }: Props) {
           }}
         />
 
-        {/* PASSO 3 */}
+        {/* PASSO 3 - PLANO */}
 
         <View
           style={{
@@ -124,30 +110,55 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor:
-                step >= 3
-                  ? COLORS.success
-                  : COLORS.card,
+              backgroundColor: step >= 3 ? COLORS.success : COLORS.card,
             }}
           >
-            <Ionicons
-              name="checkmark"
-              size={30}
-              color={COLORS.white}
-            />
+            <Ionicons name="card" size={28} color={COLORS.white} />
+          </View>
+        </View>
+
+        <View
+          style={{
+            flex: 1,
+            height: 4,
+            borderRadius: 20,
+            backgroundColor: lineColor(3),
+          }}
+        />
+
+        {/* PASSO 4 - FINALIZADO */}
+
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: 55,
+              height: 55,
+              borderRadius: 30,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: step >= 4 ? COLORS.success : COLORS.card,
+            }}
+          >
+            <Ionicons name="checkmark" size={30} color={COLORS.white} />
           </View>
         </View>
       </View>
 
-      {/* Textos */}
+      {/* TEXTOS */}
 
       <View
         style={{
           flexDirection: "row",
           marginTop: 12,
-          gap: 70,
         }}
       >
+        {/* DADOS */}
+
         <View
           style={{
             flex: 1,
@@ -158,11 +169,14 @@ export function StepIndicator({ step }: Props) {
             style={{
               color: iconColor(1),
               fontWeight: "600",
+              fontSize: 12,
             }}
           >
             Dados
           </Text>
         </View>
+
+        {/* E-MAIL */}
 
         <View
           style={{
@@ -174,11 +188,14 @@ export function StepIndicator({ step }: Props) {
             style={{
               color: iconColor(2),
               fontWeight: "600",
+              fontSize: 12,
             }}
           >
-            Plano
+            E-mail
           </Text>
         </View>
+
+        {/* PLANO */}
 
         <View
           style={{
@@ -190,6 +207,26 @@ export function StepIndicator({ step }: Props) {
             style={{
               color: iconColor(3),
               fontWeight: "600",
+              fontSize: 12,
+            }}
+          >
+            Plano
+          </Text>
+        </View>
+
+        {/* FINALIZADO */}
+
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: iconColor(4),
+              fontWeight: "600",
+              fontSize: 12,
             }}
           >
             Finalizado

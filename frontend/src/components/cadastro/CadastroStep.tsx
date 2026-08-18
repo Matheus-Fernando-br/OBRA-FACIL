@@ -1,5 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-
+import { View, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -7,6 +6,7 @@ import { COLORS, globalStyles } from "../../styles/globalStyles";
 import { cpfMask, cnpjMask, emailMask } from "@/components/forms/mask";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
+import { checkEmailExists } from "../../services/api";
 
 interface Props {
   nome: string;
@@ -53,11 +53,14 @@ export function CadastroStep({
 }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [checkingEmail, setCheckingEmail] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   async function continuar() {
     try {
       setFeedback("");
+      setCheckingEmail(true);
+
       if (!nome.trim()) {
         setFeedback("Informe seu nome completo");
         return;
@@ -89,14 +92,28 @@ export function CadastroStep({
       }
 
       if (!documento.trim()) {
-        setFeedback("Informe seu " + { tipoDocumento });
+        setFeedback(`Informe seu ${tipoDocumento}`);
+        return;
+      }
+
+      const response = await checkEmailExists(email);
+
+      if (response.exists) {
+        setFeedback("Já existe um usuário cadastrado com este e-mail.");
         return;
       }
 
       onNext();
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
+
+      setFeedback(
+        error.response?.data?.message ||
+          "Não foi possível verificar o e-mail. Tente novamente.",
+      );
     } finally {
+      setCheckingEmail(false);
+
       setTimeout(() => {
         setFeedback("");
       }, 5000);
@@ -124,7 +141,6 @@ export function CadastroStep({
 
   return (
     <View>
-
       <Text style={globalStyles.title}>Criar Conta</Text>
 
       <Text
@@ -161,8 +177,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: 
-              tipoDocumento === "CPF" ? COLORS.white : COLORS.text,
+              color: tipoDocumento === "CPF" ? COLORS.white : COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -187,8 +202,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color:
-              tipoDocumento === "CNPJ" ? COLORS.white : COLORS.text,
+              color: tipoDocumento === "CNPJ" ? COLORS.white : COLORS.text,
               fontWeight: "600",
             }}
           >
@@ -277,7 +291,12 @@ export function CadastroStep({
       </View>
       <View style={globalStyles.divider} />
       {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
-      <AppButton title="Continuar →" onPress={continuar} color={COLORS.primary} />
+      <AppButton
+        title={checkingEmail ? "Verificando..." : "Continuar →"}
+        onPress={continuar}
+        loading={checkingEmail}
+        color={COLORS.primary}
+      />
       <AppButton
         title="Voltar para tela de Login←"
         onPress={voltar}
