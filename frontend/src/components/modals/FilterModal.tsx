@@ -42,6 +42,8 @@ export interface DateFilter {
    * Formato: DD/MM/YYYY
    */
   to: string;
+
+  publish: string;
 }
 
 /* ============================================================
@@ -84,9 +86,6 @@ export interface BudgetFilters {
 
   value: RangeFilter;
 
-  /**
-   * Arquivamento é separado do status.
-   */
   archived: ArchiveFilter;
 }
 
@@ -117,9 +116,6 @@ export interface WorkFilters {
 
   value: RangeFilter;
 
-  /**
-   * Arquivamento é separado do status.
-   */
   archived: ArchiveFilter;
 }
 
@@ -136,34 +132,12 @@ interface FilterModalProps {
 
   onApply: (filters: ClientFilters | BudgetFilters | WorkFilters) => void;
 
-  /**
-   * Valores atualmente aplicados na tela.
-   * O modal usa esses valores como ponto inicial.
-   */
   initialFilters?: ClientFilters | BudgetFilters | WorkFilters;
 
-  /**
-   * Lista de estados disponíveis.
-   *
-   * Exemplo:
-   * ["SP", "RJ", "MG"]
-   */
   states?: string[];
 
-  /**
-   * Lista de cidades disponíveis.
-   *
-   * Pode ser filtrada posteriormente
-   * conforme o estado selecionado.
-   */
   cities?: string[];
 
-  /**
-   * Valor máximo utilizado pelos sliders.
-   *
-   * Exemplo:
-   * 500000
-   */
   maxValue?: number;
 }
 
@@ -175,6 +149,7 @@ export const DEFAULT_DATE_FILTER: DateFilter = {
   preset: "all",
   from: "",
   to: "",
+  publish: "",
 };
 
 export const DEFAULT_CLIENT_FILTERS: ClientFilters = {
@@ -203,7 +178,7 @@ export const DEFAULT_BUDGET_FILTERS: BudgetFilters = {
     max: 500000,
   },
 
-  archived: "active",
+  archived: "all",
 };
 
 export const DEFAULT_WORK_FILTERS: WorkFilters = {
@@ -230,7 +205,7 @@ export const DEFAULT_WORK_FILTERS: WorkFilters = {
     max: 500000,
   },
 
-  archived: "active",
+  archived: "all",
 };
 
 /* ============================================================
@@ -460,7 +435,7 @@ export default function FilterModal({
         count++;
       }
 
-      if (budgetFilters.archived !== "active") {
+      if (budgetFilters.archived !== "all") {
         count++;
       }
 
@@ -495,7 +470,7 @@ export default function FilterModal({
       count++;
     }
 
-    if (workFilters.archived !== "active") {
+    if (workFilters.archived !== "all") {
       count++;
     }
 
@@ -776,88 +751,92 @@ function BudgetFiltersContent({
         />
       </FilterSection>
 
-      {/* STATUS */}
-      <FilterSection title="Status">
-        <FilterOption
-          label="Todos"
-          selected={filters.status === "all"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "all",
-            }))
-          }
-        />
+      {/* STATUS + ARQUIVAMENTO */}
+      <View style={styles.twoColumnRow}>
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Status">
+            <FilterOption
+              label="Todos"
+              selected={filters.status === "all"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "all",
+                }))
+              }
+            />
 
-        <FilterOption
-          label="Pendente"
-          selected={filters.status === "pendente"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "pendente",
-            }))
-          }
-        />
+            <FilterOption
+              label="Pendente"
+              selected={filters.status === "pendente"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "pendente",
+                }))
+              }
+            />
 
-        <FilterOption
-          label="Aprovado"
-          selected={filters.status === "aprovado"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "aprovado",
-            }))
-          }
-        />
+            <FilterOption
+              label="Aprovado"
+              selected={filters.status === "aprovado"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "aprovado",
+                }))
+              }
+            />
 
-        <FilterOption
-          label="Recusado"
-          selected={filters.status === "recusado"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "recusado",
-            }))
-          }
-        />
-      </FilterSection>
+            <FilterOption
+              label="Recusado"
+              selected={filters.status === "recusado"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "recusado",
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
 
-      {/* ARQUIVAMENTO */}
-      <FilterSection title="Arquivamento">
-        <FilterOption
-          label="Não arquivados"
-          selected={filters.archived === "active"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "active",
-            }))
-          }
-        />
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Arquivamento">
+            <FilterOption
+              label="Todos"
+              selected={filters.archived === "all"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "all",
+                }))
+              }
+            />
+            <FilterOption
+              label="Não arquivados"
+              selected={filters.archived === "active"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "active",
+                }))
+              }
+            />
 
-        <FilterOption
-          label="Arquivados"
-          selected={filters.archived === "archived"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "archived",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Todos"
-          selected={filters.archived === "all"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "all",
-            }))
-          }
-        />
-      </FilterSection>
+            <FilterOption
+              label="Arquivados"
+              selected={filters.archived === "archived"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "archived",
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
+      </View>
 
       {/* CLIENTE */}
       <FilterSection title="Cliente">
@@ -888,6 +867,7 @@ function BudgetFiltersContent({
       <FilterSection title="Data de publicação">
         <DateFilterControl
           value={filters.publicationDate}
+          mode="publish"
           onChange={(publicationDate) =>
             setFilters((prev) => ({
               ...prev,
@@ -899,30 +879,35 @@ function BudgetFiltersContent({
 
       {/* LOCALIZAÇÃO */}
       <FilterSection title="Localização">
-        <SelectLike
-          label="Estado"
-          value={filters.state || "Todos os estados"}
-          options={states}
-          onSelect={(state) =>
-            setFilters((prev) => ({
-              ...prev,
-              state,
-              city: "",
-            }))
-          }
-        />
-
-        <SelectLike
-          label="Cidade"
-          value={filters.city || "Todas as cidades"}
-          options={cities}
-          onSelect={(city) =>
-            setFilters((prev) => ({
-              ...prev,
-              city,
-            }))
-          }
-        />
+        <View style={styles.twoColumnRow}>
+          <View style={styles.twoColumnItem}>
+            <SelectLike
+              label="Estado"
+              value={filters.state || "Todos os estados"}
+              options={states}
+              onSelect={(state) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  state,
+                  city: "",
+                }))
+              }
+            />
+          </View>
+          <View style={styles.twoColumnItem}>
+            <SelectLike
+              label="Cidade"
+              value={filters.city || "Todas as cidades"}
+              options={cities}
+              onSelect={(city) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  city,
+                }))
+              }
+            />
+          </View>
+        </View>
       </FilterSection>
 
       {/* VALOR */}
@@ -992,31 +977,147 @@ function WorkFiltersContent({
         />
       </FilterSection>
 
-      {/* INÍCIO REAL */}
-      <FilterSection title="Data de início real">
-        <DateFilterControl
-          value={filters.startDate}
-          onChange={(startDate) =>
-            setFilters((prev) => ({
-              ...prev,
-              startDate,
-            }))
-          }
-        />
-      </FilterSection>
+      {/* STATUS + ARQUIVAMENTO */}
+      <View style={styles.twoColumnRow}>
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Status">
+            <FilterOption
+              label="Todos"
+              selected={filters.status === "all"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "all",
+                }))
+              }
+            />
 
-      {/* FIM REAL */}
-      <FilterSection title="Data de fim real">
-        <DateFilterControl
-          value={filters.endDate}
-          onChange={(endDate) =>
-            setFilters((prev) => ({
-              ...prev,
-              endDate,
-            }))
-          }
-        />
-      </FilterSection>
+            <FilterOption
+              label="No prazo"
+              selected={filters.status === "noprazo"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "noprazo",
+                }))
+              }
+            />
+
+            <FilterOption
+              label="Atrasado"
+              selected={filters.status === "atrasado"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "atrasado",
+                }))
+              }
+            />
+
+            <FilterOption
+              label="Adiantado"
+              selected={filters.status === "adiantado"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "adiantado",
+                }))
+              }
+            />
+
+            <FilterOption
+              label="Entregue"
+              selected={filters.status === "entregue"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "entregue",
+                }))
+              }
+            />
+
+            <FilterOption
+              label="Cancelado"
+              selected={filters.status === "cancelado"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  status: "cancelado",
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
+
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Arquivamento">
+            <FilterOption
+              label="Todos"
+              selected={filters.archived === "all"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "all",
+                }))
+              }
+            />
+            <FilterOption
+              label="Não arquivadas"
+              selected={filters.archived === "active"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "active",
+                }))
+              }
+            />
+
+            <FilterOption
+              label="Arquivadas"
+              selected={filters.archived === "archived"}
+              onPress={() =>
+                setFilters((prev) => ({
+                  ...prev,
+                  archived: "archived",
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
+      </View>
+
+      {/* INÍCIO REAL + FIM REAL */}
+      <View style={styles.twoColumnRow}>
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Data de início real">
+            <DateFilterControl
+              value={filters.startDate}
+              mode="from"
+              onChange={(startDate) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  startDate,
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
+
+        <View style={styles.twoColumnItem}>
+          <FilterSection title="Data de fim real">
+            <DateFilterControl
+              value={filters.endDate}
+              mode="to"
+              onChange={(endDate) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  endDate,
+                }))
+              }
+            />
+          </FilterSection>
+        </View>
+      </View>
 
       {/* ENDEREÇO */}
       <FilterSection title="Endereço">
@@ -1041,111 +1142,6 @@ function WorkFiltersContent({
             setFilters((prev) => ({
               ...prev,
               city,
-            }))
-          }
-        />
-      </FilterSection>
-
-      {/* STATUS */}
-      <FilterSection title="Status">
-        <FilterOption
-          label="Todos"
-          selected={filters.status === "all"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "all",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="No prazo"
-          selected={filters.status === "noprazo"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "noprazo",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Atrasado"
-          selected={filters.status === "atrasado"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "atrasado",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Adiantado"
-          selected={filters.status === "adiantado"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "adiantado",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Entregue"
-          selected={filters.status === "entregue"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "entregue",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Cancelado"
-          selected={filters.status === "cancelado"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              status: "cancelado",
-            }))
-          }
-        />
-      </FilterSection>
-
-      {/* ARQUIVAMENTO */}
-      <FilterSection title="Arquivamento">
-        <FilterOption
-          label="Não arquivadas"
-          selected={filters.archived === "active"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "active",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Arquivadas"
-          selected={filters.archived === "archived"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "archived",
-            }))
-          }
-        />
-
-        <FilterOption
-          label="Todas"
-          selected={filters.archived === "all"}
-          onPress={() =>
-            setFilters((prev) => ({
-              ...prev,
-              archived: "all",
             }))
           }
         />
@@ -1245,11 +1241,15 @@ function FilterOption({ label, selected, onPress }: FilterOptionProps) {
 
 interface DateFilterControlProps {
   value: DateFilter;
-
   onChange: (value: DateFilter) => void;
+  mode?: "range" | "from" | "to" | "publish";
 }
 
-function DateFilterControl({ value, onChange }: DateFilterControlProps) {
+function DateFilterControl({
+  value,
+  onChange,
+  mode = "range",
+}: DateFilterControlProps) {
   return (
     <View>
       <FilterOption
@@ -1260,6 +1260,7 @@ function DateFilterControl({ value, onChange }: DateFilterControlProps) {
             preset: "all",
             from: "",
             to: "",
+            publish: "",
           })
         }
       />
@@ -1310,43 +1311,115 @@ function DateFilterControl({ value, onChange }: DateFilterControlProps) {
 
       {value.preset === "custom" && (
         <View style={styles.customDateContainer}>
-          <View style={styles.dateInputContainer}>
-            <Text style={styles.inputLabel}>Data inicial</Text>
+          {/* SOMENTE DATA INICIAL */}
+          {mode === "from" && (
+            <View style={styles.dateInputContainer}>
+              <Text style={styles.inputLabel}>Data inicial</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="DD/MM/AAAA"
-              placeholderTextColor={COLORS.textSecondary}
-              keyboardType="numeric"
-              maxLength={10}
-              value={value.from}
-              onChangeText={(from) =>
-                onChange({
-                  ...value,
-                  from,
-                })
-              }
-            />
-          </View>
+              <TextInput
+                style={styles.input}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={COLORS.textSecondary}
+                keyboardType="numeric"
+                maxLength={10}
+                value={value.from}
+                onChangeText={(from) =>
+                  onChange({
+                    ...value,
+                    from,
+                    to: "",
+                  })
+                }
+              />
+            </View>
+          )}
 
-          <View style={styles.dateInputContainer}>
-            <Text style={styles.inputLabel}>Data final</Text>
+          {/* SOMENTE DATA FINAL */}
+          {mode === "to" && (
+            <View style={styles.dateInputContainer}>
+              <Text style={styles.inputLabel}>Data final</Text>
 
-            <TextInput
-              style={styles.input}
-              placeholder="DD/MM/AAAA"
-              placeholderTextColor={COLORS.textSecondary}
-              keyboardType="numeric"
-              maxLength={10}
-              value={value.to}
-              onChangeText={(to) =>
-                onChange({
-                  ...value,
-                  to,
-                })
-              }
-            />
-          </View>
+              <TextInput
+                style={styles.input}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={COLORS.textSecondary}
+                keyboardType="numeric"
+                maxLength={10}
+                value={value.to}
+                onChangeText={(to) =>
+                  onChange({
+                    ...value,
+                    from: "",
+                    to,
+                  })
+                }
+              />
+            </View>
+          )}
+
+          {/* DATA INICIAL + DATA FINAL */}
+          {mode === "range" && (
+            <>
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Data inicial</Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="DD/MM/AAAA"
+                  placeholderTextColor={COLORS.textSecondary}
+                  keyboardType="numeric"
+                  maxLength={10}
+                  value={value.from}
+                  onChangeText={(from) =>
+                    onChange({
+                      ...value,
+                      from,
+                    })
+                  }
+                />
+              </View>
+
+              <View style={styles.dateInputContainer}>
+                <Text style={styles.inputLabel}>Data final</Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="DD/MM/AAAA"
+                  placeholderTextColor={COLORS.textSecondary}
+                  keyboardType="numeric"
+                  maxLength={10}
+                  value={value.to}
+                  onChangeText={(to) =>
+                    onChange({
+                      ...value,
+                      to,
+                    })
+                  }
+                />
+              </View>
+            </>
+          )}
+          {mode === "publish" && (
+            <View style={styles.dateInputContainer}>
+              <Text style={styles.inputLabel}>Data Publicada</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="DD/MM/AAAA"
+                placeholderTextColor={COLORS.textSecondary}
+                keyboardType="numeric"
+                maxLength={10}
+                value={value.from}
+                onChangeText={(from) =>
+                  onChange({
+                    ...value,
+                    from,
+                    to: "",
+                  })
+                }
+              />
+            </View>
+          )}
         </View>
       )}
     </View>
@@ -1822,5 +1895,15 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 15,
     fontWeight: "700",
+  },
+
+  twoColumnRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+
+  twoColumnItem: {
+    flex: 1,
+    minWidth: 0,
   },
 });

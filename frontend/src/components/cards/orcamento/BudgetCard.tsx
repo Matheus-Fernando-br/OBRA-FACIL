@@ -1,6 +1,5 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { globalStyles, COLORS } from "@/styles/globalStyles";
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
   value: number;
   date: string;
   arquivado?: boolean;
-
+  loadingArchive?: boolean;
   onDetails(): void;
   onEdit(): void;
   onDelete(): void;
@@ -24,6 +23,7 @@ export function BudgetCard({
   value,
   date,
   arquivado = false,
+  loadingArchive,
   onDetails,
   onEdit,
   onDelete,
@@ -136,24 +136,33 @@ export function BudgetCard({
         )}
 
         {/* ARQUIVAR / DESARQUIVAR */}
-
         {canArchive && (
           <Pressable
             style={[
               globalStyles.orcamentoDetailsButton,
-              globalStyles.orcamentoEditButton,
               {
                 backgroundColor: arquivado ? COLORS.success : COLORS.title,
+                paddingHorizontal: 20,
+                opacity: loadingArchive ? 0.7 : 1,
               },
             ]}
             onPress={onArchive}
+            disabled={loadingArchive}
           >
-            <Ionicons
-              name={arquivado ? "archive" : "archive-outline"}
-              size={18}
-              color={COLORS.white}
-            />
-            <Text style={globalStyles.orcamentoTextButton}>Arquivar</Text>
+            {loadingArchive ? (
+              <ActivityIndicator size="small" color={COLORS.white} />
+            ) : (
+              <>
+                <Ionicons
+                  name={arquivado ? "archive" : "archive-outline"}
+                  size={18}
+                  color={COLORS.white}
+                />
+                <Text style={globalStyles.orcamentoTextButton}>
+                  {arquivado ? "Desarquivar" : "Arquivar"}
+                </Text>
+              </>
+            )}
           </Pressable>
         )}
       </View>

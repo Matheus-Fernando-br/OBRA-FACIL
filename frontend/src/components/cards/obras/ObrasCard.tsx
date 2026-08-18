@@ -1,22 +1,16 @@
-import React from "react";
-import { View, Text, Pressable } from "react-native";
-
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
   status: string;
   progress: number;
-
   EndDate?: string;
   startDate?: string;
-
   client: string;
-
   arquivado?: boolean;
-
+  loadingArchive?: boolean;
   onDetails(): void;
   onEdit(): void;
   onDelete(): void;
@@ -31,6 +25,7 @@ export function ObrasCard({
   startDate,
   client,
   arquivado = false,
+  loadingArchive,
   onDetails,
   onEdit,
   onDelete,
@@ -189,23 +184,34 @@ export function ObrasCard({
           )}
 
           {/* ARQUIVAR / DESARQUIVAR */}
-
           {canArchive && (
             <Pressable
               style={[
                 globalStyles.orcamentoDetailsButton,
                 {
-                  backgroundColor: arquivado ? COLORS.success : COLORS.primary,
+                  backgroundColor: arquivado ? COLORS.success : COLORS.title,
+                  paddingHorizontal: 10,
+                  opacity: loadingArchive ? 0.7 : 1,
                 },
               ]}
               onPress={onArchive}
+              disabled={loadingArchive}
             >
-              <Ionicons
-                name={arquivado ? "archive" : "archive-outline"}
-                size={18}
-                color={COLORS.white}
-              />
-              <Text style={globalStyles.orcamentoTextButton}>Arquivar</Text>
+              {loadingArchive ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <>
+                  <Ionicons
+                    name={arquivado ? "archive" : "archive-outline"}
+                    size={18}
+                    color={COLORS.white}
+                  />
+
+                  <Text style={globalStyles.orcamentoTextButton}>
+                    {arquivado ? "Desarquivar" : "Arquivar"}
+                  </Text>
+                </>
+              )}
             </Pressable>
           )}
         </View>

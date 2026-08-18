@@ -177,7 +177,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
   orcamentoDetailsButton: {
     marginTop: 16,
-    height: 42,
+    height: 45,
     borderRadius: 12,
     backgroundColor: COLORS.primary,
     justifyContent: "center",

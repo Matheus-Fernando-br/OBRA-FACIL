@@ -128,10 +128,12 @@ export default function OrcamentosScreen() {
   // ============================================================
   // ARQUIVAR / DESARQUIVAR
   // ============================================================
+  const [loadingArquivo, setLoadingArquivo] = useState<string | null>(null);
 
   async function handleArchiveBudget(budget: Orcamento) {
     try {
       if (!token) return;
+      setLoadingArquivo(budget._id);
 
       const novoEstado = !budget.arquivado;
 
@@ -143,6 +145,8 @@ export default function OrcamentosScreen() {
         "ERRO AO ARQUIVAR ORÇAMENTO:",
         error?.response?.data || error?.message || error,
       );
+    } finally {
+      setLoadingArquivo(null);
     }
   }
 
@@ -890,6 +894,7 @@ export default function OrcamentosScreen() {
                     setDeleteVisible(true);
                   }}
                   onArchive={() => handleArchiveBudget(budget)}
+                  loadingArchive={loadingArquivo === budget._id}
                 />
               );
             })
