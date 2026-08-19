@@ -1,6 +1,7 @@
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
+import { COLORS } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
@@ -31,22 +32,24 @@ export function ObrasCard({
   onDelete,
   onArchive,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   function getStatusColor() {
     switch (status.toUpperCase()) {
       case "ADIANTADO":
-        return COLORS.success;
+        return theme.success;
 
       case "ATRASADO":
-        return COLORS.danger;
+        return theme.danger;
 
       case "ENTREGUE":
-        return COLORS.primary;
+        return theme.primary;
 
       case "CANCELADO":
-        return COLORS.warning;
+        return theme.warning;
 
       default:
-        return COLORS.warning;
+        return theme.warning;
     }
   }
 
@@ -59,19 +62,19 @@ export function ObrasCard({
     status.toUpperCase() === "ENTREGUE" || status.toUpperCase() === "CANCELADO";
 
   return (
-    <View style={globalStyles.obrasCard}>
+    <View style={styles.obrasCard}>
       {/* OVERLAY */}
 
-      <View style={globalStyles.obrasCardOverlay} />
+      <View style={styles.obrasCardOverlay} />
 
       {/* CONTEÚDO */}
 
-      <View style={globalStyles.obrasCardContent}>
+      <View style={styles.obrasCardContent}>
         {/* HEADER */}
 
-        <View style={globalStyles.obrasCardHeader}>
+        <View style={styles.obrasCardHeader}>
           <View style={{ flex: 1 }}>
-            <Text numberOfLines={1} style={globalStyles.orcamentoCliente}>
+            <Text numberOfLines={1} style={styles.orcamentoCliente}>
               {title}
             </Text>
           </View>
@@ -82,7 +85,7 @@ export function ObrasCard({
             {/* STATUS ATUAL */}
             <View
               style={[
-                globalStyles.orcamentoStatusBadge,
+                styles.orcamentoStatusBadge,
                 {
                   backgroundColor: `${getStatusColor()}20`,
                 },
@@ -90,7 +93,7 @@ export function ObrasCard({
             >
               <Text
                 style={[
-                  globalStyles.orcamentoStatusText,
+                  styles.orcamentoStatusText,
                   {
                     color: getStatusColor(),
                   },
@@ -104,17 +107,17 @@ export function ObrasCard({
             {arquivado && (
               <View
                 style={[
-                  globalStyles.orcamentoStatusBadge,
+                  styles.orcamentoStatusBadge,
                   {
-                    backgroundColor: `${COLORS.textSecondary}20`,
+                    backgroundColor: `${theme.textSecondary}20`,
                   },
                 ]}
               >
                 <Text
                   style={[
-                    globalStyles.orcamentoStatusText,
+                    styles.orcamentoStatusText,
                     {
-                      color: COLORS.textSecondary,
+                      color: theme.textSecondary,
                     },
                   ]}
                 >
@@ -127,29 +130,29 @@ export function ObrasCard({
 
         {/* CLIENTE */}
 
-        <Text style={globalStyles.orcamentoInfo}>Cliente: {client}</Text>
+        <Text style={styles.orcamentoInfo}>Cliente: {client}</Text>
 
         {/* DATA INÍCIO */}
 
         {startDate && (
-          <Text style={globalStyles.orcamentoInfo}>Início: {startDate}</Text>
+          <Text style={styles.orcamentoInfo}>Início: {startDate}</Text>
         )}
 
         {/* DATA FINAL */}
 
         {EndDate && (
-          <Text style={globalStyles.orcamentoInfo}>
+          <Text style={styles.orcamentoInfo}>
             Previsão de término: {EndDate}
           </Text>
         )}
 
         {/* PROGRESSO */}
 
-        <View style={globalStyles.progressContainer}>
-          <View style={globalStyles.progressBarBackground}>
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBarBackground}>
             <View
               style={[
-                globalStyles.progressBarFill,
+                styles.progressBarFill,
                 {
                   width: `${progress}%`,
                 },
@@ -157,26 +160,21 @@ export function ObrasCard({
             />
           </View>
 
-          <Text style={globalStyles.workCardProgress}>{progress}%</Text>
+          <Text style={styles.workCardProgress}>{progress}%</Text>
         </View>
 
         {/* BOTÕES */}
 
-        <View style={globalStyles.orcamentoButtons}>
+        <View style={styles.orcamentoButtons}>
           {/* DETALHES */}
 
           <Pressable
-            style={[
-              globalStyles.orcamentoDetailsButton,
-              globalStyles.orcamentoMainButton,
-            ]}
+            style={[styles.orcamentoDetailsButton, styles.orcamentoMainButton]}
             onPress={onDetails}
           >
             <Ionicons name="eye" size={18} color={COLORS.white} />
 
-            <Text style={globalStyles.orcamentoDetailsButtonText}>
-              Ver detalhes
-            </Text>
+            <Text style={styles.orcamentoDetailsButtonText}>Ver detalhes</Text>
           </Pressable>
 
           {/* EDITAR */}
@@ -185,26 +183,26 @@ export function ObrasCard({
             <>
               <Pressable
                 style={[
-                  globalStyles.orcamentoDetailsButton,
-                  globalStyles.orcamentoEditButton,
+                  styles.orcamentoDetailsButton,
+                  styles.orcamentoEditButton,
                 ]}
                 onPress={onEdit}
               >
                 <Ionicons name="create" size={18} color={COLORS.white} />
-                <Text style={globalStyles.orcamentoTextButton}>Editar</Text>
+                <Text style={styles.orcamentoTextButton}>Editar</Text>
               </Pressable>
 
               {/* EXCLUIR */}
 
               <Pressable
                 style={[
-                  globalStyles.orcamentoDetailsButton,
-                  globalStyles.orcamentoDeleteButton,
+                  styles.orcamentoDetailsButton,
+                  styles.orcamentoDeleteButton,
                 ]}
                 onPress={onDelete}
               >
                 <Ionicons name="trash" size={18} color={COLORS.white} />
-                <Text style={globalStyles.orcamentoTextButton}>Excluir</Text>
+                <Text style={styles.orcamentoTextButton}>Excluir</Text>
               </Pressable>
             </>
           )}
@@ -213,9 +211,9 @@ export function ObrasCard({
           {canArchive && (
             <Pressable
               style={[
-                globalStyles.orcamentoDetailsButton,
+                styles.orcamentoDetailsButton,
                 {
-                  backgroundColor: arquivado ? COLORS.success : COLORS.title,
+                  backgroundColor: arquivado ? theme.success : theme.title,
                   paddingHorizontal: 10,
                   opacity: loadingArchive ? 0.7 : 1,
                 },
@@ -224,7 +222,7 @@ export function ObrasCard({
               disabled={loadingArchive}
             >
               {loadingArchive ? (
-                <ActivityIndicator size="small" color={COLORS.white} />
+                <ActivityIndicator size="small" color={theme.white} />
               ) : (
                 <>
                   <Ionicons
@@ -233,7 +231,7 @@ export function ObrasCard({
                     color={COLORS.white}
                   />
 
-                  <Text style={globalStyles.orcamentoTextButton}>
+                  <Text style={styles.orcamentoTextButton}>
                     {arquivado ? "Desarquivar" : "Arquivar"}
                   </Text>
                 </>

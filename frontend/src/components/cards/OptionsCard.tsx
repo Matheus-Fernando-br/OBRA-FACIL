@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -26,17 +25,19 @@ export function OptionsCard({
   description,
   value,
   icon = "chevron-forward",
-  iconColor = COLORS.white,
+  iconColor,
   badge,
   disabled = false,
   onPress,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   return (
     <Pressable
       disabled={disabled}
       onPress={onPress}
       style={[
-        globalStyles.menuCard,
+        styles.menuCard,
         disabled && {
           opacity: .45,
         },
@@ -54,7 +55,7 @@ export function OptionsCard({
             width: 42,
             height: 42,
             borderRadius: 10,
-            backgroundColor: COLORS.title,
+            backgroundColor: theme.title,
             justifyContent: "center",
             alignItems: "center",
             marginRight: 15,
@@ -74,7 +75,7 @@ export function OptionsCard({
         >
           <Text
             style={{
-              color: COLORS.text,
+              color: theme.text,
               fontSize: 16,
               fontWeight: "600",
             }}
@@ -85,7 +86,7 @@ export function OptionsCard({
           {description && (
             <Text
               style={{
-                color: COLORS.textSecondary,
+                color: theme.textSecondary,
                 marginTop: 3,
                 fontSize: 13,
               }}
@@ -98,7 +99,7 @@ export function OptionsCard({
         {badge && (
           <View
             style={{
-              backgroundColor: COLORS.primary,
+              backgroundColor: theme.primary,
               paddingHorizontal: 8,
               paddingVertical: 3,
               borderRadius: 8,
@@ -107,7 +108,7 @@ export function OptionsCard({
           >
             <Text
               style={{
-                color: COLORS.white,
+                color: theme.white,
                 fontSize: 11,
                 fontWeight: "700",
               }}
@@ -120,7 +121,7 @@ export function OptionsCard({
         {value && (
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               marginRight: 10,
             }}
           >
@@ -130,7 +131,7 @@ export function OptionsCard({
 
         <Ionicons
           name="chevron-forward"
-          color={COLORS.placeholder}
+          color={theme.placeholder}
           size={20}
         />
       </View>

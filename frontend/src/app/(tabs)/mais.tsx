@@ -4,8 +4,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 
-import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { OptionsCard } from "../../components/cards/OptionsCard";
 import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
@@ -67,10 +67,11 @@ export default function MaisScreen() {
       console.log(error);
     }
   }
+  const { styles, theme } = useTheme();
 
   return (
-    <View style={globalStyles.screen}>
-      <GradientBackground style={globalStyles.maisContainer}>
+    <View style={styles.screen}>
+      <GradientBackground style={styles.maisContainer}>
         <ScrollView>
           <ProfileCard
             nome={user?.nome || ""}
@@ -89,12 +90,12 @@ export default function MaisScreen() {
           ))}
           <TouchableOpacity
             activeOpacity={0.8}
-            style={[globalStyles.menuCard, { backgroundColor: COLORS.danger }]}
+            style={[styles.menuCard, { backgroundColor: theme.danger }]}
             onPress={handleLogout}
           >
-            <Text style={globalStyles.menuText}>Logout</Text>
+            <Text style={styles.menuText}>Logout</Text>
 
-            <Ionicons name="exit" size={20} color={COLORS.white} />
+            <Ionicons name="exit" size={20} color={theme.white} />
           </TouchableOpacity>
         </ScrollView>
       </GradientBackground>

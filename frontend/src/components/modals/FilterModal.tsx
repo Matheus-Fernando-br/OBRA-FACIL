@@ -9,8 +9,7 @@ import {
   TextInput,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import { COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 /* ============================================================
    TIPOS GERAIS
@@ -184,6 +183,8 @@ export default function FilterModal({
   cities = [],
   maxValue = 500000,
 }: FilterModalProps) {
+  const { styles, theme } = useTheme();
+
   /* ==========================================================
      ESTADO TEMPORÁRIO
   ========================================================== */
@@ -454,7 +455,7 @@ export default function FilterModal({
 
           <View style={styles.header}>
             <View style={styles.headerTitleContainer}>
-              <Ionicons name="filter" size={22} color={COLORS.primary} />
+              <Ionicons name="filter" size={22} color={theme.primary} />
 
               <Text style={styles.title}>Filtros</Text>
 
@@ -466,7 +467,7 @@ export default function FilterModal({
             </View>
 
             <Pressable onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color={COLORS.text} />
+              <Ionicons name="close" size={24} color={theme.text} />
             </Pressable>
           </View>
 
@@ -517,7 +518,7 @@ export default function FilterModal({
             </Pressable>
 
             <Pressable onPress={handleApply} style={styles.applyButton}>
-              <Ionicons name="checkmark" size={19} color={COLORS.white} />
+              <Ionicons name="checkmark" size={19} color={theme.white} />
 
               <Text style={styles.applyButtonText}>Aplicar filtros</Text>
             </Pressable>
@@ -686,6 +687,8 @@ function BudgetFiltersContent({
   cities,
   maxValue,
 }: BudgetFiltersContentProps) {
+  const { styles } = useTheme();
+
   return (
     <>
       {/* ORDENAR */}
@@ -912,6 +915,8 @@ function WorkFiltersContent({
   cities,
   maxValue,
 }: WorkFiltersContentProps) {
+  const { styles } = useTheme();
+
   return (
     <>
       {/* ORDENAR */}
@@ -1161,6 +1166,8 @@ interface FilterSectionProps {
 }
 
 function FilterSection({ title, children }: FilterSectionProps) {
+  const { styles } = useTheme();
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -1181,6 +1188,8 @@ interface FilterOptionProps {
 }
 
 function FilterOption({ label, selected, onPress }: FilterOptionProps) {
+  const { styles } = useTheme();
+
   return (
     <Pressable
       onPress={onPress}
@@ -1212,6 +1221,8 @@ function DateFilterControl({
   onChange,
   mode = "range",
 }: DateFilterControlProps) {
+  const { styles, theme } = useTheme();
+
   return (
     <View>
       <FilterOption
@@ -1281,7 +1292,7 @@ function DateFilterControl({
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={theme.textSecondary}
                 keyboardType="numeric"
                 maxLength={10}
                 value={value.from}
@@ -1304,7 +1315,7 @@ function DateFilterControl({
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={theme.textSecondary}
                 keyboardType="numeric"
                 maxLength={10}
                 value={value.to}
@@ -1328,7 +1339,7 @@ function DateFilterControl({
                 <TextInput
                   style={styles.input}
                   placeholder="DD/MM/AAAA"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={theme.textSecondary}
                   keyboardType="numeric"
                   maxLength={10}
                   value={value.from}
@@ -1347,7 +1358,7 @@ function DateFilterControl({
                 <TextInput
                   style={styles.input}
                   placeholder="DD/MM/AAAA"
-                  placeholderTextColor={COLORS.textSecondary}
+                  placeholderTextColor={theme.textSecondary}
                   keyboardType="numeric"
                   maxLength={10}
                   value={value.to}
@@ -1368,7 +1379,7 @@ function DateFilterControl({
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA"
-                placeholderTextColor={COLORS.textSecondary}
+                placeholderTextColor={theme.textSecondary}
                 keyboardType="numeric"
                 maxLength={10}
                 value={value.from}
@@ -1400,6 +1411,8 @@ interface SelectLikeProps {
 }
 
 function SelectLike({ label, value, options, onSelect }: SelectLikeProps) {
+  const { styles, theme } = useTheme();
+
   const [opened, setOpened] = useState(false);
 
   return (
@@ -1417,7 +1430,7 @@ function SelectLike({ label, value, options, onSelect }: SelectLikeProps) {
         <Ionicons
           name={opened ? "chevron-up" : "chevron-down"}
           size={18}
-          color={COLORS.text}
+          color={theme.text}
         />
       </Pressable>
 
@@ -1495,6 +1508,7 @@ function RangeFilterControl({ value, max, onChange }: RangeFilterControlProps) {
       max: limitedMax,
     });
   }
+  const { styles, theme } = useTheme();
 
   return (
     <View style={styles.rangeContainer}>
@@ -1508,7 +1522,7 @@ function RangeFilterControl({ value, max, onChange }: RangeFilterControlProps) {
             keyboardType="numeric"
             style={styles.rangeInput}
             placeholder="0"
-            placeholderTextColor={COLORS.textSecondary}
+            placeholderTextColor={theme.textSecondary}
           />
         </View>
 
@@ -1523,7 +1537,7 @@ function RangeFilterControl({ value, max, onChange }: RangeFilterControlProps) {
             keyboardType="numeric"
             style={styles.rangeInput}
             placeholder={String(max)}
-            placeholderTextColor={COLORS.textSecondary}
+            placeholderTextColor={theme.textSecondary}
           />
         </View>
       </View>
@@ -1563,309 +1577,4 @@ function formatMoney(value: number) {
    STYLES
 ============================================================ */
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.55)",
-    justifyContent: "flex-end",
-  },
-
-  modal: {
-    width: "100%",
-    maxHeight: "92%",
-    backgroundColor: COLORS.card,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    overflow: "hidden",
-  },
-
-  header: {
-    minHeight: 65,
-    paddingHorizontal: 20,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderNull,
-  },
-
-  headerTitleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
-  title: {
-    color: COLORS.text,
-    fontSize: 20,
-    fontWeight: "700",
-  },
-
-  counter: {
-    minWidth: 24,
-    height: 24,
-    paddingHorizontal: 7,
-    borderRadius: 999,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: COLORS.primary,
-  },
-
-  counterText: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: "700",
-  },
-
-  closeButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  content: {
-    flexGrow: 0,
-  },
-
-  contentContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 25,
-  },
-
-  section: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderNull,
-  },
-
-  sectionTitle: {
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 10,
-  },
-
-  sectionContent: {
-    gap: 7,
-  },
-
-  option: {
-    minHeight: 46,
-    paddingHorizontal: 13,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    backgroundColor: "transparent",
-  },
-
-  optionSelected: {
-    backgroundColor: "rgba(0, 0, 0, 0.04)",
-  },
-
-  radio: {
-    width: 21,
-    height: 21,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: COLORS.borderNull,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  radioSelected: {
-    borderColor: COLORS.primary,
-  },
-
-  radioInner: {
-    width: 11,
-    height: 11,
-    borderRadius: 999,
-    backgroundColor: COLORS.primary,
-  },
-
-  optionText: {
-    flex: 1,
-    color: COLORS.text,
-    fontSize: 15,
-  },
-
-  optionTextSelected: {
-    fontWeight: "600",
-  },
-
-  customDateContainer: {
-    marginTop: 10,
-    gap: 12,
-    paddingLeft: 34,
-  },
-
-  dateInputContainer: {
-    gap: 6,
-  },
-
-  inputLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
-  },
-
-  input: {
-    height: 46,
-    borderWidth: 1,
-    borderColor: COLORS.borderNull,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    color: COLORS.text,
-    backgroundColor: COLORS.card,
-  },
-
-  selectContainer: {
-    marginTop: 6,
-    gap: 6,
-  },
-
-  selectButton: {
-    minHeight: 46,
-    paddingHorizontal: 13,
-    borderWidth: 1,
-    borderColor: COLORS.borderNull,
-    borderRadius: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  selectButtonText: {
-    flex: 1,
-    color: COLORS.text,
-    fontSize: 14,
-    marginRight: 10,
-  },
-
-  selectOptions: {
-    borderWidth: 1,
-    borderColor: COLORS.borderNull,
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: COLORS.card,
-  },
-
-  selectOption: {
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: 13,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.borderNull,
-  },
-
-  selectOptionText: {
-    color: COLORS.text,
-    fontSize: 14,
-  },
-
-  emptyOption: {
-    padding: 14,
-    color: COLORS.textSecondary,
-    fontSize: 14,
-  },
-
-  rangeContainer: {
-    paddingTop: 4,
-  },
-
-  rangeValues: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 10,
-  },
-
-  rangeValueBox: {
-    flex: 1,
-    gap: 6,
-  },
-
-  rangeLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    fontWeight: "600",
-  },
-
-  rangeInput: {
-    height: 45,
-    borderWidth: 1,
-    borderColor: COLORS.borderNull,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    color: COLORS.text,
-  },
-
-  rangeSeparator: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    paddingBottom: 13,
-  },
-
-  rangeHint: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    marginTop: 10,
-  },
-
-  footer: {
-    minHeight: 75,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.borderNull,
-  },
-
-  clearButton: {
-    flex: 1,
-    minHeight: 48,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.borderNull,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  clearButtonText: {
-    color: COLORS.text,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-
-  applyButton: {
-    flex: 1.5,
-    minHeight: 48,
-    borderRadius: 12,
-    backgroundColor: COLORS.primary,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-  },
-
-  applyButtonText: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-
-  twoColumnRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-
-  twoColumnItem: {
-    flex: 1,
-    minWidth: 0,
-  },
-});
+const styles = StyleSheet.create({});

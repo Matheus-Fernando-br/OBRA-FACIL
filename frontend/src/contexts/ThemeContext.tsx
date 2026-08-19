@@ -8,13 +8,14 @@ import {
   useState,
 } from "react";
 
-import { COLORS } from "@/styles/globalStyles";
+import { COLORS, createGlobalStyles } from "@/styles/globalStyles";
 
 type ThemeMode = "light" | "dark";
 
 interface ThemeContextData {
   isDark: boolean;
   theme: typeof COLORS;
+  styles: ReturnType<typeof createGlobalStyles>;
   toggleTheme: () => void;
   setTheme: (mode: ThemeMode) => void;
 }
@@ -71,32 +72,38 @@ export function ThemeProvider({ children }: Props) {
     return {
       ...COLORS,
 
-      // Estrutura
-      backgroundDestaque: "rgba(255, 255, 255, 0.10)",
+      backgroundDestaque: "rgba(0, 0, 0, 0.55)",
 
-      // Cards
+      gradientStart: "#0F172A",
+      gradientEnd: "#243257",
+
+      white: "#0F172A",
+
       card: "#1E293B",
-      cardHover: "#D9D7D7",
+      cardHover: "#334155",
 
-      // Textos
       text: "#FFFFFF",
-      textSecondary: "#D1D5DB",
-      placeholder: "#A1A1AA",
+      textSecondary: "#CBD5E1",
+      placeholder: "#94A3B8",
 
-      // Bordas
-      border: "#374151",
-      borderNull: "#4B5563",
+      border: "#334155",
+      borderNull: "#475569",
     };
   }, [mode]);
+
+  const styles = useMemo(() => {
+    return createGlobalStyles(theme);
+  }, [theme]);
 
   const value = useMemo(
     () => ({
       isDark: mode === "dark",
       theme,
+      styles,
       toggleTheme,
       setTheme,
     }),
-    [mode, theme],
+    [mode, theme, styles],
   );
 
   if (!loaded) {

@@ -1,6 +1,5 @@
 import { View, Text, Image } from "react-native";
-
-import { globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -10,26 +9,28 @@ interface Props {
 }
 
 export function WorkCard({ title, progress, type, diasReal }: Props) {
+  const { styles } = useTheme();
+
   return (
-    <View style={globalStyles.workCard}>
+    <View style={styles.workCard}>
       <Image
         source={require("../../../assets/images/house.jpg")}
-        style={globalStyles.workCardImage}
+        style={styles.workCardImage}
       />
 
-      <View style={globalStyles.workCardContent}>
-        <Text style={globalStyles.workCardTitle}>{title}</Text>
+      <View style={styles.workCardContent}>
+        <Text style={styles.workCardTitle}>{title}</Text>
 
-        <Text style={globalStyles.workCardInfo}>Status: {type}</Text>
-        <Text style={globalStyles.workCardInfo}>
+        <Text style={styles.workCardInfo}>Status: {type}</Text>
+        <Text style={styles.workCardInfo}>
           Previsão de tempo para finalização: {diasReal} dias
         </Text>
 
-        <View style={globalStyles.progressContainer}>
-          <View style={globalStyles.progressBarBackground}>
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBarBackground}>
             <View
               style={[
-                globalStyles.progressBarFill,
+                styles.progressBarFill,
                 {
                   width: `${progress}%`,
                 },
@@ -37,7 +38,7 @@ export function WorkCard({ title, progress, type, diasReal }: Props) {
             />
           </View>
 
-          <Text style={globalStyles.workCardProgress}>{progress}%</Text>
+          <Text style={styles.workCardProgress}>{progress}%</Text>
         </View>
       </View>
     </View>

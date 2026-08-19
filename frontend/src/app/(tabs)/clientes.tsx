@@ -8,7 +8,7 @@ import {
 
 import { useState, useEffect, useMemo } from "react";
 
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -36,6 +36,7 @@ import FilterModal, {
 
 export default function ClientesScreen() {
   const { token } = useAuth();
+  const { styles, theme } = useTheme();
 
   // ============================================================
   // CLIENTES
@@ -339,8 +340,8 @@ export default function ClientesScreen() {
   }
 
   return (
-    <View style={globalStyles.screen}>
-      <GradientBackground style={globalStyles.container}>
+    <View style={styles.screen}>
+      <GradientBackground style={styles.container}>
         <ScrollView
           contentContainerStyle={{
             paddingBottom: 100,
@@ -351,8 +352,8 @@ export default function ClientesScreen() {
               CABEÇALHO
           ================================================== */}
 
-          <View style={globalStyles.pageHeaderRow}>
-            <Text style={globalStyles.title}>Clientes</Text>
+          <View style={styles.pageHeaderRow}>
+            <Text style={styles.title}>Clientes</Text>
 
             <View
               style={{
@@ -364,16 +365,16 @@ export default function ClientesScreen() {
               {/* FILTRO */}
               <Pressable
                 style={[
-                  globalStyles.pageHeaderButtonFilter,
+                  styles.pageHeaderButtonFilter,
                   activeFiltersCount > 0 && {
-                    backgroundColor: COLORS.primary,
+                    backgroundColor: theme.primary,
                   },
                 ]}
                 onPress={() => setFilterVisible(true)}
               >
                 <Ionicons
                   name="filter-outline"
-                  color={activeFiltersCount > 0 ? COLORS.white : COLORS.text}
+                  color={activeFiltersCount > 0 ? theme.white : theme.text}
                   size={22}
                 />
 
@@ -387,14 +388,14 @@ export default function ClientesScreen() {
                       height: 18,
                       borderRadius: 999,
                       paddingHorizontal: 4,
-                      backgroundColor: COLORS.danger,
+                      backgroundColor: theme.danger,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
                     <Text
                       style={{
-                        color: COLORS.white,
+                        color: theme.white,
                         fontSize: 10,
                         fontWeight: "700",
                       }}
@@ -407,10 +408,10 @@ export default function ClientesScreen() {
 
               {/* NOVO CLIENTE */}
               <Pressable
-                style={globalStyles.pageHeaderButton}
+                style={styles.pageHeaderButton}
                 onPress={() => setAddVisible(true)}
               >
-                <Ionicons name="add" color={COLORS.text} size={25} />
+                <Ionicons name="add" color={theme.text} size={25} />
               </Pressable>
             </View>
           </View>
@@ -445,7 +446,7 @@ export default function ClientesScreen() {
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    backgroundColor: COLORS.primary,
+                    backgroundColor: theme.primary,
                     borderRadius: 999,
                     paddingHorizontal: 12,
                     paddingVertical: 7,
@@ -453,7 +454,7 @@ export default function ClientesScreen() {
                 >
                   <Text
                     style={{
-                      color: COLORS.white,
+                      color: theme.white,
                       fontSize: 12,
                       fontWeight: "600",
                     }}
@@ -478,12 +479,12 @@ export default function ClientesScreen() {
                 <Ionicons
                   name="close-circle-outline"
                   size={17}
-                  color={COLORS.textSecondary}
+                  color={theme.textSecondary}
                 />
 
                 <Text
                   style={{
-                    color: COLORS.textSecondary,
+                    color: theme.textSecondary,
                     fontSize: 12,
                     fontWeight: "600",
                   }}
@@ -499,9 +500,7 @@ export default function ClientesScreen() {
           ================================================== */}
 
           {!loading && filteredClients.length === 0 && (
-            <Text style={globalStyles.sectionTitle}>
-              Nenhum cliente encontrado.
-            </Text>
+            <Text style={styles.sectionTitle}>Nenhum cliente encontrado.</Text>
           )}
 
           {/* ==================================================
@@ -511,7 +510,7 @@ export default function ClientesScreen() {
           {loading ? (
             <View
               style={[
-                globalStyles.screen,
+                styles.screen,
                 {
                   justifyContent: "center",
                   alignItems: "center",
@@ -519,11 +518,11 @@ export default function ClientesScreen() {
                 },
               ]}
             >
-              <ActivityIndicator size="large" color={COLORS.primary} />
+              <ActivityIndicator size="large" color={theme.primary} />
 
               <Text
                 style={{
-                  color: COLORS.text,
+                  color: theme.text,
                   marginTop: 15,
                 }}
               >
@@ -566,14 +565,12 @@ export default function ClientesScreen() {
           BOTÃO NOVO CLIENTE
       ====================================================== */}
 
-      <View style={globalStyles.bottomActionContainer}>
+      <View style={styles.bottomActionContainer}>
         <Pressable
-          style={globalStyles.bottomActionButton}
+          style={styles.bottomActionButton}
           onPress={() => setAddVisible(true)}
         >
-          <Text style={globalStyles.bottomActionButtonText}>
-            + Novo Cliente
-          </Text>
+          <Text style={styles.bottomActionButtonText}>+ Novo Cliente</Text>
         </Pressable>
       </View>
 

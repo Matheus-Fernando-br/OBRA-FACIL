@@ -2,8 +2,9 @@ import { View, TouchableOpacity, Image } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { NotificationModal } from "../modals/NotificationModal";
+import { COLORS } from "@/styles/globalStyles";
 import { MenuModal } from "../modals/MenuModal";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   onMenu?: () => void;
@@ -11,13 +12,14 @@ interface Props {
 }
 
 export function AppHeader({ onMenu }: Props) {
+  const { styles, theme } = useTheme();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   return (
     <View
       style={{
         height: 80,
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.white,
         paddingRight: 20,
         paddingLeft: 5,
         flexDirection: "row",
@@ -32,7 +34,7 @@ export function AppHeader({ onMenu }: Props) {
           onMenu?.();
         }}
       >
-        <Ionicons name="menu" size={35} color={COLORS.text} />
+        <Ionicons name="menu" size={35} color={theme.text} />
       </TouchableOpacity>
 
       {/* Centro */}
@@ -40,18 +42,21 @@ export function AppHeader({ onMenu }: Props) {
         style={{
           flexDirection: "row",
           alignItems: "center",
+          backgroundColor: COLORS.white,
+          padding:5,
+          borderRadius:5,
         }}
       >
         <Image
           source={require("../../assets/images/logo_titulo.png")}
-          style={globalStyles.logoHeaderImg}
+          style={styles.logoHeaderImg}
         />
       </View>
 
       {/* Direita */}
       <TouchableOpacity onPress={() => setNotificationVisible(true)}>
         <View>
-          <Ionicons name="notifications" size={28} color={COLORS.text} />
+          <Ionicons name="notifications" size={28} color={theme.text} />
 
           <View
             style={{
@@ -64,7 +69,7 @@ export function AppHeader({ onMenu }: Props) {
 
               borderRadius: 20,
 
-              backgroundColor: COLORS.title,
+              backgroundColor: theme.title,
             }}
           />
         </View>

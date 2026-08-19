@@ -1,7 +1,6 @@
 import { TouchableOpacity, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import { globalStyles } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -11,15 +10,17 @@ interface Props {
 }
 
 export function QuickAccessCard({ title, icon, color, onPress }: Props) {
+  const { styles } = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      style={globalStyles.quickButton}
+      style={styles.quickButton}
     >
       <Ionicons name={icon} size={28} color={color} />
 
-      <Text style={globalStyles.quickButtonText}>{title}</Text>
+      <Text style={styles.quickButtonText}>{title}</Text>
     </TouchableOpacity>
   );
 }

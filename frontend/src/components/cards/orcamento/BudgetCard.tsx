@@ -1,7 +1,7 @@
 import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
-
+import { useTheme } from "@/contexts/ThemeContext";
+import { COLORS } from "@/styles/globalStyles";
 interface Props {
   client: string;
   nome: string;
@@ -29,16 +29,18 @@ export function BudgetCard({
   onDelete,
   onArchive,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   function getStatusColor() {
     switch (status.toLowerCase()) {
       case "aprovado":
-        return COLORS.success;
+        return theme.success;
 
       case "recusado":
-        return COLORS.danger;
+        return theme.danger;
 
       default:
-        return COLORS.warning;
+        return theme.warning;
     }
   }
 
@@ -51,19 +53,19 @@ export function BudgetCard({
     status.toUpperCase() === "APROVADO" || status.toUpperCase() === "RECUSADO";
 
   return (
-    <View style={globalStyles.orcamentoCard}>
+    <View style={styles.orcamentoCard}>
       {/* HEADER */}
 
       {/* HEADER */}
 
-      <View style={globalStyles.orcamentoHeader}>
-        <Text style={globalStyles.orcamentoCliente}>{nome}</Text>
+      <View style={styles.orcamentoHeader}>
+        <Text style={styles.orcamentoCliente}>{nome}</Text>
 
         <View style={{ alignItems: "flex-end", gap: 5 }}>
           {/* STATUS ATUAL */}
           <View
             style={[
-              globalStyles.orcamentoStatusBadge,
+              styles.orcamentoStatusBadge,
               {
                 backgroundColor: `${getStatusColor()}20`,
               },
@@ -71,7 +73,7 @@ export function BudgetCard({
           >
             <Text
               style={[
-                globalStyles.orcamentoStatusText,
+                styles.orcamentoStatusText,
                 {
                   color: getStatusColor(),
                 },
@@ -85,17 +87,17 @@ export function BudgetCard({
           {arquivado && (
             <View
               style={[
-                globalStyles.orcamentoStatusBadge,
+                styles.orcamentoStatusBadge,
                 {
-                  backgroundColor: `${COLORS.textSecondary}20`,
+                  backgroundColor: `${theme.textSecondary}20`,
                 },
               ]}
             >
               <Text
                 style={[
-                  globalStyles.orcamentoStatusText,
+                  styles.orcamentoStatusText,
                   {
-                    color: COLORS.textSecondary,
+                    color: theme.textSecondary,
                   },
                 ]}
               >
@@ -108,31 +110,24 @@ export function BudgetCard({
 
       {/* INFORMAÇÕES */}
 
-      <Text style={globalStyles.orcamentoInfo}>Cliente: {client}</Text>
+      <Text style={styles.orcamentoInfo}>Cliente: {client}</Text>
 
-      <Text style={globalStyles.orcamentoInfo}>
-        Valor: R$ {value.toFixed(2)}
-      </Text>
+      <Text style={styles.orcamentoInfo}>Valor: R$ {value.toFixed(2)}</Text>
 
-      <Text style={globalStyles.orcamentoInfo}>Criado em: {date}</Text>
+      <Text style={styles.orcamentoInfo}>Criado em: {date}</Text>
 
       {/* BOTÕES */}
 
-      <View style={globalStyles.orcamentoButtons}>
+      <View style={styles.orcamentoButtons}>
         {/* DETALHES */}
 
         <Pressable
-          style={[
-            globalStyles.orcamentoDetailsButton,
-            globalStyles.orcamentoMainButton,
-          ]}
+          style={[styles.orcamentoDetailsButton, styles.orcamentoMainButton]}
           onPress={onDetails}
         >
           <Ionicons name="eye" size={18} color={COLORS.white} />
 
-          <Text style={globalStyles.orcamentoDetailsButtonText}>
-            Ver Detalhes
-          </Text>
+          <Text style={styles.orcamentoDetailsButtonText}>Ver Detalhes</Text>
         </Pressable>
 
         {/* EDITAR + EXCLUIR */}
@@ -141,24 +136,24 @@ export function BudgetCard({
           <>
             <Pressable
               style={[
-                globalStyles.orcamentoDetailsButton,
-                globalStyles.orcamentoEditButton,
+                styles.orcamentoDetailsButton,
+                styles.orcamentoEditButton,
               ]}
               onPress={onEdit}
             >
               <Ionicons name="create" size={18} color={COLORS.white} />
-              <Text style={globalStyles.orcamentoTextButton}>Editar</Text>
+              <Text style={styles.orcamentoTextButton}>Editar</Text>
             </Pressable>
 
             <Pressable
               style={[
-                globalStyles.orcamentoDetailsButton,
-                globalStyles.orcamentoDeleteButton,
+                styles.orcamentoDetailsButton,
+                styles.orcamentoDeleteButton,
               ]}
               onPress={onDelete}
             >
               <Ionicons name="trash" size={18} color={COLORS.white} />
-              <Text style={globalStyles.orcamentoTextButton}>Excluir</Text>
+              <Text style={styles.orcamentoTextButton}>Excluir</Text>
             </Pressable>
           </>
         )}
@@ -167,9 +162,9 @@ export function BudgetCard({
         {canArchive && (
           <Pressable
             style={[
-              globalStyles.orcamentoDetailsButton,
+              styles.orcamentoDetailsButton,
               {
-                backgroundColor: arquivado ? COLORS.success : COLORS.title,
+                backgroundColor: arquivado ? theme.success : theme.title,
                 paddingHorizontal: 20,
                 opacity: loadingArchive ? 0.7 : 1,
               },
@@ -178,15 +173,15 @@ export function BudgetCard({
             disabled={loadingArchive}
           >
             {loadingArchive ? (
-              <ActivityIndicator size="small" color={COLORS.white} />
+              <ActivityIndicator size="small" color={theme.white} />
             ) : (
               <>
                 <Ionicons
                   name={arquivado ? "archive" : "archive-outline"}
                   size={18}
-                  color={COLORS.white}
+                  color={theme.white}
                 />
-                <Text style={globalStyles.orcamentoTextButton}>
+                <Text style={styles.orcamentoTextButton}>
                   {arquivado ? "Desarquivar" : "Arquivar"}
                 </Text>
               </>

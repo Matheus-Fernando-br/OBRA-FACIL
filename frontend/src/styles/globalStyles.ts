@@ -8,6 +8,8 @@ export const COLORS = {
   primary: "#3B82F6",
   secondary: "#0D6B75",
   backgroundDestaque: "rgba(0, 0, 0, 0.32)",
+  gradientStart: "#FFFFFF",
+  gradientEnd: "#c45f0080",
   card: "#D9D7D7",
   cardHover: "#1E293B",
 
@@ -37,11 +39,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
       justifyContent: "center",
       padding: 20,
       paddingHorizontal: 30,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
     },
 
     loginTitle: {
-      color: COLORS.title,
+      color: colors.title,
       fontSize: 34,
       fontWeight: "bold",
       marginBottom: 40,
@@ -49,7 +51,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     loginButton: {
       height: 55,
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
       borderRadius: 12,
       marginTop: 16,
       justifyContent: "center",
@@ -58,7 +60,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     loginButtonCadastro: {
       height: 55,
-      backgroundColor: COLORS.cardHover,
+      backgroundColor: colors.cardHover,
       borderRadius: 12,
       width: "100%",
       justifyContent: "center",
@@ -72,7 +74,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     loginText: {
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       fontSize: 14,
       textAlign: "center",
       marginTop: 16,
@@ -95,19 +97,19 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     container: {
       flex: 1,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       paddingVertical: 10,
       paddingHorizontal: 10,
     },
 
     pageContainer: {
       flex: 1,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       padding: 24,
     },
 
     feedback: {
-      color: COLORS.danger,
+      color: colors.danger,
       fontSize: 14,
       marginTop: 5,
       marginBottom: 15,
@@ -124,7 +126,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_700Bold",
       marginLeft: 5,
       fontSize: 12,
-      color: COLORS.danger,
+      color: colors.danger,
     },
 
     checkbox: {
@@ -139,8 +141,8 @@ export function createGlobalStyles(colors: typeof COLORS) {
 ========================= */
 
     orcamentoCard: {
-      backgroundColor: COLORS.white,
-      shadowColor: COLORS.text,
+      backgroundColor: colors.white,
+      shadowColor: colors.text,
       shadowOpacity: 0.3,
       shadowRadius: 5,
       shadowOffset: {
@@ -158,13 +160,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontSize: 18,
       fontWeight: "700",
 
-      color: COLORS.text,
+      color: colors.text,
 
       marginBottom: 12,
     },
 
     orcamentoInfo: {
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
 
       marginBottom: 6,
     },
@@ -178,7 +180,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       marginTop: 16,
       height: 45,
       borderRadius: 12,
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -189,7 +191,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     filterButtonText: {
-      color: COLORS.text,
+      color: colors.text,
     },
 
     orcamentoHeader: {
@@ -247,7 +249,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       textAlign: "center",
 
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
 
       borderRadius: 5,
 
@@ -267,7 +269,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       textAlign: "center",
 
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
 
       borderRadius: 5,
 
@@ -279,7 +281,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     orcamentoEditButton: {
-      backgroundColor: COLORS.warning,
+      backgroundColor: colors.warning,
       paddingHorizontal: 30,
       padding: 15,
       marginRight: 8,
@@ -287,23 +289,23 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     orcamentoDeleteButton: {
-      backgroundColor: COLORS.danger,
+      backgroundColor: colors.danger,
       paddingHorizontal: 30,
       padding: 15,
       width: 48,
     },
 
     card: {
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderRadius: 20,
       paddingVertical: 18,
       paddingHorizontal: 18,
       marginBottom: 24,
 
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
 
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -317,11 +319,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
     picker: {
       width: "100%",
       height: 60,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderRadius: 10,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
       paddingHorizontal: 20,
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOpacity: 0.08,
       shadowRadius: 4,
       shadowOffset: {
@@ -331,9 +333,9 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     pickerReadOnly: {
-      backgroundColor: COLORS.borderNull,
-      borderColor: COLORS.border,
-      color: COLORS.placeholder,
+      backgroundColor: colors.borderNull,
+      borderColor: colors.border,
+      color: colors.placeholder,
       shadowOpacity: 0,
       elevation: 0,
     },
@@ -343,10 +345,10 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     serviceContainer: {
       padding: 20,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderRadius: 10,
       marginBottom: 10,
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOpacity: 0.3,
       shadowRadius: 5,
       shadowOffset: {
@@ -359,13 +361,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_700Bold",
       textAlign: "left",
       fontWeight: "bold",
-      color: COLORS.success,
+      color: colors.success,
       marginTop: 5,
     },
     categoryTotalText: {
       fontSize: 16,
       fontWeight: "bold",
-      color: COLORS.primary,
+      color: colors.primary,
       textAlign: "right",
     },
 
@@ -382,7 +384,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     workCardDate: {
       marginBottom: 8,
       fontSize: 13,
-      color: COLORS.placeholder,
+      color: colors.placeholder,
     },
 
     /* =========================
@@ -390,12 +392,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
   ========================= */
 
     tabBar: {
-      height: COLORS.tabBarHeight,
+      height: colors.tabBarHeight,
       paddingTop: 10,
       paddingBottom: 10,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderTopWidth: 3,
-      borderTopColor: COLORS.border,
+      borderTopColor: colors.border,
     },
 
     /* =========================
@@ -412,6 +414,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       marginLeft: 7,
       flexDirection: "row",
       justifyContent: "space-between",
+  
     },
 
     pageHeaderRow: {
@@ -426,9 +429,9 @@ export function createGlobalStyles(colors: typeof COLORS) {
       width: 42,
       height: 42,
       borderRadius: 12,
-      backgroundColor: COLORS.title,
+      backgroundColor: colors.title,
       borderWidth: 1,
-      borderColor: COLORS.text,
+      borderColor: colors.text,
       justifyContent: "center",
       alignItems: "center",
     },
@@ -436,15 +439,15 @@ export function createGlobalStyles(colors: typeof COLORS) {
       width: 42,
       height: 42,
       borderRadius: 12,
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
       borderWidth: 1,
-      borderColor: COLORS.text,
+      borderColor: colors.text,
       justifyContent: "center",
       alignItems: "center",
     },
 
     pageHeaderButtonText: {
-      color: COLORS.text,
+      color: colors.text,
       fontSize: 24,
       fontWeight: "600",
     },
@@ -457,13 +460,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_600SemiBold",
       fontSize: 24,
       fontWeight: "700",
-      color: COLORS.title,
+      color: colors.title,
     },
 
     pageTitle: {
       fontFamily: "IntelOneMono_700Bold",
       fontSize: 28,
-      color: COLORS.text,
+      color: colors.text,
       marginTop: 60,
       marginBottom: 20,
     },
@@ -472,7 +475,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_500Medium,",
       fontWeight: "600",
       fontSize: 16,
-      color: COLORS.text,
+      color: colors.text,
       marginLeft: 7,
       marginBottom: 16,
       marginTop: 16,
@@ -481,12 +484,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
     subtitle: {
       fontFamily: "IntelOneMono_400Regular",
       fontSize: 12,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     body: {
       fontFamily: "IntelOneMono_400Regular",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     section: {
@@ -533,13 +536,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
 ========================= */
 
     dashboardCard: {
-      backgroundColor: COLORS.textSecondary,
+      backgroundColor: colors.textSecondary,
       flexDirection: "column",
       padding: 8,
       borderRadius: 18,
       width: "24%",
       marginBottom: 16,
-      shadowColor: COLORS.danger,
+      shadowColor: colors.danger,
       shadowOffset: {
         width: 0,
         height: 2,
@@ -553,7 +556,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     dashboardCardTitle: {
       fontSize: 12,
-      color: COLORS.white,
+      color: colors.white,
       marginBottom: 5,
     },
 
@@ -561,7 +564,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontSize: 18,
       marginTop: 10,
       fontWeight: "bold",
-      color: COLORS.white,
+      color: colors.white,
     },
 
     /* =========================
@@ -574,7 +577,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     filterButton: {
-      backgroundColor: COLORS.card,
+      backgroundColor: colors.card,
       paddingHorizontal: 16,
       paddingVertical: 10,
       borderRadius: 12,
@@ -587,16 +590,16 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     maisContainer: {
       flex: 1,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       padding: 15,
     },
 
     profileCard: {
-      backgroundColor: COLORS.border,
+      backgroundColor: colors.border,
       padding: 24,
       borderRadius: 22,
       marginBottom: 24,
-      shadowColor: COLORS.textSecondary,
+      shadowColor: colors.textSecondary,
 
       shadowOffset: {
         width: 0,
@@ -612,16 +615,16 @@ export function createGlobalStyles(colors: typeof COLORS) {
     profileName: {
       fontSize: 24,
       fontWeight: "bold",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     profileEmail: {
       marginTop: 6,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     menuCard: {
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       padding: 20,
       borderRadius: 18,
       marginBottom: 14,
@@ -634,7 +637,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     menuText: {
       fontSize: 16,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     profileImage: {
@@ -657,7 +660,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     appButtonText: {
-      color: COLORS.white,
+      color: colors.white,
       fontWeight: "bold",
       fontSize: 16,
     },
@@ -672,12 +675,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       borderRadius: 999,
 
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
 
       justifyContent: "center",
       alignItems: "center",
 
-      shadowColor: COLORS.textSecondary,
+      shadowColor: colors.textSecondary,
 
       shadowOffset: {
         width: 0,
@@ -701,7 +704,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     bottomActionButton: {
       height: 56,
 
-      backgroundColor: COLORS.title,
+      backgroundColor: colors.title,
 
       borderRadius: 16,
 
@@ -723,7 +726,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       flexDirection: "row",
       alignItems: "center",
 
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
 
       borderRadius: 10,
 
@@ -731,7 +734,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       marginBottom: 15,
 
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOpacity: 0.2,
       shadowRadius: 5,
       shadowOffset: {
@@ -745,11 +748,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
     clientCardName: {
       fontFamily: "Montserrat_600SemiBold",
       fontSize: 18,
-      color: COLORS.text,
+      color: colors.text,
     },
 
     clientCardInfo: {
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       marginTop: 6,
       fontSize: 10,
     },
@@ -768,7 +771,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     addCard: {
       flex: 1,
       maxHeight: "100%",
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       paddingTop: 20,
@@ -779,7 +782,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     addTitle: {
       fontSize: 24,
       fontWeight: "bold",
-      color: COLORS.text,
+      color: colors.text,
       marginBottom: 10,
 
       textAlign: "center",
@@ -821,20 +824,20 @@ export function createGlobalStyles(colors: typeof COLORS) {
     label: {
       fontFamily: "Poppins_500Medium",
       alignSelf: "flex-start",
-      color: COLORS.text,
+      color: colors.text,
       marginBottom: 6,
       marginTop: 12,
     },
     divider: {
       height: 1,
-      backgroundColor: COLORS.borderNull,
+      backgroundColor: colors.borderNull,
       width: "100%",
       marginVertical: 10,
     },
 
     dividerVertical: {
       width: 1,
-      backgroundColor: COLORS.borderNull,
+      backgroundColor: colors.borderNull,
       height: "100%",
       marginVertical: 5,
       marginHorizontal: 20,
@@ -848,7 +851,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     saveText: {
       fontFamily: "Poppins_700Bold",
       fontSize: 13, // Fonte um pouco menor já que está em duas linhas
-      color: COLORS.title,
+      color: colors.title,
       lineHeight: 14, // Deixa as palavras mais próximas uma da outra
     },
 
@@ -858,9 +861,9 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     quickButton: {
       flex: 1,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderWidth: 1,
-      borderColor: COLORS.borderNull,
+      borderColor: colors.borderNull,
       borderRadius: 18,
       padding: 16,
       paddingVertical: 10,
@@ -870,7 +873,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     quickButtonHover: {
-      backgroundColor: COLORS.cardHover,
+      backgroundColor: colors.cardHover,
     },
 
     quickButtonText: {
@@ -878,7 +881,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_400Regular",
       fontSize: 12,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
       textAlign: "center",
     },
 
@@ -895,13 +898,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
 ========================= */
 
     workCard: {
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       flexDirection: "row",
       alignItems: "center",
       padding: 18,
       borderRadius: 18,
       marginBottom: 16,
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOpacity: 0.3,
       shadowRadius: 5,
       shadowOffset: {
@@ -925,7 +928,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_600SemiBold",
       fontSize: 17,
       fontWeight: "700",
-      color: COLORS.text,
+      color: colors.text,
       marginBottom: 4,
     },
 
@@ -933,7 +936,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Montserrat_400Regular",
       fontSize: 13,
       fontWeight: "400",
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       marginBottom: 12,
     },
 
@@ -945,14 +948,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
     progressBarBackground: {
       flex: 1,
       height: 8,
-      backgroundColor: COLORS.borderNull,
+      backgroundColor: colors.borderNull,
       borderRadius: 999,
       overflow: "hidden",
     },
 
     progressBarFill: {
       height: "100%",
-      backgroundColor: COLORS.success,
+      backgroundColor: colors.success,
       borderRadius: 999,
     },
 
@@ -961,7 +964,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       textAlign: "right",
       marginLeft: 10,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
     },
     /* ==========================================================
    OBRAS CARD
@@ -971,13 +974,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       position: "relative",
       overflow: "hidden",
 
-      backgroundColor: COLORS.textSecondary,
+      backgroundColor: colors.textSecondary,
 
       borderRadius: 22,
 
       marginBottom: 18,
 
-      shadowColor: COLORS.text,
+      shadowColor: colors.text,
       shadowOpacity: 0.15,
       shadowRadius: 10,
 
@@ -1008,7 +1011,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       left: 0,
       right: 0,
       bottom: 0,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
     },
 
     /* =========================
@@ -1044,7 +1047,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       alignItems: "center",
 
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
     },
 
     /* =========================
@@ -1056,7 +1059,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       fontSize: 20,
 
-      color: COLORS.title,
+      color: colors.title,
     },
 
     /* =========================
@@ -1092,7 +1095,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       fontSize: 13,
 
-      color: COLORS.text,
+      color: colors.text,
 
       marginBottom: 4,
     },
@@ -1108,7 +1111,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     notificationModalOverlay: {
       ...StyleSheet.absoluteFill,
-      backgroundColor: "rgba(0, 0, 0, 0.56)",
+      backgroundColor: colors.backgroundDestaque,
     },
 
     notificationModal: {
@@ -1117,7 +1120,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
       elevation: 15,
 
-      shadowColor: "#000",
+      shadowColor: colors.text,
       shadowOffset: {
         width: -4,
         height: 0,
@@ -1274,14 +1277,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     menuOverlay: {
       ...StyleSheet.absoluteFill,
-      backgroundColor: "rgba(0, 0, 0, 0.56)",
+      backgroundColor: colors.backgroundDestaque,
     },
 
     menu: {
       height: "100%",
       elevation: 15,
 
-      shadowColor: "#000",
+      shadowColor: colors.text,
       shadowOffset: {
         width: 4,
         height: 0,
@@ -1426,6 +1429,297 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontSize: 11,
       marginTop: 3,
       opacity: 0.7,
+    },
+
+    /*FILTROS*/
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0, 0, 0, 0.55)",
+      justifyContent: "flex-end",
+    },
+  
+    modal: {
+      width: "100%",
+      maxHeight: "92%",
+      backgroundColor: colors.card,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      overflow: "hidden",
+    },
+  
+    header: {
+      minHeight: 65,
+      paddingHorizontal: 20,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderNull,
+    },
+  
+    headerTitleContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+  
+ 
+  
+    counter: {
+      minWidth: 24,
+      height: 24,
+      paddingHorizontal: 7,
+      borderRadius: 999,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.primary,
+    },
+  
+    counterText: {
+      color: colors.white,
+      fontSize: 12,
+      fontWeight: "700",
+    },
+  
+    closeButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  
+    content: {
+      flexGrow: 0,
+    },
+  
+    contentContainer: {
+      paddingHorizontal: 20,
+      paddingTop: 8,
+      paddingBottom: 25,
+    },
+  
+
+  
+    sectionContent: {
+      gap: 7,
+    },
+  
+    option: {
+      minHeight: 46,
+      paddingHorizontal: 13,
+      borderRadius: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      backgroundColor: "transparent",
+    },
+  
+    optionSelected: {
+      backgroundColor: "rgba(0, 0, 0, 0.04)",
+    },
+  
+    radio: {
+      width: 21,
+      height: 21,
+      borderRadius: 999,
+      borderWidth: 2,
+      borderColor: colors.borderNull,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  
+    radioSelected: {
+      borderColor: colors.primary,
+    },
+  
+    radioInner: {
+      width: 11,
+      height: 11,
+      borderRadius: 999,
+      backgroundColor: colors.primary,
+    },
+  
+    optionText: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 15,
+    },
+  
+    optionTextSelected: {
+      fontWeight: "600",
+    },
+  
+    customDateContainer: {
+      marginTop: 10,
+      gap: 12,
+      paddingLeft: 34,
+    },
+  
+    dateInputContainer: {
+      gap: 6,
+    },
+  
+    inputLabel: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      fontWeight: "600",
+    },
+  
+    input: {
+      height: 46,
+      borderWidth: 1,
+      borderColor: colors.borderNull,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      color: colors.text,
+      backgroundColor: colors.card,
+    },
+  
+    selectContainer: {
+      marginTop: 6,
+      gap: 6,
+    },
+  
+    selectButton: {
+      minHeight: 46,
+      paddingHorizontal: 13,
+      borderWidth: 1,
+      borderColor: colors.borderNull,
+      borderRadius: 10,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+  
+    selectButtonText: {
+      flex: 1,
+      color: colors.text,
+      fontSize: 14,
+      marginRight: 10,
+    },
+  
+    selectOptions: {
+      borderWidth: 1,
+      borderColor: colors.borderNull,
+      borderRadius: 10,
+      overflow: "hidden",
+      backgroundColor: colors.card,
+    },
+  
+    selectOption: {
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: 13,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.borderNull,
+    },
+  
+    selectOptionText: {
+      color: colors.text,
+      fontSize: 14,
+    },
+  
+    emptyOption: {
+      padding: 14,
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+  
+    rangeContainer: {
+      paddingTop: 4,
+    },
+  
+    rangeValues: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 10,
+    },
+  
+    rangeValueBox: {
+      flex: 1,
+      gap: 6,
+    },
+  
+    rangeLabel: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+  
+    rangeInput: {
+      height: 45,
+      borderWidth: 1,
+      borderColor: colors.borderNull,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      color: colors.text,
+    },
+  
+    rangeSeparator: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      paddingBottom: 13,
+    },
+  
+    rangeHint: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      marginTop: 10,
+    },
+  
+    footer: {
+      minHeight: 75,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      borderTopWidth: 1,
+      borderTopColor: colors.borderNull,
+    },
+  
+    clearButton: {
+      flex: 1,
+      minHeight: 48,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.borderNull,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  
+    clearButtonText: {
+      color: colors.text,
+      fontSize: 15,
+      fontWeight: "600",
+    },
+  
+    applyButton: {
+      flex: 1.5,
+      minHeight: 48,
+      borderRadius: 12,
+      backgroundColor: colors.primary,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+    },
+  
+    applyButtonText: {
+      color: colors.white,
+      fontSize: 15,
+      fontWeight: "700",
+    },
+  
+    twoColumnRow: {
+      flexDirection: "row",
+      gap: 10,
+    },
+  
+    twoColumnItem: {
+      flex: 1,
+      minWidth: 0,
     },
   });
 }

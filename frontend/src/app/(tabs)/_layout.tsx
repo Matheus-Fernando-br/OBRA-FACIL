@@ -1,9 +1,11 @@
 import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { AppHeader } from "@/components/layout/AppHeader"
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function TabsLayout() {
+  const { styles, theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
@@ -17,9 +19,9 @@ export default function TabsLayout() {
             }}
           />
         ),
-        tabBarActiveTintColor: COLORS.title,
-        tabBarInactiveTintColor: COLORS.textSecondary,
-        tabBarStyle: globalStyles.tabBar,
+        tabBarActiveTintColor: theme.title,
+        tabBarInactiveTintColor: theme.textSecondary,
+        tabBarStyle: styles.tabBar,
       }}
     >
       <Tabs.Screen

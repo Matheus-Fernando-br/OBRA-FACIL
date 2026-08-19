@@ -9,13 +9,15 @@ import {
 
 import { router } from "expo-router";
 import { useState } from "react";
-import { globalStyles, COLORS } from "../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { emailMask } from "@/components/forms/mask";
 import { GradientBackground } from "../styles/GradientBackground";
 
 export default function LoginScreen() {
+  const { styles, theme } = useTheme();
+
   const { login, loading } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -52,7 +54,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <GradientBackground style={globalStyles.loginContainer}>
+    <GradientBackground style={styles.loginContainer}>
       <ScrollView>
       <View
         style={{
@@ -62,11 +64,11 @@ export default function LoginScreen() {
       >
         <Image
           source={require("../assets/images/logo_titulo_frase.png")}
-          style={globalStyles.loginImage}
+          style={styles.loginImage}
         />
       </View>
       <View style={{ marginTop: -20 }}>
-        <Text style={globalStyles.label}>E-mail</Text>
+        <Text style={styles.label}>E-mail</Text>
 
         <AppInput
           placeholder="Informe seu e-mail"
@@ -78,11 +80,11 @@ export default function LoginScreen() {
           }}
         />
 
-        <Text style={globalStyles.label}>Senha</Text>
+        <Text style={styles.label}>Senha</Text>
 
         <AppInput
           placeholder="Informe sua senha"
-          placeholderTextColor={COLORS.placeholder}
+          placeholderTextColor={theme.placeholder}
           secureTextEntry
           value={password}
           onChangeText={(text) => {
@@ -91,16 +93,16 @@ export default function LoginScreen() {
             if (feedback) setFeedback("");
           }}
         />
-        <View style={globalStyles.divider} />
+        <View style={styles.divider} />
 
         {feedback !== "" && (
-          <Text style={globalStyles.feedback}>{feedback}</Text>
+          <Text style={styles.feedback}>{feedback}</Text>
         )}
 
         <TouchableOpacity
           onPress={handleLogin}
           style={[
-            globalStyles.loginButton,
+            styles.loginButton,
             loading && {
               opacity: 0.7,
             },
@@ -108,22 +110,22 @@ export default function LoginScreen() {
           disabled={loading}
         >
           {loading ? (
-            <ActivityIndicator size="small" color={COLORS.white} />
+            <ActivityIndicator size="small" color={theme.white} />
           ) : (
-            <Text style={globalStyles.loginButtonText}>Entrar</Text>
+            <Text style={styles.loginButtonText}>Entrar</Text>
           )}
         </TouchableOpacity>
 
-        <Text style={globalStyles.loginText}>Ainda não tem conta?</Text>
+        <Text style={styles.loginText}>Ainda não tem conta?</Text>
 
         <TouchableOpacity
-          style={globalStyles.loginButtonCadastro}
+          style={styles.loginButtonCadastro}
           onPress={() => router.push("/cadastro")}
         >
           {loadingRegister ? (
-            <ActivityIndicator size="small" color={COLORS.white} />
+            <ActivityIndicator size="small" color={theme.white} />
           ) : (
-            <Text style={globalStyles.loginButtonText}>Cadastre-se</Text>
+            <Text style={styles.loginButtonText}>Cadastre-se</Text>
           )}
         </TouchableOpacity>
       </View>

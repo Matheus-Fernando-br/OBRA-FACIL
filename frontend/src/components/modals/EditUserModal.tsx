@@ -1,8 +1,8 @@
 import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/contexts/ThemeContext";
 
-import { globalStyles, COLORS } from "../../styles/globalStyles";
 import { AppInput } from "../forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { documentMask, emailMask } from "@/components/forms/mask";
@@ -23,6 +23,8 @@ interface Props {
 }
 
 export function EditUserModal({ visible, onClose, user }: Props) {
+  const { styles, theme } = useTheme();
+
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [documento, setDocumento] = useState("");
@@ -117,23 +119,23 @@ export function EditUserModal({ visible, onClose, user }: Props) {
             maxHeight: "100%", // <-- importante
           }}
         >
-          <View style={[globalStyles.addCard]}>
-            <View style={globalStyles.modalHeader}>
-            <Pressable onPress={onClose} style={globalStyles.leftAction}>
-                <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+          <View style={[styles.addCard]}>
+            <View style={styles.modalHeader}>
+            <Pressable onPress={onClose} style={styles.leftAction}>
+                <Ionicons name="arrow-back" size={25} color={theme.text} />
               </Pressable>
-              <Text style={globalStyles.addTitle}>Meu Perfil</Text>
+              <Text style={styles.addTitle}>Meu Perfil</Text>
 
-              <Pressable onPress={handleSave} style={globalStyles.rightAction}>
-                <View style={globalStyles.saveTextStack}>
-                  <Text style={globalStyles.saveText}>Atualizar</Text>
-                  <Text style={globalStyles.saveText}>Perfil</Text>
+              <Pressable onPress={handleSave} style={styles.rightAction}>
+                <View style={styles.saveTextStack}>
+                  <Text style={styles.saveText}>Atualizar</Text>
+                  <Text style={styles.saveText}>Perfil</Text>
                 </View>
-                <Ionicons name="download" size={20} color={COLORS.title} />
+                <Ionicons name="download" size={20} color={theme.title} />
               </Pressable>
             </View>
 
-            <View style={globalStyles.divider} />
+            <View style={styles.divider} />
 
             <ScrollView
               showsVerticalScrollIndicator
@@ -141,7 +143,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 paddingBottom: 20,
               }}
             >
-              <Text style={globalStyles.label}>Nome</Text>
+              <Text style={styles.label}>Nome</Text>
 
               <AppInput
                 value={nome}
@@ -149,7 +151,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 placeholder="Nome"
               />
 
-              <Text style={globalStyles.label}>Email</Text>
+              <Text style={styles.label}>Email</Text>
 
               <AppInput
                 value={email}
@@ -157,7 +159,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 placeholder="Email"
               />
 
-              <Text style={globalStyles.label}>CPF / CNPJ</Text>
+              <Text style={styles.label}>CPF / CNPJ</Text>
 
               <AppInput
                 value={documento}
@@ -165,21 +167,21 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 placeholder="CPF/CNPJ"
               />
 
-              <View style={globalStyles.divider} />
+              <View style={styles.divider} />
 
               {feedback !== "" && (
-                <Text style={globalStyles.feedback}>{feedback}</Text>
+                <Text style={styles.feedback}>{feedback}</Text>
               )}
 
               <AppButton
                 title={loading ? "Salvando..." : "Salvar alterações"}
                 onPress={handleSave}
-                color={COLORS.primary}
+                color={theme.primary}
               />
 
               <AppButton
                 title="Cancelar"
-                color={COLORS.danger}
+                color={theme.danger}
                 onPress={onClose}
               />
             </ScrollView>

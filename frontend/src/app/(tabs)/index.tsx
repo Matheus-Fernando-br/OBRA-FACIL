@@ -10,8 +10,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useCallback, useMemo } from "react";
 import { useFocusEffect } from "expo-router";
-import { globalStyles, COLORS } from "../../styles/globalStyles";
-
+import { useTheme } from "@/contexts/ThemeContext";
 import { DashboardCard } from "../../components/cards/DashboardCard";
 import { WorkCard } from "@/components/cards/obras/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
@@ -21,6 +20,7 @@ import { getClients, getUser, getBudgets, getWork } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { GradientBackground } from "@/styles/GradientBackground";
 export default function HomeScreen() {
+  const { styles, theme } = useTheme();
   const { token, user, setUser } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [budgets, setBudgets] = useState<Orcamento[]>([]);
@@ -92,77 +92,83 @@ export default function HomeScreen() {
   );
 
   return (
-    <GradientBackground style={globalStyles.container}>
+    <GradientBackground style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={globalStyles.homeHeader}>
-          <View style={{ flexDirection: "column" }}>
-            <Text style={globalStyles.title}>
-              <Text style={{ color: COLORS.text }}>Olá, </Text>
-              {user?.nome || "Usuário"} 👋
-            </Text>
+        <View style={styles.homeHeader}>
+          <View
+            style={[
+              styles.row,
+              {
+                alignItems: "center",
+                justifyContent: "space-between",
+                flex: 1,
+              },
+            ]}
+          >
+            <View style={styles.column}>
+              <Text style={styles.title}>
+                <Text style={{ color: theme.text }}>Olá, </Text>
+                {user?.nome || "Usuário"} 👋
+              </Text>
 
-            <Text style={globalStyles.subtitle}>
-              Aqui está o resumo dos seus projetos!
-            </Text>
+              <Text style={styles.subtitle}>
+                Aqui está o resumo dos seus projetos!
+              </Text>
+            </View>
+
+            <View style={{ justifyContent: "center" }}>
+              <Ionicons name="person-circle" size={60} color={theme.text} />
+            </View>
           </View>
-          <Image
-            source={require("../../assets/images/profile.png")}
-            style={globalStyles.profileImageIndex}
-          />
         </View>
-        <View
-          style={[
-            globalStyles.section,
-            { backgroundColor: COLORS.white },
-          ]}
-        >
-          <Text style={globalStyles.sectionTitle}>Resumo geral:</Text>
+        <View style={[styles.section, { backgroundColor: theme.white }]}>
+          <Text style={styles.sectionTitle}>Resumo geral:</Text>
 
-          <View style={globalStyles.dashboardGrid}>
+          <View style={styles.dashboardGrid}>
             <DashboardCard
               title="Orçamentos Pendentes"
               value={
                 loading ? (
-                  <ActivityIndicator size="small" color={COLORS.white} />
+                  <ActivityIndicator size="small" color={theme.white} />
                 ) : (
                   orcamentosPendentesCount.toString()
                 )
               }
               icon="document-text"
-              color={COLORS.title}
+              color={theme.title}
             />
 
             <DashboardCard
               title="Clientes"
               value={
                 loading ? (
-                  <ActivityIndicator size="small" color={COLORS.white} />
+                  <ActivityIndicator size="small" color={theme.white} />
                 ) : (
                   clientsList.length.toString()
                 )
               }
               icon="people"
-              color={COLORS.warning}
+              color={theme.warning}
             />
 
             <DashboardCard
               title="Obras"
               value={
                 loading ? (
-                  <ActivityIndicator size="small" color={COLORS.white} />
+                  <ActivityIndicator size="small" color={theme.white} />
                 ) : (
                   obrasCount.toString()
                 )
               }
               icon="hammer"
-              color={COLORS.primary}
+              color={theme.primary}
             />
 
             <DashboardCard
               title="Orçamento Aprovado"
               value={
                 loading ? (
-                  <ActivityIndicator size="small" color={COLORS.white} />
+                  <ActivityIndicator size="small" color={theme.white} />
                 ) : (
                   faturamentoTotal.toLocaleString("pt-BR", {
                     style: "currency",
@@ -173,28 +179,28 @@ export default function HomeScreen() {
                 )
               }
               icon="cash"
-              color={COLORS.success}
+              color={theme.success}
               valueStyle={{ fontSize: 14 }}
             />
           </View>
         </View>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.section}>
-          <View style={globalStyles.quickAccessHeader}>
-            <Text style={globalStyles.sectionTitle}>Acesso rápido:</Text>
+        <View style={styles.divider} />
+        <View style={styles.section}>
+          <View style={styles.quickAccessHeader}>
+            <Text style={styles.sectionTitle}>Acesso rápido:</Text>
 
-            <Pressable style={globalStyles.quickAccessEditButton}>
-              <Ionicons name="pencil" size={25} color={COLORS.primary} />
+            <Pressable style={styles.quickAccessEditButton}>
+              <Ionicons name="pencil" size={25} color={theme.primary} />
             </Pressable>
           </View>
-          <View style={globalStyles.quickAccessRow}>
+          <View style={styles.quickAccessRow}>
             <QuickAccessCard
               title="Novo Orçamento"
               icon="document-text"
               onPress={() => {
                 router.replace("/orcamentos");
               }}
-              color={COLORS.title}
+              color={theme.title}
             />
 
             <QuickAccessCard
@@ -203,7 +209,7 @@ export default function HomeScreen() {
               onPress={() => {
                 router.replace("/clientes");
               }}
-              color={COLORS.success}
+              color={theme.success}
             />
 
             <QuickAccessCard
@@ -212,14 +218,14 @@ export default function HomeScreen() {
               onPress={() => {
                 router.replace("/configuracoes");
               }}
-              color={COLORS.textSecondary}
+              color={theme.textSecondary}
             />
           </View>
         </View>
-        <View style={globalStyles.divider} />
+        <View style={styles.divider} />
 
-        <View style={globalStyles.section}>
-          <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Obras em andamento</Text>
 
           {works.map((work) => {
             const budget = getBudget(work);

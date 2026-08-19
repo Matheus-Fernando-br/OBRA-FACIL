@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { phoneMask } from "@/components/forms/mask";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   name: string;
@@ -20,6 +20,8 @@ export function ClientCard({
   onEdit,
   onDelete,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
 
@@ -56,7 +58,7 @@ export function ClientCard({
   const telefone = phoneMask(phone || "");
 
   return (
-    <Pressable onPress={onDetails} style={globalStyles.clientCard}>
+    <Pressable onPress={onDetails} style={styles.clientCard}>
       {/* Avatar */}
 
       <View
@@ -74,7 +76,7 @@ export function ClientCard({
           style={{
             fontSize: 18,
             fontWeight: "700",
-            color: COLORS.primary,
+            color: theme.primary,
           }}
         >
           {getInitials(name)}
@@ -84,24 +86,24 @@ export function ClientCard({
       {/* Informações */}
 
       <View style={{ flex: 1 }}>
-        <Text style={globalStyles.clientCardName}>{name}</Text>
+        <Text style={styles.clientCardName}>{name}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>{email}</Text>
+        <Text style={styles.clientCardInfo}>{email}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>{telefone}</Text>
+        <Text style={styles.clientCardInfo}>{telefone}</Text>
       </View>
 
-      <View style={globalStyles.dividerVertical} />
+      <View style={styles.dividerVertical} />
 
       {/* Ações */}
 
-      <View style={globalStyles.clientIcons}>
+      <View style={styles.clientIcons}>
         <Pressable onPress={onEdit}>
-          <Ionicons name="pencil" size={30} color={COLORS.primary} />
+          <Ionicons name="pencil" size={30} color={theme.primary} />
         </Pressable>
 
         <Pressable onPress={onDelete}>
-          <Ionicons name="trash-outline" size={30} color={COLORS.danger} />
+          <Ionicons name="trash-outline" size={30} color={theme.danger} />
         </Pressable>
       </View>
     </Pressable>

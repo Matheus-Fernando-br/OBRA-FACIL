@@ -1,8 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-
-import { COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -13,6 +12,8 @@ export function PageHeader({
   title,
   subtitle,
 }: Props) {
+  const { theme } = useTheme();
+
   return (
     <View
       style={{
@@ -30,12 +31,12 @@ export function PageHeader({
         <Ionicons
           name="arrow-back"
           size={24}
-          color={COLORS.title}
+          color={theme.title}
         />
 
         <Text
           style={{
-            color: COLORS.title,
+            color: theme.title,
             marginLeft: 8,
             fontWeight: "600",
             fontSize: 16,
@@ -47,7 +48,7 @@ export function PageHeader({
 
       <Text
         style={{
-          color: COLORS.text,
+          color: theme.text,
           fontSize: 30,
           fontWeight: "700",
         }}
@@ -58,7 +59,7 @@ export function PageHeader({
       {subtitle && (
         <Text
           style={{
-            color: COLORS.textSecondary,
+            color: theme.textSecondary,
             marginTop: 6,
             fontSize: 15,
           }}
