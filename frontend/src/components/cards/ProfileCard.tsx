@@ -46,7 +46,7 @@ export function ProfileCard({
         </Text>
 
         <Text style={globalStyles.profileEmail}>
-          {email}
+          E-mail: {email}
         </Text>
       </View>
 

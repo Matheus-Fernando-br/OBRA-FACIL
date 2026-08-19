@@ -115,7 +115,7 @@ export const DEFAULT_DATE_FILTER: DateFilter = {
 };
 
 export const DEFAULT_CLIENT_FILTERS: ClientFilters = {
-  sort: "asc",
+  sort: null,
   personType: "all",
   budgetQuantity: "all",
 };

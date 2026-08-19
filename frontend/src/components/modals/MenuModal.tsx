@@ -1,4 +1,4 @@
-import { useTheme } from "@/contexts/ThemeContext";
+import { useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -7,8 +7,13 @@ import {
   Image,
   Pressable,
   ScrollView,
+  Animated,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
+import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface Props {
@@ -17,266 +22,455 @@ interface Props {
   onOptionPress?: (option: string) => void;
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const MENU_WIDTH = Math.min(320, SCREEN_WIDTH * 0.82);
+
 export function MenuModal({ visible, onClose, onOptionPress }: Props) {
   const { isDark, theme, toggleTheme } = useTheme();
 
+  const { user } = useAuth();
+
+  const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
+
+  const overlayAnim = useRef(new Animated.Value(0)).current;
+
+  /*
+   * ABRIR MENU
+   */
+  useEffect(() => {
+    if (!visible) return;
+
+    slideAnim.setValue(-MENU_WIDTH);
+    overlayAnim.setValue(0);
+
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        damping: 24,
+        stiffness: 180,
+        mass: 0.8,
+      }),
+
+      Animated.timing(overlayAnim, {
+        toValue: 1,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [visible]);
+
+  /*
+   * FECHAR MENU
+   */
+  const handleClose = () => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: -MENU_WIDTH,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+
+      Animated.timing(overlayAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (finished) {
+        onClose();
+      }
+    });
+  };
+
+  /*
+   * OPÇÃO DO MENU
+   */
   const handleOptionPress = (option: string) => {
     onOptionPress?.(option);
-    onClose();
+
+    handleClose();
+  };
+
+  const menuTextColor = theme.text;
+
+  const menuSecondaryColor = theme.textSecondary ?? COLORS.textSecondary;
+
+  const iconColor = theme.text;
+
+  /*
+   * ITEM DO MENU
+   */
+  const renderMenuItem = (
+    option: string,
+    icon: keyof typeof Ionicons.glyphMap,
+    label: string,
+    subtitle?: string,
+  ) => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.7}
+        onPress={() => handleOptionPress(option)}
+        style={globalStyles.menuItem}
+      >
+        <View
+          style={[
+            globalStyles.menuIcon,
+            {
+              backgroundColor: isDark
+                ? "rgba(255,255,255,0.07)"
+                : "rgba(0,0,0,0.045)",
+            },
+          ]}
+        >
+          <Ionicons name={icon} size={21} color={iconColor} />
+        </View>
+
+        <View style={globalStyles.menuItemContent}>
+          <Text
+            style={[
+              globalStyles.menuItemText,
+              {
+                color: menuTextColor,
+              },
+            ]}
+          >
+            {label}
+          </Text>
+
+          {subtitle && (
+            <Text
+              style={[
+                globalStyles.menuItemSubtitle,
+                {
+                  color: menuSecondaryColor,
+                },
+              ]}
+            >
+              {subtitle}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  /*
+   * TÍTULO DA SEÇÃO
+   */
+  const renderSectionTitle = (title: string) => {
+    return (
+      <Text
+        style={[
+          globalStyles.menuSectionTitle,
+          {
+            color: menuSecondaryColor,
+          },
+        ]}
+      >
+        {title}
+      </Text>
+    );
   };
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      animationType="none"
+      onRequestClose={handleClose}
+      statusBarTranslucent
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.45)",
-        }}
-      >
-        {/* Área para fechar clicando fora */}
-        <Pressable
-          onPress={onClose}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-          }}
-        />
-        <ScrollView>
-          {/* MENU */}
-          <View
+      <View style={globalStyles.menuContainer}>
+        {/* FUNDO ESCURO */}
+
+        <Animated.View
+          style={[
+            globalStyles.menuOverlay,
+            {
+              opacity: overlayAnim,
+            },
+          ]}
+        >
+          <Pressable
             style={{
-              width: 300,
-              minHeight: "100%",
-              backgroundColor: theme.white,
-              paddingHorizontal: 20,
-              paddingTop: 45,
-              paddingBottom: 25,
-              elevation: 10,
-              shadowColor: COLORS.text,
-              shadowOffset: {
-                width: 2,
-                height: 0,
-              },
-              shadowOpacity: 0.2,
-              shadowRadius: 8,
+              flex: 1,
             }}
+            onPress={handleClose}
+          />
+        </Animated.View>
+
+        {/* MENU */}
+
+        <Animated.View
+          style={[
+            globalStyles.menu,
+            {
+              width: MENU_WIDTH,
+              backgroundColor: theme.white,
+              transform: [
+                {
+                  translateX: slideAnim,
+                },
+              ],
+            },
+          ]}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={globalStyles.menuScroll}
+            bounces={false}
           >
-            {/* LOGO */}
-            <View
-              style={{
-                alignItems: "center",
-                marginBottom: 25,
-              }}
-            >
+            {/* ============================== */}
+            {/* CABEÇALHO */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuHeader}>
+              {/* X */}
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={handleClose}
+                style={[
+                  globalStyles.menuCloseButton,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.07)"
+                      : "rgba(0,0,0,0.045)",
+                  },
+                ]}
+              >
+                <Ionicons name="close" size={23} color={menuTextColor} />
+              </TouchableOpacity>
+
+              {/* LOGO */}
+
               <Image
                 source={require("../../assets/images/logo_titulo.png")}
-                style={{
-                  width: 200,
-                  height: 90,
-                  resizeMode: "contain",
-                }}
+                style={globalStyles.menuLogo}
               />
-            </View>
 
-            {/* DIVISOR */}
-            <View style={globalStyles.divider} />
+              {/* USUÁRIO */}
 
-            {/* OPÇÕES */}
-            <View
-              style={{
-                marginTop: 15,
-              }}
-            >
-              {/* OPÇÃO 1 */}
-              <TouchableOpacity
-                onPress={() => handleOptionPress("inicio")}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 16,
-                }}
-              >
-                <Ionicons
-                  name="home-outline"
-                  size={23}
-                  color={isDark ? COLORS.white : COLORS.text}
-                />
-
+              <View style={globalStyles.menuUserInfo}>
                 <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 16,
-                    color: isDark ? COLORS.white : COLORS.text,
-                    fontWeight: "500",
-                  }}
+                  style={[
+                    globalStyles.menuUserName,
+                    {
+                      color: menuTextColor,
+                    },
+                  ]}
+                  numberOfLines={1}
                 >
-                  Início
+                  {user?.nome || "Usuário"}
                 </Text>
-              </TouchableOpacity>
 
-              {/* OPÇÃO 2 */}
-              <TouchableOpacity
-                onPress={() => handleOptionPress("clientes")}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 16,
-                }}
-              >
-                <Ionicons
-                  name="people-outline"
-                  size={23}
-                  color={isDark ? COLORS.white : COLORS.text}
-                />
+                <View style={globalStyles.menuUserRole}>
+                  <Ionicons
+                    name="shield-checkmark-outline"
+                    size={14}
+                    color={menuSecondaryColor}
+                  />
 
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 16,
-                    color: isDark ? COLORS.white : COLORS.text,
-                    fontWeight: "500",
-                  }}
-                >
-                  Clientes
-                </Text>
-              </TouchableOpacity>
-
-              {/* OPÇÃO 3 */}
-              <TouchableOpacity
-                onPress={() => handleOptionPress("servicos")}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 16,
-                }}
-              >
-                <Ionicons
-                  name="construct-outline"
-                  size={23}
-                  color={isDark ? COLORS.white : COLORS.text}
-                />
-
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 16,
-                    color: isDark ? COLORS.white : COLORS.text,
-                    fontWeight: "500",
-                  }}
-                >
-                  Serviços
-                </Text>
-              </TouchableOpacity>
-
-              {/* OPÇÃO 4 */}
-              <TouchableOpacity
-                onPress={() => handleOptionPress("configuracoes")}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  paddingVertical: 16,
-                }}
-              >
-                <Ionicons
-                  name="settings-outline"
-                  size={23}
-                  color={isDark ? COLORS.white : COLORS.text}
-                />
-
-                <Text
-                  style={{
-                    marginLeft: 15,
-                    fontSize: 16,
-                    color: isDark ? COLORS.white : COLORS.text,
-                    fontWeight: "500",
-                  }}
-                >
-                  Configurações
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* ESPAÇO */}
-            <View style={{ flex: 1 }} />
-
-            {/* DIVISOR */}
-            <View style={globalStyles.divider} />
-
-            {/* TEMA */}
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingVertical: 16,
-                paddingHorizontal: 12,
-                borderRadius: 12,
-                backgroundColor: isDark
-                  ? "rgba(255,255,255,0.06)"
-                  : "rgba(0,0,0,0.04)",
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <Ionicons
-                  name={isDark ? "moon" : "sunny"}
-                  size={22}
-                  color={theme.text}
-                />
-
-                <Text
-                  style={{
-                    marginLeft: 14,
-                    fontSize: 15,
-                    fontWeight: "600",
-                    color: theme.text,
-                  }}
-                >
-                  {isDark ? "Modo escuro" : "Modo claro"}
-                </Text>
+                  <Text
+                    style={[
+                      globalStyles.menuUserRoleText,
+                      {
+                        color: menuSecondaryColor,
+                      },
+                    ]}
+                  >
+                    Administrador
+                  </Text>
+                </View>
               </View>
+            </View>
 
-              <Ionicons
-                name="swap-horizontal"
-                size={20}
-                color={theme.textSecondary}
-              />
-            </TouchableOpacity>
+            {/* DIVISOR */}
 
-            {/* FECHAR */}
-            <TouchableOpacity
-              onPress={onClose}
-              style={{
-                marginTop: 5,
-                paddingVertical: 12,
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: COLORS.danger,
-                  fontSize: 14,
-                  fontWeight: "600",
-                }}
+            <View
+              style={[
+                globalStyles.menuDivider,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(255,255,255,0.10)"
+                    : "rgba(0,0,0,0.08)",
+                },
+              ]}
+            />
+
+            {/* ============================== */}
+            {/* PRINCIPAL */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuSection}>
+              {renderSectionTitle("PRINCIPAL")}
+
+              {renderMenuItem("inicio", "home-outline", "Início")}
+
+              {renderMenuItem("clientes", "people-outline", "Clientes")}
+
+              {renderMenuItem("obras", "business-outline", "Obras")}
+
+              {renderMenuItem(
+                "orcamentos",
+                "document-text-outline",
+                "Orçamentos",
+              )}
+
+              {renderMenuItem("servicos", "construct-outline", "Serviços")}
+            </View>
+
+            {/* ============================== */}
+            {/* GESTÃO */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuSection}>
+              {renderSectionTitle("GESTÃO")}
+
+              {renderMenuItem("relatorios", "bar-chart-outline", "Relatórios")}
+
+              {renderMenuItem(
+                "documentos",
+                "document-attach-outline",
+                "Documentos / PDFs",
+              )}
+
+              {renderMenuItem("materiais", "cube-outline", "Materiais")}
+
+              {renderMenuItem("financeiro", "wallet-outline", "Financeiro")}
+            </View>
+
+            {/* ============================== */}
+            {/* SISTEMA */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuSection}>
+              {renderSectionTitle("SISTEMA")}
+
+              {renderMenuItem(
+                "configuracoes",
+                "settings-outline",
+                "Configurações",
+              )}
+
+              {/* APARÊNCIA */}
+
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={toggleTheme}
+                style={globalStyles.menuItem}
               >
-                Fechar
+                <View
+                  style={[
+                    globalStyles.menuIcon,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.07)"
+                        : "rgba(0,0,0,0.045)",
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={isDark ? "moon-outline" : "sunny-outline"}
+                    size={21}
+                    color={iconColor}
+                  />
+                </View>
+
+                <View style={globalStyles.menuItemContent}>
+                  <Text
+                    style={[
+                      globalStyles.menuItemText,
+                      {
+                        color: menuTextColor,
+                      },
+                    ]}
+                  >
+                    Aparência
+                  </Text>
+
+                  <Text
+                    style={[
+                      globalStyles.menuItemSubtitle,
+                      {
+                        color: menuSecondaryColor,
+                      },
+                    ]}
+                  >
+                    {isDark ? "Modo escuro" : "Modo claro"}
+                  </Text>
+                </View>
+
+                <Ionicons
+                  name="swap-horizontal-outline"
+                  size={19}
+                  color={menuSecondaryColor}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* ============================== */}
+            {/* OUTROS */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuSection}>
+              {renderSectionTitle("OUTROS")}
+
+              {renderMenuItem(
+                "ajuda",
+                "help-circle-outline",
+                "Ajuda / Suporte",
+              )}
+
+              {renderMenuItem(
+                "sobre",
+                "information-circle-outline",
+                "Sobre o Obra Fácil",
+              )}
+            </View>
+
+            {/* ============================== */}
+            {/* RODAPÉ */}
+            {/* ============================== */}
+
+            <View style={globalStyles.menuFooter}>
+              <View
+                style={[
+                  globalStyles.menuFooterDivider,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.10)"
+                      : "rgba(0,0,0,0.08)",
+                  },
+                ]}
+              />
+
+              <Text
+                style={[
+                  globalStyles.menuFooterText,
+                  {
+                    color: menuSecondaryColor,
+                  },
+                ]}
+              >
+                Obra Fácil
               </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+
+              <Text
+                style={[
+                  globalStyles.menuVersionText,
+                  {
+                    color: menuSecondaryColor,
+                  },
+                ]}
+              >
+                Versão 1.0.0
+              </Text>
+            </View>
+          </ScrollView>
+        </Animated.View>
       </View>
     </Modal>
   );

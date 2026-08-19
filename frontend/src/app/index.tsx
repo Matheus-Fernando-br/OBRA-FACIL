@@ -31,6 +31,9 @@ export default function LoginScreen() {
 
       await login(email, password);
       router.replace("/(tabs)");
+      console.log("LOGIN REALIZADO COM SUCESSO!");
+      console.log("----------------------------");
+      console.log("Usuário: "+email)
     } catch (error: any) {
       console.log(error);
 
@@ -45,10 +48,6 @@ export default function LoginScreen() {
       setTimeout(() => {
         setFeedback("");
       }, 7000);
-    }
-    finally{
-      console.log("LOGIN REALIZADO COM SUCESSO!");
-      console.log("----------------------------");
     }
   }
 
