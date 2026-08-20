@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { verifyEmailCode, resendVerificationCode } from "../../services/api";
 
 interface Props {
@@ -15,6 +15,8 @@ interface Props {
 }
 
 export function VerificarEmail({ email, onBack, onVerified }: Props) {
+  const { styles, theme } = useTheme();
+
   const [codigo, setCodigo] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -91,14 +93,14 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
           marginBottom: 25,
         }}
       >
-        <Ionicons name="mail-outline" size={65} color={COLORS.primary} />
+        <Ionicons name="mail-outline" size={65} color={theme.primary} />
       </View>
 
-      <Text style={globalStyles.title}>Verifique seu e-mail</Text>
+      <Text style={styles.title}>Verifique seu e-mail</Text>
 
       <Text
         style={[
-          globalStyles.subtitle,
+          styles.subtitle,
           {
             marginTop: 10,
             marginBottom: 25,
@@ -110,7 +112,7 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
 
       <View
         style={{
-          backgroundColor: COLORS.card,
+          backgroundColor: theme.card,
           borderRadius: 12,
           padding: 15,
           marginBottom: 25,
@@ -119,7 +121,7 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
       >
         <Text
           style={{
-            color: COLORS.white,
+            color: theme.white,
             fontSize: 16,
             fontWeight: "600",
           }}
@@ -128,7 +130,7 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
         </Text>
       </View>
 
-      <Text style={globalStyles.label}>Código de verificação</Text>
+      <Text style={styles.label}>Código de verificação</Text>
 
       <AppInput
         placeholder="Digite o código de 6 dígitos"
@@ -138,23 +140,23 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
         maxLength={6}
       />
 
-      {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
+      {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
 
       <AppButton
         title={loading ? "Verificando..." : "Verificar e-mail"}
         onPress={verificarCodigo}
         loading={loading}
-        color={COLORS.primary}
+        color={theme.primary}
       />
 
       <AppButton
         title={resending ? "Reenviando..." : "Reenviar código"}
         onPress={reenviarCodigo}
         loading={resending}
-        color={COLORS.success}
+        color={theme.success}
       />
 
-      <AppButton title="Voltar" onPress={onBack} color={COLORS.title} />
+      <AppButton title="Voltar" onPress={onBack} color={theme.title} />
     </View>
   );
 }

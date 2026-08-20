@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
 import { Checkbox } from "expo-checkbox";
@@ -254,6 +254,8 @@ export function ObrasForm({
   onSuccess,
   onEdit,
 }: ObrasFormProps) {
+  const { styles, theme } = useTheme();
+
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const isAdd = mode === "add";
@@ -583,32 +585,32 @@ export function ObrasForm({
   function getStatusColor(status: ObraStatus) {
     switch (status) {
       case "ENTREGUE":
-        return COLORS.primary;
+        return theme.primary;
 
       case "ADIANTADO":
-        return COLORS.success;
+        return theme.success;
 
       case "ATRASADO":
-        return COLORS.danger;
+        return theme.danger;
 
       case "CANCELADO":
-        return COLORS.danger;
+        return theme.danger;
 
       default:
-        return COLORS.warning;
+        return theme.warning;
     }
   }
 
   const [enderecoExpandido, setEnderecoExpandido] = useState(false);
 
   return (
-    <View style={globalStyles.container}>
-      <View style={globalStyles.modalHeader}>
-        <Pressable onPress={onClose} style={globalStyles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+    <View style={styles.container}>
+      <View style={styles.modalHeader}>
+        <Pressable onPress={onClose} style={styles.leftAction}>
+          <Ionicons name="arrow-back" size={25} color={theme.text} />
         </Pressable>
 
-        <Text style={globalStyles.addTitle}>
+        <Text style={styles.addTitle}>
           {mode === "add"
             ? "Novo Serviço"
             : mode === "edit"
@@ -618,35 +620,32 @@ export function ObrasForm({
 
         <Pressable
           onPress={mode === "details" ? onEdit : irParaSalvar}
-          style={globalStyles.rightAction}
+          style={styles.rightAction}
         >
-          <Text style={globalStyles.saveText}>
+          <Text style={styles.saveText}>
             {mode === "details" ? "Editar" : "Salvar"}
           </Text>
           <Ionicons
             name={mode === "details" ? "pencil-sharp" : "download"}
             size={25}
-            color={COLORS.title}
+            color={theme.title}
           />
         </Pressable>
       </View>
 
       <ScrollView ref={scrollRef} style={{ flex: 1 }}>
-        <Text style={globalStyles.subtitle}>Informações Gerais</Text>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.card}>
+        <Text style={styles.subtitle}>Informações Gerais</Text>
+        <View style={styles.divider} />
+        <View style={styles.card}>
           <Text
-            style={[
-              globalStyles.title,
-              { marginVertical: 10, textAlign: "center" },
-            ]}
+            style={[styles.title, { marginVertical: 10, textAlign: "center" }]}
           >
             {orcamentoAtrelado?.nome ?? ""}
           </Text>
           {!isAdd && (
             <View
               style={[
-                globalStyles.obraStatusBadge,
+                styles.obraStatusBadge,
                 {
                   backgroundColor: `${getStatusColor(obraStatusCalculado)}20`,
                 },
@@ -654,7 +653,7 @@ export function ObrasForm({
             >
               <Text
                 style={[
-                  globalStyles.obraStatusText,
+                  styles.obraStatusText,
                   {
                     color: getStatusColor(obraStatusCalculado),
                   },
@@ -664,13 +663,13 @@ export function ObrasForm({
               </Text>
             </View>
           )}
-          <Text style={globalStyles.label}>Cliente:</Text>
-          <View style={globalStyles.divider} />
+          <Text style={styles.label}>Cliente:</Text>
+          <View style={styles.divider} />
 
           {loadingClient ? (
             <View
               style={[
-                globalStyles.clientCard,
+                styles.clientCard,
                 {
                   justifyContent: "center",
                   alignItems: "center",
@@ -679,9 +678,9 @@ export function ObrasForm({
                 },
               ]}
             >
-              <ActivityIndicator size="large" color={COLORS.primary} />
+              <ActivityIndicator size="large" color={theme.primary} />
 
-              <Text style={globalStyles.subtitle}>Carregando cliente...</Text>
+              <Text style={styles.subtitle}>Carregando cliente...</Text>
             </View>
           ) : (
             <ClientCardSelect
@@ -694,12 +693,12 @@ export function ObrasForm({
             />
           )}
 
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 Data de Início Prevista:
                 {!isReadOnly && !isEdit && (
-                  <Text style={globalStyles.obrigatorio}>*</Text>
+                  <Text style={styles.obrigatorio}>*</Text>
                 )}
               </Text>
               <AppInput
@@ -713,12 +712,10 @@ export function ObrasForm({
             </View>
 
             {!isAdd && (
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>
+              <View style={styles.column}>
+                <Text style={styles.label}>
                   Data de Início Real:
-                  {!isReadOnly && (
-                    <Text style={globalStyles.obrigatorio}>*</Text>
-                  )}
+                  {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                 </Text>
                 <AppInput
                   placeholder="DD/MM/YYYY"
@@ -733,11 +730,11 @@ export function ObrasForm({
           </View>
           {!isAdd && (
             <View style={{ marginTop: 10 }}>
-              <Text style={globalStyles.label}>Conclusão Geral:</Text>
+              <Text style={styles.label}>Conclusão Geral:</Text>
 
               <View
                 style={[
-                  globalStyles.progressContainer,
+                  styles.progressContainer,
                   {
                     width: "100%",
                     marginTop: 8,
@@ -746,7 +743,7 @@ export function ObrasForm({
               >
                 <View
                   style={[
-                    globalStyles.progressBarBackground,
+                    styles.progressBarBackground,
                     {
                       minWidth: 0,
                     },
@@ -754,7 +751,7 @@ export function ObrasForm({
                 >
                   <View
                     style={[
-                      globalStyles.progressBarFill,
+                      styles.progressBarFill,
                       {
                         width: `${Math.min(
                           100,
@@ -767,7 +764,7 @@ export function ObrasForm({
 
                 <Text
                   style={[
-                    globalStyles.workCardProgress,
+                    styles.workCardProgress,
                     {
                       marginLeft: 10,
                     },
@@ -779,14 +776,14 @@ export function ObrasForm({
             </View>
           )}
         </View>
-        <Text style={globalStyles.subtitle}>Endereço da Obra</Text>
-        <View style={globalStyles.divider} />
+        <Text style={styles.subtitle}>Endereço da Obra</Text>
+        <View style={styles.divider} />
 
-        <View style={globalStyles.card}>
+        <View style={styles.card}>
           {/* ENDEREÇO RESUMIDO */}
-          <View style={globalStyles.row}>
+          <View style={styles.row}>
             <View style={{ flex: 1 }}>
-              <Text style={globalStyles.label}>Endereço:</Text>
+              <Text style={styles.label}>Endereço:</Text>
 
               <AppInput
                 value={
@@ -802,17 +799,17 @@ export function ObrasForm({
           {/* CAMPOS EXPANDIDOS */}
           {enderecoExpandido && (
             <>
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>CEP:</Text>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>CEP:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.CEP ?? ""}
                     editable={false}
                   />
                 </View>
 
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Estado:</Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Estado:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.estado ?? ""}
                     editable={false}
@@ -820,17 +817,17 @@ export function ObrasForm({
                 </View>
               </View>
 
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Cidade:</Text>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Cidade:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.cidade ?? ""}
                     editable={false}
                   />
                 </View>
 
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Bairro:</Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Bairro:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.bairro ?? ""}
                     editable={false}
@@ -838,24 +835,24 @@ export function ObrasForm({
                 </View>
               </View>
 
-              <Text style={globalStyles.label}>Logradouro:</Text>
+              <Text style={styles.label}>Logradouro:</Text>
 
               <AppInput
                 value={orcamentoAtrelado?.endereco?.rua ?? ""}
                 editable={false}
               />
 
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Número:</Text>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Número:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.numero ?? ""}
                     editable={false}
                   />
                 </View>
 
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Complemento:</Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Complemento:</Text>
                   <AppInput
                     value={orcamentoAtrelado?.endereco?.complemento ?? ""}
                     editable={false}
@@ -878,7 +875,7 @@ export function ObrasForm({
           >
             <Text
               style={{
-                color: COLORS.primary,
+                color: theme.primary,
                 fontWeight: "600",
               }}
             >
@@ -890,28 +887,28 @@ export function ObrasForm({
             <Ionicons
               name={enderecoExpandido ? "chevron-up" : "chevron-down"}
               size={18}
-              color={COLORS.primary}
+              color={theme.primary}
               style={{ marginLeft: 5 }}
             />
           </Pressable>
         </View>
-        <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
-        <View style={globalStyles.divider} />
+        <Text style={styles.subtitle}>Categorias e Serviços</Text>
+        <View style={styles.divider} />
         {categoriasCalculadas.map((categoria, idx) => (
-          <View key={categoria.id} style={globalStyles.card}>
-            <Text style={globalStyles.label}>Nome da Categoria {idx + 1}:</Text>
+          <View key={categoria.id} style={styles.card}>
+            <Text style={styles.label}>Nome da Categoria {idx + 1}:</Text>
             <AppInput value={categoria.nome} editable={false} />
-            <View style={globalStyles.row}>
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Dias Previstos:</Text>
+            <View style={styles.row}>
+              <View style={styles.column}>
+                <Text style={styles.label}>Dias Previstos:</Text>
                 <AppInput
                   value={String(categoria.qt_dias_prevista || 0)}
                   editable={false}
                 />
               </View>
               {!isAdd && (
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Dias Reais:</Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Dias Reais:</Text>
                   <AppInput
                     value={String(categoria.qt_dias_real || 0)}
                     editable={false}
@@ -920,15 +917,13 @@ export function ObrasForm({
               )}
             </View>
             {!isAdd && (
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Status da Categoria:</Text>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Status da Categoria:</Text>
                   <AppInput value={categoria.status} editable={false} />
                 </View>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>
-                    Progresso da Categoria:
-                  </Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Progresso da Categoria:</Text>
                   <AppInput
                     value={`${categoria.porcentagem_de_conclusao || 0}%`}
                     editable={false}
@@ -940,7 +935,7 @@ export function ObrasForm({
               <View key={servico.id} style={styles.serviceCard}>
                 <View
                   style={[
-                    globalStyles.obraStatusBadge,
+                    styles.obraStatusBadge,
                     {
                       backgroundColor: `${getStatusColor(servico.status)}20`,
                     },
@@ -948,7 +943,7 @@ export function ObrasForm({
                 >
                   <Text
                     style={[
-                      globalStyles.obraStatusText,
+                      styles.obraStatusText,
                       {
                         color: getStatusColor(servico.status),
                       },
@@ -958,12 +953,10 @@ export function ObrasForm({
                   </Text>
                 </View>
 
-                <Text style={globalStyles.label}>
-                  Nome do Serviço {sIdx + 1}:
-                </Text>
+                <Text style={styles.label}>Nome do Serviço {sIdx + 1}:</Text>
 
                 <AppInput value={servico.nome} editable={false} />
-                <Text style={globalStyles.label}>Descrição:</Text>
+                <Text style={styles.label}>Descrição:</Text>
                 <AppInput
                   placeholder="Informe detalhes sobre esse serviço"
                   onChangeText={(text) =>
@@ -972,12 +965,12 @@ export function ObrasForm({
                   value={servico.descricao}
                   editable={!isReadOnly}
                 />
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
+                <View style={styles.row}>
+                  <View style={styles.column}>
+                    <Text style={styles.label}>
                       Dias Previstos:
                       {!isReadOnly && !isEdit && (
-                        <Text style={globalStyles.obrigatorio}>*</Text>
+                        <Text style={styles.obrigatorio}>*</Text>
                       )}
                     </Text>
                     <AppInput
@@ -996,11 +989,11 @@ export function ObrasForm({
                     />
                   </View>
                   {!isAdd && (
-                    <View style={globalStyles.column}>
-                      <Text style={globalStyles.label}>
+                    <View style={styles.column}>
+                      <Text style={styles.label}>
                         Dias Reais:
                         {!isReadOnly && (
-                          <Text style={globalStyles.obrigatorio}>*</Text>
+                          <Text style={styles.obrigatorio}>*</Text>
                         )}
                       </Text>
                       <AppInput
@@ -1021,13 +1014,11 @@ export function ObrasForm({
                   )}
                 </View>
                 {!isAdd && (
-                  <View style={globalStyles.row}>
-                    <Text style={globalStyles.label}>
-                      O Serviço foi Concluído?
-                    </Text>
+                  <View style={styles.row}>
+                    <Text style={styles.label}>O Serviço foi Concluído?</Text>
                     <Checkbox
-                      color={servico.concluido ? COLORS.primary : undefined}
-                      style={globalStyles.checkbox}
+                      color={servico.concluido ? theme.primary : undefined}
+                      style={styles.checkbox}
                       disabled={isReadOnly}
                       value={servico.concluido ?? false}
                       onValueChange={(newValue) => {
@@ -1063,12 +1054,12 @@ export function ObrasForm({
             ))}
           </View>
         ))}
-        <Text style={globalStyles.subtitle}>Resumo da Obra</Text>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.card}>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data de Fim Prevista:</Text>
+        <Text style={styles.subtitle}>Resumo da Obra</Text>
+        <View style={styles.divider} />
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>Data de Fim Prevista:</Text>
               <AppInput
                 placeholder="DD/MM/YYYY"
                 value={dataFimPrevistaCalculada}
@@ -1077,8 +1068,8 @@ export function ObrasForm({
             </View>
 
             {!isAdd && (
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Data de Fim Real:</Text>
+              <View style={styles.column}>
+                <Text style={styles.label}>Data de Fim Real:</Text>
                 <AppInput
                   placeholder="DD/MM/YYYY"
                   value={dataFimRealCalculada}
@@ -1087,17 +1078,17 @@ export function ObrasForm({
               </View>
             )}
           </View>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Orçamento Aprovado:</Text>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>Orçamento Aprovado:</Text>
               <AppInput
                 value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
                 editable={false}
               />
             </View>
             {!isAdd && (
-              <View style={globalStyles.column}>
-                <Text style={globalStyles.label}>Total gasto:</Text>
+              <View style={styles.column}>
+                <Text style={styles.label}>Total gasto:</Text>
                 <AppInput
                   placeholder="R$ 0,00"
                   value={"R$ 0.00"}
@@ -1108,13 +1099,11 @@ export function ObrasForm({
           </View>
         </View>
 
-        {feedback !== "" && (
-          <Text style={globalStyles.feedback}>{feedback}</Text>
-        )}
+        {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
         {feedbackMessage && feedbackMessage !== "" && (
-          <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
+          <Text style={styles.feedback}>{feedbackMessage}</Text>
         )}
-        <View style={globalStyles.divider}></View>
+        <View style={styles.divider}></View>
         <AppButton
           title={
             mode === "add"
@@ -1125,7 +1114,7 @@ export function ObrasForm({
           }
           onPress={handleSubmit}
           loading={loading}
-          color={COLORS.primary}
+          color={theme.primary}
         />
         <AppButton
           title={
@@ -1137,20 +1126,11 @@ export function ObrasForm({
           }
           onPress={handleClose}
           loading={loadingClose}
-          color={COLORS.danger}
+          color={theme.danger}
         />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  serviceCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: 8,
-    padding: 15,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-  },
-});
+const styles = StyleSheet.create({});

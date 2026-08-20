@@ -1,10 +1,5 @@
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-} from "react-native";
-
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -19,8 +14,10 @@ export function AppButton({
   onPress,
   loading = false,
   disabled = false,
-  color = COLORS.title,
+  color,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   const isDisabled = loading || disabled;
 
   return (
@@ -40,9 +37,9 @@ export function AppButton({
       }}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={COLORS.white} />
+        <ActivityIndicator size="small" color={theme.white} />
       ) : (
-        <Text style={globalStyles.appButtonText}>{title}</Text>
+        <Text style={styles.appButtonText}>{title}</Text>
       )}
     </TouchableOpacity>
   );

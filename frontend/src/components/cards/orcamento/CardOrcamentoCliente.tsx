@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   name: string;
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
+  const { styles, theme } = useTheme();
+
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
 
@@ -21,7 +23,7 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
   }
 
   function getAvatarColor(nome: string) {
-    const colors = [
+    const theme = [
       "#DBEAFE",
       "#DCFCE7",
       "#FEF3C7",
@@ -40,24 +42,24 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
       hash = nome.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    return colors[Math.abs(hash) % colors.length];
+    return theme[Math.abs(hash) % theme.length];
   }
 
   function getStatusColor() {
     switch (status.toLowerCase()) {
       case "aprovado":
-        return COLORS.success;
+        return theme.success;
 
       case "recusado":
-        return COLORS.danger;
+        return theme.danger;
 
       default:
-        return COLORS.warning;
+        return theme.warning;
     }
   }
 
   return (
-    <View style={globalStyles.clientCard}>
+    <View style={styles.clientCard}>
       {/* Avatar */}
 
       <View
@@ -75,7 +77,7 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
           style={{
             fontSize: 18,
             fontWeight: "700",
-            color: COLORS.primary,
+            color: theme.primary,
           }}
         >
           {getInitials(name)}
@@ -92,10 +94,10 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
             justifyContent: "space-between",
           }}
         >
-          <Text style={globalStyles.clientCardName}>{name}</Text>
+          <Text style={styles.clientCardName}>{name}</Text>
           <View
             style={[
-              globalStyles.orcamentoStatusBadge,
+              styles.orcamentoStatusBadge,
               {
                 backgroundColor: `${getStatusColor()}20`,
               },
@@ -103,7 +105,7 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
           >
             <Text
               style={[
-                globalStyles.orcamentoStatusText,
+                styles.orcamentoStatusText,
                 {
                   color: getStatusColor(),
                 },
@@ -113,18 +115,16 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
             </Text>
           </View>
         </View>
-        <Text style={globalStyles.clientCardInfo}>
-          R$ {Number(value).toFixed(2)}
-        </Text>
+        <Text style={styles.clientCardInfo}>R$ {Number(value).toFixed(2)}</Text>
       </View>
 
-      <View style={globalStyles.dividerVertical} />
+      <View style={styles.dividerVertical} />
 
       {/* Ações */}
 
-      <View style={globalStyles.clientIcons}>
+      <View style={styles.clientIcons}>
         <Pressable onPress={onClick}>
-          <Ionicons name="eye" size={30} color={COLORS.primary} />
+          <Ionicons name="eye" size={30} color={theme.primary} />
         </Pressable>
       </View>
     </View>

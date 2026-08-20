@@ -2,100 +2,57 @@ import { useState } from "react";
 import { Pressable, Text } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
-
-import { COLORS } from "@/styles/globalStyles";
-
+import { useTheme } from "@/contexts/ThemeContext";
 import { BottomSheetSelect } from "./BottomSheetSelect";
 
-interface Props{
+interface Props {
+  title: string;
 
-title:string;
+  value: string;
 
-value:string;
+  options: string[];
 
-options:string[];
-
-onChange:(value:string)=>void;
-
+  onChange: (value: string) => void;
 }
 
-export function SettingsSelect({
+export function SettingsSelect({ title, value, options, onChange }: Props) {
+  const { theme } = useTheme();
 
-title,
-value,
-options,
-onChange
+  const [visible, setVisible] = useState(false);
 
-}:Props){
+  return (
+    <>
+      <Pressable
+        style={{
+          flexDirection: "row",
 
-const [visible,setVisible]=useState(false);
+          alignItems: "center",
+        }}
+        onPress={() => setVisible(true)}
+      >
+        <Text
+          style={{
+            fontWeight: "700",
 
-return(
+            color: theme.primary,
 
-<>
+            marginRight: 8,
+          }}
+        >
+          {value}
+        </Text>
 
-<Pressable
+        <Ionicons name="chevron-down" size={18} color={theme.primary} />
+      </Pressable>
 
-style={{
-
-flexDirection:"row",
-
-alignItems:"center"
-
-}}
-
-onPress={()=>setVisible(true)}
-
->
-
-<Text
-
-style={{
-
-fontWeight:"700",
-
-color:COLORS.primary,
-
-marginRight:8
-
-}}
-
->
-
-{value}
-
-</Text>
-
-<Ionicons
-
-name="chevron-down"
-
-size={18}
-
-color={COLORS.primary}
-
-/>
-
-</Pressable>
-
-<BottomSheetSelect
-
-visible={visible}
-
-title={title}
-
-options={options}
-
-value={value}
-
-onClose={()=>setVisible(false)}
-
-onSelect={onChange}
-
-/>
-
-</>
-
-)
-
+      <BottomSheetSelect
+        visible={visible}
+        title={title}
+        options={options}
+        value={value}
+        onClose={() => setVisible(false)}
+        onSelect={onChange}
+      />
+    </>
+  );
 }

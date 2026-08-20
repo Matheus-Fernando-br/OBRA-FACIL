@@ -1,17 +1,18 @@
 import { useState } from "react";
 import { TextInput, TextInputProps } from "react-native";
-import { COLORS } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props extends TextInputProps {}
 
 export function AppInput({ editable = true, style, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <TextInput
       {...rest}
       editable={editable}
-      placeholderTextColor={COLORS.placeholder}
+      placeholderTextColor={theme.placeholder}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
       style={[
@@ -19,17 +20,17 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
           width: "100%",
           minHeight: 58,
 
-          backgroundColor: editable ? COLORS.white : COLORS.border,
+          backgroundColor: editable ? theme.white : theme.border,
 
-          color: editable ? COLORS.text : COLORS.placeholder,
+          color: editable ? theme.text : theme.placeholder,
 
           borderWidth: 1.2,
 
           borderColor: editable
             ? focused
-              ? COLORS.primary
-              : COLORS.border
-            : COLORS.borderNull,
+              ? theme.primary
+              : theme.border
+            : theme.borderNull,
 
           borderRadius: 10,
 
@@ -38,7 +39,7 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
 
           marginBottom: 16,
 
-          shadowColor: editable ? COLORS.text : "transparent",
+          shadowColor: editable ? theme.text : "transparent",
           shadowOpacity: editable ? 0.08 : 0,
           shadowRadius: editable ? 4 : 0,
           shadowOffset: {

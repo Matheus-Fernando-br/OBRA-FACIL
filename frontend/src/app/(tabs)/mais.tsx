@@ -5,7 +5,7 @@ import { router } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
-
+import { COLORS } from "@/styles/globalStyles";
 import { OptionsCard } from "../../components/cards/OptionsCard";
 import { EditUserModal } from "../../components/modals/EditUserModal";
 import { ProfileCard } from "../../components/cards/ProfileCard";
@@ -84,6 +84,7 @@ export default function MaisScreen() {
               key={item.title}
               title={item.title}
               description={item.description}
+              iconColor={COLORS.white}
               icon={item.icon as any}
               onPress={() => router.push(item.route as any)}
             />

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { CardOrcamentoCliente } from "@/components/cards/orcamento/CardOrcamentoCliente";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "@/components/buttons/AppButton";
@@ -47,6 +47,8 @@ export function ClientForm({
   onBudgetDetails,
   onBudgetEdit,
 }: ClientFormProps) {
+  const { styles, theme } = useTheme();
+
   const { token } = useAuth();
   const isReadOnly = mode === "details";
 
@@ -352,17 +354,17 @@ export function ClientForm({
   // ===========================
 
   return (
-    <View style={globalStyles.container}>
-      <View style={globalStyles.modalHeader}>
+    <View style={styles.container}>
+      <View style={styles.modalHeader}>
         <Pressable
           onPress={onClose}
-          style={globalStyles.leftAction}
+          style={styles.leftAction}
           disabled={loadingSubmit}
         >
-          <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+          <Ionicons name="arrow-back" size={25} color={theme.text} />
         </Pressable>
 
-        <Text style={globalStyles.addTitle}>
+        <Text style={styles.addTitle}>
           {mode === "add"
             ? "Novo Cliente"
             : mode === "edit"
@@ -372,9 +374,9 @@ export function ClientForm({
 
         <Pressable
           onPress={mode === "details" ? onEdit : irParaSalvar}
-          style={globalStyles.rightAction}
+          style={styles.rightAction}
         >
-          <Text style={globalStyles.saveText}>
+          <Text style={styles.saveText}>
             {mode === "details" ? "Editar" : "Salvar"}
           </Text>
           <Ionicons
@@ -386,20 +388,20 @@ export function ClientForm({
                   : "pencil-sharp"
             }
             size={25}
-            color={COLORS.title}
+            color={theme.title}
           />
         </Pressable>
       </View>
 
       <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
-        <View style={globalStyles.addCard}>
-          <Text style={globalStyles.subtitle}>Informações Pessoais</Text>
+        <View style={styles.addCard}>
+          <Text style={styles.subtitle}>Informações Pessoais</Text>
 
-          <View style={globalStyles.divider} />
+          <View style={styles.divider} />
 
-          <Text style={globalStyles.label}>
+          <Text style={styles.label}>
             Nome Completo:
-            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+            {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
           </Text>
 
           <AppInput
@@ -408,20 +410,17 @@ export function ClientForm({
             onChangeText={setNome}
             editable={!isReadOnly}
           />
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 Tipo:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
               <Picker
                 selectedValue={tipoPessoa}
-                placeholder={COLORS.placeholder}
+                placeholder={theme.placeholder}
                 onValueChange={setTipoPessoa}
-                style={[
-                  globalStyles.picker,
-                  isReadOnly && globalStyles.pickerReadOnly,
-                ]}
+                style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
                 enabled={!isReadOnly}
               >
                 <Picker.Item label={"Selecione o tipo de Pessoa"} value="" />
@@ -430,10 +429,10 @@ export function ClientForm({
               </Picker>
             </View>
 
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 CPF / CNPJ:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
 
               <AppInput
@@ -445,16 +444,14 @@ export function ClientForm({
             </View>
           </View>
 
-          <Text style={[globalStyles.subtitle, { marginTop: 20 }]}>
-            Contato
-          </Text>
+          <Text style={[styles.subtitle, { marginTop: 20 }]}>Contato</Text>
 
-          <View style={globalStyles.divider} />
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+          <View style={styles.divider} />
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 E-mail:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
 
               <AppInput
@@ -464,10 +461,10 @@ export function ClientForm({
                 editable={!isReadOnly}
               />
             </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 Telefone:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
 
               <AppInput
@@ -479,11 +476,11 @@ export function ClientForm({
             </View>
           </View>
 
-          <Text style={globalStyles.subtitle}>Observação</Text>
+          <Text style={styles.subtitle}>Observação</Text>
 
-          <View style={globalStyles.divider} />
+          <View style={styles.divider} />
 
-          <Text style={globalStyles.label}>Descrição:</Text>
+          <Text style={styles.label}>Descrição:</Text>
 
           <AppInput
             placeholder="Descreva o cliente..."
@@ -495,8 +492,8 @@ export function ClientForm({
 
           {isReadOnly && (
             <>
-              <Text style={globalStyles.subtitle}>Orçamentos Associados</Text>
-              <View style={globalStyles.divider} />
+              <Text style={styles.subtitle}>Orçamentos Associados</Text>
+              <View style={styles.divider} />
               {loadingOrcamentos ? (
                 <Text>Carregando...</Text>
               ) : orcamentos && orcamentos.length > 0 ? (
@@ -512,16 +509,12 @@ export function ClientForm({
                   />
                 ))
               ) : (
-                <Text style={globalStyles.title}>
-                  Nenhum orçamento encontrado.
-                </Text>
+                <Text style={styles.title}>Nenhum orçamento encontrado.</Text>
               )}
-              <View style={globalStyles.divider} />
+              <View style={styles.divider} />
             </>
           )}
-          {feedback !== "" && (
-            <Text style={globalStyles.feedback}>{feedback}</Text>
-          )}
+          {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
 
           <View ref={salvarRef}>
             {!isReadOnly && (
@@ -529,7 +522,7 @@ export function ClientForm({
                 title={mode === "add" ? "Salvar Cliente" : "Salvar Alterações"}
                 onPress={handleSubmit}
                 loading={loadingSubmit}
-                color={COLORS.primary}
+                color={theme.primary}
               />
             )}
           </View>
@@ -540,7 +533,7 @@ export function ClientForm({
               }
               onPress={handleClose}
               loading={loadingClose}
-              color={COLORS.danger}
+              color={theme.danger}
             />
           )}
         </View>

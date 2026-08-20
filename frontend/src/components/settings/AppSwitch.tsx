@@ -1,25 +1,23 @@
 import { Switch } from "react-native";
-
-import { COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   value: boolean;
   onValueChange: (value: boolean) => void;
 }
 
-export function AppSwitch({
-  value,
-  onValueChange,
-}: Props) {
+export function AppSwitch({ value, onValueChange }: Props) {
+  const { theme } = useTheme();
+
   return (
-<Switch
-  value={value}
-  onValueChange={onValueChange}
-  trackColor={{
-    false: COLORS.border,
-    true: COLORS.success,
-  }}
-  thumbColor={value && COLORS.primary || COLORS.white}
-/>
+    <Switch
+      value={value}
+      onValueChange={onValueChange}
+      trackColor={{
+        false: theme.border,
+        true: theme.success,
+      }}
+      thumbColor={(value && theme.primary) || theme.white}
+    />
   );
 }

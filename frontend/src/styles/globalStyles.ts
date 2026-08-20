@@ -140,6 +140,15 @@ export function createGlobalStyles(colors: typeof COLORS) {
    ORÇAMENTOS
 ========================= */
 
+    serviceCard: {
+      backgroundColor: colors.white,
+      borderRadius: 8,
+      padding: 15,
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
     orcamentoCard: {
       backgroundColor: colors.white,
       shadowColor: colors.text,
@@ -414,7 +423,6 @@ export function createGlobalStyles(colors: typeof COLORS) {
       marginLeft: 7,
       flexDirection: "row",
       justifyContent: "space-between",
-  
     },
 
     pageHeaderRow: {
@@ -660,7 +668,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     appButtonText: {
-      color: colors.white,
+      color: COLORS.white,
       fontWeight: "bold",
       fontSize: 16,
     },
@@ -1437,7 +1445,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       backgroundColor: "rgba(0, 0, 0, 0.55)",
       justifyContent: "flex-end",
     },
-  
+
     modal: {
       width: "100%",
       maxHeight: "92%",
@@ -1446,7 +1454,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderTopRightRadius: 24,
       overflow: "hidden",
     },
-  
+
     header: {
       minHeight: 65,
       paddingHorizontal: 20,
@@ -1456,15 +1464,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderBottomWidth: 1,
       borderBottomColor: colors.borderNull,
     },
-  
+
     headerTitleContainer: {
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
     },
-  
- 
-  
+
     counter: {
       minWidth: 24,
       height: 24,
@@ -1474,13 +1480,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       justifyContent: "center",
       backgroundColor: colors.primary,
     },
-  
+
     counterText: {
       color: colors.white,
       fontSize: 12,
       fontWeight: "700",
     },
-  
+
     closeButton: {
       width: 40,
       height: 40,
@@ -1488,23 +1494,21 @@ export function createGlobalStyles(colors: typeof COLORS) {
       alignItems: "center",
       justifyContent: "center",
     },
-  
+
     content: {
       flexGrow: 0,
     },
-  
+
     contentContainer: {
       paddingHorizontal: 20,
       paddingTop: 8,
       paddingBottom: 25,
     },
-  
 
-  
     sectionContent: {
       gap: 7,
     },
-  
+
     option: {
       minHeight: 46,
       paddingHorizontal: 13,
@@ -1514,11 +1518,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
       gap: 12,
       backgroundColor: "transparent",
     },
-  
+
     optionSelected: {
       backgroundColor: "rgba(0, 0, 0, 0.04)",
     },
-  
+
     radio: {
       width: 21,
       height: 21,
@@ -1528,44 +1532,44 @@ export function createGlobalStyles(colors: typeof COLORS) {
       alignItems: "center",
       justifyContent: "center",
     },
-  
+
     radioSelected: {
       borderColor: colors.primary,
     },
-  
+
     radioInner: {
       width: 11,
       height: 11,
       borderRadius: 999,
       backgroundColor: colors.primary,
     },
-  
+
     optionText: {
       flex: 1,
       color: colors.text,
       fontSize: 15,
     },
-  
+
     optionTextSelected: {
       fontWeight: "600",
     },
-  
+
     customDateContainer: {
       marginTop: 10,
       gap: 12,
       paddingLeft: 34,
     },
-  
+
     dateInputContainer: {
       gap: 6,
     },
-  
+
     inputLabel: {
       color: colors.textSecondary,
       fontSize: 13,
       fontWeight: "600",
     },
-  
+
     input: {
       height: 46,
       borderWidth: 1,
@@ -1575,12 +1579,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
       color: colors.text,
       backgroundColor: colors.card,
     },
-  
+
     selectContainer: {
       marginTop: 6,
       gap: 6,
     },
-  
+
     selectButton: {
       minHeight: 46,
       paddingHorizontal: 13,
@@ -1591,14 +1595,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
       alignItems: "center",
       justifyContent: "space-between",
     },
-  
+
     selectButtonText: {
       flex: 1,
       color: colors.text,
       fontSize: 14,
       marginRight: 10,
     },
-  
+
     selectOptions: {
       borderWidth: 1,
       borderColor: colors.borderNull,
@@ -1606,7 +1610,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       overflow: "hidden",
       backgroundColor: colors.card,
     },
-  
+
     selectOption: {
       minHeight: 44,
       justifyContent: "center",
@@ -1614,39 +1618,39 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderBottomWidth: 1,
       borderBottomColor: colors.borderNull,
     },
-  
+
     selectOptionText: {
       color: colors.text,
       fontSize: 14,
     },
-  
+
     emptyOption: {
       padding: 14,
       color: colors.textSecondary,
       fontSize: 14,
     },
-  
+
     rangeContainer: {
       paddingTop: 4,
     },
-  
+
     rangeValues: {
       flexDirection: "row",
       alignItems: "flex-end",
       gap: 10,
     },
-  
+
     rangeValueBox: {
       flex: 1,
       gap: 6,
     },
-  
+
     rangeLabel: {
       color: colors.textSecondary,
       fontSize: 12,
       fontWeight: "600",
     },
-  
+
     rangeInput: {
       height: 45,
       borderWidth: 1,
@@ -1655,19 +1659,19 @@ export function createGlobalStyles(colors: typeof COLORS) {
       paddingHorizontal: 10,
       color: colors.text,
     },
-  
+
     rangeSeparator: {
       color: colors.textSecondary,
       fontSize: 13,
       paddingBottom: 13,
     },
-  
+
     rangeHint: {
       color: colors.textSecondary,
       fontSize: 13,
       marginTop: 10,
     },
-  
+
     footer: {
       minHeight: 75,
       paddingHorizontal: 20,
@@ -1678,7 +1682,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderTopWidth: 1,
       borderTopColor: colors.borderNull,
     },
-  
+
     clearButton: {
       flex: 1,
       minHeight: 48,
@@ -1688,13 +1692,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       alignItems: "center",
       justifyContent: "center",
     },
-  
+
     clearButtonText: {
       color: colors.text,
       fontSize: 15,
       fontWeight: "600",
     },
-  
+
     applyButton: {
       flex: 1.5,
       minHeight: 48,
@@ -1705,18 +1709,18 @@ export function createGlobalStyles(colors: typeof COLORS) {
       justifyContent: "center",
       gap: 8,
     },
-  
+
     applyButtonText: {
       color: colors.white,
       fontSize: 15,
       fontWeight: "700",
     },
-  
+
     twoColumnRow: {
       flexDirection: "row",
       gap: 10,
     },
-  
+
     twoColumnItem: {
       flex: 1,
       minWidth: 0,

@@ -1,7 +1,6 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
@@ -26,20 +25,22 @@ export function SettingsItem({
   title,
   description,
   icon,
-  iconColor = COLORS.title,
+  iconColor,
   value,
   disabled = false,
   danger = false,
   rightComponent,
   onPress,
 }: Props) {
+  const { theme } = useTheme();
+
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       disabled={disabled || !onPress}
       onPress={onPress}
       style={{
-        backgroundColor: COLORS.white,
+        backgroundColor: theme.white,
         borderRadius: 18,
         padding: 18,
         marginBottom: 14,
@@ -59,11 +60,7 @@ export function SettingsItem({
           marginRight: 15,
         }}
       >
-        <Ionicons
-          name={icon}
-          size={24}
-          color={iconColor}
-        />
+        <Ionicons name={icon} size={24} color={iconColor} />
       </View>
 
       <View
@@ -73,7 +70,7 @@ export function SettingsItem({
       >
         <Text
           style={{
-            color: danger ? COLORS.danger : COLORS.text,
+            color: danger ? theme.danger : theme.text,
             fontWeight: "700",
             fontSize: 16,
           }}
@@ -84,7 +81,7 @@ export function SettingsItem({
         {!!description && (
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               marginTop: 4,
               fontSize: 13,
             }}
@@ -99,7 +96,7 @@ export function SettingsItem({
       ) : value ? (
         <Text
           style={{
-            color: COLORS.primary,
+            color: theme.primary,
             fontWeight: "700",
             marginRight: 10,
           }}
@@ -111,7 +108,7 @@ export function SettingsItem({
       {!disabled && !rightComponent && (
         <Ionicons
           name="chevron-forward"
-          color={COLORS.textSecondary}
+          color={theme.textSecondary}
           size={20}
         />
       )}

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppCurrencyInput } from "./AppCurrencyInput";
 import { AppButton } from "@/components/buttons/AppButton";
@@ -59,6 +59,8 @@ export function OrcamentoForm({
   onEdit,
   onClientDetails,
 }: OrcamentoFormProps) {
+  const { styles, theme } = useTheme();
+
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
   const isAdd = mode === "add";
@@ -522,12 +524,12 @@ export function OrcamentoForm({
   }
 
   return (
-    <View style={globalStyles.container}>
-      <View style={globalStyles.modalHeader}>
-        <Pressable onPress={onClose} style={globalStyles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+    <View style={styles.container}>
+      <View style={styles.modalHeader}>
+        <Pressable onPress={onClose} style={styles.leftAction}>
+          <Ionicons name="arrow-back" size={25} color={theme.text} />
         </Pressable>
-        <Text style={globalStyles.addTitle}>
+        <Text style={styles.addTitle}>
           {mode === "add"
             ? "Novo Orçamento"
             : mode === "edit"
@@ -536,45 +538,49 @@ export function OrcamentoForm({
         </Text>
 
         {mode === "details" && !isLocked ? (
-          <View style={globalStyles.right}>
-          <Pressable onPress={onEdit} style={globalStyles.rightAction}>
-            <Text style={globalStyles.saveText}>Editar</Text>
+          <View style={styles.right}>
+            <Pressable onPress={onEdit} style={styles.rightAction}>
+              <Text style={styles.saveText}>Editar</Text>
 
-            <Ionicons name="pencil-sharp" size={25} color={COLORS.title} />
-          </Pressable>
-          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
-            <Text style={globalStyles.saveText}>Gerar PDF</Text>
+              <Ionicons name="pencil-sharp" size={25} color={theme.title} />
+            </Pressable>
+            <Pressable onPress={irParaSalvar} style={styles.rightAction}>
+              <Text style={styles.saveText}>Gerar PDF</Text>
 
-            <Ionicons name="document-text-outline" size={25} color={COLORS.title} />
-          </Pressable>
+              <Ionicons
+                name="document-text-outline"
+                size={25}
+                color={theme.title}
+              />
+            </Pressable>
           </View>
         ) : mode !== "details" && !isLocked ? (
-          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
-            <Text style={globalStyles.saveText}>Salvar</Text>
+          <Pressable onPress={irParaSalvar} style={styles.rightAction}>
+            <Text style={styles.saveText}>Salvar</Text>
 
-            <Ionicons name="download" size={25} color={COLORS.title} />
+            <Ionicons name="download" size={25} color={theme.title} />
           </Pressable>
         ) : mode === "details" && isLocked ? (
-          <Pressable onPress={irParaSalvar} style={globalStyles.rightAction}>
-            <Text style={globalStyles.saveText}>Gerar PDF</Text>
+          <Pressable onPress={irParaSalvar} style={styles.rightAction}>
+            <Text style={styles.saveText}>Gerar PDF</Text>
 
             <Ionicons
               name="document-text-outline"
               size={25}
-              color={COLORS.title}
+              color={theme.title}
             />
           </Pressable>
         ) : null}
       </View>
       <ScrollView ref={scrollRef} style={{ flex: 1 }}>
-        <Text style={globalStyles.subtitle}>Cliente</Text>
+        <Text style={styles.subtitle}>Cliente</Text>
 
-        <View style={globalStyles.divider} />
+        <View style={styles.divider} />
 
         {loadingClient ? (
           <View
             style={[
-              globalStyles.clientCard,
+              styles.clientCard,
               {
                 justifyContent: "center",
                 alignItems: "center",
@@ -583,9 +589,9 @@ export function OrcamentoForm({
               },
             ]}
           >
-            <ActivityIndicator size="large" color={COLORS.primary} />
+            <ActivityIndicator size="large" color={theme.primary} />
 
-            <Text style={globalStyles.subtitle}>Carregando cliente...</Text>
+            <Text style={styles.subtitle}>Carregando cliente...</Text>
           </View>
         ) : (
           <ClientCardSelect
@@ -603,12 +609,12 @@ export function OrcamentoForm({
             icon={mode === "details" ? "eye" : "chevron-down"}
           />
         )}
-        <Text style={globalStyles.subtitle}>Informações Gerais</Text>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.card}>
-          <Text style={globalStyles.label}>
+        <Text style={styles.subtitle}>Informações Gerais</Text>
+        <View style={styles.divider} />
+        <View style={styles.card}>
+          <Text style={styles.label}>
             Nome do orçamento:
-            {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+            {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
           </Text>
           <AppInput
             placeholder="Nome do orçamento"
@@ -617,7 +623,7 @@ export function OrcamentoForm({
             editable={canEdit}
           />
 
-          <Text style={globalStyles.label}>Descrição:</Text>
+          <Text style={styles.label}>Descrição:</Text>
 
           <AppInput
             placeholder="Descrição"
@@ -630,14 +636,11 @@ export function OrcamentoForm({
 
           {!isAdd && (
             <>
-              <Text style={globalStyles.label}>Status de Orçamento:</Text>
+              <Text style={styles.label}>Status de Orçamento:</Text>
               <Picker
                 selectedValue={status}
                 onValueChange={(itemValue) => setStatus(itemValue)}
-                style={[
-                  globalStyles.picker,
-                  isReadOnly && globalStyles.pickerReadOnly,
-                ]}
+                style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
               >
                 <Picker.Item
                   label={"Selecione o Status do Orçamento " + nome}
@@ -649,26 +652,23 @@ export function OrcamentoForm({
               </Picker>
             </>
           )}
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Data de Publicação:</Text>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>Data de Publicação:</Text>
               <AppInput
                 value={dataPublicacao.toLocaleDateString("pt-BR")}
                 editable={false}
               />
             </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 Validade:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
               <Picker
                 selectedValue={validade}
                 onValueChange={(v) => setValidade(Number(v))}
-                style={[
-                  globalStyles.picker,
-                  isReadOnly && globalStyles.pickerReadOnly,
-                ]}
+                style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
                 enabled={canEdit}
               >
                 {Array.from({ length: 15 }, (_, i) => (
@@ -677,7 +677,7 @@ export function OrcamentoForm({
               </Picker>
             </View>
           </View>
-          <Text style={globalStyles.label}>Válido até dia:</Text>
+          <Text style={styles.label}>Válido até dia:</Text>
           <AppInput
             value={
               dataValidade
@@ -689,8 +689,8 @@ export function OrcamentoForm({
         </View>
         {/* ENDEREÇO RESUMIDO */}
         {!isAdd && (
-          <View style={globalStyles.card}>
-            <Text style={globalStyles.label}>Endereço:</Text>
+          <View style={styles.card}>
+            <Text style={styles.label}>Endereço:</Text>
 
             <Pressable
               onPress={() => setEnderecoExpandido((prev) => !prev)}
@@ -712,7 +712,7 @@ export function OrcamentoForm({
               <Ionicons
                 name={enderecoExpandido ? "chevron-up" : "chevron-down"}
                 size={22}
-                color={COLORS.primary}
+                color={theme.primary}
                 style={{ marginLeft: 8 }}
               />
             </Pressable>
@@ -722,16 +722,14 @@ export function OrcamentoForm({
         {/* ENDEREÇO COMPLETO*/}
         {(isAdd || enderecoExpandido) && (
           <>
-            <Text style={globalStyles.subtitle}>Endereço:</Text>
-            <View style={globalStyles.divider} />
-            <View style={globalStyles.card}>
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>
+            <Text style={styles.subtitle}>Endereço:</Text>
+            <View style={styles.divider} />
+            <View style={styles.card}>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>
                     CEP:
-                    {!isReadOnly && (
-                      <Text style={globalStyles.obrigatorio}>*</Text>
-                    )}
+                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                   </Text>
                   <AppInput
                     placeholder="CEP"
@@ -749,21 +747,19 @@ export function OrcamentoForm({
                     keyboardType="numeric"
                   />
                 </View>
-                <View style={globalStyles.column}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
+                <View style={styles.column}>
+                  <View style={styles.column}>
+                    <Text style={styles.label}>
                       Estado:
-                      {!isReadOnly && (
-                        <Text style={globalStyles.obrigatorio}>*</Text>
-                      )}
+                      {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                     </Text>
 
                     <Picker
                       selectedValue={estado}
                       onValueChange={(value) => setEstado(value)}
                       style={[
-                        globalStyles.picker,
-                        isReadOnly && globalStyles.pickerReadOnly,
+                        styles.picker,
+                        isReadOnly && styles.pickerReadOnly,
                       ]}
                       enabled={canEdit}
                     >
@@ -802,13 +798,11 @@ export function OrcamentoForm({
                   </View>
                 </View>
               </View>
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>
                     Cidade:
-                    {!isReadOnly && (
-                      <Text style={globalStyles.obrigatorio}>*</Text>
-                    )}
+                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                   </Text>
 
                   <AppInput
@@ -818,12 +812,10 @@ export function OrcamentoForm({
                     editable={canEdit}
                   />
                 </View>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>
                     Bairro:
-                    {!isReadOnly && (
-                      <Text style={globalStyles.obrigatorio}>*</Text>
-                    )}
+                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                   </Text>
 
                   <AppInput
@@ -834,11 +826,11 @@ export function OrcamentoForm({
                   />
                 </View>
               </View>
-              <Text style={globalStyles.label}>
+              <Text style={styles.label}>
                 Logradouro:
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
-              <View style={globalStyles.row}>
+              <View style={styles.row}>
                 <AppInput
                   placeholder="Rua"
                   value={logradouro}
@@ -846,13 +838,11 @@ export function OrcamentoForm({
                   editable={canEdit}
                 />
               </View>
-              <View style={globalStyles.row}>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>
+              <View style={styles.row}>
+                <View style={styles.column}>
+                  <Text style={styles.label}>
                     Número:
-                    {!isReadOnly && (
-                      <Text style={globalStyles.obrigatorio}>*</Text>
-                    )}
+                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                   </Text>
 
                   <AppInput
@@ -863,8 +853,8 @@ export function OrcamentoForm({
                     keyboardType="numeric"
                   />
                 </View>
-                <View style={globalStyles.column}>
-                  <Text style={globalStyles.label}>Complemento:</Text>
+                <View style={styles.column}>
+                  <Text style={styles.label}>Complemento:</Text>
 
                   <AppInput
                     placeholder="Compl."
@@ -891,7 +881,7 @@ export function OrcamentoForm({
           >
             <Text
               style={{
-                color: COLORS.primary,
+                color: theme.primary,
                 fontWeight: "600",
               }}
             >
@@ -901,26 +891,26 @@ export function OrcamentoForm({
             <Ionicons
               name="chevron-down"
               size={18}
-              color={COLORS.primary}
+              color={theme.primary}
               style={{ marginLeft: 5 }}
             />
           </Pressable>
         )}
-        <Text style={globalStyles.subtitle}>Categorias e Serviços</Text>
-        <View style={globalStyles.divider} />
-        <Text style={globalStyles.label}>Link da tabela SINAPI:</Text>
+        <Text style={styles.subtitle}>Categorias e Serviços</Text>
+        <View style={styles.divider} />
+        <Text style={styles.label}>Link da tabela SINAPI:</Text>
         <AppButton
           title="Baixar Tabela SINAPI"
           onPress={handleOpenSinapiLink}
         />
         {feedbackSinapi !== "" && (
-          <Text style={globalStyles.feedback}>{feedbackSinapi}</Text>
+          <Text style={styles.feedback}>{feedbackSinapi}</Text>
         )}
         {categorias.map((cat, idx) => (
-          <View key={cat.id} style={[globalStyles.card, { marginTop: 20 }]}>
-            <Text style={globalStyles.label}>
+          <View key={cat.id} style={[styles.card, { marginTop: 20 }]}>
+            <Text style={styles.label}>
               Nome da Categoria {idx + 1}:
-              {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+              {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
             </Text>
             <AppInput
               placeholder="Nome da Categoria"
@@ -929,12 +919,10 @@ export function OrcamentoForm({
               editable={canEdit}
             />
             {cat.servicos.map((s, sIdx) => (
-              <View key={s.id} style={globalStyles.serviceContainer}>
-                <Text style={globalStyles.label}>
+              <View key={s.id} style={styles.serviceContainer}>
+                <Text style={styles.label}>
                   Nome do Serviço {sIdx + 1}:
-                  {!isReadOnly && (
-                    <Text style={globalStyles.obrigatorio}>*</Text>
-                  )}
+                  {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                 </Text>
                 <AppInput
                   placeholder="Nome do Serviço"
@@ -942,13 +930,11 @@ export function OrcamentoForm({
                   onChangeText={(t) => updateServico(cat.id, s.id, "nome", t)}
                   editable={canEdit}
                 />
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
+                <View style={styles.row}>
+                  <View style={styles.column}>
+                    <Text style={styles.label}>
                       Unidade do Serviço:
-                      {!isReadOnly && (
-                        <Text style={globalStyles.obrigatorio}>*</Text>
-                      )}
+                      {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                     </Text>
 
                     <Picker
@@ -957,8 +943,8 @@ export function OrcamentoForm({
                         updateServico(cat.id, s.id, "unidade", value)
                       }
                       style={[
-                        globalStyles.picker,
-                        isReadOnly && globalStyles.pickerReadOnly,
+                        styles.picker,
+                        isReadOnly && styles.pickerReadOnly,
                       ]}
                       enabled={canEdit}
                     >
@@ -976,12 +962,10 @@ export function OrcamentoForm({
                     </Picker>
                   </View>
 
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
+                  <View style={styles.column}>
+                    <Text style={styles.label}>
                       Valor Unitário:
-                      {!isReadOnly && (
-                        <Text style={globalStyles.obrigatorio}>*</Text>
-                      )}
+                      {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                     </Text>
 
                     <AppCurrencyInput
@@ -998,13 +982,11 @@ export function OrcamentoForm({
                     />
                   </View>
                 </View>
-                <View style={globalStyles.row}>
-                  <View style={globalStyles.column}>
-                    <Text style={globalStyles.label}>
+                <View style={styles.row}>
+                  <View style={styles.column}>
+                    <Text style={styles.label}>
                       Quantidade:
-                      {!isReadOnly && (
-                        <Text style={globalStyles.obrigatorio}>*</Text>
-                      )}
+                      {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
                     </Text>
 
                     <AppInput
@@ -1023,21 +1005,21 @@ export function OrcamentoForm({
                     />
                   </View>
                 </View>
-                <Text style={globalStyles.serviceTotalText}>
+                <Text style={styles.serviceTotalText}>
                   Subtotal do Serviço {sIdx + 1}: R$ {s.preco_total.toFixed(2)}
                 </Text>
               </View>
             ))}
             <Text
               style={[
-                globalStyles.serviceTotalText,
-                { fontSize: 15, color: COLORS.primary },
+                styles.serviceTotalText,
+                { fontSize: 15, color: theme.primary },
               ]}
             >
               Subtotal da Categoria {idx + 1}: R$
               {cat.preco_total_da_categoria.toFixed(2)}
             </Text>
-            <View style={globalStyles.divider} />
+            <View style={styles.divider} />
 
             {canEdit && (
               <AppButton title="+ Serviço" onPress={() => addServico(cat.id)} />
@@ -1049,18 +1031,18 @@ export function OrcamentoForm({
           <AppButton
             title="+ Categoria"
             onPress={addCategoria}
-            color={COLORS.primary}
+            color={theme.primary}
           />
         )}
 
-        <Text style={[globalStyles.subtitle, { marginTop: 20 }]}>
+        <Text style={[styles.subtitle, { marginTop: 20 }]}>
           Valores Financeiros
         </Text>
-        <View style={globalStyles.divider} />
-        <View style={globalStyles.card}>
-          <View style={globalStyles.row}>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>Custo Obra:</Text>
+        <View style={styles.divider} />
+        <View style={styles.card}>
+          <View style={styles.row}>
+            <View style={styles.column}>
+              <Text style={styles.label}>Custo Obra:</Text>
 
               <AppInput
                 value={custoObraCalculado.toLocaleString("pt-BR", {
@@ -1070,10 +1052,10 @@ export function OrcamentoForm({
                 editable={false}
               />
             </View>
-            <View style={globalStyles.column}>
-              <Text style={globalStyles.label}>
+            <View style={styles.column}>
+              <Text style={styles.label}>
                 BDI (%):
-                {!isReadOnly && <Text style={globalStyles.obrigatorio}>*</Text>}
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
               </Text>
 
               <AppInput
@@ -1086,7 +1068,7 @@ export function OrcamentoForm({
             </View>
           </View>
 
-          <Text style={globalStyles.label}>Custo Total da Obra com BDI:</Text>
+          <Text style={styles.label}>Custo Total da Obra com BDI:</Text>
           <AppInput
             value={custoTotalComBDI.toLocaleString("pt-BR", {
               style: "currency",
@@ -1095,13 +1077,11 @@ export function OrcamentoForm({
             editable={false}
           />
         </View>
-        {feedback !== "" && (
-          <Text style={globalStyles.feedback}>{feedback}</Text>
-        )}
+        {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
         {feedbackMessage !== "" && (
-          <Text style={globalStyles.feedback}>{feedbackMessage}</Text>
+          <Text style={styles.feedback}>{feedbackMessage}</Text>
         )}
-        <View style={globalStyles.divider}></View>
+        <View style={styles.divider}></View>
         <AppButton
           title={
             mode === "add"
@@ -1111,7 +1091,7 @@ export function OrcamentoForm({
                 : "Gerar PDF"
           }
           onPress={handleSubmit}
-          color={COLORS.primary}
+          color={theme.primary}
           loading={loadingSubmit}
         />
         <AppButton
@@ -1123,7 +1103,7 @@ export function OrcamentoForm({
                 : "Voltar"
           }
           onPress={handleClose}
-          color={COLORS.danger}
+          color={theme.danger}
           loading={loadingClose}
         />
       </ScrollView>
@@ -1137,7 +1117,7 @@ export function OrcamentoForm({
         >
           <View
             style={{
-              backgroundColor: COLORS.white,
+              backgroundColor: theme.white,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               maxHeight: "90%",
@@ -1152,13 +1132,13 @@ export function OrcamentoForm({
                 marginBottom: 5,
               }}
             >
-              <Text style={globalStyles.subtitle}>Selecione um Cliente</Text>
+              <Text style={styles.subtitle}>Selecione um Cliente</Text>
 
               <Pressable onPress={() => setClientModalVisible(false)}>
-                <Ionicons name="close" size={35} color={COLORS.danger} />
+                <Ionicons name="close" size={35} color={theme.danger} />
               </Pressable>
             </View>
-            <View style={globalStyles.divider} />
+            <View style={styles.divider} />
             <ScrollView>
               {clientsList.map((client) => (
                 <Pressable

@@ -179,7 +179,7 @@ export function BudgetCard({
                 <Ionicons
                   name={arquivado ? "archive" : "archive-outline"}
                   size={18}
-                  color={theme.white}
+                  color={COLORS.white}
                 />
                 <Text style={styles.orcamentoTextButton}>
                   {arquivado ? "Desarquivar" : "Arquivar"}

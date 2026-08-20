@@ -20,10 +20,9 @@ export function ProfileCard({ nome, email, imagem, onPress }: Props) {
           alignItems: "center",
         }}
       >
-        <Image
-          source={imagem ?? require("../../assets/images/profile.png")}
-          style={styles.profileImage}
-        />
+        <View style={{ justifyContent: "center" }}>
+          <Ionicons name="person-circle" size={70} color={theme.text} />
+        </View>
 
         <View
           style={{

@@ -1,19 +1,21 @@
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   step: number;
 }
 
 export function StepIndicator({ step }: Props) {
+  const { theme } = useTheme();
+
   function iconColor(index: number) {
-    return step >= index ? COLORS.success : COLORS.textSecondary;
+    return step >= index ? theme.success : theme.textSecondary;
   }
 
   function lineColor(index: number) {
-    return step > index ? COLORS.success : COLORS.border;
+    return step > index ? theme.success : theme.border;
   }
 
   return (
@@ -48,10 +50,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: step >= 1 ? COLORS.success : COLORS.card,
+              backgroundColor: step >= 1 ? theme.success : theme.card,
             }}
           >
-            <Ionicons name="person" size={28} color={COLORS.white} />
+            <Ionicons name="person" size={28} color={theme.white} />
           </View>
         </View>
 
@@ -79,10 +81,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: step >= 2 ? COLORS.success : COLORS.card,
+              backgroundColor: step >= 2 ? theme.success : theme.card,
             }}
           >
-            <Ionicons name="mail" size={28} color={COLORS.white} />
+            <Ionicons name="mail" size={28} color={theme.white} />
           </View>
         </View>
 
@@ -110,10 +112,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: step >= 3 ? COLORS.success : COLORS.card,
+              backgroundColor: step >= 3 ? theme.success : theme.card,
             }}
           >
-            <Ionicons name="card" size={28} color={COLORS.white} />
+            <Ionicons name="card" size={28} color={theme.white} />
           </View>
         </View>
 
@@ -141,10 +143,10 @@ export function StepIndicator({ step }: Props) {
               borderRadius: 30,
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: step >= 4 ? COLORS.success : COLORS.card,
+              backgroundColor: step >= 4 ? theme.success : theme.card,
             }}
           >
-            <Ionicons name="checkmark" size={30} color={COLORS.white} />
+            <Ionicons name="checkmark" size={30} color={theme.white} />
           </View>
         </View>
       </View>
@@ -191,7 +193,7 @@ export function StepIndicator({ step }: Props) {
               fontSize: 12,
             }}
           >
-            E-mail
+            Confrimar E-mail
           </Text>
         </View>
 

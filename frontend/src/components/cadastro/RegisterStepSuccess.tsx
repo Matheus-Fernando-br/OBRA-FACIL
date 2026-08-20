@@ -2,9 +2,11 @@ import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { useRouter } from "expo-router";
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export function RegisterStepSuccess() {
+  const { styles, theme } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   async function handleGoToLogin() {
@@ -27,21 +29,11 @@ export function RegisterStepSuccess() {
         paddingVertical: 30,
       }}
     >
-      <Ionicons
-        name="checkmark-circle"
-        size={90}
-        color={COLORS.success}
-      />
+      <Ionicons name="checkmark-circle" size={90} color={theme.success} />
 
-      <Text
-        style={globalStyles.title}
-      >
-        Cadastro realizado!
-      </Text>
+      <Text style={styles.title}>Cadastro realizado!</Text>
 
-      <Text
-        style={globalStyles.subtitle}
-      >
+      <Text style={styles.subtitle}>
         Sua conta foi criada com sucesso.
         {"\n\n"}
         Agora você já pode acessar o sistema utilizando seu e-mail e senha.
@@ -53,21 +45,17 @@ export function RegisterStepSuccess() {
           width: 100,
           height: 100,
           borderRadius: 50,
-          backgroundColor: COLORS.success,
+          backgroundColor: theme.success,
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Ionicons
-          name="shield-checkmark"
-          size={50}
-          color={COLORS.success}
-        />
+        <Ionicons name="shield-checkmark" size={50} color={theme.success} />
       </View>
 
       <Text
         style={{
-          color: COLORS.placeholder,
+          color: theme.placeholder,
           marginTop: 25,
           textAlign: "center",
         }}

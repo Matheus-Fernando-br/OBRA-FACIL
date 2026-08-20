@@ -14,7 +14,6 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { DashboardCard } from "../../components/cards/DashboardCard";
 import { WorkCard } from "@/components/cards/obras/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
-
 import { Cliente, Orcamento, Obra } from "@/components/layout/interface";
 import { getClients, getUser, getBudgets, getWork } from "../../services/api";
 import { useAuth } from "@/contexts/AuthContext";

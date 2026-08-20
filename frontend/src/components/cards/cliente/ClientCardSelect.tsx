@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { phoneMask } from "@/components/forms/mask";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   name: string;
@@ -16,6 +16,8 @@ export function ClientCardSelect({
   onClick,
   icon = "chevron-down",
 }: Props) {
+  const { styles, theme } = useTheme();
+
   function getInitials(nome: string) {
     const nomes = nome.trim().split(" ");
 
@@ -31,7 +33,7 @@ export function ClientCardSelect({
   }
 
   function getAvatarColor(nome: string) {
-    const colors = [
+    const theme = [
       "#DBEAFE",
       "#DCFCE7",
       "#FEF3C7",
@@ -50,15 +52,13 @@ export function ClientCardSelect({
       hash = nome.charCodeAt(i) + ((hash << 5) - hash);
     }
 
-    return colors[Math.abs(hash) % colors.length];
+    return theme[Math.abs(hash) % theme.length];
   }
 
   const telefone = phoneMask(phone || "");
 
   return (
-    <View
-      style={globalStyles.clientCard}
-    >
+    <View style={styles.clientCard}>
       {/* Avatar */}
       <View
         style={{
@@ -72,17 +72,13 @@ export function ClientCardSelect({
         }}
       >
         {name === "Selecionar Cliente" ? (
-          <Ionicons
-            name="person-outline"
-            size={28}
-            color={COLORS.primary}
-          />
+          <Ionicons name="person-outline" size={28} color={theme.primary} />
         ) : (
           <Text
             style={{
               fontSize: 18,
               fontWeight: "700",
-              color: COLORS.primary,
+              color: theme.primary,
             }}
           >
             {getInitials(name)}
@@ -92,22 +88,14 @@ export function ClientCardSelect({
 
       {/* Informações */}
       <View style={{ flex: 1 }}>
-        <Text style={globalStyles.clientCardName}>
-          {name}
-        </Text>
+        <Text style={styles.clientCardName}>{name}</Text>
 
-        <Text style={globalStyles.clientCardInfo}>
-          {telefone}
-        </Text>
+        <Text style={styles.clientCardInfo}>{telefone}</Text>
       </View>
 
       {/* Ação */}
-      <Pressable onPress={onClick} style={globalStyles.clientIcons}>
-        <Ionicons
-          name={icon}
-          size={30}
-          color={COLORS.primary}
-        />
+      <Pressable onPress={onClick} style={styles.clientIcons}>
+        <Ionicons name={icon} size={30} color={theme.primary} />
       </Pressable>
     </View>
   );

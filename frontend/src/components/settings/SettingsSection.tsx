@@ -1,17 +1,15 @@
 import { View, Text } from "react-native";
 import { ReactNode } from "react";
-
-import { COLORS } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
   children?: ReactNode;
 }
 
-export function SettingsSection({
-  title,
-  children,
-}: Props) {
+export function SettingsSection({ title, children }: Props) {
+  const { theme } = useTheme();
+
   return (
     <View
       style={{
@@ -21,7 +19,7 @@ export function SettingsSection({
     >
       <Text
         style={{
-          color: COLORS.text,
+          color: theme.text,
           fontSize: 21,
           fontWeight: "700",
           marginBottom: 12,

@@ -2,7 +2,8 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { COLORS, globalStyles } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
+
 import { cpfMask, cnpjMask, emailMask } from "@/components/forms/mask";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
@@ -51,6 +52,8 @@ export function CadastroStep({
 
   onNext,
 }: Props) {
+  const { styles, theme } = useTheme();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
@@ -141,11 +144,11 @@ export function CadastroStep({
 
   return (
     <View>
-      <Text style={globalStyles.title}>Criar Conta</Text>
+      <Text style={styles.title}>Criar Conta</Text>
 
       <Text
         style={{
-          color: COLORS.textSecondary,
+          color: theme.textSecondary,
           marginBottom: 25,
         }}
       >
@@ -168,7 +171,7 @@ export function CadastroStep({
             marginRight: 10,
             alignItems: "center",
             backgroundColor:
-              tipoDocumento === "CPF" ? COLORS.primary : COLORS.card,
+              tipoDocumento === "CPF" ? theme.primary : theme.card,
           }}
           onPress={() => {
             setTipoDocumento("CPF");
@@ -177,7 +180,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: tipoDocumento === "CPF" ? COLORS.white : COLORS.text,
+              color: tipoDocumento === "CPF" ? theme.white : theme.text,
               fontWeight: "600",
             }}
           >
@@ -193,7 +196,7 @@ export function CadastroStep({
             marginLeft: 5,
             alignItems: "center",
             backgroundColor:
-              tipoDocumento === "CNPJ" ? COLORS.primary : COLORS.card,
+              tipoDocumento === "CNPJ" ? theme.primary : theme.card,
           }}
           onPress={() => {
             setTipoDocumento("CNPJ");
@@ -202,7 +205,7 @@ export function CadastroStep({
         >
           <Text
             style={{
-              color: tipoDocumento === "CNPJ" ? COLORS.white : COLORS.text,
+              color: tipoDocumento === "CNPJ" ? theme.white : theme.text,
               fontWeight: "600",
             }}
           >
@@ -210,19 +213,19 @@ export function CadastroStep({
           </Text>
         </TouchableOpacity>
       </View>
-      <Text style={globalStyles.label}>Nome:</Text>
+      <Text style={styles.label}>Nome:</Text>
       <AppInput
         placeholder="Informe seu Nome Completo"
         value={nome}
         onChangeText={setNome}
       />
-      <Text style={globalStyles.label}>E-mail:</Text>
+      <Text style={styles.label}>E-mail:</Text>
       <AppInput
         placeholder="Informe seu Email"
         value={email}
         onChangeText={(text) => setEmail(emailMask(text))}
       />
-      <Text style={globalStyles.label}>{tipoDocumento}:</Text>
+      <Text style={styles.label}>{tipoDocumento}:</Text>
       <AppInput
         placeholder={"Informe o seu " + tipoDocumento}
         value={documento}
@@ -231,7 +234,7 @@ export function CadastroStep({
 
       {/* Senha */}
 
-      <Text style={globalStyles.label}>Senha</Text>
+      <Text style={styles.label}>Senha</Text>
       <View
         style={{
           flexDirection: "row",
@@ -248,19 +251,19 @@ export function CadastroStep({
         >
           <Ionicons
             size={24}
-            color={COLORS.text}
+            color={theme.text}
             name={showPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>
         <AppInput
           placeholder="Senha"
           secureTextEntry={!showPassword}
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor={theme.textSecondary}
           value={senha}
           onChangeText={setSenha}
         />
       </View>
-      <Text style={globalStyles.label}>Confirme a Senha</Text>
+      <Text style={styles.label}>Confirme a Senha</Text>
       <View
         style={{
           flexDirection: "row",
@@ -277,30 +280,30 @@ export function CadastroStep({
         >
           <Ionicons
             size={24}
-            color={COLORS.text}
+            color={theme.text}
             name={showConfirmPassword ? "eye" : "eye-off"}
           />
         </TouchableOpacity>
         <AppInput
           placeholder="Confirmar Senha"
           secureTextEntry={!showConfirmPassword}
-          placeholderTextColor={COLORS.textSecondary}
+          placeholderTextColor={theme.textSecondary}
           value={confirmarSenha}
           onChangeText={setConfirmarSenha}
         />
       </View>
-      <View style={globalStyles.divider} />
-      {feedback !== "" && <Text style={globalStyles.feedback}>{feedback}</Text>}
+      <View style={styles.divider} />
+      {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
       <AppButton
         title={checkingEmail ? "Verificando..." : "Continuar →"}
         onPress={continuar}
         loading={checkingEmail}
-        color={COLORS.primary}
+        color={theme.primary}
       />
       <AppButton
         title="Voltar para tela de Login←"
         onPress={voltar}
-        color={COLORS.title}
+        color={theme.title}
       />
     </View>
   );

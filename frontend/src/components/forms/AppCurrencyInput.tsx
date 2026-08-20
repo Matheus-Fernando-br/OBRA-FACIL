@@ -1,7 +1,6 @@
 import { useState } from "react";
 import CurrencyInput from "react-native-currency-input";
-import { COLORS } from "@/styles/globalStyles";
-import { Color } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   value: number | null;
@@ -17,6 +16,7 @@ export function AppCurrencyInput({
   placeholder,
 }: Props) {
   const [focused, setFocused] = useState(false);
+  const { theme } = useTheme();
 
   return (
     <CurrencyInput
@@ -24,7 +24,7 @@ export function AppCurrencyInput({
       onChangeValue={onChangeValue}
       editable={editable}
       placeholder={placeholder}
-      placeholderTextColor={COLORS.placeholder}
+      placeholderTextColor={theme.placeholder}
       prefix="R$ "
       delimiter="."
       separator=","
@@ -36,17 +36,17 @@ export function AppCurrencyInput({
         width: "100%",
         minHeight: 58,
 
-        backgroundColor: editable ? COLORS.white : COLORS.border,
+        backgroundColor: editable ? theme.white : theme.border,
 
-        color: editable ? COLORS.text : COLORS.placeholder,
+        color: editable ? theme.text : theme.placeholder,
 
         borderWidth: 1.2,
 
         borderColor: editable
           ? focused
-            ? COLORS.primary
-            : COLORS.border
-          : COLORS.borderNull,
+            ? theme.primary
+            : theme.border
+          : theme.borderNull,
 
         borderRadius: 10,
 
@@ -55,7 +55,7 @@ export function AppCurrencyInput({
 
         marginBottom: 16,
 
-        shadowColor: editable ? COLORS.text : "transparent",
+        shadowColor: editable ? theme.text : "transparent",
         shadowOpacity: editable ? 0.08 : 0,
         shadowRadius: editable ? 4 : 0,
         shadowOffset: {
