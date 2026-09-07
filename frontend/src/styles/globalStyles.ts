@@ -1725,6 +1725,96 @@ export function createGlobalStyles(colors: typeof COLORS) {
       flex: 1,
       minWidth: 0,
     },
+
+    /* ==========================================================
+       NOVO: CHIPS DE FILTRO ATIVO (usado em Clientes/Orçamentos/Obras)
+       Substitui os estilos inline que existiam direto nas telas,
+       reduzindo alocação de objetos a cada render.
+    ========================================================== */
+
+    headerActionsRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    filterCountBadge: {
+      position: "absolute",
+      right: -4,
+      top: -4,
+      minWidth: 18,
+      height: 18,
+      borderRadius: 999,
+      paddingHorizontal: 4,
+      backgroundColor: colors.danger,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    filterCountBadgeText: {
+      color: colors.white,
+      fontSize: 10,
+      fontWeight: "700",
+    },
+
+    filterActiveWrapRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 12,
+      marginBottom: 4,
+    },
+
+    filterActiveScrollContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingTop: 12,
+      paddingBottom: 4,
+      paddingRight: 8,
+    },
+
+    filterChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.primary,
+      borderRadius: 999,
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+    },
+
+    filterChipText: {
+      color: colors.white,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+
+    clearFilterButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+    },
+
+    clearFilterButtonText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+
+    listLoadingState: {
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 40,
+      paddingBottom: 40,
+    },
+
+    listLoadingText: {
+      color: colors.text,
+      marginTop: 15,
+    },
   });
 }
 
