@@ -9,7 +9,7 @@ export const COLORS = {
   secondary: "#0D6B75",
   backgroundDestaque: "rgba(0, 0, 0, 0.32)",
   gradientStart: "#FFFFFF",
-  gradientEnd: "#c45f0080",
+  gradientEnd: "#ccbdaf80",
   card: "#D9D7D7",
   cardHover: "#1E293B",
 
@@ -123,7 +123,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     obrigatorio: {
-      fontFamily: "Montserrat_700Bold",
+      fontFamily: "HelveticaNow-Bold",
       marginLeft: 5,
       fontSize: 12,
       color: colors.danger,
@@ -182,7 +182,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     orcamentoTextButton: {
       color: COLORS.white,
       marginBottom: 6,
-      fontFamily: "Montserrat_500Bold",
+      fontFamily: "HelveticaNow-Bold",
     },
 
     orcamentoDetailsButton: {
@@ -367,7 +367,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
     serviceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 5 },
     serviceTotalText: {
-      fontFamily: "Montserrat_700Bold",
+      fontFamily: "HelveticaNow-Bold",
       textAlign: "left",
       fontWeight: "bold",
       color: colors.success,
@@ -465,7 +465,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
   ========================= */
 
     title: {
-      fontFamily: "Montserrat_600SemiBold",
+      fontFamily: "HelveticaNow-SemiBold",
       fontSize: 24,
       fontWeight: "700",
       color: colors.title,
@@ -480,7 +480,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     sectionTitle: {
-      fontFamily: "Montserrat_500Medium,",
+      fontFamily: "HelveticaNow-Medium",
       fontWeight: "600",
       fontSize: 16,
       color: colors.text,
@@ -537,6 +537,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     quickAccessRow: {
       flexDirection: "row",
       justifyContent: "space-between",
+      gap: 15,
     },
 
     /* =========================
@@ -754,7 +755,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     clientCardName: {
-      fontFamily: "Montserrat_600SemiBold",
+      fontFamily: "HelveticaNow-SemiBold",
       fontSize: 18,
       color: colors.text,
     },
@@ -873,9 +874,8 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderWidth: 1,
       borderColor: colors.borderNull,
       borderRadius: 18,
-      padding: 16,
-      paddingVertical: 10,
-      paddingHorizontal: 4,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
       alignItems: "center",
       marginHorizontal: 2,
     },
@@ -885,8 +885,8 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     quickButtonText: {
-      marginTop: 10,
-      fontFamily: "Montserrat_400Regular",
+      marginTop: 5,
+      fontFamily: "HelveticaNow-Regular",
       fontSize: 12,
       fontWeight: "600",
       color: colors.text,
@@ -933,7 +933,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     workCardTitle: {
-      fontFamily: "Montserrat_600SemiBold",
+      fontFamily: "HelveticaNow-SemiBold",
       fontSize: 17,
       fontWeight: "700",
       color: colors.text,
@@ -941,7 +941,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     workCardInfo: {
-      fontFamily: "Montserrat_400Regular",
+      fontFamily: "HelveticaNow-Regular",
       fontSize: 13,
       fontWeight: "400",
       color: colors.textSecondary,

@@ -8,39 +8,32 @@ import {
 } from "react-native";
 
 import { useState } from "react";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { AppInput } from "@/components/forms/AppInput";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/layout/PageHeader";
 
 import { updateUser } from "@/services/api";
 
-import {
-  COLORS,
-  globalStyles,
-} from "@/styles/globalStyles";
-
+import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { AppSwitch } from "@/components/settings/AppSwitch";
 import { AppButton } from "@/components/buttons/AppButton";
 
 export default function SegurancaScreen() {
   const { user, token } = useAuth();
+  const { styles } = useTheme();
 
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
-  const [confirmarSenha, setConfirmarSenha] =
-    useState("");
+  const [confirmarSenha, setConfirmarSenha] = useState("");
 
-  const [biometria, setBiometria] =
-    useState(false);
+  const [biometria, setBiometria] = useState(false);
 
-  const [autenticacao2F, setAutenticacao2F] =
-    useState(false);
+  const [autenticacao2F, setAutenticacao2F] = useState(false);
 
-  const [lembrarLogin, setLembrarLogin] =
-    useState(true);
+  const [lembrarLogin, setLembrarLogin] = useState(true);
 
   const [loading, setLoading] = useState(false);
 
@@ -49,10 +42,7 @@ export default function SegurancaScreen() {
       if (!user || !token) return;
 
       if (novaSenha !== confirmarSenha) {
-        Alert.alert(
-          "Erro",
-          "As senhas não coincidem."
-        );
+        Alert.alert("Erro", "As senhas não coincidem.");
         return;
       }
 
@@ -67,22 +57,16 @@ export default function SegurancaScreen() {
           CNPJ: user.CNPJ,
           senha: novaSenha,
         },
-        token
+        token,
       );
 
-      Alert.alert(
-        "Sucesso",
-        "Senha alterada."
-      );
+      Alert.alert("Sucesso", "Senha alterada.");
 
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
     } catch {
-      Alert.alert(
-        "Erro",
-        "Não foi possível alterar a senha."
-      );
+      Alert.alert("Erro", "Não foi possível alterar a senha.");
     } finally {
       setLoading(false);
     }
@@ -93,59 +77,37 @@ export default function SegurancaScreen() {
       style={globalStyles.container}
       showsVerticalScrollIndicator={false}
     >
-        <PageHeader
+      <PageHeader
         title="Privacidade e Segurança"
         subtitle="Acesse suas configurações de segurança"
       />
 
       <SettingsSection title="Alterar Senha">
-
-        <TextInput
+        <Text style={styles.label}>Senha Atual:</Text>
+        <AppInput
           secureTextEntry
-          placeholder="Senha Atual"
+          placeholder="Informe a sua Senha Atual"
           placeholderTextColor={COLORS.placeholder}
           value={senhaAtual}
           onChangeText={setSenhaAtual}
-          style={{
-            width: "100%",
-            height: 55,
-            backgroundColor: COLORS.white,
-            borderRadius: 14,
-            paddingHorizontal: 30,
-            marginBottom: 16,
-          }}
         />
+        <Text style={styles.label}>Nova Senha:</Text>
 
-        <TextInput
+        <AppInput
           secureTextEntry
-          placeholder="Nova Senha"
+          placeholder="Informe a Nova Senha"
           placeholderTextColor={COLORS.placeholder}
           value={novaSenha}
           onChangeText={setNovaSenha}
-          style={{
-            width: "100%",
-            height: 55,
-            backgroundColor: COLORS.white,
-            borderRadius: 14,
-            paddingHorizontal: 30,
-            marginBottom: 16,
-          }}
         />
+        <Text style={styles.label}>Confirmar Senha Atual:</Text>
 
-        <TextInput
+        <AppInput
           secureTextEntry
-          placeholder="Confirmar Nova Senha"
+          placeholder="Confirme a Nova Senha"
           placeholderTextColor={COLORS.placeholder}
           value={confirmarSenha}
           onChangeText={setConfirmarSenha}
-          style={{
-            width: "100%",
-            height: 55,
-            backgroundColor: COLORS.white,
-            borderRadius: 14,
-            paddingHorizontal: 30,
-            marginBottom: 16,
-          }}
         />
 
         <AppButton
@@ -153,44 +115,26 @@ export default function SegurancaScreen() {
           loading={loading}
           onPress={handleChangePassword}
         />
-
       </SettingsSection>
 
       <SettingsSection title="Proteção">
-
         <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>
-            Login com biometria
-          </Text>
+          <Text style={globalStyles.menuText}>Login com biometria</Text>
 
-          <AppSwitch
-            value={biometria}
-            onValueChange={setBiometria}
-          />
+          <AppSwitch value={biometria} onValueChange={setBiometria} />
         </View>
 
         <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>
-            Autenticação em duas etapas
-          </Text>
+          <Text style={globalStyles.menuText}>Autenticação em duas etapas</Text>
 
-          <AppSwitch
-            value={autenticacao2F}
-            onValueChange={setAutenticacao2F}
-          />
+          <AppSwitch value={autenticacao2F} onValueChange={setAutenticacao2F} />
         </View>
 
         <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>
-            Manter conectado
-          </Text>
+          <Text style={globalStyles.menuText}>Manter conectado</Text>
 
-          <AppSwitch
-            value={lembrarLogin}
-            onValueChange={setLembrarLogin}
-          />
+          <AppSwitch value={lembrarLogin} onValueChange={setLembrarLogin} />
         </View>
-
       </SettingsSection>
 
       <View style={{ height: 40 }} />

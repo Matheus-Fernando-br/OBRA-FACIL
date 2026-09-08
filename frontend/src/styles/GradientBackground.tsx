@@ -18,8 +18,8 @@ export function GradientBackground({
     <LinearGradient
       colors={[theme.gradientStart, theme.gradientEnd]}
       locations={[0.4, 1.0]}
-      start={{ x: 0.1, y: 0.0 }}
-      end={{ x: 0.9, y: 1.0 }}
+      start={{ x: 0, y: 0.0 }}
+      end={{ x: 0, y: 1.0 }}
       style={[styles.defaultStyle, style]}
     >
       {children}

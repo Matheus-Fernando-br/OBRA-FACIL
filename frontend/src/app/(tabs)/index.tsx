@@ -105,9 +105,8 @@ export default function HomeScreen() {
             ]}
           >
             <View style={styles.column}>
-              <Text style={styles.title}>
-                <Text style={{ color: theme.text }}>Olá, </Text>
-                {user?.nome || "Usuário"} 👋
+              <Text style={[styles.title, { color: theme.text }]}>
+                Olá, {user?.nome || "Usuário"} 👋
               </Text>
 
               <Text style={styles.subtitle}>
@@ -120,6 +119,7 @@ export default function HomeScreen() {
             </View>
           </View>
         </View>
+        <View style={styles.divider} />
         <View style={[styles.section, { backgroundColor: theme.white }]}>
           <Text style={styles.sectionTitle}>Resumo geral:</Text>
 
@@ -187,10 +187,11 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.quickAccessHeader}>
             <Text style={styles.sectionTitle}>Acesso rápido:</Text>
-
+            {/*}
             <Pressable style={styles.quickAccessEditButton}>
               <Ionicons name="pencil" size={25} color={theme.primary} />
             </Pressable>
+            */}
           </View>
           <View style={styles.quickAccessRow}>
             <QuickAccessCard
@@ -224,7 +225,7 @@ export default function HomeScreen() {
         <View style={styles.divider} />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Obras em andamento</Text>
+          <Text style={styles.sectionTitle}>Obras / Serviços em andamento</Text>
 
           {works.map((work) => {
             const budget = getBudget(work);
