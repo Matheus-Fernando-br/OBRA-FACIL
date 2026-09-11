@@ -1,16 +1,27 @@
-import { Tabs } from "expo-router";
+import { router, Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
-import { globalStyles } from "../../styles/globalStyles";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function TabsLayout() {
+  const { styles, theme } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "#64748B",
-        tabBarStyle: globalStyles.tabBar,
+        header: () => (
+          <AppHeader
+            onMenu={() => {
+              console.log("Menu");
+            }}
+            onNotifications={() => {
+              router.replace("../notificacoes");
+            }}
+          />
+        ),
+        tabBarActiveTintColor: theme.title,
+        tabBarInactiveTintColor: theme.textSecondary,
+        tabBarStyle: styles.tabBar,
       }}
     >
       <Tabs.Screen
@@ -60,6 +71,56 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="menu" color={color} size={size} />
           ),
+        }}
+      />
+
+      {/*TELAS QUE NÃO PODEM APARECER DEVIDO AO NOME index*/}
+      <Tabs.Screen
+        name="configuracoes"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="seguranca"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="relatorios"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="planos"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="notificacoes"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="ajuda"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
+        name="sobre"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

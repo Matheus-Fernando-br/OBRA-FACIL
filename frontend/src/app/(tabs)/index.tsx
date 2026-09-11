@@ -1,95 +1,247 @@
-import { View, Text, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
-import { globalStyles } from "../../styles/globalStyles";
-
+import { useState, useCallback, useMemo } from "react";
+import { useFocusEffect } from "expo-router";
+import { useTheme } from "@/contexts/ThemeContext";
 import { DashboardCard } from "../../components/cards/DashboardCard";
-import { WorkCard } from "../../components/cards/WorkCard";
+import { WorkCard } from "@/components/cards/obras/WorkCard";
 import { QuickAccessCard } from "../../components/cards/QuickAccessCard";
-
-import { obras } from "../../data/obras";
-import { clients } from "../../data/clients";
-import { orcamentos } from "../../data/orcamentos";
-
+import { Cliente, Orcamento, Obra } from "@/components/layout/interface";
+import { getClients, getUser, getBudgets, getWork } from "../../services/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { GradientBackground } from "@/styles/GradientBackground";
 export default function HomeScreen() {
-  const clientesCount = clients.length;
-  const obrasCount = obras.length;
-  const orcamentosPendentesCount = orcamentos.filter(
-    (o) => o.status === "Pendente",
-  ).length;
-  const faturamentoTotal = orcamentos
-    .filter((orcamento) => orcamento.status === "Aprovado")
-    .reduce((acc, orcamento) => acc + orcamento.valor, 0);
+  const { styles, theme } = useTheme();
+  const { token, user, setUser } = useAuth();
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+  const [budgets, setBudgets] = useState<Orcamento[]>([]);
+  const [works, setWorks] = useState<Obra[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const obrasCount = works.length;
+
+  const orcamentosPendentesCount = useMemo(() => {
+    return budgets.filter((budget) => budget.status === "PENDENTE").length;
+  }, [budgets]);
+
+  const faturamentoTotal = useMemo(() => {
+    return budgets
+      .filter((budget) => budget.status === "APROVADO")
+      .reduce(
+        (total, budget) => total + (budget.preco_com_bdi ?? budget.preco ?? 0),
+        0,
+      );
+  }, [budgets]);
+
+  const budgetsMap = useMemo(() => {
+    return budgets.reduce((acc: Record<string, Orcamento>, budget) => {
+      acc[budget._id] = budget;
+      return acc;
+    }, {});
+  }, [budgets]);
+
+  function getBudget(work: Obra) {
+    const budgetId =
+      typeof work.orcamento === "string" ? work.orcamento : work.orcamento._id;
+
+    return budgetsMap[budgetId];
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      async function loadData() {
+        try {
+          if (!token) return;
+
+          setLoading(true);
+
+          const [loggedUser, clients, budgetsData, worksData] =
+            await Promise.all([
+              getUser(token),
+              getClients(token),
+              getBudgets(token),
+              getWork(token),
+            ]);
+
+          setUser(loggedUser);
+          setClientsList(clients);
+          setBudgets(budgetsData);
+          setWorks(worksData);
+        } catch (error) {
+          console.log(error);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      if (token) {
+        loadData();
+      }
+
+      return;
+    }, [token, setUser]), // <-- Dependências necessárias
+  );
 
   return (
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={globalStyles.homeHeader}>
-        <Text style={globalStyles.title}>Olá, Matheus 👋</Text>
+    <GradientBackground style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.homeHeader}>
+          <View
+            style={[
+              styles.row,
+              {
+                alignItems: "center",
+                justifyContent: "space-between",
+                flex: 1,
+              },
+            ]}
+          >
+            <View style={styles.column}>
+              <Text style={[styles.title, { color: theme.text }]}>
+                Olá, {user?.nome || "Usuário"} 👋
+              </Text>
 
-        <Text style={globalStyles.subtitle}>Bem-vindo ao OBRA-FÁCIL</Text>
-      </View>
+              <Text style={styles.subtitle}>
+                Aqui está o resumo dos seus projetos!
+              </Text>
+            </View>
 
-      <Text style={globalStyles.sectionTitle}>Resumo geral</Text>
+            <View style={{ justifyContent: "center" }}>
+              <Ionicons name="person-circle" size={60} color={theme.text} />
+            </View>
+          </View>
+        </View>
+        <View style={styles.divider} />
+        <View style={[styles.section, { backgroundColor: theme.white }]}>
+          <Text style={styles.sectionTitle}>Resumo geral:</Text>
 
-      <View style={globalStyles.dashboardGrid}>
-        <DashboardCard
-          title="Orçamentos Pendentes"
-          value={orcamentosPendentesCount.toString()}
-        />
+          <View style={styles.dashboardGrid}>
+            <DashboardCard
+              title="Orçamentos Pendentes"
+              value={
+                loading ? (
+                  <ActivityIndicator size="small" color={theme.white} />
+                ) : (
+                  orcamentosPendentesCount.toString()
+                )
+              }
+              icon="document-text"
+              color={theme.title}
+            />
 
-        <DashboardCard title="Clientes" value={clientesCount.toString()} />
+            <DashboardCard
+              title="Clientes"
+              value={
+                loading ? (
+                  <ActivityIndicator size="small" color={theme.white} />
+                ) : (
+                  clientsList.length.toString()
+                )
+              }
+              icon="people"
+              color={theme.warning}
+            />
 
-        <DashboardCard title="Obras" value={obrasCount.toString()} />
+            <DashboardCard
+              title="Obras"
+              value={
+                loading ? (
+                  <ActivityIndicator size="small" color={theme.white} />
+                ) : (
+                  obrasCount.toString()
+                )
+              }
+              icon="hammer"
+              color={theme.primary}
+            />
 
-        <DashboardCard
-          title="Faturamento"
-          value={parseFloat(faturamentoTotal.toString()).toLocaleString(
-            "pt-BR",
-            {
-              style: "currency",
-              currency: "BRL",
-            },
-          )}
-        />
-      </View>
+            <DashboardCard
+              title="Orçamento Aprovado"
+              value={
+                loading ? (
+                  <ActivityIndicator size="small" color={theme.white} />
+                ) : (
+                  faturamentoTotal.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  })
+                )
+              }
+              icon="cash"
+              color={theme.success}
+              valueStyle={{ fontSize: 14 }}
+            />
+          </View>
+        </View>
+        <View style={styles.divider} />
+        <View style={styles.section}>
+          <View style={styles.quickAccessHeader}>
+            <Text style={styles.sectionTitle}>Acesso rápido:</Text>
+            {/*}
+            <Pressable style={styles.quickAccessEditButton}>
+              <Ionicons name="pencil" size={25} color={theme.primary} />
+            </Pressable>
+            */}
+          </View>
+          <View style={styles.quickAccessRow}>
+            <QuickAccessCard
+              title="Novo Orçamento"
+              icon="document-text"
+              onPress={() => {
+                router.replace("/orcamentos");
+              }}
+              color={theme.title}
+            />
 
-      <View style={globalStyles.quickAccessHeader}>
-        <Text style={globalStyles.sectionTitle}>Acesso rápido</Text>
+            <QuickAccessCard
+              title="Novo Cliente"
+              icon="people"
+              onPress={() => {
+                router.replace("/clientes");
+              }}
+              color={theme.success}
+            />
 
-        <Pressable
-          style={({ hovered }) => [
-            globalStyles.quickAccessEditButton,
-            hovered && globalStyles.quickButtonHover,
-          ]}
-        >
-          <Ionicons name="pencil" size={25} color="#ffffff" />
-        </Pressable>
-      </View>
+            <QuickAccessCard
+              title="Configurações"
+              icon="cog"
+              onPress={() => {
+                router.replace("/configuracoes");
+              }}
+              color={theme.textSecondary}
+            />
+          </View>
+        </View>
+        <View style={styles.divider} />
 
-      <View style={globalStyles.quickAccessRow}>
-        <QuickAccessCard title="Clientes" icon="people" onPress={() => {}} />
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Obras / Serviços em andamento</Text>
 
-        <QuickAccessCard title="Obras" icon="hammer" onPress={() => {}} />
+          {works.map((work) => {
+            const budget = getBudget(work);
 
-        <QuickAccessCard title="Financeiro" icon="cash" onPress={() => {}} />
-      </View>
-
-      <View style={globalStyles.workSection}>
-        <Text style={globalStyles.sectionTitle}>Obras em andamento</Text>
-
-        {obras.map((obra) => (
-          <WorkCard
-            key={obra.id}
-            title={obra.nome}
-            progress={obra.progresso}
-            type={obra.tipo}
-            meters={obra.metros}
-          />
-        ))}
-      </View>
-    </ScrollView>
+            return (
+              <WorkCard
+                key={work._id}
+                title={budget?.nome ?? "Obra"}
+                progress={work.porcentagem_de_conclusao ?? 0}
+                type={work.status}
+                diasReal={work.qt_dias_real ?? 0}
+              />
+            );
+          })}
+        </View>
+      </ScrollView>
+    </GradientBackground>
   );
 }

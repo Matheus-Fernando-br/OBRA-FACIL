@@ -1,11 +1,11 @@
 import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
-
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
   onPress: () => void;
   loading?: boolean;
+  disabled?: boolean;
   color?: string;
 }
 
@@ -13,28 +13,33 @@ export function AppButton({
   title,
   onPress,
   loading = false,
-  color = COLORS.primary,
+  disabled = false,
+  color,
 }: Props) {
+  const { styles, theme } = useTheme();
+
+  const isDisabled = loading || disabled;
+
   return (
     <TouchableOpacity
+      disabled={isDisabled}
       onPress={onPress}
       activeOpacity={0.8}
-      style={[
-        {
-          width: "100%",
-          height: 50,
-          marginTop: 10,
-          backgroundColor: COLORS.primary,
-          borderRadius: 12,
-          justifyContent: "center",
-          alignItems: "center",
-        },
-      ]}
+      style={{
+        width: "100%",
+        height: 50,
+        marginTop: 10,
+        backgroundColor: color,
+        borderRadius: 12,
+        justifyContent: "center",
+        alignItems: "center",
+        opacity: isDisabled ? 0.5 : 1,
+      }}
     >
       {loading ? (
-        <ActivityIndicator color="#FFF" />
+        <ActivityIndicator size="small" color={theme.white} />
       ) : (
-        <Text style={globalStyles.appButtonText}>{title}</Text>
+        <Text style={styles.appButtonText}>{title}</Text>
       )}
     </TouchableOpacity>
   );

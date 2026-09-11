@@ -1,47 +1,132 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+} from "react";
 
-interface User {
-  name: string;
+import {
+  login as apiLogin,
+  logout as apiLogout,
+  refreshToken,
+  getUser,
+} from "../services/api";
+
+export interface User {
+  _id: string;
+  nome: string;
   email: string;
+  CPF?: string;
+  CNPJ?: string;
 }
 
 interface AuthContextData {
   user: User | null;
+  token: string | null;
 
-  signIn: (email: string, password: string) => Promise<void>;
+  loading: boolean;
 
-  signOut: () => void;
+  login(
+    email: string,
+    senha: string
+  ): Promise<void>;
+
+  logout(): Promise<void>;
+
+  refresh(): Promise<void>;
+
+  setUser(user: User | null): void;
+
+  setToken(token: string | null): void;
 }
 
-const AuthContext = createContext({} as AuthContextData);
+const AuthContext =
+  createContext({} as AuthContextData);
 
-interface Props {
+export function AuthProvider({
+  children,
+}: {
   children: ReactNode;
-}
+}) {
+  const [user, setUser] =
+    useState<User | null>(null);
 
-export function AuthProvider({ children }: Props) {
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] =
+    useState<string | null>(null);
 
-  async function signIn(email: string, password: string) {
-    // Simulação futura API
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  const [loading, setLoading] =
+    useState(false);
 
-    setUser({
-      name: "Matheus",
-      email,
-    });
+  async function login(
+    email: string,
+    senha: string
+  ) {
+    setLoading(true);
+
+    try {
+      const response =
+        await apiLogin(email, senha);
+
+      setToken(response.accessToken);
+
+      const loggedUser =
+        await getUser(response.accessToken);
+
+      setUser(loggedUser);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function signOut() {
-    setUser(null);
+  async function refresh() {
+    if (!token) return;
+
+    try {
+      const response =
+        await refreshToken(token);
+
+      if (response.accessToken) {
+        setToken(response.accessToken);
+
+        const loggedUser =
+          await getUser(response.accessToken);
+
+        setUser(loggedUser);
+      }
+    } catch (error) {
+      console.log(error);
+
+      await logout();
+    }
+  }
+
+  async function logout() {
+    try {
+      if (token) {
+        await apiLogout(token);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setUser(null);
+      setToken(null);
+    }
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        signIn,
-        signOut,
+        token,
+
+        loading,
+
+        login,
+        logout,
+        refresh,
+
+        setUser,
+        setToken,
       }}
     >
       {children}

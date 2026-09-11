@@ -1,28 +1,55 @@
-import { TextInput } from "react-native";
+import { useState } from "react";
+import { TextInput, TextInputProps } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
 
-interface Props {
-  placeholder: string;
+interface Props extends TextInputProps {}
 
-  value: string;
+export function AppInput({ editable = true, style, ...rest }: Props) {
+  const [focused, setFocused] = useState(false);
+  const { theme } = useTheme();
 
-  onChangeText: (text: string) => void;
-}
-
-export function AppInput({ placeholder, value, onChangeText }: Props) {
   return (
     <TextInput
-      placeholder={placeholder}
-      placeholderTextColor="#94A3B8"
-      value={value}
-      onChangeText={onChangeText}
-      style={{
-        width: "100%",
-        height: 55,
-        backgroundColor: "#FFF",
-        borderRadius: 14,
-        paddingHorizontal: 30,
-        marginBottom: 16,
-      }}
+      {...rest}
+      editable={editable}
+      placeholderTextColor={theme.placeholder}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={[
+        {
+          width: "100%",
+          minHeight: 58,
+
+          backgroundColor: editable ? theme.white : theme.border,
+
+          color: editable ? theme.text : theme.placeholder,
+
+          borderWidth: 1.2,
+
+          borderColor: editable
+            ? focused
+              ? theme.primary
+              : theme.border
+            : theme.borderNull,
+
+          borderRadius: 10,
+
+          paddingHorizontal: 18,
+          paddingVertical: 14,
+
+          marginBottom: 16,
+
+          shadowColor: editable ? theme.text : "transparent",
+          shadowOpacity: editable ? 0.08 : 0,
+          shadowRadius: editable ? 4 : 0,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          elevation: editable ? 2 : 0,
+        },
+        style,
+      ]}
     />
   );
 }
