@@ -340,3 +340,51 @@ export async function deleteWork(id: string, token: string) {
 
   return data;
 }
+
+// ==============================
+// PLANOS E ASSINATURAS
+// ==============================
+
+export async function getPlans(token: string) {
+  const { data } = await api.get("/plans", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function getMySubscription(token: string) {
+  const { data } = await api.get("/subscription/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function changeSubscription(planoId: string, token: string) {
+  const { data } = await api.put(
+    `/subscription/${planoId}`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return data;
+}
+
+export async function cancelSubscription(token: string) {
+  const { data } = await api.delete("/subscription", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}

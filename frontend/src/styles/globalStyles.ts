@@ -9,7 +9,7 @@ export const COLORS = {
   secondary: "#0D6B75",
   backgroundDestaque: "rgba(0, 0, 0, 0.32)",
   gradientStart: "#FFFFFF",
-  gradientEnd: "#ccbdaf80",
+  gradientEnd: "#c45f0080",
   card: "#D9D7D7",
   cardHover: "#1E293B",
 
@@ -123,7 +123,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     obrigatorio: {
-      fontFamily: "HelveticaNow-Bold",
+      fontFamily: "Montserrat_700Bold",
       marginLeft: 5,
       fontSize: 12,
       color: colors.danger,
@@ -182,7 +182,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     orcamentoTextButton: {
       color: COLORS.white,
       marginBottom: 6,
-      fontFamily: "HelveticaNow-Bold",
+      fontFamily: "Montserrat_500Bold",
     },
 
     orcamentoDetailsButton: {
@@ -367,7 +367,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
     serviceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 5 },
     serviceTotalText: {
-      fontFamily: "HelveticaNow-Bold",
+      fontFamily: "Montserrat_700Bold",
       textAlign: "left",
       fontWeight: "bold",
       color: colors.success,
@@ -465,7 +465,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
   ========================= */
 
     title: {
-      fontFamily: "HelveticaNow-SemiBold",
+      fontFamily: "Montserrat_600SemiBold",
       fontSize: 24,
       fontWeight: "700",
       color: colors.title,
@@ -480,7 +480,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     sectionTitle: {
-      fontFamily: "HelveticaNow-Medium",
+      fontFamily: "Montserrat_500Medium,",
       fontWeight: "600",
       fontSize: 16,
       color: colors.text,
@@ -537,7 +537,6 @@ export function createGlobalStyles(colors: typeof COLORS) {
     quickAccessRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      gap: 15,
     },
 
     /* =========================
@@ -755,7 +754,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     clientCardName: {
-      fontFamily: "HelveticaNow-SemiBold",
+      fontFamily: "Montserrat_600SemiBold",
       fontSize: 18,
       color: colors.text,
     },
@@ -874,8 +873,9 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderWidth: 1,
       borderColor: colors.borderNull,
       borderRadius: 18,
-      paddingVertical: 12,
-      paddingHorizontal: 10,
+      padding: 16,
+      paddingVertical: 10,
+      paddingHorizontal: 4,
       alignItems: "center",
       marginHorizontal: 2,
     },
@@ -885,8 +885,8 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     quickButtonText: {
-      marginTop: 5,
-      fontFamily: "HelveticaNow-Regular",
+      marginTop: 10,
+      fontFamily: "Montserrat_400Regular",
       fontSize: 12,
       fontWeight: "600",
       color: colors.text,
@@ -933,7 +933,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     workCardTitle: {
-      fontFamily: "HelveticaNow-SemiBold",
+      fontFamily: "Montserrat_600SemiBold",
       fontSize: 17,
       fontWeight: "700",
       color: colors.text,
@@ -941,7 +941,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     workCardInfo: {
-      fontFamily: "HelveticaNow-Regular",
+      fontFamily: "Montserrat_400Regular",
       fontSize: 13,
       fontWeight: "400",
       color: colors.textSecondary,
@@ -1092,6 +1092,430 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontFamily: "Poppins_600SemiBold",
 
       fontSize: 12,
+    },
+
+    // ==============================
+    // PLANOS E ASSINATURA
+    // ==============================
+
+    planPageContent: {
+      paddingBottom: 30,
+    },
+
+    planCurrentCard: {
+      backgroundColor: COLORS.card,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 16,
+    },
+
+    planCurrentHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      gap: 12,
+    },
+
+    planCurrentTitleContainer: {
+      flex: 1,
+    },
+
+    planCurrentLabel: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: COLORS.textSecondary,
+      letterSpacing: 0.8,
+      marginBottom: 5,
+    },
+
+    planCurrentName: {
+      fontSize: 24,
+      fontWeight: "700",
+      color: COLORS.text,
+      marginBottom: 5,
+    },
+
+    planCurrentDescription: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: COLORS.textSecondary,
+    },
+
+    planActiveBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      alignSelf: "flex-start",
+      paddingHorizontal: 9,
+      paddingVertical: 6,
+      borderRadius: 20,
+      backgroundColor: COLORS.white,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    },
+
+    planActiveDot: {
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: COLORS.primary,
+      marginRight: 6,
+    },
+
+    planActiveText: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: COLORS.primary,
+    },
+
+    planCurrentPriceRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      marginTop: 18,
+    },
+
+    planCurrentPrice: {
+      fontSize: 28,
+      fontWeight: "800",
+      color: COLORS.text,
+    },
+
+    planCurrentPeriod: {
+      fontSize: 13,
+      color: COLORS.textSecondary,
+      marginLeft: 4,
+    },
+
+    planCurrentInfo: {
+      borderTopWidth: 1,
+      borderTopColor: COLORS.border,
+      marginTop: 18,
+      paddingTop: 16,
+      gap: 14,
+    },
+
+    planCurrentInfoItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+
+    planCurrentInfoLabel: {
+      fontSize: 11,
+      color: COLORS.textSecondary,
+      marginBottom: 2,
+    },
+
+    planCurrentInfoValue: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: COLORS.text,
+    },
+
+    planChangeButton: {
+      marginTop: 18,
+      height: 46,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      flexDirection: "row",
+      gap: 8,
+    },
+
+    planChangeButtonText: {
+      fontSize: 14,
+      fontWeight: "700",
+      color: COLORS.primary,
+    },
+
+    planUsageCard: {
+      backgroundColor: COLORS.card,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 16,
+    },
+
+    planSectionTitle: {
+      fontSize: 17,
+      fontWeight: "700",
+      color: COLORS.text,
+    },
+
+    planSectionDescription: {
+      fontSize: 13,
+      lineHeight: 19,
+      color: COLORS.textSecondary,
+    },
+
+    planUsageItem: {
+      marginTop: 18,
+    },
+
+    planUsageTop: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 9,
+    },
+
+    planUsageTitleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
+
+    planUsageTitle: {
+      fontSize: 13,
+      fontWeight: "600",
+      color: COLORS.text,
+    },
+
+    planUsageValue: {
+      fontSize: 12,
+      fontWeight: "600",
+      color: COLORS.textSecondary,
+    },
+
+    planUsageValueWarning: {
+      color: COLORS.warning,
+    },
+
+    planUsageBarBackground: {
+      height: 7,
+      width: "100%",
+      borderRadius: 10,
+      overflow: "hidden",
+      backgroundColor: COLORS.border,
+    },
+
+    planUsageBar: {
+      height: "100%",
+      borderRadius: 10,
+    },
+
+    planOptionsHeader: {
+      marginBottom: 14,
+    },
+
+    planOptionCard: {
+      backgroundColor: COLORS.card,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      borderRadius: 18,
+      padding: 18,
+      marginBottom: 14,
+    },
+
+    planOptionCardFeatured: {
+      borderColor: COLORS.primary,
+    },
+
+    planRecommendedBadge: {
+      flexDirection: "row",
+      alignSelf: "flex-start",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: 9,
+      paddingVertical: 5,
+      borderRadius: 20,
+      backgroundColor: COLORS.white,
+      marginBottom: 12,
+    },
+
+    planRecommendedText: {
+      fontSize: 11,
+      fontWeight: "700",
+      color: COLORS.primary,
+    },
+
+    planOptionHeader: {
+      marginBottom: 14,
+    },
+
+    planOptionTitleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+
+    planOptionName: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: COLORS.text,
+    },
+
+    planCurrentBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+      backgroundColor: COLORS.white,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    },
+
+    planCurrentBadgeText: {
+      fontSize: 10,
+      fontWeight: "700",
+      color: COLORS.textSecondary,
+    },
+
+    planOptionDescription: {
+      marginTop: 5,
+      fontSize: 13,
+      lineHeight: 19,
+      color: COLORS.textSecondary,
+    },
+
+    planOptionPriceRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      marginBottom: 16,
+    },
+
+    planOptionPrice: {
+      fontSize: 25,
+      fontWeight: "800",
+      color: COLORS.text,
+    },
+
+    planOptionPeriod: {
+      fontSize: 12,
+      color: COLORS.textSecondary,
+      marginLeft: 4,
+    },
+
+    planLimits: {
+      borderTopWidth: 1,
+      borderTopColor: COLORS.border,
+      paddingTop: 14,
+      gap: 10,
+    },
+
+    planLimitRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 9,
+    },
+
+    planLimitText: {
+      fontSize: 13,
+      color: COLORS.textSecondary,
+    },
+
+    planFeatures: {
+      marginTop: 16,
+      gap: 10,
+    },
+
+    planFeatureRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 8,
+    },
+
+    planFeatureText: {
+      flex: 1,
+      fontSize: 13,
+      lineHeight: 18,
+      color: COLORS.text,
+    },
+
+    planSelectButton: {
+      height: 44,
+      borderRadius: 11,
+      backgroundColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 18,
+    },
+
+    planSelectButtonCurrent: {
+      backgroundColor: COLORS.white,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    },
+
+    planSelectButtonText: {
+      fontSize: 13,
+      fontWeight: "700",
+      color: COLORS.white,
+    },
+
+    planSelectButtonTextCurrent: {
+      color: COLORS.textSecondary,
+    },
+
+    paymentMethodCard: {
+      minHeight: 70,
+      paddingHorizontal: 4,
+      paddingVertical: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+
+    paymentMethodIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      backgroundColor: COLORS.white,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    paymentMethodContent: {
+      flex: 1,
+    },
+
+    paymentMethodTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: COLORS.text,
+      marginBottom: 3,
+    },
+
+    paymentMethodDescription: {
+      fontSize: 12,
+      lineHeight: 17,
+      color: COLORS.textSecondary,
+    },
+
+    planCancelButton: {
+      minHeight: 70,
+      paddingHorizontal: 4,
+      paddingVertical: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+    },
+
+    planCancelContent: {
+      flex: 1,
+    },
+
+    planCancelTitle: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: COLORS.danger,
+      marginBottom: 3,
+    },
+
+    planCancelDescription: {
+      fontSize: 12,
+      lineHeight: 17,
+      color: COLORS.textSecondary,
+    },
+
+    pressOpacity: {
+      opacity: 0.7,
     },
 
     /* =========================

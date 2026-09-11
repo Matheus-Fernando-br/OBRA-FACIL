@@ -34,6 +34,13 @@ const options = [
   },
 
   {
+    title: "Planos e Assinaturas",
+    icon: "card",
+    route: "/planos",
+    description: "Gerencie seu plano e assinatura",
+  },
+
+  {
     title: "Notificações",
     icon: "notifications",
     route: "/notificacoes",

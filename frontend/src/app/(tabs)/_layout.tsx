@@ -97,6 +97,13 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
+        name="planos"
+        options={{
+          href: null,
+        }}
+      />
+
+      <Tabs.Screen
         name="notificacoes"
         options={{
           href: null,

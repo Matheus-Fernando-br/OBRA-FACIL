@@ -188,3 +188,43 @@ export interface Obra {
 
   arquivado: boolean;
 }
+
+// ==============================
+// PLANO
+// ==============================
+
+export interface Plano {
+  id: string;
+  nome: string;
+  descricao: string;
+  preco: number;
+  periodo: "mensal" | "anual";
+  destaque?: boolean;
+
+  limites: {
+    clientes: number;
+    orcamentos: number;
+    obras: number;
+    usuarios?: number;
+    armazenamento?: number;
+  };
+
+  recursos: string[];
+}
+
+export interface UsoPlano {
+  clientes: number;
+  orcamentos: number;
+  obras: number;
+  usuarios?: number;
+  armazenamento?: number;
+}
+
+export interface Assinatura {
+  plano: Plano;
+  status: "ATIVA" | "PENDENTE" | "CANCELADA" | "EXPIRADA";
+  inicio: string;
+  proxima_cobranca?: string;
+  forma_pagamento?: string;
+  uso: UsoPlano;
+}
