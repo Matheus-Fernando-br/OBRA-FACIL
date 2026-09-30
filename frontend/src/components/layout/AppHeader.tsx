@@ -43,8 +43,8 @@ export function AppHeader({ onMenu }: Props) {
           flexDirection: "row",
           alignItems: "center",
           backgroundColor: COLORS.white,
-          padding:5,
-          borderRadius:5,
+          padding: 5,
+          borderRadius: 5,
         }}
       >
         <Image

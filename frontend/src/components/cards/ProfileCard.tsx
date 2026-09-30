@@ -21,7 +21,7 @@ export function ProfileCard({ nome, email, imagem, onPress }: Props) {
         }}
       >
         <View style={{ justifyContent: "center" }}>
-          <Ionicons name="person-circle" size={70} color={theme.text} />
+          <Ionicons name="person-circle" size={70} color={theme.white} />
         </View>
 
         <View
@@ -44,10 +44,10 @@ export function ProfileCard({ nome, email, imagem, onPress }: Props) {
             borderRadius: 19,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: theme.primary,
+            backgroundColor: theme.white,
           }}
         >
-          <Ionicons name="create-outline" size={20} color={theme.white} />
+          <Ionicons name="create-outline" size={20} color={theme.text} />
         </Pressable>
       </View>
     </Pressable>

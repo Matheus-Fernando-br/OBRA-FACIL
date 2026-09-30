@@ -8,65 +8,53 @@ interface Props {
   subtitle?: string;
 }
 
-export function PageHeader({
-  title,
-  subtitle,
-}: Props) {
-  const { theme } = useTheme();
+export function PageHeader({ title, subtitle }: Props) {
+  const { styles, theme } = useTheme();
 
   return (
-    <View
-      style={{
-        marginBottom: 25,
-      }}
-    >
-      <Pressable
-        onPress={() => router.replace("/(tabs)/mais")}
+    <View>
+      <View style={styles.divider} />
+      <View
         style={{
-          flexDirection: "row",
+          position: "relative",
+          width: "100%",
+          minHeight: 44,
+          justifyContent: "center",
           alignItems: "center",
-          marginBottom: 18,
         }}
       >
-        <Ionicons
-          name="arrow-back"
-          size={24}
-          color={theme.title}
-        />
-
-        <Text
+        {/* Seta fixa à esquerda */}
+        <Pressable
+          onPress={() => router.replace("/(tabs)/mais")}
           style={{
-            color: theme.title,
-            marginLeft: 8,
-            fontWeight: "600",
-            fontSize: 16,
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: 44,
+            height: 44,
+            alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
-          Voltar
-        </Text>
-      </Pressable>
+          <Ionicons name="arrow-back" size={24} color={theme.title} />
+        </Pressable>
 
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 30,
-          fontWeight: "700",
-        }}
-      >
-        {title}
-      </Text>
-
-      {subtitle && (
+        {/* Título centralizado na tela */}
         <Text
-          style={{
-            color: theme.textSecondary,
-            marginTop: 6,
-            fontSize: 15,
-          }}
+          style={[
+            styles.title,
+            {
+              textAlign: "center",
+            },
+          ]}
         >
-          {subtitle}
+          {title}
         </Text>
-      )}
+      </View>
+
+      <View style={styles.divider} />
+
+      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
   );
 }

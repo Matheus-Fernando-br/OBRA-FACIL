@@ -101,7 +101,9 @@ export default function MaisScreen() {
             style={[styles.menuCard, { backgroundColor: theme.danger }]}
             onPress={handleLogout}
           >
-            <Text style={styles.menuText}>Logout</Text>
+            <Text style={[styles.menuText, { color: theme.white }]}>
+              Logout
+            </Text>
 
             <Ionicons name="exit" size={20} color={theme.white} />
           </TouchableOpacity>

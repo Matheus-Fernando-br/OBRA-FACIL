@@ -7,21 +7,14 @@ import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
 
 export default function AjudaScreen() {
-
   return (
-
     <ScrollView
       style={globalStyles.container}
       showsVerticalScrollIndicator={false}
     >
-
-      <PageHeader
-        title="Ajuda"
-        subtitle="Tire dúvidas sobre o sistema"
-      />
+      <PageHeader title="Ajuda" subtitle="Tire dúvidas sobre o sistema" />
 
       <SettingsSection title="Central de Ajuda">
-
         <SettingsItem
           icon="book"
           title="Manual do Sistema"
@@ -49,17 +42,7 @@ export default function AjudaScreen() {
           description="Enviar um erro encontrado"
           onPress={() => Alert.alert("Em breve")}
         />
-
-        <SettingsItem
-          icon="mail"
-          title="Contato"
-          description="suporte@obrafacil.com.br"
-        />
-
       </SettingsSection>
-
     </ScrollView>
-
   );
-
 }

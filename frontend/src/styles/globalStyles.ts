@@ -603,7 +603,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     profileCard: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.title,
       padding: 24,
       borderRadius: 22,
       marginBottom: 24,
@@ -623,12 +623,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
     profileName: {
       fontSize: 24,
       fontWeight: "bold",
-      color: colors.text,
+      color: COLORS.white,
     },
 
     profileEmail: {
       marginTop: 6,
-      color: colors.textSecondary,
+      color: COLORS.white,
     },
 
     menuCard: {
@@ -636,7 +636,6 @@ export function createGlobalStyles(colors: typeof COLORS) {
       padding: 20,
       borderRadius: 18,
       marginBottom: 14,
-
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
