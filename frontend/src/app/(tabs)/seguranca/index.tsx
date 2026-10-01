@@ -73,71 +73,75 @@ export default function SegurancaScreen() {
   }
 
   return (
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <PageHeader
-        title="Privacidade e Segurança"
-        subtitle="Acesse suas configurações de segurança"
-      />
+    <View style={{ flex: 1 }}>
+      <PageHeader title="Privacidade e Segurança" />
 
-      <SettingsSection title="Alterar Senha">
-        <Text style={styles.label}>Senha Atual:</Text>
-        <AppInput
-          secureTextEntry
-          placeholder="Informe a sua Senha Atual"
-          placeholderTextColor={COLORS.placeholder}
-          value={senhaAtual}
-          onChangeText={setSenhaAtual}
-        />
-        <Text style={styles.label}>Nova Senha:</Text>
+      <ScrollView
+        style={globalStyles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <SettingsSection title="Alterar Senha">
+          <Text style={styles.label}>Senha Atual:</Text>
+          <AppInput
+            secureTextEntry
+            placeholder="Informe a sua Senha Atual"
+            placeholderTextColor={COLORS.placeholder}
+            value={senhaAtual}
+            onChangeText={setSenhaAtual}
+          />
+          <Text style={styles.label}>Nova Senha:</Text>
 
-        <AppInput
-          secureTextEntry
-          placeholder="Informe a Nova Senha"
-          placeholderTextColor={COLORS.placeholder}
-          value={novaSenha}
-          onChangeText={setNovaSenha}
-        />
-        <Text style={styles.label}>Confirmar Senha Atual:</Text>
+          <AppInput
+            secureTextEntry
+            placeholder="Informe a Nova Senha"
+            placeholderTextColor={COLORS.placeholder}
+            value={novaSenha}
+            onChangeText={setNovaSenha}
+          />
+          <Text style={styles.label}>Confirmar Senha Atual:</Text>
 
-        <AppInput
-          secureTextEntry
-          placeholder="Confirme a Nova Senha"
-          placeholderTextColor={COLORS.placeholder}
-          value={confirmarSenha}
-          onChangeText={setConfirmarSenha}
-        />
+          <AppInput
+            secureTextEntry
+            placeholder="Confirme a Nova Senha"
+            placeholderTextColor={COLORS.placeholder}
+            value={confirmarSenha}
+            onChangeText={setConfirmarSenha}
+          />
 
-        <AppButton
-          title="Alterar Senha"
-          loading={loading}
-          onPress={handleChangePassword}
-        />
-      </SettingsSection>
+          <AppButton
+            title="Alterar Senha"
+            loading={loading}
+            onPress={handleChangePassword}
+          />
+        </SettingsSection>
 
-      <SettingsSection title="Proteção">
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Login com biometria</Text>
+        <SettingsSection title="Proteção">
+          <View style={globalStyles.menuCard}>
+            <Text style={globalStyles.menuText}>Login com biometria</Text>
 
-          <AppSwitch value={biometria} onValueChange={setBiometria} />
-        </View>
+            <AppSwitch value={biometria} onValueChange={setBiometria} />
+          </View>
 
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Autenticação em duas etapas</Text>
+          <View style={globalStyles.menuCard}>
+            <Text style={globalStyles.menuText}>
+              Autenticação em duas etapas
+            </Text>
 
-          <AppSwitch value={autenticacao2F} onValueChange={setAutenticacao2F} />
-        </View>
+            <AppSwitch
+              value={autenticacao2F}
+              onValueChange={setAutenticacao2F}
+            />
+          </View>
 
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Manter conectado</Text>
+          <View style={globalStyles.menuCard}>
+            <Text style={globalStyles.menuText}>Manter conectado</Text>
 
-          <AppSwitch value={lembrarLogin} onValueChange={setLembrarLogin} />
-        </View>
-      </SettingsSection>
+            <AppSwitch value={lembrarLogin} onValueChange={setLembrarLogin} />
+          </View>
+        </SettingsSection>
 
-      <View style={{ height: 40 }} />
-    </ScrollView>
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }

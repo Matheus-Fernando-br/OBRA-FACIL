@@ -53,13 +53,6 @@ const options = [
     route: "/ajuda",
     description: "FAQ e suporte",
   },
-
-  {
-    title: "Sobre o app",
-    icon: "information-circle",
-    route: "/sobre",
-    description: "Versão e informações",
-  },
 ];
 
 export default function MaisScreen() {

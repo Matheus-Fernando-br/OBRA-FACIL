@@ -1,4 +1,4 @@
-import { ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useState } from "react";
 
 import { globalStyles } from "@/styles/globalStyles";
@@ -9,115 +9,80 @@ import { SettingsItem } from "@/components/settings/SettingsItem";
 import { AppSwitch } from "@/components/settings/AppSwitch";
 
 export default function NotificacoesScreen() {
-
-  const [push, setPush] =
-    useState(true);
-
-  const [email, setEmail] =
-    useState(true);
-
-  const [clientes, setClientes] =
-    useState(true);
-
-  const [orcamentos, setOrcamentos] =
-    useState(true);
-
-  const [obras, setObras] =
-    useState(true);
-
-  const [atualizacoes, setAtualizacoes] =
-    useState(false);
+  const [push, setPush] = useState(true);
+  const [email, setEmail] = useState(true);
+  const [clientes, setClientes] = useState(true);
+  const [orcamentos, setOrcamentos] = useState(true);
+  const [obras, setObras] = useState(true);
+  const [atualizacoes, setAtualizacoes] = useState(false);
 
   return (
+    <View style={{ flex: 1 }}>
+      {/* HEADER FIXO */}
+      <PageHeader title="Notificações" />
 
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
+      {/* CONTEÚDO COM SCROLL */}
+      <ScrollView
+        style={globalStyles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}
+      >
+        <SettingsSection title="Alertas">
+          <SettingsItem
+            icon="notifications"
+            title="Push"
+            description="Receber notificações"
+            rightComponent={<AppSwitch value={push} onValueChange={setPush} />}
+          />
 
-      <PageHeader
-        title="Notificações"
-        subtitle="Ajuste as notificações que deseja receber"
-      />
+          <SettingsItem
+            icon="mail"
+            title="E-mail"
+            description="Receber notificações por e-mail"
+            rightComponent={
+              <AppSwitch value={email} onValueChange={setEmail} />
+            }
+          />
 
-      <SettingsSection title="Alertas">
+          <SettingsItem
+            icon="people"
+            title="Clientes"
+            description="Novos clientes"
+            rightComponent={
+              <AppSwitch value={clientes} onValueChange={setClientes} />
+            }
+          />
 
-        <SettingsItem
-          icon="notifications"
-          title="Push"
-          description="Receber notificações"
-          rightComponent={
-            <AppSwitch
-              value={push}
-              onValueChange={setPush}
-            />
-          }
-        />
+          <SettingsItem
+            icon="document-text"
+            title="Orçamentos"
+            description="Atualizações"
+            rightComponent={
+              <AppSwitch value={orcamentos} onValueChange={setOrcamentos} />
+            }
+          />
 
-        <SettingsItem
-          icon="mail"
-          title="E-mail"
-          description="Receber notificações por e-mail"
-          rightComponent={
-            <AppSwitch
-              value={email}
-              onValueChange={setEmail}
-            />
-          }
-        />
+          <SettingsItem
+            icon="hammer"
+            title="Obras"
+            description="Mudanças nas obras"
+            rightComponent={
+              <AppSwitch value={obras} onValueChange={setObras} />
+            }
+          />
 
-        <SettingsItem
-          icon="people"
-          title="Clientes"
-          description="Novos clientes"
-          rightComponent={
-            <AppSwitch
-              value={clientes}
-              onValueChange={setClientes}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="document-text"
-          title="Orçamentos"
-          description="Atualizações"
-          rightComponent={
-            <AppSwitch
-              value={orcamentos}
-              onValueChange={setOrcamentos}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="hammer"
-          title="Obras"
-          description="Mudanças nas obras"
-          rightComponent={
-            <AppSwitch
-              value={obras}
-              onValueChange={setObras}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="download"
-          title="Atualizações"
-          description="Novas versões do aplicativo"
-          rightComponent={
-            <AppSwitch
-              value={atualizacoes}
-              onValueChange={setAtualizacoes}
-            />
-          }
-        />
-
-      </SettingsSection>
-
-    </ScrollView>
-
+          <SettingsItem
+            icon="download"
+            title="Atualizações"
+            description="Novas versões do aplicativo"
+            rightComponent={
+              <AppSwitch value={atualizacoes} onValueChange={setAtualizacoes} />
+            }
+          />
+        </SettingsSection>
+      </ScrollView>
+    </View>
   );
-
 }

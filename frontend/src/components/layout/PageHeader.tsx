@@ -5,15 +5,18 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
-  subtitle?: string;
 }
 
-export function PageHeader({ title, subtitle }: Props) {
+export function PageHeader({ title }: Props) {
   const { styles, theme } = useTheme();
 
   return (
-    <View>
-      <View style={styles.divider} />
+    <View
+      style={{
+        backgroundColor: theme.white,
+        padding: 10,
+      }}
+    >
       <View
         style={{
           position: "relative",
@@ -21,9 +24,9 @@ export function PageHeader({ title, subtitle }: Props) {
           minHeight: 44,
           justifyContent: "center",
           alignItems: "center",
+          paddingHorizontal: 50,
         }}
       >
-        {/* Seta fixa à esquerda */}
         <Pressable
           onPress={() => router.replace("/(tabs)/mais")}
           style={{
@@ -39,7 +42,6 @@ export function PageHeader({ title, subtitle }: Props) {
           <Ionicons name="arrow-back" size={24} color={theme.title} />
         </Pressable>
 
-        {/* Título centralizado na tela */}
         <Text
           style={[
             styles.title,
@@ -53,8 +55,6 @@ export function PageHeader({ title, subtitle }: Props) {
       </View>
 
       <View style={styles.divider} />
-
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
   );
 }

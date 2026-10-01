@@ -9,76 +9,99 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        header: () => (
-          <AppHeader
-            onMenu={() => {
-              console.log("Menu");
-            }}
-            onNotifications={() => {
-              router.replace("../notificacoes");
-            }}
-          />
-        ),
         tabBarActiveTintColor: theme.title,
         tabBarInactiveTintColor: theme.textSecondary,
         tabBarStyle: styles.tabBar,
       }}
     >
+      {/* TELA COM APP HEADER */}
       <Tabs.Screen
         name="index"
         options={{
           title: "Início",
+
+          header: () => (
+            <AppHeader
+              onMenu={() => {
+                console.log("Menu");
+              }}
+            />
+          ),
+
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="home" color={color} size={size} />
           ),
         }}
       />
 
+      {/* TELA COM APP HEADER */}
       <Tabs.Screen
         name="clientes"
         options={{
           title: "Clientes",
+
+          header: () => (
+            <AppHeader
+              onMenu={() => {
+                console.log("Menu");
+              }}
+            />
+          ),
+
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people" color={color} size={size} />
           ),
         }}
       />
 
+      {/* TELA COM APP HEADER */}
       <Tabs.Screen
         name="orcamentos"
         options={{
           title: "Orçamentos",
+
+          header: () => <AppHeader />,
+
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="document-text" color={color} size={size} />
           ),
         }}
       />
 
+      {/* TELA SEM APP HEADER */}
       <Tabs.Screen
         name="obras"
         options={{
           title: "Serviços",
+          headerShown: false,
+
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="hammer" color={color} size={size} />
           ),
         }}
       />
 
+      {/* TELA COM APP HEADER */}
       <Tabs.Screen
         name="mais"
         options={{
           title: "Mais",
+
+          header: () => <AppHeader />,
+
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="menu" color={color} size={size} />
           ),
         }}
       />
 
-      {/*TELAS QUE NÃO PODEM APARECER DEVIDO AO NOME index*/}
+      {/* TELAS INTERNAS */}
+
       <Tabs.Screen
         name="configuracoes"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -86,6 +109,7 @@ export default function TabsLayout() {
         name="seguranca"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -93,6 +117,7 @@ export default function TabsLayout() {
         name="relatorios"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -100,6 +125,7 @@ export default function TabsLayout() {
         name="planos"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -107,6 +133,7 @@ export default function TabsLayout() {
         name="notificacoes"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -114,6 +141,7 @@ export default function TabsLayout() {
         name="ajuda"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
 
@@ -121,6 +149,7 @@ export default function TabsLayout() {
         name="sobre"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
     </Tabs>

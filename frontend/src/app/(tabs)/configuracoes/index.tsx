@@ -1,13 +1,12 @@
-import { ScrollView } from "react-native";
+import { View, ScrollView } from "react-native";
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { globalStyles, COLORS } from "@/styles/globalStyles";
+import { globalStyles } from "@/styles/globalStyles";
 import { router } from "expo-router";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
 import { AppSwitch } from "@/components/settings/AppSwitch";
 import { SettingsSelect } from "@/components/settings/SettingsSelect";
-
 import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 
 export default function ConfiguracoesScreen() {
@@ -21,24 +20,22 @@ export default function ConfiguracoesScreen() {
   const [abrirUltimaTela, setAbrirUltimaTela] = useState(false);
 
   const [backupAutomatico, setBackupAutomatico] = useState(true);
-  const [sincronizacao, setSincronizacao] =
-    useState("Automática");
+  const [sincronizacao, setSincronizacao] = useState("Automática");
 
   return (
-    <>
+    <View style={{ flex: 1 }}>
+      {/* HEADER FIXO */}
+      <PageHeader title="Configurações" />
+
+      {/* CONTEÚDO QUE ROLA */}
       <ScrollView
         style={globalStyles.container}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: 30,
+        }}
       >
-
-        <PageHeader
-        title="Configurações"
-        subtitle="Ajuste as configurações do aplicativo"
-      />
-
-
         <SettingsSection title="Aparência">
-
           <SettingsItem
             icon="moon"
             title="Tema"
@@ -47,11 +44,7 @@ export default function ConfiguracoesScreen() {
               <SettingsSelect
                 title="Tema"
                 value={tema}
-                options={[
-                  "Sistema",
-                  "Claro",
-                  "Escuro",
-                ]}
+                options={["Sistema", "Claro", "Escuro"]}
                 onChange={setTema}
               />
             }
@@ -62,17 +55,39 @@ export default function ConfiguracoesScreen() {
             title="Animações"
             description="Ativar animações"
             rightComponent={
+              <AppSwitch value={animacoes} onValueChange={setAnimacoes} />
+            }
+          />
+        </SettingsSection>
+
+        <SettingsSection title="Sincronização">
+          <SettingsItem
+            icon="cloud-upload"
+            title="Backup automático"
+            description="Enviar dados automaticamente"
+            rightComponent={
               <AppSwitch
-                value={animacoes}
-                onValueChange={setAnimacoes}
+                value={backupAutomatico}
+                onValueChange={setBackupAutomatico}
               />
             }
           />
 
+          <SettingsItem
+            icon="sync"
+            title="Modo"
+            description="Forma de sincronização"
+            rightComponent={
+              <SettingsSelect
+                title="Modo"
+                value={sincronizacao}
+                options={["Automática", "Manual", "Somente Wi-Fi"]}
+                onChange={setSincronizacao}
+              />
+            }
+          />
         </SettingsSection>
-
         <SettingsSection title="Aplicativo">
-
           <SettingsItem
             icon="rocket"
             title="Inicialização rápida"
@@ -108,52 +123,20 @@ export default function ConfiguracoesScreen() {
               />
             }
           />
-
-        </SettingsSection>
-
-        <SettingsSection title="Sincronização">
-
           <SettingsItem
-            icon="cloud-upload"
-            title="Backup automático"
-            description="Enviar dados automaticamente"
-            rightComponent={
-              <AppSwitch
-                value={backupAutomatico}
-                onValueChange={setBackupAutomatico}
-              />
-            }
+            icon="information-circle"
+            title="Sobre o app"
+            description="Versão e informações"
+            onPress={() => router.push("../sobre")}
           />
-
-          <SettingsItem
-            icon="sync"
-            title="Modo"
-            description="Forma de sincronização"
-            rightComponent={
-              <SettingsSelect
-                title="Modo"
-                value={sincronizacao}
-                options={[
-                  "Automática",
-                  "Manual",
-                  "Somente Wi-Fi",
-                ]}
-                onChange={setSincronizacao}
-              />
-            }
-          />
-
         </SettingsSection>
 
         <SettingsSection title="Conta">
-
           <SettingsItem
             icon="shield-checkmark"
             title="Privacidade e Segurança"
             description="Senha e autenticação"
-            onPress={() =>
-              router.push("../seguranca")
-            }
+            onPress={() => router.push("../seguranca")}
           />
 
           <SettingsItem
@@ -161,19 +144,15 @@ export default function ConfiguracoesScreen() {
             title="Excluir Conta"
             description="Remover permanentemente"
             danger
-            onPress={() =>
-              setDeleteVisible(true)
-            }
+            onPress={() => setDeleteVisible(true)}
           />
-
         </SettingsSection>
-
       </ScrollView>
 
       <DeleteAccountModal
         visible={deleteVisible}
         onClose={() => setDeleteVisible(false)}
       />
-    </>
+    </View>
   );
 }

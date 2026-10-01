@@ -166,119 +166,119 @@ export default function PlanosScreen() {
   }
 
   return (
-    <ScrollView
-      style={globalStyles.container}
-      contentContainerStyle={globalStyles.planPageContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <PageHeader
-        title="Planos e assinatura"
-        subtitle="Gerencie seu plano, pagamentos e recursos."
-      />
+    <View style={{ flex: 1 }}>
+      <PageHeader title="Planos e assinatura" />
 
-      <CurrentPlanCard
-        assinatura={assinatura}
-        onChangePlan={handleChangePlan}
-      />
-
-      <PlanUsageCard plano={assinatura.plano} uso={assinatura.uso} />
-
-      <SettingsSection title="Pagamento">
-        <PaymentMethodCard
-          paymentMethod={assinatura.forma_pagamento}
-          onPress={handlePaymentMethod}
+      <ScrollView
+        style={globalStyles.container}
+        contentContainerStyle={globalStyles.planPageContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <CurrentPlanCard
+          assinatura={assinatura}
+          onChangePlan={handleChangePlan}
         />
 
-        <SettingsItem
-          icon="receipt-outline"
-          title="Histórico de cobranças"
-          description="Consulte suas cobranças e pagamentos"
-          onPress={handleBillingHistory}
-        />
-      </SettingsSection>
+        <PlanUsageCard plano={assinatura.plano} uso={assinatura.uso} />
 
-      <SettingsSection title="Opções da assinatura">
-        <SettingsItem
-          icon="refresh-outline"
-          title="Renovação automática"
-          description="Renovar o plano automaticamente"
-          rightComponent={
-            <AppSwitch
-              value={renovacaoAutomatica}
-              onValueChange={setRenovacaoAutomatica}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="notifications-outline"
-          title="Notificações de cobrança"
-          description="Receber avisos antes das cobranças"
-          rightComponent={
-            <AppSwitch
-              value={notificacaoCobranca}
-              onValueChange={setNotificacaoCobranca}
-            />
-          }
-        />
-      </SettingsSection>
-
-      <SettingsSection title="Planos disponíveis">
-        <View style={globalStyles.planOptionsHeader}>
-          <Text style={globalStyles.planSectionDescription}>
-            Compare os planos e escolha a opção mais adequada para sua operação.
-          </Text>
-        </View>
-
-        {planos.map((plano) => (
-          <PlanOptionCard
-            key={plano.id}
-            plano={plano}
-            atual={plano.id === assinatura.plano.id}
-            onSelect={() => handleSelectPlan(plano)}
-          />
-        ))}
-      </SettingsSection>
-
-      <SettingsSection title="Gerenciamento">
-        <SettingsItem
-          icon="help-circle-outline"
-          title="Precisa de ajuda?"
-          description="Entre em contato com o suporte"
-          onPress={() =>
-            Alert.alert(
-              "Suporte",
-              "O canal de suporte será integrado posteriormente.",
-            )
-          }
-        />
-
-        <Pressable
-          style={({ pressed }) => [
-            globalStyles.planCancelButton,
-            pressed && globalStyles.pressOpacity,
-          ]}
-          onPress={handleCancelSubscription}
-        >
-          <Ionicons
-            name="close-circle-outline"
-            size={20}
-            color={COLORS.danger}
+        <SettingsSection title="Pagamento">
+          <PaymentMethodCard
+            paymentMethod={assinatura.forma_pagamento}
+            onPress={handlePaymentMethod}
           />
 
-          <View style={globalStyles.planCancelContent}>
-            <Text style={globalStyles.planCancelTitle}>
-              Cancelar assinatura
-            </Text>
+          <SettingsItem
+            icon="receipt-outline"
+            title="Histórico de cobranças"
+            description="Consulte suas cobranças e pagamentos"
+            onPress={handleBillingHistory}
+          />
+        </SettingsSection>
 
-            <Text style={globalStyles.planCancelDescription}>
-              Encerrar sua assinatura do OBRA-FÁCIL
+        <SettingsSection title="Opções da assinatura">
+          <SettingsItem
+            icon="refresh-outline"
+            title="Renovação automática"
+            description="Renovar o plano automaticamente"
+            rightComponent={
+              <AppSwitch
+                value={renovacaoAutomatica}
+                onValueChange={setRenovacaoAutomatica}
+              />
+            }
+          />
+
+          <SettingsItem
+            icon="notifications-outline"
+            title="Notificações de cobrança"
+            description="Receber avisos antes das cobranças"
+            rightComponent={
+              <AppSwitch
+                value={notificacaoCobranca}
+                onValueChange={setNotificacaoCobranca}
+              />
+            }
+          />
+        </SettingsSection>
+
+        <SettingsSection title="Planos disponíveis">
+          <View style={globalStyles.planOptionsHeader}>
+            <Text style={globalStyles.planSectionDescription}>
+              Compare os planos e escolha a opção mais adequada para sua
+              operação.
             </Text>
           </View>
 
-          <Ionicons name="chevron-forward" size={20} color={COLORS.danger} />
-        </Pressable>
-      </SettingsSection>
-    </ScrollView>
+          {planos.map((plano) => (
+            <PlanOptionCard
+              key={plano.id}
+              plano={plano}
+              atual={plano.id === assinatura.plano.id}
+              onSelect={() => handleSelectPlan(plano)}
+            />
+          ))}
+        </SettingsSection>
+
+        <SettingsSection title="Gerenciamento">
+          <SettingsItem
+            icon="help-circle-outline"
+            title="Precisa de ajuda?"
+            description="Entre em contato com o suporte"
+            onPress={() =>
+              Alert.alert(
+                "Suporte",
+                "O canal de suporte será integrado posteriormente.",
+              )
+            }
+          />
+
+          <Pressable
+            style={({ pressed }) => [
+              globalStyles.planCancelButton,
+              pressed && globalStyles.pressOpacity,
+            ]}
+            onPress={handleCancelSubscription}
+          >
+            <Ionicons
+              name="close-circle-outline"
+              size={20}
+              color={COLORS.danger}
+            />
+
+            <View style={globalStyles.planCancelContent}>
+              <Text style={globalStyles.planCancelTitle}>
+                Cancelar assinatura
+              </Text>
+
+              <Text style={globalStyles.planCancelDescription}>
+                Encerrar sua assinatura do OBRA-FÁCIL
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward" size={20} color={COLORS.danger} />
+          </Pressable>
+        </SettingsSection>
+      </ScrollView>
+    </View>
   );
 }
