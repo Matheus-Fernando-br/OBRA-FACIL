@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Image,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState, useCallback, useMemo } from "react";

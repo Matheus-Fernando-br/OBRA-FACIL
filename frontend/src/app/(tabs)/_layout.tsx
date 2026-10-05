@@ -60,7 +60,13 @@ export default function TabsLayout() {
         options={{
           title: "Orçamentos",
 
-          header: () => <AppHeader />,
+          header: () => (
+            <AppHeader
+              onMenu={() => {
+                console.log("Menu");
+              }}
+            />
+          ),
 
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="document-text" color={color} size={size} />
@@ -68,12 +74,17 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* TELA SEM APP HEADER */}
       <Tabs.Screen
         name="obras"
         options={{
           title: "Serviços",
-          headerShown: false,
+          header: () => (
+            <AppHeader
+              onMenu={() => {
+                console.log("Menu");
+              }}
+            />
+          ),
 
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="hammer" color={color} size={size} />

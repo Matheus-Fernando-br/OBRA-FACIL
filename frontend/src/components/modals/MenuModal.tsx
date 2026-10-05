@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useRouter } from "expo-router";
+import type { Href } from "expo-router";
 import {
   Modal,
   View,
@@ -19,14 +21,37 @@ import { COLORS, globalStyles } from "@/styles/globalStyles";
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onOptionPress?: (option: string) => void;
+  onOptionPress?: (option: MenuOption) => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 const MENU_WIDTH = Math.min(320, SCREEN_WIDTH * 0.82);
 
+/**
+ * ================================================================
+ * ROTAS DO MENU
+ * ================================================================
+ */
+const MENU_ROUTES = {
+  inicio: "/",
+  clientes: "/clientes",
+  obras: "/obras",
+  orcamentos: "/orcamentos",
+  relatorios: "/relatorios",
+  documentos: "/documentos",
+  materiais: "/materiais",
+  financeiro: "/planos",
+  configuracoes: "/configuracoes",
+  ajuda: "/ajuda",
+  sobre: "/sobre",
+} as const;
+
+type MenuOption = keyof typeof MENU_ROUTES;
+
 export function MenuModal({ visible, onClose, onOptionPress }: Props) {
+  const router = useRouter();
+
   const { isDark, theme, toggleTheme } = useTheme();
 
   const { user } = useAuth();
@@ -87,10 +112,34 @@ export function MenuModal({ visible, onClose, onOptionPress }: Props) {
   /*
    * OPÇÃO DO MENU
    */
-  const handleOptionPress = (option: string) => {
+  const handleOptionPress = (option: MenuOption) => {
     onOptionPress?.(option);
 
-    handleClose();
+    const destination = MENU_ROUTES[option];
+
+    // Fecha o modal primeiro e só depois troca a tela.
+    handleCloseWithNavigation(destination);
+  };
+
+  const handleCloseWithNavigation = (destination: Href) => {
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: -MENU_WIDTH,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+
+      Animated.timing(overlayAnim, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(({ finished }) => {
+      if (!finished) return;
+
+      onClose();
+      router.replace(destination);
+    });
   };
 
   const menuTextColor = theme.text;
@@ -103,7 +152,7 @@ export function MenuModal({ visible, onClose, onOptionPress }: Props) {
    * ITEM DO MENU
    */
   const renderMenuItem = (
-    option: string,
+    option: MenuOption,
     icon: keyof typeof Ionicons.glyphMap,
     label: string,
     subtitle?: string,
@@ -311,15 +360,12 @@ export function MenuModal({ visible, onClose, onOptionPress }: Props) {
 
               {renderMenuItem("clientes", "people-outline", "Clientes")}
 
-              {renderMenuItem("obras", "business-outline", "Obras")}
-
               {renderMenuItem(
                 "orcamentos",
                 "document-text-outline",
                 "Orçamentos",
               )}
-
-              {renderMenuItem("servicos", "construct-outline", "Serviços")}
+              {renderMenuItem("obras", "business-outline", "Obras / Serviços")}
             </View>
 
             {/* ============================== */}
@@ -339,7 +385,11 @@ export function MenuModal({ visible, onClose, onOptionPress }: Props) {
 
               {renderMenuItem("materiais", "cube-outline", "Materiais")}
 
-              {renderMenuItem("financeiro", "wallet-outline", "Financeiro")}
+              {renderMenuItem(
+                "financeiro",
+                "wallet-outline",
+                "Planos / Assinaturas",
+              )}
             </View>
 
             {/* ============================== */}
