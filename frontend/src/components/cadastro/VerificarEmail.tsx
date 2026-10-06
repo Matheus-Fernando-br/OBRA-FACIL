@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-
+import { Text, View } from "react-native";
+import { MailCheck } from "lucide-react-native";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
-
 import { useTheme } from "@/contexts/ThemeContext";
 import { verifyEmailCode, resendVerificationCode } from "../../services/api";
 
@@ -16,46 +14,29 @@ interface Props {
 
 export function VerificarEmail({ email, onBack, onVerified }: Props) {
   const { styles, theme } = useTheme();
-
   const [codigo, setCodigo] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   function handleCodigo(text: string) {
-    const apenasNumeros = text.replace(/\D/g, "");
-
-    setCodigo(apenasNumeros.slice(0, 6));
-
-    if (feedback) {
-      setFeedback("");
-    }
+    setCodigo(text.replace(/\D/g, "").slice(0, 6));
+    if (feedback) setFeedback("");
   }
 
   async function verificarCodigo() {
-    if (!codigo) {
-      setFeedback("Informe o código enviado para seu e-mail.");
-      return;
-    }
-
-    if (codigo.length !== 6) {
-      setFeedback("O código deve possuir 6 dígitos.");
-      return;
-    }
+    if (!codigo)
+      return setFeedback("Informe o código enviado para seu e-mail.");
+    if (codigo.length !== 6)
+      return setFeedback("O código deve possuir 6 dígitos.");
 
     try {
       setLoading(true);
       setFeedback("");
-
-      await verifyEmailCode({
-        email,
-        codigo,
-      });
-
+      await verifyEmailCode({ email, codigo });
       onVerified();
     } catch (error: any) {
       console.log(error);
-
       setFeedback(
         error.response?.data?.message || "Código inválido ou expirado.",
       );
@@ -68,15 +49,10 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
     try {
       setResending(true);
       setFeedback("");
-
-      await resendVerificationCode({
-        email,
-      });
-
+      await resendVerificationCode({ email });
       setFeedback("Um novo código foi enviado para seu e-mail.");
     } catch (error: any) {
       console.log(error);
-
       setFeedback(
         error.response?.data?.message || "Não foi possível reenviar o código.",
       );
@@ -87,76 +63,39 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
 
   return (
     <View>
-      <View
-        style={{
-          alignItems: "center",
-          marginBottom: 25,
-        }}
-      >
-        <Ionicons name="mail-outline" size={65} color={theme.primary} />
+      <View style={styles.emailIconWrap}>
+        <MailCheck size={32} color={theme.title} />
       </View>
-
-      <Text style={styles.title}>Verifique seu e-mail</Text>
-
-      <Text
-        style={[
-          styles.subtitle,
-          {
-            marginTop: 10,
-            marginBottom: 25,
-          },
-        ]}
-      >
-        Enviamos um código de verificação de 6 dígitos para:
+      <Text style={styles.cadastroStepTitle}>Confirme seu e-mail</Text>
+      <Text style={styles.cadastroStepSubtitle}>
+        Enviamos um código de 6 dígitos para o endereço abaixo.
       </Text>
-
-      <View
-        style={{
-          backgroundColor: theme.card,
-          borderRadius: 12,
-          padding: 15,
-          marginBottom: 25,
-          alignItems: "center",
-        }}
-      >
-        <Text
-          style={{
-            color: theme.white,
-            fontSize: 16,
-            fontWeight: "600",
-          }}
-        >
-          {email}
-        </Text>
+      <View style={styles.emailCard}>
+        <Text style={styles.emailCardText}>{email}</Text>
       </View>
-
-      <Text style={styles.label}>Código de verificação</Text>
-
+      <Text style={styles.cadastroLabel}>Código de verificação</Text>
       <AppInput
-        placeholder="Digite o código de 6 dígitos"
+        placeholder="000000"
         value={codigo}
         onChangeText={handleCodigo}
         keyboardType="number-pad"
         maxLength={6}
+        style={[styles.cadastroInput, styles.emailCodeInput]}
       />
-
-      {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
-
+      {!!feedback && <Text style={styles.cadastroFeedback}>{feedback}</Text>}
       <AppButton
         title={loading ? "Verificando..." : "Verificar e-mail"}
         onPress={verificarCodigo}
         loading={loading}
-        color={theme.primary}
+        color={theme.title}
       />
-
       <AppButton
         title={resending ? "Reenviando..." : "Reenviar código"}
         onPress={reenviarCodigo}
         loading={resending}
-        color={theme.success}
+        color={theme.primary}
       />
-
-      <AppButton title="Voltar" onPress={onBack} color={theme.title} />
+      <AppButton title="Voltar" onPress={onBack} color={theme.placeholder} />
     </View>
   );
 }

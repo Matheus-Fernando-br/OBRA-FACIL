@@ -47,7 +47,7 @@ export function ProfileCard({ nome, email, imagem, onPress }: Props) {
             backgroundColor: theme.white,
           }}
         >
-          <Ionicons name="create-outline" size={20} color={theme.text} />
+          <Ionicons name="create-outline" size={20} color={theme.title} />
         </Pressable>
       </View>
     </Pressable>

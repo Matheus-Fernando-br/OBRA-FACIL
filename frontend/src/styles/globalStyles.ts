@@ -30,62 +30,504 @@ export const COLORS = {
 
 export function createGlobalStyles(colors: typeof COLORS) {
   return StyleSheet.create({
-    /* =========================
-   LOGIN
-========================= */
+    /* ==========================================================
+       AUTENTICAÇÃO E CADASTRO
+       Estilos compartilhados das telas de login, cadastro e splash.
+    ========================================================== */
 
     loginContainer: {
       flex: 1,
-      justifyContent: "center",
-      padding: 20,
-      paddingHorizontal: 30,
-      backgroundColor: colors.white,
+      backgroundColor: colors.gradientStart,
     },
 
-    loginTitle: {
+    authSplash: {
+      flex: 1,
+      backgroundColor: colors.gradientStart,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    authSplashMark: {
+      width: 100,
+      height: 100,
+      borderRadius: 31,
+      backgroundColor: colors.titleBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+    },
+
+    authSplashLogo: {
+      width: 76,
+      height: 76,
+      resizeMode: "contain",
+    },
+
+    authSplashTitle: {
       color: colors.title,
-      fontSize: 34,
-      fontWeight: "bold",
-      marginBottom: 40,
+      fontSize: 20,
+      fontWeight: "800",
+      letterSpacing: 2,
     },
 
-    loginButton: {
-      height: 55,
-      backgroundColor: colors.primary,
-      borderRadius: 12,
-      marginTop: 16,
-      justifyContent: "center",
+    authSplashSubtitle: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 7,
+    },
+
+    authSplashLoader: {
+      marginTop: 28,
+    },
+
+    loginSafeArea: { flex: 1 },
+    loginKeyboard: { flex: 1 },
+    loginContent: {
+      flexGrow: 1,
+      paddingHorizontal: 24,
+      paddingTop: 24,
+      paddingBottom: 30,
+    },
+
+    loginBrandRow: {
+      flexDirection: "row",
       alignItems: "center",
+      gap: 12,
+      marginBottom: 20,
     },
 
-    loginButtonCadastro: {
-      height: 55,
-      backgroundColor: colors.cardHover,
-      borderRadius: 12,
-      width: "100%",
-      justifyContent: "center",
+    loginBrandBadge: {
+      width: 40,
+      height: 40,
       alignItems: "center",
+      justifyContent: "center",
     },
 
-    loginButtonText: {
-      color: COLORS.white,
-      fontWeight: "bold",
-      fontSize: 16,
+    loginBrandLogo: { width: 80, height: 80, resizeMode: "contain" },
+    loginBrandName: {
+      color: colors.title,
+      fontSize: 15,
+      fontWeight: "800",
+      letterSpacing: 1.4,
     },
-
-    loginText: {
+    loginHeadingBlock: { marginBottom: 26 },
+    loginEyebrow: {
+      color: colors.title,
+      fontSize: 11,
+      fontWeight: "800",
+      letterSpacing: 1.3,
+      marginBottom: 10,
+    },
+    loginTitle: {
+      color: colors.text,
+      fontSize: 30,
+      fontWeight: "800",
+      letterSpacing: -0.7,
+      marginBottom: 10,
+    },
+    loginDescription: {
       color: colors.textSecondary,
       fontSize: 14,
-      textAlign: "center",
-      marginTop: 16,
+      lineHeight: 21,
+      maxWidth: 320,
+    },
+    authFormCard: {
+      backgroundColor: colors.white,
+      borderRadius: 24,
+      padding: 20,
+      shadowColor: colors.text,
+      shadowOpacity: 0.08,
+      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 3,
+    },
+    authFieldBlock: { marginBottom: 5 },
+    authLabelRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    authLabel: {
+      color: colors.text,
+      fontSize: 13,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    authForgot: {
+      color: colors.title,
+      fontSize: 12,
+      fontWeight: "700",
+      marginBottom: 8,
+    },
+    authInput: {
+      minHeight: 54,
+      borderRadius: 14,
+      marginBottom: 14,
+      backgroundColor: colors.white,
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingHorizontal: 16,
+    },
+    appInput: {
+      width: "100%",
+      minHeight: 58,
+      borderWidth: 1.2,
+      borderRadius: 10,
+      paddingHorizontal: 18,
+      paddingVertical: 14,
       marginBottom: 16,
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      shadowOffset: { width: 0, height: 2 },
+      elevation: 2,
+    },
+    authPasswordWrap: { position: "relative" },
+    authPasswordInput: { paddingRight: 50 },
+    authEyeButton: { position: "absolute", right: 14, top: 15, padding: 3 },
+    authFeedback: {
+      color: colors.danger,
+      fontSize: 12,
+      lineHeight: 18,
+      fontWeight: "600",
+      marginTop: 2,
+      marginBottom: 10,
+    },
+    authPrimaryButton: {
+      height: 54,
+      borderRadius: 15,
+      backgroundColor: colors.title,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 6,
+    },
+    authPrimaryButtonText: {
+      color: colors.white,
+      fontSize: 16,
+      fontWeight: "800",
+    },
+    authBiometricButton: {
+      height: 50,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: colors.titleBackground,
+      flexDirection: "row",
+      gap: 9,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 11,
+      backgroundColor: colors.white,
+    },
+    authBiometricText: { color: colors.title, fontSize: 14, fontWeight: "700" },
+    authSecurityNote: {
+      flexDirection: "row",
+      gap: 6,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 17,
+    },
+    authSecurityText: { color: colors.textSecondary, fontSize: 11 },
+    authRegisterRow: {
+      flexDirection: "row",
+      gap: 5,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 24,
+    },
+    authRegisterText: { color: colors.textSecondary, fontSize: 13 },
+    authRegisterLink: { color: colors.title, fontSize: 13, fontWeight: "800" },
+    authPressed: { opacity: 0.78, transform: [{ scale: 0.99 }] },
+    authDisabled: { opacity: 0.6 },
+
+    cadastroScreen: { flex: 1 },
+    cadastroContent: {
+      flexGrow: 1,
+      paddingHorizontal: 24,
+      paddingTop: 18,
+      paddingBottom: 34,
+    },
+    cadastroHeader: { marginBottom: 22 },
+    cadastroKicker: {
+      color: colors.title,
+      fontSize: 11,
+      fontWeight: "800",
+      letterSpacing: 1.2,
+      marginBottom: 7,
+    },
+    cadastroTitle: {
+      color: colors.text,
+      fontSize: 29,
+      fontWeight: "800",
+      letterSpacing: -0.6,
+      marginBottom: 8,
+    },
+    cadastroSubtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      lineHeight: 21,
+    },
+    cadastroStepTitle: {
+      color: colors.text,
+      fontSize: 20,
+      fontWeight: "800",
+      marginBottom: 6,
+    },
+    cadastroStepSubtitle: {
+      color: colors.textSecondary,
+      fontSize: 13,
+      lineHeight: 20,
+      marginBottom: 12,
+    },
+    cadastroCard: {
+      backgroundColor: colors.white,
+      borderRadius: 24,
+      padding: 20,
+      shadowColor: colors.text,
+      shadowOpacity: 0.08,
+      shadowRadius: 20,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 3,
+    },
+    cadastroField: { marginBottom: 2 },
+    cadastroLabel: {
+      color: colors.text,
+      fontSize: 13,
+      fontWeight: "700",
+      marginBottom: 8,
+      marginTop: 10,
+    },
+    cadastroInput: {
+      minHeight: 54,
+      borderRadius: 14,
+      backgroundColor: colors.white,
+      shadowOpacity: 0,
+      elevation: 0,
+      paddingHorizontal: 16,
+      marginBottom: 6,
+    },
+    cadastroDocumentToggle: {
+      flexDirection: "row",
+      gap: 8,
+      marginBottom: 8,
+    },
+    cadastroDocumentButton: {
+      flex: 1,
+      minHeight: 46,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.white,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    cadastroDocumentButtonActive: {
+      backgroundColor: colors.title,
+      borderColor: colors.title,
+    },
+    cadastroDocumentButtonText: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      fontWeight: "700",
+    },
+    cadastroDocumentButtonTextActive: { color: colors.white },
+    cadastroPasswordWrap: { position: "relative" },
+    cadastroPasswordInput: { paddingRight: 52 },
+    cadastroEyeButton: { position: "absolute", right: 14, top: 15, padding: 3 },
+    cadastroFeedback: {
+      color: colors.danger,
+      fontSize: 12,
+      lineHeight: 18,
+      fontWeight: "600",
+      marginTop: 8,
+      marginBottom: 4,
+    },
+    appButton: {
+      width: "100%",
+      minHeight: 52,
+      marginTop: 10,
+      borderRadius: 15,
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 18,
+    },
+    appButtonText: { color: colors.white, fontSize: 15, fontWeight: "800" },
+    cadastroSecondaryButton: {
+      backgroundColor: colors.cardHover,
+    },
+    cadastroBackButton: {
+      marginTop: 10,
+      minHeight: 48,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: colors.border,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    cadastroBackButtonText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+    emailIconWrap: {
+      width: 66,
+      height: 66,
+      borderRadius: 22,
+      backgroundColor: colors.titleBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      alignSelf: "center",
+      marginBottom: 18,
+    },
+    emailCard: {
+      backgroundColor: colors.titleBackground,
+      borderRadius: 15,
+      padding: 15,
+      marginBottom: 18,
+      alignItems: "center",
+    },
+    emailCardText: { color: colors.title, fontSize: 15, fontWeight: "700" },
+    emailCodeInput: {
+      textAlign: "center",
+      letterSpacing: 8,
+      fontSize: 22,
+      fontWeight: "800",
+    },
+    cadastroSecondaryOutlineButton: {
+      backgroundColor: colors.white,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    cadastroSecondaryOutlineButtonText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+    planCard: {
+      backgroundColor: colors.cardHover,
+      borderRadius: 20,
+      padding: 20,
+      marginTop: 18,
+      marginBottom: 18,
+      borderWidth: 1,
+      borderColor: colors.titleBackground,
+    },
+    planTitle: {
+      color: colors.white,
+      fontSize: 18,
+      fontWeight: "800",
+      marginTop: 14,
+    },
+    planFeature: { color: colors.textSecondary, fontSize: 13, marginTop: 9 },
+    planPrice: {
+      color: colors.success,
+      fontSize: 24,
+      fontWeight: "800",
+      marginTop: 20,
+    },
+    successWrap: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 34,
+    },
+    successBadge: {
+      width: 98,
+      height: 98,
+      borderRadius: 32,
+      backgroundColor: colors.titleBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 18,
+    },
+    successTitle: {
+      color: colors.text,
+      fontSize: 26,
+      fontWeight: "800",
+      textAlign: "center",
+      marginBottom: 10,
+    },
+    successText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      lineHeight: 21,
+      textAlign: "center",
+    },
+    successHint: {
+      color: colors.textSecondary,
+      fontSize: 12,
+      marginTop: 24,
+      textAlign: "center",
+    },
+    successSecurityIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 18,
+      backgroundColor: colors.titleBackground,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 22,
+    },
+    successAction: {
+      minHeight: 44,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 6,
+    },
+    successActionText: {
+      color: colors.title,
+      fontSize: 13,
+      fontWeight: "800",
+    },
+    cadastroFooterHint: {
+      color: colors.textSecondary,
+      fontSize: 11,
+      textAlign: "center",
+      marginTop: 18,
     },
 
-    loginImage: {
-      width: 250,
-      height: 250,
-      marginTop: -20,
+    stepIndicator: { marginBottom: 26 },
+    stepIndicatorTrack: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 2,
     },
+    stepIndicatorItem: { alignItems: "center" },
+    stepIndicatorCircle: {
+      width: 42,
+      height: 42,
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.white,
+    },
+    stepIndicatorCircleActive: {
+      backgroundColor: colors.title,
+      borderColor: colors.title,
+    },
+    stepIndicatorCircleDone: {
+      backgroundColor: colors.success,
+      borderColor: colors.success,
+    },
+    stepIndicatorLine: {
+      flex: 1,
+      height: 2,
+      backgroundColor: colors.border,
+      marginHorizontal: 6,
+    },
+    stepIndicatorLineActive: { backgroundColor: colors.success },
+    stepIndicatorLabels: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 9,
+    },
+    stepIndicatorLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      fontWeight: "700",
+      textAlign: "center",
+      width: 72,
+    },
+    stepIndicatorLabelActive: { color: colors.title },
 
     /* =========================
      LAYOUT
@@ -607,14 +1049,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
       padding: 24,
       borderRadius: 22,
       marginBottom: 24,
-      shadowColor: colors.textSecondary,
+      shadowColor: colors.text,
 
       shadowOffset: {
         width: 0,
         height: 3,
       },
 
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.8,
       shadowRadius: 4,
 
       elevation: 6,
@@ -636,6 +1078,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       padding: 20,
       borderRadius: 18,
       marginBottom: 14,
+
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
@@ -654,23 +1097,6 @@ export function createGlobalStyles(colors: typeof COLORS) {
       marginBottom: 16,
     },
 
-    /* =========================
-   BUTTONS
-========================= */
-
-    appButton: {
-      height: 55,
-      borderRadius: 14,
-
-      justifyContent: "center",
-      alignItems: "center",
-    },
-
-    appButtonText: {
-      color: COLORS.white,
-      fontWeight: "bold",
-      fontSize: 16,
-    },
     fabButton: {
       position: "absolute",
 

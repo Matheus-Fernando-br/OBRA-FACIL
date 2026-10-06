@@ -1,239 +1,74 @@
-import { View, Text } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-
+import { Fragment } from "react";
+import { Text, View } from "react-native";
+import { Check, CreditCard, Mail, UserRound } from "lucide-react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   step: number;
 }
 
+const steps = [
+  { label: "Dados", icon: UserRound },
+  { label: "E-mail", icon: Mail },
+  { label: "Plano", icon: CreditCard },
+  { label: "Finalizado", icon: Check },
+];
+
 export function StepIndicator({ step }: Props) {
-  const { theme } = useTheme();
-
-  function iconColor(index: number) {
-    return step >= index ? theme.success : theme.textSecondary;
-  }
-
-  function lineColor(index: number) {
-    return step > index ? theme.success : theme.border;
-  }
+  const { styles, theme } = useTheme();
 
   return (
-    <View
-      style={{
-        flexDirection: "column",
-        justifyContent: "center",
-        marginTop: 10,
-        marginBottom: 35,
-      }}
-    >
-      {/* ÍCONES E LINHAS */}
+    <View style={styles.stepIndicator}>
+      <View style={styles.stepIndicatorTrack}>
+        {steps.map((item, index) => {
+          const itemStep = index + 1;
+          const isDone = step > itemStep;
+          const isActive = step === itemStep;
+          const Icon = item.icon;
 
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        {/* PASSO 1 - DADOS */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 55,
-              height: 55,
-              borderRadius: 30,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: step >= 1 ? theme.success : theme.card,
-            }}
-          >
-            <Ionicons name="person" size={28} color={theme.white} />
-          </View>
-        </View>
-
-        <View
-          style={{
-            flex: 1,
-            height: 4,
-            borderRadius: 20,
-            backgroundColor: lineColor(1),
-          }}
-        />
-
-        {/* PASSO 2 - E-MAIL */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 55,
-              height: 55,
-              borderRadius: 30,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: step >= 2 ? theme.success : theme.card,
-            }}
-          >
-            <Ionicons name="mail" size={28} color={theme.white} />
-          </View>
-        </View>
-
-        <View
-          style={{
-            flex: 1,
-            height: 4,
-            borderRadius: 20,
-            backgroundColor: lineColor(2),
-          }}
-        />
-
-        {/* PASSO 3 - PLANO */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 55,
-              height: 55,
-              borderRadius: 30,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: step >= 3 ? theme.success : theme.card,
-            }}
-          >
-            <Ionicons name="card" size={28} color={theme.white} />
-          </View>
-        </View>
-
-        <View
-          style={{
-            flex: 1,
-            height: 4,
-            borderRadius: 20,
-            backgroundColor: lineColor(3),
-          }}
-        />
-
-        {/* PASSO 4 - FINALIZADO */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: 55,
-              height: 55,
-              borderRadius: 30,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: step >= 4 ? theme.success : theme.card,
-            }}
-          >
-            <Ionicons name="checkmark" size={30} color={theme.white} />
-          </View>
-        </View>
+          return (
+            <Fragment key={item.label}>
+              <View style={styles.stepIndicatorItem}>
+                <View
+                  style={[
+                    styles.stepIndicatorCircle,
+                    isActive && styles.stepIndicatorCircleActive,
+                    isDone && styles.stepIndicatorCircleDone,
+                  ]}
+                >
+                  <Icon
+                    size={18}
+                    color={
+                      isActive || isDone ? theme.white : theme.textSecondary
+                    }
+                    strokeWidth={2.5}
+                  />
+                </View>
+              </View>
+              {index < steps.length - 1 && (
+                <View
+                  style={[
+                    styles.stepIndicatorLine,
+                    step > itemStep && styles.stepIndicatorLineActive,
+                  ]}
+                />
+              )}
+            </Fragment>
+          );
+        })}
       </View>
-
-      {/* TEXTOS */}
-
-      <View
-        style={{
-          flexDirection: "row",
-          marginTop: 12,
-        }}
-      >
-        {/* DADOS */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
+      <View style={styles.stepIndicatorLabels}>
+        {steps.map((item, index) => (
           <Text
-            style={{
-              color: iconColor(1),
-              fontWeight: "600",
-              fontSize: 12,
-            }}
+            key={`${item.label}-label`}
+            style={[
+              styles.stepIndicatorLabel,
+              step >= index + 1 && styles.stepIndicatorLabelActive,
+            ]}
           >
-            Dados
+            {item.label}
           </Text>
-        </View>
-
-        {/* E-MAIL */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: iconColor(2),
-              fontWeight: "600",
-              fontSize: 12,
-            }}
-          >
-            Confrimar E-mail
-          </Text>
-        </View>
-
-        {/* PLANO */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: iconColor(3),
-              fontWeight: "600",
-              fontSize: 12,
-            }}
-          >
-            Plano
-          </Text>
-        </View>
-
-        {/* FINALIZADO */}
-
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-          }}
-        >
-          <Text
-            style={{
-              color: iconColor(4),
-              fontWeight: "600",
-              fontSize: 12,
-            }}
-          >
-            Finalizado
-          </Text>
-        </View>
+        ))}
       </View>
     </View>
   );

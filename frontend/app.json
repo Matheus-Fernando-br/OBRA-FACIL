@@ -8,7 +8,8 @@
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./src/assets/images/icon.png"
+      "icon": "./src/assets/images/icon.png",
+      "faceIDPermission": "Use o Face ID para entrar com segurança no Obra Fácil."
     },
     "android": {
       "adaptiveIcon": {
@@ -29,14 +30,15 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFF9F5",
           "android": {
-            "image": "./src/assets/images/splash-icon.png",
+            "image": "./src/assets/images/icon.png",
             "imageWidth": 76
           }
         }
       ],
       "expo-font",
+      "expo-local-authentication",
       "expo-sharing"
     ],
     "experiments": {

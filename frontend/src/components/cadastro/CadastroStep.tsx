@@ -1,9 +1,8 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useState } from "react";
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
 import { useTheme } from "@/contexts/ThemeContext";
-
 import { cpfMask, cnpjMask, emailMask } from "@/components/forms/mask";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
@@ -12,48 +11,35 @@ import { checkEmailExists } from "../../services/api";
 interface Props {
   nome: string;
   setNome: (text: string) => void;
-
   email: string;
   setEmail: (text: string) => void;
-
   senha: string;
   setSenha: (text: string) => void;
-
   confirmarSenha: string;
   setConfirmarSenha: (text: string) => void;
-
   documento: string;
   setDocumento: (text: string) => void;
-
   tipoDocumento: "CPF" | "CNPJ";
   setTipoDocumento: (tipo: "CPF" | "CNPJ") => void;
-
   onNext: () => void;
 }
 
 export function CadastroStep({
   nome,
   setNome,
-
   email,
   setEmail,
-
   senha,
   setSenha,
-
   confirmarSenha,
   setConfirmarSenha,
-
   documento,
   setDocumento,
-
   tipoDocumento,
   setTipoDocumento,
-
   onNext,
 }: Props) {
   const { styles, theme } = useTheme();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [checkingEmail, setCheckingEmail] = useState(false);
@@ -64,62 +50,30 @@ export function CadastroStep({
       setFeedback("");
       setCheckingEmail(true);
 
-      if (!nome.trim()) {
-        setFeedback("Informe seu nome completo");
-        return;
-      }
-
-      if (!email.trim()) {
-        setFeedback("Informe seu e-mail");
-        return;
-      }
-
-      if (!email.includes("@")) {
-        setFeedback("Informe um e-mail válido.");
-        return;
-      }
-
-      if (!senha) {
-        setFeedback("Informe uma senha");
-        return;
-      }
-
-      if (senha.length < 6) {
-        setFeedback("A senha deve ter no mínimo 6 caracteres");
-        return;
-      }
-
-      if (senha !== confirmarSenha) {
-        setFeedback("As senhas não coincidem");
-        return;
-      }
-
-      if (!documento.trim()) {
-        setFeedback(`Informe seu ${tipoDocumento}`);
-        return;
-      }
+      if (!nome.trim()) return setFeedback("Informe seu nome completo");
+      if (!email.trim()) return setFeedback("Informe seu e-mail");
+      if (!email.includes("@")) return setFeedback("Informe um e-mail válido.");
+      if (!senha) return setFeedback("Informe uma senha");
+      if (senha.length < 6)
+        return setFeedback("A senha deve ter no mínimo 6 caracteres");
+      if (senha !== confirmarSenha)
+        return setFeedback("As senhas não coincidem");
+      if (!documento.trim()) return setFeedback(`Informe seu ${tipoDocumento}`);
 
       const response = await checkEmailExists(email);
-
       if (response.exists) {
         setFeedback("Já existe um usuário cadastrado com este e-mail.");
         return;
       }
-
       onNext();
     } catch (error: any) {
       console.log(error);
-
       setFeedback(
         error.response?.data?.message ||
           "Não foi possível verificar o e-mail. Tente novamente.",
       );
     } finally {
       setCheckingEmail(false);
-
-      setTimeout(() => {
-        setFeedback("");
-      }, 5000);
     }
   }
 
@@ -129,181 +83,147 @@ export function CadastroStep({
     setSenha("");
     setConfirmarSenha("");
     setDocumento("");
-
     router.replace("/");
   }
 
   function handleDocumento(text: string) {
-    if (tipoDocumento === "CPF") {
-      setDocumento(cpfMask(text));
-      return;
-    }
-
-    setDocumento(cnpjMask(text));
+    setDocumento(tipoDocumento === "CPF" ? cpfMask(text) : cnpjMask(text));
   }
 
   return (
     <View>
-      <Text style={styles.title}>Criar Conta</Text>
-
-      <Text
-        style={{
-          color: theme.textSecondary,
-          marginBottom: 25,
-        }}
-      >
-        Preencha seus dados para continuar.
+      <Text style={styles.cadastroStepTitle}>Seus dados</Text>
+      <Text style={styles.cadastroStepSubtitle}>
+        Preencha suas informações para começar.
       </Text>
 
-      {/* CPF / CNPJ */}
-
-      <View
-        style={{
-          flexDirection: "row",
-          marginBottom: 18,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            padding: 14,
-            borderRadius: 12,
-            marginRight: 10,
-            alignItems: "center",
-            backgroundColor:
-              tipoDocumento === "CPF" ? theme.primary : theme.card,
-          }}
+      <View style={styles.cadastroDocumentToggle}>
+        <Pressable
+          style={[
+            styles.cadastroDocumentButton,
+            tipoDocumento === "CPF" && styles.cadastroDocumentButtonActive,
+          ]}
           onPress={() => {
             setTipoDocumento("CPF");
             setDocumento("");
           }}
         >
           <Text
-            style={{
-              color: tipoDocumento === "CPF" ? theme.white : theme.text,
-              fontWeight: "600",
-            }}
+            style={[
+              styles.cadastroDocumentButtonText,
+              tipoDocumento === "CPF" &&
+                styles.cadastroDocumentButtonTextActive,
+            ]}
           >
             Pessoa Física
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            padding: 14,
-            borderRadius: 12,
-            marginLeft: 5,
-            alignItems: "center",
-            backgroundColor:
-              tipoDocumento === "CNPJ" ? theme.primary : theme.card,
-          }}
+        </Pressable>
+        <Pressable
+          style={[
+            styles.cadastroDocumentButton,
+            tipoDocumento === "CNPJ" && styles.cadastroDocumentButtonActive,
+          ]}
           onPress={() => {
             setTipoDocumento("CNPJ");
             setDocumento("");
           }}
         >
           <Text
-            style={{
-              color: tipoDocumento === "CNPJ" ? theme.white : theme.text,
-              fontWeight: "600",
-            }}
+            style={[
+              styles.cadastroDocumentButtonText,
+              tipoDocumento === "CNPJ" &&
+                styles.cadastroDocumentButtonTextActive,
+            ]}
           >
             Pessoa Jurídica
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
-      <Text style={styles.label}>Nome:</Text>
+
+      <Text style={styles.cadastroLabel}>Nome completo</Text>
       <AppInput
-        placeholder="Informe seu Nome Completo"
+        placeholder="Informe seu nome completo"
         value={nome}
         onChangeText={setNome}
+        style={styles.cadastroInput}
       />
-      <Text style={styles.label}>E-mail:</Text>
+
+      <Text style={styles.cadastroLabel}>E-mail</Text>
       <AppInput
-        placeholder="Informe seu Email"
+        placeholder="voce@exemplo.com"
         value={email}
+        autoCapitalize="none"
+        keyboardType="email-address"
         onChangeText={(text) => setEmail(emailMask(text))}
+        style={styles.cadastroInput}
       />
-      <Text style={styles.label}>{tipoDocumento}:</Text>
+
+      <Text style={styles.cadastroLabel}>{tipoDocumento}</Text>
       <AppInput
-        placeholder={"Informe o seu " + tipoDocumento}
+        placeholder={`Informe seu ${tipoDocumento}`}
         value={documento}
+        keyboardType="number-pad"
         onChangeText={handleDocumento}
+        style={styles.cadastroInput}
       />
 
-      {/* Senha */}
-
-      <Text style={styles.label}>Senha</Text>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => setShowPassword(!showPassword)}
-          style={{
-            position: "absolute",
-            right: 10,
-            top: 15,
-          }}
-        >
-          <Ionicons
-            size={24}
-            color={theme.text}
-            name={showPassword ? "eye" : "eye-off"}
-          />
-        </TouchableOpacity>
+      <Text style={styles.cadastroLabel}>Senha</Text>
+      <View style={styles.cadastroPasswordWrap}>
         <AppInput
-          placeholder="Senha"
+          placeholder="Crie uma senha com 6 caracteres ou mais"
           secureTextEntry={!showPassword}
-          placeholderTextColor={theme.textSecondary}
           value={senha}
           onChangeText={setSenha}
+          style={[styles.cadastroInput, styles.cadastroPasswordInput]}
         />
-      </View>
-      <Text style={styles.label}>Confirme a Senha</Text>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-          style={{
-            position: "absolute",
-            right: 10,
-            top: 15,
-          }}
+        <Pressable
+          onPress={() => setShowPassword((current) => !current)}
+          style={styles.cadastroEyeButton}
+          accessibilityLabel={showPassword ? "Ocultar senha" : "Mostrar senha"}
         >
-          <Ionicons
-            size={24}
-            color={theme.text}
-            name={showConfirmPassword ? "eye" : "eye-off"}
-          />
-        </TouchableOpacity>
+          {showPassword ? (
+            <EyeOff size={20} color={theme.placeholder} />
+          ) : (
+            <Eye size={20} color={theme.placeholder} />
+          )}
+        </Pressable>
+      </View>
+
+      <Text style={styles.cadastroLabel}>Confirmar senha</Text>
+      <View style={styles.cadastroPasswordWrap}>
         <AppInput
-          placeholder="Confirmar Senha"
+          placeholder="Digite sua senha novamente"
           secureTextEntry={!showConfirmPassword}
-          placeholderTextColor={theme.textSecondary}
           value={confirmarSenha}
           onChangeText={setConfirmarSenha}
+          style={[styles.cadastroInput, styles.cadastroPasswordInput]}
         />
+        <Pressable
+          onPress={() => setShowConfirmPassword((current) => !current)}
+          style={styles.cadastroEyeButton}
+          accessibilityLabel={
+            showConfirmPassword ? "Ocultar confirmação" : "Mostrar confirmação"
+          }
+        >
+          {showConfirmPassword ? (
+            <EyeOff size={20} color={theme.placeholder} />
+          ) : (
+            <Eye size={20} color={theme.placeholder} />
+          )}
+        </Pressable>
       </View>
-      <View style={styles.divider} />
-      {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
+
+      {!!feedback && <Text style={styles.cadastroFeedback}>{feedback}</Text>}
       <AppButton
-        title={checkingEmail ? "Verificando..." : "Continuar →"}
+        title={checkingEmail ? "Verificando..." : "Continuar"}
         onPress={continuar}
         loading={checkingEmail}
-        color={theme.primary}
+        color={theme.title}
       />
       <AppButton
-        title="Voltar para tela de Login←"
+        title="Voltar para o login"
         onPress={voltar}
-        color={theme.title}
+        color={theme.placeholder}
       />
     </View>
   );
