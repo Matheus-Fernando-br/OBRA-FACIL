@@ -93,12 +93,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
-      marginBottom: 20,
+      marginBottom: 22,
     },
 
     loginBrandBadge: {
-      width: 40,
-      height: 40,
+      width: 46,
+      height: 46,
+      borderRadius: 15,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -109,6 +110,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontSize: 15,
       fontWeight: "800",
       letterSpacing: 1.4,
+    },
+    loginBrandCaption: {
+      color: colors.textSecondary,
+      fontSize: 11,
+      marginTop: 3,
     },
     loginHeadingBlock: { marginBottom: 26 },
     loginEyebrow: {
@@ -237,6 +243,46 @@ export function createGlobalStyles(colors: typeof COLORS) {
     authRegisterLink: { color: colors.title, fontSize: 13, fontWeight: "800" },
     authPressed: { opacity: 0.78, transform: [{ scale: 0.99 }] },
     authDisabled: { opacity: 0.6 },
+
+    loginSuccessTransition: {
+      ...StyleSheet.absoluteFill,
+      zIndex: 20,
+      alignItems: "center",
+    },
+    loginSuccessWhite: {
+      ...StyleSheet.absoluteFill,
+      backgroundColor: colors.white,
+    },
+    loginSuccessLogoWrap: {
+      position: "absolute",
+      width: 46,
+      height: 46,
+      borderRadius: 15,
+      backgroundColor: colors.titleBackground,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loginSuccessLogo: { width: 36, height: 36, resizeMode: "contain" },
+    loginSuccessMessage: {
+      position: "absolute",
+      top: "50%",
+      marginTop: 48,
+      color: colors.title,
+      fontSize: 16,
+      fontWeight: "800",
+      letterSpacing: 0.2,
+      textAlign: "center",
+      paddingHorizontal: 28,
+    },
+    loginSuccessSubmessage: {
+      position: "absolute",
+      top: "50%",
+      marginTop: 100,
+      color: colors.textSecondary,
+      fontSize: 12,
+      textAlign: "center",
+      paddingHorizontal: 36,
+    },
 
     cadastroScreen: { flex: 1 },
     cadastroContent: {
@@ -1045,18 +1091,18 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     profileCard: {
-      backgroundColor: colors.title,
+      backgroundColor: colors.border,
       padding: 24,
       borderRadius: 22,
       marginBottom: 24,
-      shadowColor: colors.text,
+      shadowColor: colors.textSecondary,
 
       shadowOffset: {
         width: 0,
         height: 3,
       },
 
-      shadowOpacity: 0.8,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
 
       elevation: 6,
@@ -1065,12 +1111,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
     profileName: {
       fontSize: 24,
       fontWeight: "bold",
-      color: COLORS.white,
+      color: colors.text,
     },
 
     profileEmail: {
       marginTop: 6,
-      color: COLORS.white,
+      color: colors.textSecondary,
     },
 
     menuCard: {

@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, ActivityIndicator } from "react-native";
+import { ActivityIndicator, Pressable, Text } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
@@ -7,6 +7,8 @@ interface Props {
   loading?: boolean;
   disabled?: boolean;
   color?: string;
+  textColor?: string;
+  outline?: boolean;
 }
 
 export function AppButton({
@@ -15,32 +17,37 @@ export function AppButton({
   loading = false,
   disabled = false,
   color,
+  textColor,
+  outline = false,
 }: Props) {
   const { styles, theme } = useTheme();
-
   const isDisabled = loading || disabled;
 
   return (
-    <TouchableOpacity
+    <Pressable
       disabled={isDisabled}
       onPress={onPress}
-      activeOpacity={0.8}
-      style={{
-        width: "100%",
-        height: 50,
-        marginTop: 10,
-        backgroundColor: color,
-        borderRadius: 12,
-        justifyContent: "center",
-        alignItems: "center",
-        opacity: isDisabled ? 0.5 : 1,
-      }}
+      style={({ pressed }) => [
+        styles.appButton,
+        outline && styles.cadastroSecondaryOutlineButton,
+        color && !outline && { backgroundColor: color },
+        pressed && styles.authPressed,
+        isDisabled && styles.authDisabled,
+      ]}
     >
       {loading ? (
-        <ActivityIndicator size="small" color={theme.white} />
+        <ActivityIndicator size="small" color={textColor || theme.white} />
       ) : (
-        <Text style={styles.appButtonText}>{title}</Text>
+        <Text
+          style={[
+            styles.appButtonText,
+            outline && styles.cadastroSecondaryOutlineButtonText,
+            textColor && { color: textColor },
+          ]}
+        >
+          {title}
+        </Text>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
