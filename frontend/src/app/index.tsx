@@ -378,7 +378,9 @@ export default function LoginScreen() {
       </Animated.View>
 
       {successTransition && (
-        <LoginSuccessTransition onComplete={() => router.replace("/(tabs)")} />
+        <LoginSuccessTransition
+          onComplete={() => router.replace("/(tabs)?fromLogin=true")}
+        />
       )}
     </GradientBackground>
   );

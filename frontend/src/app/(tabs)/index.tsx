@@ -1,7 +1,13 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
-import { router } from "expo-router";
+import {
+  View,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+  Animated,
+} from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useFocusEffect } from "expo-router";
 import { useTheme } from "@/contexts/ThemeContext";
 import { DashboardCard } from "../../components/cards/DashboardCard";
@@ -14,6 +20,30 @@ import { GradientBackground } from "@/styles/GradientBackground";
 export default function HomeScreen() {
   const { styles, theme } = useTheme();
   const { token, user, setUser } = useAuth();
+
+  const { fromLogin } = useLocalSearchParams();
+
+  const splashOpacity = useRef(new Animated.Value(1)).current;
+  const [showLoginSplash, setShowLoginSplash] = useState(fromLogin === "true");
+  useEffect(() => {
+    if (fromLogin !== "true") return;
+
+    splashOpacity.setValue(1);
+    setShowLoginSplash(true);
+
+    const timer = setTimeout(() => {
+      Animated.timing(splashOpacity, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }).start(() => {
+        setShowLoginSplash(false);
+      });
+    }, 150);
+
+    return () => clearTimeout(timer);
+  }, [fromLogin, splashOpacity]);
+
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [budgets, setBudgets] = useState<Orcamento[]>([]);
   const [works, setWorks] = useState<Obra[]>([]);
@@ -235,6 +265,25 @@ export default function HomeScreen() {
           })}
         </View>
       </ScrollView>
+      {showLoginSplash && (
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "#FFFFFF",
+              zIndex: 9999,
+            },
+            {
+              opacity: splashOpacity,
+            },
+          ]}
+        />
+      )}
     </GradientBackground>
   );
 }

@@ -898,8 +898,8 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     /* =========================
-     HEADER
-  ========================= */
+   HEADER
+========================= */
 
     pageHeader: {
       marginTop: 60,
@@ -916,38 +916,145 @@ export function createGlobalStyles(colors: typeof COLORS) {
     pageHeaderRow: {
       marginTop: 10,
       marginBottom: 20,
+
       flexDirection: "row",
+      alignItems: "center",
       justifyContent: "space-between",
-      alignItems: "center",
+
+      minHeight: 44,
     },
 
-    pageHeaderButton: {
-      width: 42,
-      height: 42,
-      borderRadius: 12,
-      backgroundColor: colors.title,
-      borderWidth: 1,
-      borderColor: colors.text,
+    /* =========================
+   TÍTULO
+========================= */
+
+    pageHeaderTitle: {
+      color: colors.title,
+
+      fontSize: 28,
+      fontWeight: "700",
+
+      letterSpacing: -0.7,
+
+      flex: 1,
+    },
+
+    /* =========================
+   AÇÕES
+========================= */
+
+    pageHeaderActions: {
+      flexDirection: "row",
+      alignItems: "center",
+
+      gap: 10,
+
+      marginLeft: 16,
+    },
+
+    /* =========================
+   BOTÕES
+========================= */
+
+    pageHeaderAction: {
+      width: 44,
+      height: 44,
+
+      borderRadius: 14,
+
       justifyContent: "center",
       alignItems: "center",
-    },
-    pageHeaderButtonFilter: {
-      width: 42,
-      height: 42,
-      borderRadius: 12,
+
+      position: "relative",
+
+      borderWidth: 1,
+
+      // aparência semelhante aos controles do iOS
       backgroundColor: colors.primary,
-      borderWidth: 1,
-      borderColor: colors.text,
+
+      borderColor: "rgba(120, 120, 128, 0.18)",
+
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.08,
+      shadowRadius: 6,
+
+      elevation: 2,
+    },
+
+    pageHeaderAddButton: {
+      backgroundColor: colors.title,
+
+      borderColor: colors.title,
+
+      shadowOpacity: 0.12,
+    },
+
+    pageHeaderFilterButton: {
+      backgroundColor: colors.placeholder,
+    },
+
+    pageHeaderFilterActive: {
+      backgroundColor: colors.primary,
+
+      borderColor: colors.primary,
+
+      shadowOpacity: 0.14,
+    },
+
+    /* =========================
+   PRESS
+========================= */
+
+    pageHeaderButtonPressed: {
+      opacity: 0.65,
+
+      transform: [
+        {
+          scale: 0.94,
+        },
+      ],
+    },
+
+    /* =========================
+   BADGE DO FILTRO
+========================= */
+
+    pageHeaderFilterBadge: {
+      position: "absolute",
+
+      top: -6,
+      right: -6,
+
+      minWidth: 19,
+      height: 19,
+
+      paddingHorizontal: 4,
+
+      borderRadius: 999,
+
+      backgroundColor: colors.danger,
+
       justifyContent: "center",
       alignItems: "center",
+
+      borderWidth: 2,
+      borderColor: colors.placeholder,
     },
 
-    pageHeaderButtonText: {
-      color: colors.text,
-      fontSize: 24,
-      fontWeight: "600",
-    },
+    pageHeaderFilterBadgeText: {
+      color: colors.white,
 
+      fontSize: 9,
+      fontWeight: "800",
+
+      lineHeight: 11,
+
+      textAlign: "center",
+    },
     /* =========================
      TIPOGRAFIA
   ========================= */
@@ -1091,7 +1198,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     profileCard: {
-      backgroundColor: colors.border,
+      backgroundColor: colors.title,
       padding: 24,
       borderRadius: 22,
       marginBottom: 24,
@@ -1102,7 +1209,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
         height: 3,
       },
 
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.8,
       shadowRadius: 4,
 
       elevation: 6,
@@ -1111,12 +1218,12 @@ export function createGlobalStyles(colors: typeof COLORS) {
     profileName: {
       fontSize: 24,
       fontWeight: "bold",
-      color: colors.text,
+      color: COLORS.white,
     },
 
     profileEmail: {
       marginTop: 6,
-      color: colors.textSecondary,
+      color: COLORS.white,
     },
 
     menuCard: {

@@ -6,9 +6,9 @@ import { router } from "expo-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { COLORS } from "@/styles/globalStyles";
-import { OptionsCard } from "../../components/cards/OptionsCard";
+import { OptionsCard } from "../../components/cards/mais/OptionsCard";
 import { EditUserModal } from "../../components/modals/EditUserModal";
-import { ProfileCard } from "../../components/cards/ProfileCard";
+import { ProfileCard } from "../../components/cards/mais/ProfileCard";
 import { GradientBackground } from "@/styles/GradientBackground";
 
 const options = [

@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
+import { Header } from "@/components/cards/Header";
 
 import { AppInput } from "../../components/forms/AppInput";
 
@@ -661,75 +662,14 @@ export default function OrcamentosScreen() {
           {/* ==================================================
               CABEÇALHO
           =================================================== */}
-
-          <View style={styles.pageHeaderRow}>
-            <Text style={styles.title}>Orçamentos</Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {/* FILTRO */}
-
-              <Pressable
-                style={[
-                  styles.pageHeaderButtonFilter,
-
-                  activeFiltersCount > 0
-                    ? {
-                        backgroundColor: theme.primary,
-                      }
-                    : null,
-                ]}
-                onPress={() => setFilterVisible(true)}
-              >
-                <Ionicons
-                  name="filter-outline"
-                  size={22}
-                  color={activeFiltersCount > 0 ? theme.white : theme.text}
-                />
-
-                {activeFiltersCount > 0 && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: -4,
-                      top: -4,
-                      minWidth: 18,
-                      height: 18,
-                      borderRadius: 999,
-                      paddingHorizontal: 4,
-                      backgroundColor: theme.danger,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.white,
-                        fontSize: 10,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {activeFiltersCount}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-
-              {/* NOVO ORÇAMENTO */}
-
-              <Pressable
-                style={styles.pageHeaderButton}
-                onPress={() => setAddVisible(true)}
-              >
-                <Ionicons name="add" color={theme.text} size={25} />
-              </Pressable>
-            </View>
-          </View>
+          <Header
+            title="Orçamentos"
+            showFilter
+            activeFiltersCount={activeFiltersCount}
+            onFilterPress={() => setFilterVisible(true)}
+            showAdd
+            onAddPress={() => setAddVisible(true)}
+          />
 
           {/* ==================================================
               BUSCA
@@ -914,9 +854,7 @@ export default function OrcamentosScreen() {
           style={styles.bottomActionButton}
           onPress={() => setAddVisible(true)}
         >
-          <Text style={styles.bottomActionButtonText}>
-            + Novo Orçamento
-          </Text>
+          <Text style={styles.bottomActionButtonText}>+ Novo Orçamento</Text>
         </Pressable>
       </View>
 
