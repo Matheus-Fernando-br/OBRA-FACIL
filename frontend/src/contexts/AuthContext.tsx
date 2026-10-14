@@ -138,9 +138,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const loggedUser = await getUser(savedToken);
       setToken(savedToken);
       setUser(loggedUser);
-    } catch (error) {
-      console.log("Sessão salva expirada:", error);
-      await removeToken();
+    } catch (error: any) {
+      // Só descarta a sessão se o servidor recusar o token; falha de rede
+      // ou servidor acordando não deve deslogar o usuário.
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        console.log("Sessão salva expirada:", status);
+        await removeToken();
+      } else {
+        console.log("Não foi possível validar a sessão (rede):", error?.message);
+      }
     } finally {
       setInitializing(false);
     }

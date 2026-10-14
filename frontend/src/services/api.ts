@@ -3,6 +3,9 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
   withCredentials: true,
+  // O servidor no Render (plano gratuito) "dorme" e pode levar ~1 min para
+  // acordar. Sem timeout, a tela inicial ficava carregando indefinidamente.
+  timeout: 60000,
 });
 
 // ==========================
