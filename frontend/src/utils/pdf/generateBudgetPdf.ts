@@ -1,294 +1,165 @@
-import * as Print from "expo-print";
-import * as FileSystem from "expo-file-system";
-import { Orcamento } from "@/components/layout/interface";
+import type { Cliente, Orcamento } from "@/components/layout/interface";
+import { BUDGET_STATUS_LABEL, getBudgetValidUntil } from "@/utils/status";
+import {
+  DEFAULT_PDF_OPTIONS,
+  PdfIssuer,
+  PdfOptions,
+  date,
+  esc,
+  formatDocument,
+  formatPhone,
+  money,
+  num,
+  pill,
+  renderDocument,
+} from "./template";
+import { createPdf, GeneratedPdf } from "./output";
 
-export async function generateBudgetPdf(budget: Orcamento): Promise<string> {
-  const formatMoney = (value: number) =>
-    value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
+interface BudgetPdfArgs {
+  budget: Orcamento;
+  /** Cliente completo (o orçamento pode trazer apenas o ID). */
+  client?: Cliente | null;
+  issuer?: PdfIssuer;
+  options?: PdfOptions;
+}
 
-  const formatDate = (date: string | Date) =>
-    new Date(date).toLocaleDateString("pt-BR");
+/** HTML do orçamento (exportado para testes e pré-visualização). */
+export function buildBudgetHtml({
+  budget,
+  client,
+  issuer,
+  options = DEFAULT_PDF_OPTIONS,
+}: BudgetPdfArgs) {
+  const cliente =
+    client ?? (typeof budget.cliente === "object" ? budget.cliente : null);
 
-  const categoriesHtml = budget.categoria
-    .map(
-      (categoria, index) => `
-      <h2>${index + 1}. ${categoria.nome}</h2>
+  const endereco = budget.endereco ?? ({} as Orcamento["endereco"]);
+  const enderecoLinha1 = [endereco.rua, endereco.numero].filter(Boolean).join(", ");
+  const enderecoLinha2 = [
+    endereco.complemento,
+    endereco.bairro,
+    [endereco.cidade, endereco.estado].filter(Boolean).join("/"),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
+  const validUntil = getBudgetValidUntil(budget);
+  const categorias = Array.isArray(budget.categoria) ? budget.categoria : [];
+
+  const categoriesHtml = categorias.length
+    ? categorias
+        .map(
+          (categoria, index) => `
+      <h2>${index + 1}. ${esc(categoria.nome)}</h2>
       <table>
         <thead>
           <tr>
+            <th style="width:4%">#</th>
             <th>Serviço</th>
-            <th>Un.</th>
-            <th>Qtd.</th>
-            <th>Valor Unit.</th>
-            <th>Total</th>
+            <th style="width:8%">Un.</th>
+            <th class="num" style="width:10%">Qtd.</th>
+            <th class="num" style="width:16%">Valor unit.</th>
+            <th class="num" style="width:16%">Total</th>
           </tr>
         </thead>
-
         <tbody>
-
-        ${categoria.servicos
-          .map(
-            (servico) => `
+          ${(categoria.servicos ?? [])
+            .map(
+              (servico, sIndex) => `
             <tr>
-              <td>${servico.nome}</td>
-              <td>${servico.unidade}</td>
-              <td>${servico.quantidade_unidade}</td>
-              <td>${formatMoney(servico.preco_da_unidade)}</td>
-              <td>${formatMoney(servico.preco_total)}</td>
-            </tr>
-          `,
-          )
-          .join("")}
-
+              <td class="muted">${index + 1}.${sIndex + 1}</td>
+              <td>${esc(servico.nome)}${
+                servico.descricao ? `<div class="desc">${esc(servico.descricao)}</div>` : ""
+              }</td>
+              <td>${esc(servico.unidade)}</td>
+              <td class="num">${num(servico.quantidade_unidade)}</td>
+              <td class="num">${money(servico.preco_da_unidade)}</td>
+              <td class="num">${money(servico.preco_total)}</td>
+            </tr>`,
+            )
+            .join("")}
         </tbody>
-
       </table>
+      <div class="subtotal">Subtotal da etapa: <strong>${money(
+        categoria.preco_total_da_categoria,
+      )}</strong></div>`,
+        )
+        .join("")
+    : `<p class="empty">Nenhum serviço cadastrado.</p>`;
 
-      <div class="subtotal">
-        Subtotal da categoria:
-        <strong>${formatMoney(categoria.preco_total_da_categoria)}</strong>
+  const bdiValue = (budget.preco_com_bdi ?? 0) - (budget.preco ?? 0);
+
+  const body = `
+    <div class="grid">
+      <div class="box">
+        <div class="label">Cliente</div>
+        <div class="value">${esc(cliente?.nome || "Não informado")}</div>
+        <div class="muted">${[
+          formatDocument(cliente ?? undefined),
+          formatPhone(cliente?.telefone),
+          cliente?.email,
+        ]
+          .filter(Boolean)
+          .map(esc)
+          .join(" · ")}</div>
       </div>
-    `,
-    )
-    .join("");
-
-  const html = `
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
-<meta charset="utf-8"/>
-
-<style>
-
-body{
-
-font-family:Arial;
-padding:30px;
-font-size:12px;
-color:#222;
-
-}
-
-.header{
-
-text-align:center;
-margin-bottom:30px;
-
-}
-
-.title{
-
-font-size:26px;
-font-weight:bold;
-margin-bottom:10px;
-
-}
-
-.info{
-
-display:flex;
-justify-content:space-between;
-margin-bottom:20px;
-
-}
-
-.section{
-
-margin-top:20px;
-
-}
-
-table{
-
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-margin-bottom:20px;
-
-}
-
-th{
-
-background:#1565C0;
-color:white;
-padding:8px;
-font-size:12px;
-
-}
-
-td{
-
-border:1px solid #DDD;
-padding:6px;
-
-}
-
-.subtotal{
-
-text-align:right;
-font-size:13px;
-margin-bottom:30px;
-
-}
-
-.footer{
-
-margin-top:40px;
-border-top:2px solid #CCC;
-padding-top:15px;
-
-}
-
-.total{
-
-font-size:20px;
-font-weight:bold;
-color:#1565C0;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="header">
-
-<div class="title">
-ORÇAMENTO SINTÉTICO
-</div>
-
-<div>
-Obra Fácil
-</div>
-
-</div>
-
-<div class="info">
-
-<div>
-
-<strong>Cliente</strong><br/>
-
-${budget.cliente.nome}
-
-</div>
-
-<div>
-
-<strong>Status</strong><br/>
-
-${budget.status}
-
-</div>
-
-</div>
-
-<div>
-
-<strong>Orçamento</strong>
-
-${budget.nome}
-
-</div>
-
-<br/>
-
-<div>
-
-<strong>Descrição</strong>
-
-${budget.descricao}
-
-</div>
-
-<br/>
-
-<div>
-
-<strong>Endereço</strong><br/>
-
-${budget.endereco.rua},
-${budget.endereco.numero}
-<br/>
-
-${budget.endereco.bairro}
-<br/>
-
-${budget.endereco.cidade}
--
-${budget.endereco.estado}
-<br/>
-
-CEP:
-${budget.endereco.CEP}
-
-</div>
-
-<br/>
-
-<div>
-
-<strong>Data publicação:</strong>
-
-${formatDate(budget.data_publicacao)}
-
-<br/>
-
-<strong>Validade:</strong>
-
-${budget.valido_durante} dias
-
-</div>
-
-<div class="section">
-
-${categoriesHtml}
-
-</div>
-
-<div class="footer">
-
-<p>
-
-Custo Direto:
-<strong>${formatMoney(budget.preco)}</strong>
-
-</p>
-
-<p>
-
-BDI:
-<strong>${budget.bdi}%</strong>
-
-</p>
-
-<p class="total">
-
-TOTAL DA OBRA
-
-${formatMoney(budget.preco_com_bdi)}
-
-</p>
-
-</div>
-
-</body>
-
-</html>
-`;
-
-  const { uri } = await Print.printToFileAsync({
-    html,
+      <div class="box">
+        <div class="label">Local da obra</div>
+        <div class="value">${esc(enderecoLinha1 || "Não informado")}</div>
+        <div class="muted">${esc(enderecoLinha2)}${
+          endereco.CEP ? ` · CEP ${esc(endereco.CEP)}` : ""
+        }</div>
+      </div>
+      <div class="box">
+        <div class="label">Emissão</div>
+        <div class="value">${date(budget.data_publicacao)}</div>
+      </div>
+      <div class="box">
+        <div class="label">Validade da proposta</div>
+        <div class="value">${
+          validUntil ? `Até ${date(validUntil)}` : "—"
+        } <span class="muted">(${num(budget.valido_durante)} dias)</span></div>
+      </div>
+    </div>
+
+    ${
+      budget.descricao
+        ? `<div class="box" style="margin-bottom:6px"><div class="label">Descrição</div><div>${esc(
+            budget.descricao,
+          )}</div></div>`
+        : ""
+    }
+
+    ${categoriesHtml}
+
+    <div class="totals">
+      <div class="row"><span>Custo direto</span><strong>${money(budget.preco)}</strong></div>
+      <div class="row"><span>BDI (${num(budget.bdi)}%)</span><strong>${money(bdiValue)}</strong></div>
+      <div class="row grand"><span>Valor total</span><span>${money(budget.preco_com_bdi)}</span></div>
+    </div>
+
+    <div class="notes">
+      Valores em reais (R$). Proposta válida até ${
+        validUntil ? date(validUntil) : "a data informada"
+      }. BDI (Benefícios e Despesas Indiretas) aplicado sobre o custo direto.
+    </div>`;
+
+  const statusKey = (budget.status || "PENDENTE").toUpperCase();
+
+  return renderDocument({
+    title: "Orçamento",
+    subtitle: budget.nome,
+    badge: pill(BUDGET_STATUS_LABEL[statusKey] ?? statusKey, statusKey),
+    issuer,
+    options,
+    body,
+    signatures: [
+      issuer?.nome ? `${issuer.nome} — Responsável técnico` : "Responsável técnico",
+      cliente?.nome ? `${cliente.nome} — Cliente` : "Cliente",
+    ],
   });
+}
 
-  return uri;
+export async function generateBudgetPdf(args: BudgetPdfArgs): Promise<GeneratedPdf> {
+  return createPdf(buildBudgetHtml(args), `Orcamento ${args.budget.nome}`);
 }

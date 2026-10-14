@@ -1,123 +1,86 @@
-import { ScrollView } from "react-native";
-import { useState } from "react";
+import { View, ScrollView } from "react-native";
+import { useEffect, useState } from "react";
 
-import { globalStyles } from "@/styles/globalStyles";
-
+import { useTheme } from "@/contexts/ThemeContext";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
 import { AppSwitch } from "@/components/settings/AppSwitch";
+import {
+  AlertPreferences,
+  DEFAULT_ALERT_PREFS,
+  loadAlertPrefs,
+  saveAlertPrefs,
+} from "@/utils/alerts";
 
+/*
+ * Preferências dos alertas do painel (sino). Push e e-mail dependem do
+ * backend e aparecem como "Em breve" em vez de chaves sem efeito.
+ */
 export default function NotificacoesScreen() {
+  const { styles, theme } = useTheme();
+  const [prefs, setPrefs] = useState<AlertPreferences>(DEFAULT_ALERT_PREFS);
 
-  const [push, setPush] =
-    useState(true);
+  useEffect(() => {
+    loadAlertPrefs().then(setPrefs);
+  }, []);
 
-  const [email, setEmail] =
-    useState(true);
-
-  const [clientes, setClientes] =
-    useState(true);
-
-  const [orcamentos, setOrcamentos] =
-    useState(true);
-
-  const [obras, setObras] =
-    useState(true);
-
-  const [atualizacoes, setAtualizacoes] =
-    useState(false);
+  function update(patch: Partial<AlertPreferences>) {
+    const next = { ...prefs, ...patch };
+    setPrefs(next);
+    saveAlertPrefs(next);
+  }
 
   return (
+    <View style={styles.screen}>
+      <PageHeader title="Notificações" subtitle="O que aparece no sino do app" />
 
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
+        <SettingsSection
+          title="Alertas no app"
+          footer="Os alertas são calculados a partir dos seus orçamentos e obras sempre que o painel é aberto."
+        >
+          <SettingsItem
+            icon="document-text"
+            iconColor={theme.warning}
+            title="Orçamentos"
+            description="Propostas pendentes vencidas ou a vencer em até 3 dias"
+            rightComponent={
+              <AppSwitch value={prefs.orcamentos} onValueChange={(v) => update({ orcamentos: v })} />
+            }
+          />
+          <SettingsItem
+            icon="construct"
+            iconColor={theme.danger}
+            title="Obras"
+            description="Obras atrasadas e entregas nos próximos 7 dias"
+            rightComponent={
+              <AppSwitch value={prefs.obras} onValueChange={(v) => update({ obras: v })} />
+            }
+          />
+        </SettingsSection>
 
-      <PageHeader
-        title="Notificações"
-        subtitle="Ajuste as notificações que deseja receber"
-      />
-
-      <SettingsSection title="Alertas">
-
-        <SettingsItem
-          icon="notifications"
-          title="Push"
-          description="Receber notificações"
-          rightComponent={
-            <AppSwitch
-              value={push}
-              onValueChange={setPush}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="mail"
-          title="E-mail"
-          description="Receber notificações por e-mail"
-          rightComponent={
-            <AppSwitch
-              value={email}
-              onValueChange={setEmail}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="people"
-          title="Clientes"
-          description="Novos clientes"
-          rightComponent={
-            <AppSwitch
-              value={clientes}
-              onValueChange={setClientes}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="document-text"
-          title="Orçamentos"
-          description="Atualizações"
-          rightComponent={
-            <AppSwitch
-              value={orcamentos}
-              onValueChange={setOrcamentos}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="hammer"
-          title="Obras"
-          description="Mudanças nas obras"
-          rightComponent={
-            <AppSwitch
-              value={obras}
-              onValueChange={setObras}
-            />
-          }
-        />
-
-        <SettingsItem
-          icon="download"
-          title="Atualizações"
-          description="Novas versões do aplicativo"
-          rightComponent={
-            <AppSwitch
-              value={atualizacoes}
-              onValueChange={setAtualizacoes}
-            />
-          }
-        />
-
-      </SettingsSection>
-
-    </ScrollView>
-
+        <SettingsSection title="Outros canais">
+          <SettingsItem
+            icon="phone-portrait"
+            iconColor={theme.textSecondary}
+            title="Notificações push"
+            description="Em breve"
+            disabled
+          />
+          <SettingsItem
+            icon="mail"
+            iconColor={theme.textSecondary}
+            title="Resumo por e-mail"
+            description="Em breve"
+            disabled
+          />
+        </SettingsSection>
+      </ScrollView>
+    </View>
   );
-
 }

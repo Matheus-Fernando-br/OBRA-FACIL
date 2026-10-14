@@ -2,8 +2,7 @@ import {
   View,
   Text,
   ScrollView,
-  Pressable,
-  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 
 import { useState, useEffect, useMemo } from "react";
@@ -11,8 +10,13 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 import { useAuth } from "@/contexts/AuthContext";
-
-import { AppInput } from "../../components/forms/AppInput";
+import { router, useLocalSearchParams } from "expo-router";
+import { Header } from "@/components/cards/Header";
+import { SearchField } from "@/components/ui/SearchField";
+import { FilterChips } from "@/components/ui/FilterChips";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FadeInView } from "@/components/ui/FadeInView";
+import { ListSkeleton } from "@/components/ui/Skeleton";
 
 import { ClientCard } from "@/components/cards/cliente/ClientCard";
 
@@ -25,9 +29,6 @@ import { getClients, getBudgets } from "../../services/api";
 
 import { Cliente, Orcamento } from "@/components/layout/interface";
 
-import { GradientBackground } from "@/styles/GradientBackground";
-
-import { Ionicons } from "@expo/vector-icons";
 
 import FilterModal, {
   ClientFilters,
@@ -83,6 +84,23 @@ export default function ClientesScreen() {
   // ============================================================
 
   const [loading, setLoading] = useState(true);
+
+  // Atalho "Novo cliente" (dashboard): abre o cadastro direto.
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  useEffect(() => {
+    if (action !== "new") return;
+    setAddVisible(true);
+    router.setParams({ action: undefined });
+  }, [action]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await Promise.all([loadClients(), loadBudgets()]);
+    setRefreshing(false);
+  }
 
   // ============================================================
   // CARREGAR CLIENTES
@@ -174,12 +192,19 @@ export default function ClientesScreen() {
 
     let result = clientsList.filter((client) => {
       // ==================================================
-      // BUSCA POR NOME
+      // BUSCA POR NOME, E-MAIL OU TELEFONE
       // ==================================================
 
       const nome = client.nome?.toLowerCase() || "";
+      const email = client.email?.toLowerCase() || "";
+      const telefone = (client.telefone || "").replace(/\D/g, "");
+      const searchDigits = searchLower.replace(/\D/g, "");
 
-      const matchSearch = !searchLower || nome.includes(searchLower);
+      const matchSearch =
+        !searchLower ||
+        nome.includes(searchLower) ||
+        email.includes(searchLower) ||
+        (searchDigits.length >= 3 && telefone.includes(searchDigits));
 
       if (!matchSearch) {
         return false;
@@ -341,238 +366,85 @@ export default function ClientesScreen() {
 
   return (
     <View style={styles.screen}>
-      <GradientBackground style={styles.container}>
-        <ScrollView
-          contentContainerStyle={{
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ==================================================
-              CABEÇALHO
-          ================================================== */}
-
-          <View style={styles.pageHeaderRow}>
-            <Text style={styles.title}>Clientes</Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {/* FILTRO */}
-              <Pressable
-                style={[
-                  styles.pageHeaderButtonFilter,
-                  activeFiltersCount > 0 && {
-                    backgroundColor: theme.primary,
-                  },
-                ]}
-                onPress={() => setFilterVisible(true)}
-              >
-                <Ionicons
-                  name="filter-outline"
-                  color={activeFiltersCount > 0 ? theme.white : theme.text}
-                  size={22}
-                />
-
-                {activeFiltersCount > 0 && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: -4,
-                      top: -4,
-                      minWidth: 18,
-                      height: 18,
-                      borderRadius: 999,
-                      paddingHorizontal: 4,
-                      backgroundColor: theme.danger,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.white,
-                        fontSize: 10,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {activeFiltersCount}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-
-              {/* NOVO CLIENTE */}
-              <Pressable
-                style={styles.pageHeaderButton}
-                onPress={() => setAddVisible(true)}
-              >
-                <Ionicons name="add" color={theme.text} size={25} />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ==================================================
-              BUSCA
-          ================================================== */}
-
-          <AppInput
-            placeholder="Buscar cliente..."
-            value={search}
-            onChangeText={setSearch}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
           />
+        }
+      >
+        <Header
+          title="Clientes"
+          subtitle={
+            loading
+              ? "Carregando…"
+              : `${clientsList.length} cliente${clientsList.length === 1 ? "" : "s"} cadastrado${clientsList.length === 1 ? "" : "s"}`
+          }
+          showFilter
+          activeFiltersCount={activeFiltersCount}
+          onFilterPress={() => setFilterVisible(true)}
+          showAdd
+          onAddPress={() => setAddVisible(true)}
+        />
 
-          {/* ==================================================
-              FILTROS ATIVOS
-          ================================================== */}
+        <SearchField
+          placeholder="Buscar por nome, e-mail ou telefone"
+          value={search}
+          onChangeText={setSearch}
+        />
 
-          {activeFilterLabels.length > 0 && (
-            <View
-              style={{
-                flexDirection: "row",
-                flexWrap: "wrap",
-                gap: 8,
-                marginTop: 12,
-                marginBottom: 4,
-              }}
-            >
-              {activeFilterLabels.map((label) => (
-                <View
-                  key={label}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: theme.primary,
-                    borderRadius: 999,
-                    paddingHorizontal: 12,
-                    paddingVertical: 7,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: theme.white,
-                      fontSize: 12,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {label}
-                  </Text>
-                </View>
-              ))}
+        <FilterChips labels={activeFilterLabels} onClear={clearFilters} />
 
-              {/* LIMPAR */}
-
-              <Pressable
-                onPress={clearFilters}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 5,
-                  paddingHorizontal: 10,
-                  paddingVertical: 7,
-                }}
-              >
-                <Ionicons
-                  name="close-circle-outline"
-                  size={17}
-                  color={theme.textSecondary}
-                />
-
-                <Text
-                  style={{
-                    color: theme.textSecondary,
-                    fontSize: 12,
-                    fontWeight: "600",
-                  }}
-                >
-                  Limpar
-                </Text>
-              </Pressable>
-            </View>
-          )}
-
-          {/* ==================================================
-              NENHUM RESULTADO
-          ================================================== */}
-
-          {!loading && filteredClients.length === 0 && (
-            <Text style={styles.sectionTitle}>Nenhum cliente encontrado.</Text>
-          )}
-
-          {/* ==================================================
-              LOADING
-          ================================================== */}
-
-          {loading ? (
-            <View
-              style={[
-                styles.screen,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 40,
-                },
-              ]}
-            >
-              <ActivityIndicator size="large" color={theme.primary} />
-
-              <Text
-                style={{
-                  color: theme.text,
-                  marginTop: 15,
-                }}
-              >
-                Carregando clientes...
-              </Text>
-            </View>
+        {loading && clientsList.length === 0 ? (
+          <ListSkeleton count={4} />
+        ) : filteredClients.length === 0 ? (
+          clientsList.length === 0 ? (
+            <EmptyState
+              icon="people-outline"
+              title="Nenhum cliente ainda"
+              message="Cadastre seus clientes para criar orçamentos e acompanhar obras."
+              actionLabel="Novo cliente"
+              onAction={() => setAddVisible(true)}
+            />
           ) : (
-            /* ==================================================
-               CLIENTES
-            ================================================== */
-
-            filteredClients.map((client) => (
+            <EmptyState
+              icon="search-outline"
+              title="Nenhum resultado"
+              message="Ajuste a busca ou limpe os filtros para ver todos os clientes."
+            />
+          )
+        ) : (
+          filteredClients.map((client, index) => (
+            <FadeInView key={client._id} index={index}>
               <ClientCard
-                key={client._id}
                 name={client.nome}
                 phone={client.telefone}
                 email={client.email}
+                budgetsCount={getBudgetCount(client)}
                 onDetails={() => {
                   setSelectedClient(client);
-
                   setDetailsVisible(true);
                 }}
                 onEdit={() => {
                   setSelectedClient(client);
-
                   setEditVisible(true);
                 }}
                 onDelete={() => {
                   setSelectedClient(client);
-
                   setDeleteVisible(true);
                 }}
               />
-            ))
-          )}
-        </ScrollView>
-      </GradientBackground>
-
-      {/* ======================================================
-          BOTÃO NOVO CLIENTE
-      ====================================================== */}
-
-      <View style={styles.bottomActionContainer}>
-        <Pressable
-          style={styles.bottomActionButton}
-          onPress={() => setAddVisible(true)}
-        >
-          <Text style={styles.bottomActionButtonText}>+ Novo Cliente</Text>
-        </Pressable>
-      </View>
+            </FadeInView>
+          ))
+        )}
+      </ScrollView>
 
       {/* ======================================================
           MODAL DE FILTROS

@@ -1,4 +1,4 @@
-import { Switch } from "react-native";
+import { Platform, Switch } from "react-native";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
@@ -13,11 +13,9 @@ export function AppSwitch({ value, onValueChange }: Props) {
     <Switch
       value={value}
       onValueChange={onValueChange}
-      trackColor={{
-        false: theme.border,
-        true: theme.success,
-      }}
-      thumbColor={(value && theme.primary) || theme.white}
+      trackColor={{ false: theme.borderNull, true: theme.success }}
+      thumbColor={Platform.OS === "android" ? "#FFFFFF" : undefined}
+      ios_backgroundColor={theme.borderNull}
     />
   );
 }

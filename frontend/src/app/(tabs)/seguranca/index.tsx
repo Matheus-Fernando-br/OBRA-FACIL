@@ -1,51 +1,52 @@
-import {
-  Alert,
-  ScrollView,
-  View,
-  Text,
-  TextInput,
-  Pressable,
-} from "react-native";
-
+import { ScrollView, View, Text, Platform } from "react-native";
 import { useState } from "react";
+
 import { AppInput } from "@/components/forms/AppInput";
-
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { PageHeader } from "@/components/layout/PageHeader";
-
+import { SettingsSection } from "@/components/settings/SettingsSection";
+import { SettingsItem } from "@/components/settings/SettingsItem";
+import { AppButton } from "@/components/buttons/AppButton";
 import { updateUser } from "@/services/api";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
-import { useTheme } from "@/contexts/ThemeContext";
-import { SettingsSection } from "@/components/settings/SettingsSection";
-import { AppSwitch } from "@/components/settings/AppSwitch";
-import { AppButton } from "@/components/buttons/AppButton";
+const MIN_PASSWORD = 6; // mesma regra do cadastro
 
 export default function SegurancaScreen() {
-  const { user, token } = useAuth();
-  const { styles } = useTheme();
+  const { user, token, biometricAvailable } = useAuth();
+  const { styles, theme } = useTheme();
 
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
-
-  const [biometria, setBiometria] = useState(false);
-
-  const [autenticacao2F, setAutenticacao2F] = useState(false);
-
-  const [lembrarLogin, setLembrarLogin] = useState(true);
-
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
   async function handleChangePassword() {
+    setFeedback(null);
+
+    if (!user || !token) {
+      setFeedback({ ok: false, text: "Sessão expirada. Entre novamente." });
+      return;
+    }
+    if (!senhaAtual) {
+      setFeedback({ ok: false, text: "Informe a senha atual." });
+      return;
+    }
+    if (novaSenha.length < MIN_PASSWORD) {
+      setFeedback({ ok: false, text: `A nova senha deve ter no mínimo ${MIN_PASSWORD} caracteres.` });
+      return;
+    }
+    if (novaSenha === senhaAtual) {
+      setFeedback({ ok: false, text: "A nova senha deve ser diferente da atual." });
+      return;
+    }
+    if (novaSenha !== confirmarSenha) {
+      setFeedback({ ok: false, text: "A confirmação não confere com a nova senha." });
+      return;
+    }
+
     try {
-      if (!user || !token) return;
-
-      if (novaSenha !== confirmarSenha) {
-        Alert.alert("Erro", "As senhas não coincidem.");
-        return;
-      }
-
       setLoading(true);
 
       await updateUser(
@@ -60,84 +61,99 @@ export default function SegurancaScreen() {
         token,
       );
 
-      Alert.alert("Sucesso", "Senha alterada.");
-
+      setFeedback({ ok: true, text: "Senha alterada com sucesso." });
       setSenhaAtual("");
       setNovaSenha("");
       setConfirmarSenha("");
-    } catch {
-      Alert.alert("Erro", "Não foi possível alterar a senha.");
+    } catch (error: any) {
+      setFeedback({
+        ok: false,
+        text: error?.response?.data?.message || "Não foi possível alterar a senha.",
+      });
     } finally {
       setLoading(false);
     }
   }
 
+  const biometricText =
+    Platform.OS === "web"
+      ? "Indisponível no navegador"
+      : biometricAvailable
+        ? "Ativo — solicitado ao abrir o app"
+        : "Cadastre Face ID / digital no aparelho para usar";
+
   return (
-    <ScrollView
-      style={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <PageHeader
-        title="Privacidade e Segurança"
-        subtitle="Acesse suas configurações de segurança"
-      />
+    <View style={styles.screen}>
+      <PageHeader title="Segurança" subtitle="Senha e acesso à sua conta" />
 
-      <SettingsSection title="Alterar Senha">
-        <Text style={styles.label}>Senha Atual:</Text>
-        <AppInput
-          secureTextEntry
-          placeholder="Informe a sua Senha Atual"
-          placeholderTextColor={COLORS.placeholder}
-          value={senhaAtual}
-          onChangeText={setSenhaAtual}
-        />
-        <Text style={styles.label}>Nova Senha:</Text>
+      <ScrollView
+        style={styles.container}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <SettingsSection title="Alterar senha">
+          <View>
+            <Text style={[styles.label, { marginTop: 0 }]}>Senha atual</Text>
+            <AppInput
+              secureTextEntry
+              placeholder="Sua senha atual"
+              value={senhaAtual}
+              onChangeText={setSenhaAtual}
+              autoComplete="current-password"
+            />
+            <Text style={styles.label}>Nova senha</Text>
+            <AppInput
+              secureTextEntry
+              placeholder={`Mínimo de ${MIN_PASSWORD} caracteres`}
+              value={novaSenha}
+              onChangeText={setNovaSenha}
+              autoComplete="new-password"
+            />
+            <Text style={styles.label}>Confirmar nova senha</Text>
+            <AppInput
+              secureTextEntry
+              placeholder="Repita a nova senha"
+              value={confirmarSenha}
+              onChangeText={setConfirmarSenha}
+              autoComplete="new-password"
+            />
 
-        <AppInput
-          secureTextEntry
-          placeholder="Informe a Nova Senha"
-          placeholderTextColor={COLORS.placeholder}
-          value={novaSenha}
-          onChangeText={setNovaSenha}
-        />
-        <Text style={styles.label}>Confirmar Senha Atual:</Text>
+            {feedback && (
+              <Text style={[styles.feedback, feedback.ok && { color: theme.success }]}>
+                {feedback.text}
+              </Text>
+            )}
 
-        <AppInput
-          secureTextEntry
-          placeholder="Confirme a Nova Senha"
-          placeholderTextColor={COLORS.placeholder}
-          value={confirmarSenha}
-          onChangeText={setConfirmarSenha}
-        />
+            <AppButton title="Alterar senha" loading={loading} onPress={handleChangePassword} />
+          </View>
+        </SettingsSection>
 
-        <AppButton
-          title="Alterar Senha"
-          loading={loading}
-          onPress={handleChangePassword}
-        />
-      </SettingsSection>
-
-      <SettingsSection title="Proteção">
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Login com biometria</Text>
-
-          <AppSwitch value={biometria} onValueChange={setBiometria} />
-        </View>
-
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Autenticação em duas etapas</Text>
-
-          <AppSwitch value={autenticacao2F} onValueChange={setAutenticacao2F} />
-        </View>
-
-        <View style={globalStyles.menuCard}>
-          <Text style={globalStyles.menuText}>Manter conectado</Text>
-
-          <AppSwitch value={lembrarLogin} onValueChange={setLembrarLogin} />
-        </View>
-      </SettingsSection>
-
-      <View style={{ height: 40 }} />
-    </ScrollView>
+        <SettingsSection
+          title="Proteção"
+          footer="A sessão fica guardada no armazenamento seguro do aparelho e é removida ao sair da conta."
+        >
+          <SettingsItem
+            icon="finger-print"
+            iconColor={theme.success}
+            title="Desbloqueio por biometria"
+            description={biometricText}
+          />
+          <SettingsItem
+            icon="lock-closed"
+            iconColor={theme.info}
+            title="Sessão protegida"
+            description="Token criptografado (Keychain / Keystore)"
+          />
+          <SettingsItem
+            icon="key"
+            iconColor={theme.textSecondary}
+            title="Verificação em duas etapas"
+            description="Em breve"
+            disabled
+          />
+        </SettingsSection>
+      </ScrollView>
+    </View>
   );
 }

@@ -1,8 +1,8 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import { Plano } from "@/components/layout/interface";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface PlanOptionCardProps {
   plano: Plano;
@@ -15,6 +15,7 @@ export function PlanOptionCard({
   atual = false,
   onSelect,
 }: PlanOptionCardProps) {
+  const { styles, theme } = useTheme();
   function formatPrice(value: number) {
     return value.toFixed(2).replace(".", ",");
   }
@@ -22,102 +23,102 @@ export function PlanOptionCard({
   return (
     <View
       style={[
-        globalStyles.planOptionCard,
-        plano.destaque && globalStyles.planOptionCardFeatured,
+        styles.planOptionCard,
+        plano.destaque && styles.planOptionCardFeatured,
       ]}
     >
       {plano.destaque && (
-        <View style={globalStyles.planRecommendedBadge}>
-          <Ionicons name="star" size={13} color={COLORS.primary} />
+        <View style={styles.planRecommendedBadge}>
+          <Ionicons name="star" size={13} color={theme.primary} />
 
-          <Text style={globalStyles.planRecommendedText}>Recomendado</Text>
+          <Text style={styles.planRecommendedText}>Recomendado</Text>
         </View>
       )}
 
-      <View style={globalStyles.planOptionHeader}>
-        <View style={globalStyles.planOptionTitleRow}>
-          <Text style={globalStyles.planOptionName}>{plano.nome}</Text>
+      <View style={styles.planOptionHeader}>
+        <View style={styles.planOptionTitleRow}>
+          <Text style={styles.planOptionName}>{plano.nome}</Text>
 
           {atual && (
-            <View style={globalStyles.planCurrentBadge}>
-              <Text style={globalStyles.planCurrentBadgeText}>Atual</Text>
+            <View style={styles.planCurrentBadge}>
+              <Text style={styles.planCurrentBadgeText}>Atual</Text>
             </View>
           )}
         </View>
 
-        <Text style={globalStyles.planOptionDescription}>
+        <Text style={styles.planOptionDescription}>
           {plano.descricao}
         </Text>
       </View>
 
-      <View style={globalStyles.planOptionPriceRow}>
-        <Text style={globalStyles.planOptionPrice}>
+      <View style={styles.planOptionPriceRow}>
+        <Text style={styles.planOptionPrice}>
           R$ {formatPrice(plano.preco)}
         </Text>
 
-        <Text style={globalStyles.planOptionPeriod}>/{plano.periodo}</Text>
+        <Text style={styles.planOptionPeriod}>/{plano.periodo}</Text>
       </View>
 
-      <View style={globalStyles.planLimits}>
-        <View style={globalStyles.planLimitRow}>
+      <View style={styles.planLimits}>
+        <View style={styles.planLimitRow}>
           <Ionicons
             name="people-outline"
             size={17}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
-          <Text style={globalStyles.planLimitText}>
+          <Text style={styles.planLimitText}>
             {plano.limites.clientes} clientes
           </Text>
         </View>
 
-        <View style={globalStyles.planLimitRow}>
+        <View style={styles.planLimitRow}>
           <Ionicons
             name="document-text-outline"
             size={17}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
-          <Text style={globalStyles.planLimitText}>
+          <Text style={styles.planLimitText}>
             {plano.limites.orcamentos} orçamentos
           </Text>
         </View>
 
-        <View style={globalStyles.planLimitRow}>
+        <View style={styles.planLimitRow}>
           <Ionicons
             name="business-outline"
             size={17}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
-          <Text style={globalStyles.planLimitText}>
+          <Text style={styles.planLimitText}>
             {plano.limites.obras} obras
           </Text>
         </View>
 
         {plano.limites.usuarios !== undefined && (
-          <View style={globalStyles.planLimitRow}>
+          <View style={styles.planLimitRow}>
             <Ionicons
               name="person-add-outline"
               size={17}
-              color={COLORS.textSecondary}
+              color={theme.textSecondary}
             />
 
-            <Text style={globalStyles.planLimitText}>
+            <Text style={styles.planLimitText}>
               {plano.limites.usuarios} usuários
             </Text>
           </View>
         )}
 
         {plano.limites.armazenamento !== undefined && (
-          <View style={globalStyles.planLimitRow}>
+          <View style={styles.planLimitRow}>
             <Ionicons
               name="cloud-outline"
               size={17}
-              color={COLORS.textSecondary}
+              color={theme.textSecondary}
             />
 
-            <Text style={globalStyles.planLimitText}>
+            <Text style={styles.planLimitText}>
               {plano.limites.armazenamento} GB
             </Text>
           </View>
@@ -125,19 +126,19 @@ export function PlanOptionCard({
       </View>
 
       {plano.recursos.length > 0 && (
-        <View style={globalStyles.planFeatures}>
+        <View style={styles.planFeatures}>
           {plano.recursos.map((recurso, index) => (
             <View
               key={`${plano.id}-${index}`}
-              style={globalStyles.planFeatureRow}
+              style={styles.planFeatureRow}
             >
               <Ionicons
                 name="checkmark-circle"
                 size={17}
-                color={COLORS.primary}
+                color={theme.primary}
               />
 
-              <Text style={globalStyles.planFeatureText}>{recurso}</Text>
+              <Text style={styles.planFeatureText}>{recurso}</Text>
             </View>
           ))}
         </View>
@@ -145,17 +146,17 @@ export function PlanOptionCard({
 
       <Pressable
         style={({ pressed }) => [
-          globalStyles.planSelectButton,
-          atual && globalStyles.planSelectButtonCurrent,
-          pressed && globalStyles.pressOpacity,
+          styles.planSelectButton,
+          atual && styles.planSelectButtonCurrent,
+          pressed && styles.pressOpacity,
         ]}
         onPress={onSelect}
         disabled={atual}
       >
         <Text
           style={[
-            globalStyles.planSelectButtonText,
-            atual && globalStyles.planSelectButtonTextCurrent,
+            styles.planSelectButtonText,
+            atual && styles.planSelectButtonTextCurrent,
           ]}
         >
           {atual ? "Plano atual" : "Escolher plano"}

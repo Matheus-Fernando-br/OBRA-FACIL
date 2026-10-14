@@ -1,3 +1,4 @@
+import { useTheme } from "@/contexts/ThemeContext";
 // src/components/modals/obras/AddObrasModal.tsx
 
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +12,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "@/components/buttons/AppButton";
 
@@ -31,6 +31,7 @@ interface Props {
 }
 
 export function AddObrasModal({ visible, onClose, onSelect }: Props) {
+  const { styles, theme } = useTheme();
   const { token } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -140,17 +141,17 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
       <View
         style={{
           flex: 1,
-          backgroundColor: COLORS.white,
+          backgroundColor: theme.white,
         }}
       >
-        <View style={globalStyles.modalHeader}>
-          <Pressable onPress={onClose} style={globalStyles.leftAction}>
-            <Ionicons name="arrow-back" size={25} color={COLORS.text} />
+        <View style={styles.modalHeader}>
+          <Pressable onPress={onClose} style={styles.leftAction}>
+            <Ionicons name="chevron-back" size={26} color={theme.primary} />
           </Pressable>
 
-          <Text style={globalStyles.addTitle}>Nova Obra</Text>
+          <Text style={styles.addTitle}>Nova Obra</Text>
 
-          <View style={globalStyles.rightAction} />
+          <View style={styles.rightAction} />
         </View>
 
         <View
@@ -160,11 +161,11 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
             paddingTop: 20,
           }}
         >
-          <Text style={globalStyles.subtitle}>
+          <Text style={styles.subtitle}>
             Selecione um orçamento aprovado
           </Text>
 
-          <View style={globalStyles.divider} />
+          <View style={styles.divider} />
 
           <AppInput
             placeholder="Buscar orçamento..."
@@ -180,12 +181,12 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                 alignItems: "center",
               }}
             >
-              <ActivityIndicator size="large" color={COLORS.primary} />
+              <ActivityIndicator size="large" color={theme.primary} />
 
               <Text
                 style={{
                   marginTop: 15,
-                  color: COLORS.text,
+                  color: theme.text,
                 }}
               >
                 Carregando orçamentos aprovados...
@@ -199,13 +200,13 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                 alignItems: "center",
               }}
             >
-              <Ionicons name="folder-open-outline" size={70} color={COLORS.placeholder} />
+              <Ionicons name="folder-open-outline" size={70} color={theme.placeholder} />
 
               <Text
                 style={{
                   marginTop: 15,
                   fontSize: 16,
-                  color: COLORS.text,
+                  color: theme.text,
                   textAlign: "center",
                 }}
               >
@@ -215,7 +216,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
               <Text
                 style={{
                   marginTop: 8,
-                  color: COLORS.card,
+                  color: theme.card,
                   textAlign: "center",
                 }}
               >
@@ -245,7 +246,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
           )}
         </View>
 
-        <View style={globalStyles.bottomActionContainer}>
+        <View style={styles.bottomActionContainer}>
           <AppButton
             title="Continuar"
             disabled={!selectedBudget}

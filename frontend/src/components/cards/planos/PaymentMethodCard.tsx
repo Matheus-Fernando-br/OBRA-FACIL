@@ -1,7 +1,7 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface PaymentMethodCardProps {
   paymentMethod?: string;
@@ -12,27 +12,28 @@ export function PaymentMethodCard({
   paymentMethod,
   onPress,
 }: PaymentMethodCardProps) {
+  const { styles, theme } = useTheme();
   return (
     <Pressable
       style={({ pressed }) => [
-        globalStyles.paymentMethodCard,
-        pressed && globalStyles.pressOpacity,
+        styles.paymentMethodCard,
+        pressed && styles.pressOpacity,
       ]}
       onPress={onPress}
     >
-      <View style={globalStyles.paymentMethodIcon}>
-        <Ionicons name="card-outline" size={22} color={COLORS.primary} />
+      <View style={styles.paymentMethodIcon}>
+        <Ionicons name="card-outline" size={22} color={theme.primary} />
       </View>
 
-      <View style={globalStyles.paymentMethodContent}>
-        <Text style={globalStyles.paymentMethodTitle}>Forma de pagamento</Text>
+      <View style={styles.paymentMethodContent}>
+        <Text style={styles.paymentMethodTitle}>Forma de pagamento</Text>
 
-        <Text style={globalStyles.paymentMethodDescription}>
+        <Text style={styles.paymentMethodDescription}>
           {paymentMethod || "Nenhuma forma de pagamento cadastrada"}
         </Text>
       </View>
 
-      <Ionicons name="chevron-forward" size={20} color={COLORS.textSecondary} />
+      <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
     </Pressable>
   );
 }

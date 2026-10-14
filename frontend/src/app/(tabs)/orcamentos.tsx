@@ -1,21 +1,23 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 
 import { useState, useEffect, useMemo } from "react";
 
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
+import { Header } from "@/components/cards/Header";
 
-import { AppInput } from "../../components/forms/AppInput";
+import { SearchField } from "@/components/ui/SearchField";
+import { FilterChips } from "@/components/ui/FilterChips";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FadeInView } from "@/components/ui/FadeInView";
+import { ListSkeleton } from "@/components/ui/Skeleton";
+import { StatusSegment } from "@/components/ui/StatusSegment";
+import { formatDate } from "@/utils/format";
+import { getClientName, isBudgetExpired } from "@/utils/status";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getBudgets, archiveBudget } from "../../services/api";
+import { getBudgets, getClients, archiveBudget } from "../../services/api";
 
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
 
@@ -33,7 +35,6 @@ import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsM
 
 import { Orcamento, Cliente } from "@/components/layout/interface";
 
-import { GradientBackground } from "@/styles/GradientBackground";
 
 import FilterModal, {
   BudgetFilters,
@@ -53,6 +54,16 @@ export default function OrcamentosScreen() {
   const [loading, setLoading] = useState(true);
 
   const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
+
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+
+  // Nome do cliente mesmo quando o orçamento traz apenas o ID.
+  const clientsById = useMemo(() => {
+    return clientsList.reduce((acc: Record<string, Cliente>, client) => {
+      acc[client._id] = client;
+      return acc;
+    }, {});
+  }, [clientsList]);
 
   const [addVisible, setAddVisible] = useState(false);
 
@@ -99,9 +110,13 @@ export default function OrcamentosScreen() {
 
       setLoading(true);
 
-      const data = await getBudgets(token);
+      const [data, clients] = await Promise.all([
+        getBudgets(token),
+        getClients(token).catch(() => []),
+      ]);
 
       setBudgetsList(Array.isArray(data) ? data : []);
+      setClientsList(Array.isArray(clients) ? clients : []);
     } catch (error: any) {
       console.log("ERRO AO CARREGAR ORÇAMENTOS:", error);
 
@@ -124,6 +139,23 @@ export default function OrcamentosScreen() {
 
     loadBudgets();
   }, [token]);
+
+  // Atalho "Novo orçamento" (dashboard): abre o formulário direto.
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  useEffect(() => {
+    if (action !== "new") return;
+    setAddVisible(true);
+    router.setParams({ action: undefined });
+  }, [action]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await loadBudgets();
+    setRefreshing(false);
+  }
 
   // ============================================================
   // ARQUIVAR / DESARQUIVAR
@@ -287,10 +319,7 @@ export default function OrcamentosScreen() {
 
       const nome = budget.nome?.toLowerCase() || "";
 
-      const clienteNome =
-        typeof budget.cliente === "string"
-          ? budget.cliente.toLowerCase()
-          : budget.cliente?.nome?.toLowerCase() || "";
+      const clienteNome = getClientName(budget.cliente, clientsById).toLowerCase();
 
       const matchSearch =
         !searchLower ||
@@ -360,9 +389,12 @@ export default function OrcamentosScreen() {
       // VALOR COM BDI
       // ======================================================
 
+      // O teto do controle (500 mil) significa "sem limite": antes,
+      // orçamentos acima disso eram ocultados mesmo sem filtro ativo.
       const valor = Number(budget.preco_com_bdi ?? 0);
+      const semTeto = filters.value.max >= 500000;
 
-      if (valor < filters.value.min || valor > filters.value.max) {
+      if (valor < filters.value.min || (!semTeto && valor > filters.value.max)) {
         return false;
       }
 
@@ -395,11 +427,9 @@ export default function OrcamentosScreen() {
 
     if (filters.clientSort) {
       result.sort((a, b) => {
-        const clienteA =
-          typeof a.cliente === "string" ? a.cliente : a.cliente?.nome || "";
+        const clienteA = getClientName(a.cliente, clientsById);
 
-        const clienteB =
-          typeof b.cliente === "string" ? b.cliente : b.cliente?.nome || "";
+        const clienteB = getClientName(b.cliente, clientsById);
 
         if (filters.clientSort === "asc") {
           return clienteA.localeCompare(clienteB, "pt-BR", {
@@ -414,7 +444,7 @@ export default function OrcamentosScreen() {
     }
 
     return result;
-  }, [budgetsList, search, filters]);
+  }, [budgetsList, clientsById, search, filters]);
 
   // ============================================================
   // ESTADOS DISPONÍVEIS
@@ -651,274 +681,115 @@ export default function OrcamentosScreen() {
 
   return (
     <View style={styles.screen}>
-      <GradientBackground style={styles.container}>
-        <ScrollView
-          contentContainerStyle={{
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ==================================================
-              CABEÇALHO
-          =================================================== */}
-
-          <View style={styles.pageHeaderRow}>
-            <Text style={styles.title}>Orçamentos</Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {/* FILTRO */}
-
-              <Pressable
-                style={[
-                  styles.pageHeaderButtonFilter,
-
-                  activeFiltersCount > 0
-                    ? {
-                        backgroundColor: theme.primary,
-                      }
-                    : null,
-                ]}
-                onPress={() => setFilterVisible(true)}
-              >
-                <Ionicons
-                  name="filter-outline"
-                  size={22}
-                  color={activeFiltersCount > 0 ? theme.white : theme.text}
-                />
-
-                {activeFiltersCount > 0 && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      right: -4,
-                      top: -4,
-                      minWidth: 18,
-                      height: 18,
-                      borderRadius: 999,
-                      paddingHorizontal: 4,
-                      backgroundColor: theme.danger,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.white,
-                        fontSize: 10,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {activeFiltersCount}
-                    </Text>
-                  </View>
-                )}
-              </Pressable>
-
-              {/* NOVO ORÇAMENTO */}
-
-              <Pressable
-                style={styles.pageHeaderButton}
-                onPress={() => setAddVisible(true)}
-              >
-                <Ionicons name="add" color={theme.text} size={25} />
-              </Pressable>
-            </View>
-          </View>
-
-          {/* ==================================================
-              BUSCA
-          =================================================== */}
-
-          <AppInput
-            placeholder="Buscar orçamento..."
-            value={search}
-            onChangeText={setSearch}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
           />
+        }
+      >
+        <Header
+          title="Orçamentos"
+          subtitle={
+            loading
+              ? "Carregando…"
+              : `${filteredBudgets.length} de ${budgetsList.length} orçamento${budgetsList.length === 1 ? "" : "s"}`
+          }
+          showFilter
+          activeFiltersCount={activeFiltersCount}
+          onFilterPress={() => setFilterVisible(true)}
+          showAdd
+          onAddPress={() => setAddVisible(true)}
+        />
 
-          {/* ==================================================
-              FILTROS ATIVOS
-          =================================================== */}
+        <SearchField
+          placeholder="Buscar por orçamento ou cliente"
+          value={search}
+          onChangeText={setSearch}
+        />
 
-          {activeFilterLabels.length > 0 && (
-            <View
-              style={{
-                marginTop: 12,
-                marginBottom: 4,
-              }}
-            >
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  paddingRight: 8,
-                }}
-              >
-                {/* FILTROS */}
+        <StatusSegment
+          value={filters.status}
+          onChange={(status) => setFilters((prev) => ({ ...prev, status }))}
+          options={[
+            { value: "all", label: "Todos" },
+            { value: "pendente", label: "Pendentes" },
+            { value: "aprovado", label: "Aprovados" },
+            { value: "recusado", label: "Recusados" },
+          ]}
+        />
 
-                {activeFilterLabels.map((label) => (
-                  <View
-                    key={label}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: theme.primary,
-                      borderRadius: 999,
-                      paddingHorizontal: 12,
-                      paddingVertical: 7,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.white,
-                        fontSize: 12,
-                        fontWeight: "600",
-                      }}
-                      numberOfLines={1}
-                    >
-                      {label}
-                    </Text>
-                  </View>
-                ))}
-
-                {/* LIMPAR */}
-
-                <Pressable
-                  onPress={clearFilters}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 5,
-                    paddingHorizontal: 10,
-                    paddingVertical: 7,
-                  }}
-                >
-                  <Ionicons
-                    name="close-circle-outline"
-                    size={17}
-                    color={theme.textSecondary}
-                  />
-
-                  <Text
-                    style={{
-                      color: theme.textSecondary,
-                      fontSize: 12,
-                      fontWeight: "600",
-                    }}
-                  >
-                    Limpar
-                  </Text>
-                </Pressable>
-              </ScrollView>
-            </View>
+        <FilterChips
+          labels={activeFilterLabels.filter(
+            (label) => !["Pendente", "Aprovado", "Recusado"].includes(label),
           )}
+          onClear={clearFilters}
+        />
 
-          {/* ==================================================
-              NENHUM ORÇAMENTO
-          =================================================== */}
-
-          {!loading && filteredBudgets.length === 0 && (
-            <Text style={styles.sectionTitle}>
-              {filters.archived === "archived"
-                ? "Nenhum orçamento arquivado encontrado."
-                : "Nenhum orçamento encontrado."}
-            </Text>
-          )}
-
-          {/* ==================================================
-              LOADING
-          =================================================== */}
-
-          {loading ? (
-            <View
-              style={[
-                styles.screen,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 40,
-                },
-              ]}
-            >
-              <ActivityIndicator size="large" color={theme.primary} />
-
-              <Text
-                style={{
-                  color: theme.text,
-                  marginTop: 15,
-                }}
-              >
-                Carregando Orçamentos...
-              </Text>
-            </View>
+        {loading && budgetsList.length === 0 ? (
+          <ListSkeleton count={3} />
+        ) : filteredBudgets.length === 0 ? (
+          budgetsList.length === 0 ? (
+            <EmptyState
+              icon="document-text-outline"
+              title="Nenhum orçamento ainda"
+              message="Monte seu primeiro orçamento com categorias, serviços e BDI — e gere o PDF para o cliente."
+              actionLabel="Novo orçamento"
+              onAction={() => setAddVisible(true)}
+            />
           ) : (
-            /* ==================================================
-               LISTA
-            ================================================== */
+            <EmptyState
+              icon="search-outline"
+              title={
+                filters.archived === "archived"
+                  ? "Nenhum orçamento arquivado"
+                  : "Nenhum orçamento encontrado"
+              }
+              message="Ajuste a busca ou os filtros para ver outros orçamentos."
+            />
+          )
+        ) : (
+          filteredBudgets.map((budget, index) => {
+            const nomeCliente = getClientName(budget.cliente, clientsById);
 
-            filteredBudgets.map((budget) => {
-              const nomeCliente =
-                typeof budget.cliente === "object"
-                  ? (budget.cliente?.nome ?? "")
-                  : "Cliente não encontrado";
-
-              return (
+            return (
+              <FadeInView key={budget._id} index={index}>
                 <BudgetCard
-                  key={budget._id}
                   client={nomeCliente}
                   nome={budget.nome}
                   status={budget.status}
                   value={budget.preco_com_bdi}
-                  date={new Date(budget.data_validade).toLocaleDateString(
-                    "pt-BR",
-                  )}
+                  date={formatDate(budget.data_validade)}
+                  issuedAt={formatDate(budget.data_publicacao)}
+                  expired={isBudgetExpired(budget)}
                   arquivado={budget.arquivado}
                   onDetails={() => {
                     setSelectedBudget(budget);
-
                     setDetailsVisible(true);
                   }}
                   onEdit={() => {
                     setSelectedBudget(budget);
-
                     setEditVisible(true);
                   }}
                   onDelete={() => {
                     setSelectedBudget(budget);
-
                     setDeleteVisible(true);
                   }}
                   onArchive={() => handleArchiveBudget(budget)}
                   loadingArchive={loadingArquivo === budget._id}
                 />
-              );
-            })
-          )}
-        </ScrollView>
-      </GradientBackground>
-
-      {/* ======================================================
-          BOTÃO NOVO ORÇAMENTO
-      ====================================================== */}
-
-      <View style={styles.bottomActionContainer}>
-        <Pressable
-          style={styles.bottomActionButton}
-          onPress={() => setAddVisible(true)}
-        >
-          <Text style={styles.bottomActionButtonText}>
-            + Novo Orçamento
-          </Text>
-        </Pressable>
-      </View>
+              </FadeInView>
+            );
+          })
+        )}
+      </ScrollView>
 
       {/* ======================================================
           MODAL - ADICIONAR

@@ -4,49 +4,35 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props extends TextInputProps {}
 
-export function AppInput({ editable = true, style, ...rest }: Props) {
+/**
+ * Campo de texto padrão do app: preenchido (estilo iOS), com borda de
+ * acento apenas quando focado. Campos somente-leitura ficam sem fundo,
+ * para que a leitura de detalhes seja limpa.
+ */
+export function AppInput({ editable = true, style, onFocus, onBlur, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
-  const { theme } = useTheme();
+  const { theme, styles } = useTheme();
 
   return (
     <TextInput
       {...rest}
       editable={editable}
       placeholderTextColor={theme.placeholder}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      selectionColor={theme.primary}
+      onFocus={(e) => {
+        setFocused(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        onBlur?.(e);
+      }}
       style={[
+        styles.appInput,
         {
-          width: "100%",
-          minHeight: 58,
-
-          backgroundColor: editable ? theme.white : theme.border,
-
-          color: editable ? theme.text : theme.placeholder,
-
-          borderWidth: 1.2,
-
-          borderColor: editable
-            ? focused
-              ? theme.primary
-              : theme.border
-            : theme.borderNull,
-
-          borderRadius: 10,
-
-          paddingHorizontal: 18,
-          paddingVertical: 14,
-
-          marginBottom: 16,
-
-          shadowColor: editable ? theme.text : "transparent",
-          shadowOpacity: editable ? 0.08 : 0,
-          shadowRadius: editable ? 4 : 0,
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          elevation: editable ? 2 : 0,
+          backgroundColor: editable ? theme.surfaceMuted : "transparent",
+          color: editable ? theme.text : theme.textSecondary,
+          borderColor: editable && focused ? theme.primary : editable ? "transparent" : theme.border,
         },
         style,
       ]}

@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
@@ -8,65 +9,50 @@ interface Props {
   subtitle?: string;
 }
 
-export function PageHeader({
-  title,
-  subtitle,
-}: Props) {
-  const { theme } = useTheme();
+/**
+ * Cabeçalho das telas internas: "Voltar" no topo e título grande.
+ * Volta para a tela anterior (histórico das abas) ou para "Ajustes".
+ */
+export function PageHeader({ title, subtitle }: Props) {
+  const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  function goBack() {
+    if (router.canGoBack()) router.back();
+    else router.navigate("/mais");
+  }
 
   return (
     <View
       style={{
-        marginBottom: 25,
+        backgroundColor: theme.background,
+        paddingTop: insets.top + 4,
+        paddingHorizontal: 16,
+        paddingBottom: 8,
       }}
     >
       <Pressable
-        onPress={() => router.replace("/(tabs)/mais")}
-        style={{
+        onPress={goBack}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+        style={({ pressed }) => ({
           flexDirection: "row",
           alignItems: "center",
-          marginBottom: 18,
-        }}
+          alignSelf: "flex-start",
+          minHeight: 40,
+          marginLeft: -6,
+          opacity: pressed ? 0.5 : 1,
+        })}
       >
-        <Ionicons
-          name="arrow-back"
-          size={24}
-          color={theme.title}
-        />
-
-        <Text
-          style={{
-            color: theme.title,
-            marginLeft: 8,
-            fontWeight: "600",
-            fontSize: 16,
-          }}
-        >
-          Voltar
-        </Text>
+        <Ionicons name="chevron-back" size={24} color={theme.primary} />
+        <Text style={[styles.body, { color: theme.primary }]}>Voltar</Text>
       </Pressable>
 
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 30,
-          fontWeight: "700",
-        }}
-      >
+      <Text style={styles.pageHeaderTitle} accessibilityRole="header">
         {title}
       </Text>
-
-      {subtitle && (
-        <Text
-          style={{
-            color: theme.textSecondary,
-            marginTop: 6,
-            fontSize: 15,
-          }}
-        >
-          {subtitle}
-        </Text>
-      )}
+      {subtitle ? <Text style={styles.pageHeaderSubtitle}>{subtitle}</Text> : null}
     </View>
   );
 }

@@ -3,6 +3,9 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
   withCredentials: true,
+  // O servidor no Render (plano gratuito) "dorme" e pode levar ~1 min para
+  // acordar. Sem timeout, a tela inicial ficava carregando indefinidamente.
+  timeout: 60000,
 });
 
 // ==========================
@@ -82,7 +85,7 @@ export async function resendVerificationCode(data: { email: string }) {
 // USER
 // ==========================
 
-import { Usuario } from "@/components/layout/interface";
+import { UpdateUsuario } from "@/components/layout/interface";
 
 export async function getUser(token: string) {
   const { data } = await api.get("/user/me", {
@@ -94,7 +97,7 @@ export async function getUser(token: string) {
   return data;
 }
 
-export async function updateUser(id: string, body: Usuario, token: string) {
+export async function updateUser(id: string, body: UpdateUsuario, token: string) {
   const { data } = await api.put(`/user/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,

@@ -1,11 +1,13 @@
 import { Modal, View } from "react-native";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ObrasForm } from "@/components/forms/ObrasForms";
 import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
-import { getClients } from "@/services/api";
+import { getBudgetById, getClientById } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { PdfViewerModal } from "@/components/modals/PdfViewerModal";
-import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
+import { generateWorkPdf } from "@/utils/pdf/generateWorkPdf";
+import { loadPdfOptions } from "@/utils/pdf/preferences";
+import { GeneratedPdf } from "@/utils/pdf/output";
 
 interface Props {
   visible: boolean;
@@ -15,33 +17,37 @@ interface Props {
 }
 
 export function DetailsObraModal({ visible, work, onClose, onEdit }: Props) {
-  const { token } = useAuth();
-  const [clientsList, setClientsList] = useState<Cliente[]>([]);
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const { token, user } = useAuth();
+  const [pdf, setPdf] = useState<GeneratedPdf | null>(null);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
 
-  useEffect(() => {
-    if (visible && token) getClients(token).then(setClientsList);
-  }, [visible, token]);
-
+  /** Relatório de acompanhamento da obra (antes desativado). */
   const handleGeneratePdf = async () => {
-    if (!work) return;
+    if (!work || !token) return;
 
-    setPdfLoading(true);
+    const budget: Orcamento | null =
+      typeof work.orcamento === "object"
+        ? work.orcamento
+        : await getBudgetById(work.orcamento, token);
 
-    try {
-      /*
-      const uri = await generateBudgetPdf(work);
-
-      setPdfUri(uri);
-
-      setShowPdfViewer(true);*/
-    } catch (e) {
-      console.log(e);
-
-      alert("Erro ao gerar PDF.");
-    } finally {
-      setPdfLoading(false);
+    let client: Cliente | null = null;
+    if (budget?.cliente) {
+      client =
+        typeof budget.cliente === "object"
+          ? budget.cliente
+          : await getClientById(budget.cliente, token).catch(() => null);
     }
+
+    const generated = await generateWorkPdf({
+      work,
+      budget,
+      client,
+      issuer: user ?? undefined,
+      options: await loadPdfOptions(),
+    });
+
+    setPdf(generated);
+    setShowPdfViewer(true);
   };
 
   if (!work) return null;
@@ -52,14 +58,21 @@ export function DetailsObraModal({ visible, work, onClose, onEdit }: Props) {
       animationType="slide"
       transparent
       statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}>
+      <View style={{ flex: 1 }}>
         <ObrasForm
           mode="details"
           initialData={work}
           onClose={onClose}
-          loading={pdfLoading}
           onEdit={onEdit}
+          onGeneratePdf={handleGeneratePdf}
+        />
+        <PdfViewerModal
+          visible={showPdfViewer}
+          onClose={() => setShowPdfViewer(false)}
+          pdf={pdf}
+          budgetTitle="Relatório de acompanhamento da obra"
         />
       </View>
     </Modal>

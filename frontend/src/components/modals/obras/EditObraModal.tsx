@@ -38,8 +38,9 @@ export function EditObraModal({ visible, work, onClose, onSuccess }: Props) {
       await updateWork(work._id, formData, token!);
       onClose();
       onSuccess();
-    } catch (error) {
-      setFeedback("Erro ao atualizar Orçamento.");
+    } catch (error: any) {
+      console.log("ERRO AO ATUALIZAR OBRA:", error?.response?.data || error);
+      setFeedback(error?.response?.data?.message ?? "Erro ao atualizar a obra.");
     } finally {
       setLoading(false);
     }
@@ -48,8 +49,14 @@ export function EditObraModal({ visible, work, onClose, onSuccess }: Props) {
   if (!work) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={{ flex: 1 }}>
         <ObrasForm
           mode="edit"
           initialData={work}

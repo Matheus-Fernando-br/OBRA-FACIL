@@ -122,7 +122,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
           <View style={[styles.addCard]}>
             <View style={styles.modalHeader}>
             <Pressable onPress={onClose} style={styles.leftAction}>
-                <Ionicons name="arrow-back" size={25} color={theme.text} />
+                <Ionicons name="chevron-back" size={26} color={theme.primary} />
               </Pressable>
               <Text style={styles.addTitle}>Meu Perfil</Text>
 
@@ -131,7 +131,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                   <Text style={styles.saveText}>Atualizar</Text>
                   <Text style={styles.saveText}>Perfil</Text>
                 </View>
-                <Ionicons name="download" size={20} color={theme.title} />
+                <Ionicons name="checkmark" size={20} color={theme.title} />
               </Pressable>
             </View>
 
@@ -179,9 +179,8 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 color={theme.primary}
               />
 
-              <AppButton
+              <AppButton variant="secondary"
                 title="Cancelar"
-                color={theme.danger}
                 onPress={onClose}
               />
             </ScrollView>

@@ -1,46 +1,54 @@
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
+import { PressableScale } from "@/components/ui/PressableScale";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { getWorkStatusMeta } from "@/utils/status";
+import { formatDate } from "@/utils/format";
 
 interface Props {
   title: string;
+  client?: string;
   progress: number;
-  type: string;
-  diasReal: number;
+  status: string;
+  endDate?: Date | string;
+  onPress?: () => void;
 }
 
-export function WorkCard({ title, progress, type, diasReal }: Props) {
-  const { styles } = useTheme();
+/** Resumo compacto de uma obra em andamento (dashboard). */
+export function WorkCard({ title, client, progress, status, endDate, onPress }: Props) {
+  const { styles, theme } = useTheme();
+  const meta = getWorkStatusMeta(status, theme);
 
   return (
-    <View style={styles.workCard}>
-      <Image
-        source={require("../../../assets/images/house.jpg")}
-        style={styles.workCardImage}
-      />
-
-      <View style={styles.workCardContent}>
-        <Text style={styles.workCardTitle}>{title}</Text>
-
-        <Text style={styles.workCardInfo}>Status: {type}</Text>
-        <Text style={styles.workCardInfo}>
-          Previsão de tempo para finalização: {diasReal} dias
-        </Text>
-
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBarBackground}>
-            <View
-              style={[
-                styles.progressBarFill,
-                {
-                  width: `${progress}%`,
-                },
-              ]}
-            />
-          </View>
-
-          <Text style={styles.workCardProgress}>{progress}%</Text>
+    <PressableScale onPress={onPress} disabled={!onPress} style={styles.workCard}>
+      <View style={styles.listCardHeader}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.workCardTitle} numberOfLines={1}>
+            {title}
+          </Text>
+          {client ? (
+            <Text style={styles.workCardInfo} numberOfLines={1}>
+              {client}
+            </Text>
+          ) : null}
         </View>
+        <StatusPill meta={meta} />
       </View>
-    </View>
+
+      <View style={{ marginTop: 14 }}>
+        <ProgressBar value={progress} color={meta.color} />
+      </View>
+
+      {endDate ? (
+        <View style={[styles.listCardMeta, { marginTop: 10 }]}>
+          <Ionicons name="flag-outline" size={13} color={theme.textSecondary} />
+          <Text style={styles.listCardMetaText}>
+            Término previsto {formatDate(endDate)}
+          </Text>
+        </View>
+      ) : null}
+    </PressableScale>
   );
 }

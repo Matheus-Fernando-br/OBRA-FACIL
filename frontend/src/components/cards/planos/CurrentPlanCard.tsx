@@ -1,8 +1,8 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, Text, View } from "react-native";
 
 import { Assinatura } from "@/components/layout/interface";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface CurrentPlanCardProps {
   assinatura: Assinatura;
@@ -13,6 +13,7 @@ export function CurrentPlanCard({
   assinatura,
   onChangePlan,
 }: CurrentPlanCardProps) {
+  const { styles, theme } = useTheme();
   const { plano } = assinatura;
 
   function formatPrice(value: number) {
@@ -32,79 +33,79 @@ export function CurrentPlanCard({
   }
 
   return (
-    <View style={globalStyles.planCurrentCard}>
-      <View style={globalStyles.planCurrentHeader}>
-        <View style={globalStyles.planCurrentTitleContainer}>
-          <Text style={globalStyles.planCurrentLabel}>PLANO ATUAL</Text>
+    <View style={styles.planCurrentCard}>
+      <View style={styles.planCurrentHeader}>
+        <View style={styles.planCurrentTitleContainer}>
+          <Text style={styles.planCurrentLabel}>PLANO ATUAL</Text>
 
-          <Text style={globalStyles.planCurrentName}>{plano.nome}</Text>
+          <Text style={styles.planCurrentName}>{plano.nome}</Text>
 
-          <View style={globalStyles.divider} />
+          <View style={styles.divider} />
         </View>
 
-        <View style={globalStyles.planActiveBadge}>
-          <View style={globalStyles.planActiveDot} />
+        <View style={styles.planActiveBadge}>
+          <View style={styles.planActiveDot} />
 
-          <Text style={globalStyles.planActiveText}>
+          <Text style={styles.planActiveText}>
             {assinatura.status === "ATIVA" ? "Ativo" : assinatura.status}
           </Text>
         </View>
       </View>
 
-      <View style={globalStyles.planCurrentPriceRow}>
-        <Text style={globalStyles.planCurrentPrice}>
+      <View style={styles.planCurrentPriceRow}>
+        <Text style={styles.planCurrentPrice}>
           R$ {formatPrice(plano.preco)}
         </Text>
 
-        <Text style={globalStyles.planCurrentPeriod}>/{plano.periodo}</Text>
+        <Text style={styles.planCurrentPeriod}>/{plano.periodo}</Text>
       </View>
 
-      <View style={globalStyles.planCurrentInfo}>
-        <View style={globalStyles.planCurrentInfoItem}>
+      <View style={styles.planCurrentInfo}>
+        <View style={styles.planCurrentInfoItem}>
           <Ionicons
             name="calendar-outline"
             size={18}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
           <View>
-            <Text style={globalStyles.planCurrentInfoLabel}>Início</Text>
+            <Text style={styles.planCurrentInfoLabel}>Início</Text>
 
-            <Text style={globalStyles.planCurrentInfoValue}>
+            <Text style={styles.planCurrentInfoValue}>
               {formatDate(assinatura.inicio)}
             </Text>
           </View>
         </View>
 
-        <View style={globalStyles.planCurrentInfoItem}>
+        <View style={styles.planCurrentInfoItem}>
           <Ionicons
             name="refresh-outline"
             size={18}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
           <View>
-            <Text style={globalStyles.planCurrentInfoLabel}>
+            <Text style={styles.planCurrentInfoLabel}>
               Próxima cobrança
             </Text>
 
-            <Text style={globalStyles.planCurrentInfoValue}>
+            <Text style={styles.planCurrentInfoValue}>
               {formatDate(assinatura.proxima_cobranca)}
             </Text>
           </View>
         </View>
 
-        <View style={globalStyles.planCurrentInfoItem}>
+        <View style={styles.planCurrentInfoItem}>
           <Ionicons
             name="card-outline"
             size={18}
-            color={COLORS.textSecondary}
+            color={theme.textSecondary}
           />
 
           <View>
-            <Text style={globalStyles.planCurrentInfoLabel}>Pagamento</Text>
+            <Text style={styles.planCurrentInfoLabel}>Pagamento</Text>
 
-            <Text style={globalStyles.planCurrentInfoValue}>
+            <Text style={styles.planCurrentInfoValue}>
               {assinatura.forma_pagamento || "Não definido"}
             </Text>
           </View>
@@ -113,18 +114,18 @@ export function CurrentPlanCard({
 
       <Pressable
         style={({ pressed }) => [
-          globalStyles.planChangeButton,
-          pressed && globalStyles.pressOpacity,
+          styles.planChangeButton,
+          pressed && styles.pressOpacity,
         ]}
         onPress={onChangePlan}
       >
         <Ionicons
           name="swap-horizontal-outline"
           size={18}
-          color={COLORS.primary}
+          color={theme.primary}
         />
 
-        <Text style={globalStyles.planChangeButtonText}>Alterar plano</Text>
+        <Text style={styles.planChangeButtonText}>Alterar plano</Text>
       </Pressable>
     </View>
   );

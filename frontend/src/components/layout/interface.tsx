@@ -11,6 +11,9 @@ export interface Usuario {
   CNPJ?: string;
 }
 
+/** Campos aceitos na atualização do usuário. */
+export type UpdateUsuario = Partial<Omit<Usuario, "_id">> & { senha?: string };
+
 // ==============================
 // CLIENTE
 // ==============================
@@ -27,15 +30,7 @@ export interface Cliente {
   descricao?: string;
 }
 
-export interface AddCliente {
-  nome: string;
-  tipoPessoa: string;
-  CPF?: string;
-  CNPJ?: string;
-  email: string;
-  telefone: string;
-  descricao?: string;
-}
+export type AddCliente = Omit<Cliente, "_id">;
 
 // ==============================
 // ENDEREÇO

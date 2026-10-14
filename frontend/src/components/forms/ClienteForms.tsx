@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -48,6 +49,7 @@ export function ClientForm({
   onBudgetEdit,
 }: ClientFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token } = useAuth();
   const isReadOnly = mode === "details";
@@ -66,7 +68,6 @@ export function ClientForm({
   const [loadingOrcamentos, setLoadingOrcamentos] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [loadingClose, setLoadingClose] = useState(false);
   const documento = onlyNumbers(cpf);
   const telefoneLimpo = onlyNumbers(telefone);
 
@@ -76,13 +77,13 @@ export function ClientForm({
 
   const scrollRef = useRef<ScrollView>(null);
 
+  // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
+  useEffect(() => {
+    if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
+  }, [feedback]);
+
   const salvarRef = useRef<View>(null);
 
-  function irParaSalvar() {
-    scrollRef.current?.scrollToEnd({
-      animated: true,
-    });
-  }
 
   // ===========================
   // PREENCHER DADOS
@@ -328,25 +329,11 @@ export function ClientForm({
   // FECHAR
   // ===========================
 
-  async function handleClose() {
+  function handleClose() {
     if (loadingSubmit) return;
-
-    setLoadingClose(true);
-
-    setFeedback(
-      mode === "add"
-        ? "Cancelando cadastro..."
-        : mode === "edit"
-          ? "Cancelando alterações..."
-          : "Fechando...",
-    );
-
-    setTimeout(() => {
-      limparFormulario();
-      onClose();
-      setLoadingClose(false);
-      setFeedback("");
-    }, 1200);
+    limparFormulario();
+    setFeedback("");
+    onClose();
   }
 
   // ===========================
@@ -354,14 +341,14 @@ export function ClientForm({
   // ===========================
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable
           onPress={onClose}
           style={styles.leftAction}
           disabled={loadingSubmit}
         >
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
 
         <Text style={styles.addTitle}>
@@ -373,7 +360,8 @@ export function ClientForm({
         </Text>
 
         <Pressable
-          onPress={mode === "details" ? onEdit : irParaSalvar}
+          onPress={mode === "details" ? onEdit : handleSubmit}
+          disabled={loadingSubmit}
           style={styles.rightAction}
         >
           <Text style={styles.saveText}>
@@ -387,13 +375,18 @@ export function ClientForm({
                   ? "download"
                   : "pencil-sharp"
             }
-            size={25}
+            size={16}
             color={theme.title}
           />
         </Pressable>
       </View>
 
-      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.addCard}>
           <Text style={styles.subtitle}>Informações Pessoais</Text>
 
@@ -527,13 +520,11 @@ export function ClientForm({
             )}
           </View>
           {!isReadOnly && (
-            <AppButton
+            <AppButton variant="secondary"
               title={
                 mode === "add" ? "Cancelar Cadastro" : "Cancelar Alterações"
               }
               onPress={handleClose}
-              loading={loadingClose}
-              color={theme.danger}
             />
           )}
         </View>

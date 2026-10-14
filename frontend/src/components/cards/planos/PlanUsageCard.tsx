@@ -1,8 +1,8 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 
 import { Plano, UsoPlano } from "@/components/layout/interface";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 interface PlanUsageCardProps {
   plano: Plano;
@@ -18,24 +18,25 @@ interface UsageItemProps {
 }
 
 function UsageItem({ icon, title, used, limit, suffix = "" }: UsageItemProps) {
+  const { styles, theme } = useTheme();
   const percentage = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
 
   const isNearLimit = percentage >= 80;
   const isFull = percentage >= 100;
 
   return (
-    <View style={globalStyles.planUsageItem}>
-      <View style={globalStyles.planUsageTop}>
-        <View style={globalStyles.planUsageTitleRow}>
-          <Ionicons name={icon} size={18} color={COLORS.textSecondary} />
+    <View style={styles.planUsageItem}>
+      <View style={styles.planUsageTop}>
+        <View style={styles.planUsageTitleRow}>
+          <Ionicons name={icon} size={18} color={theme.textSecondary} />
 
-          <Text style={globalStyles.planUsageTitle}>{title}</Text>
+          <Text style={styles.planUsageTitle}>{title}</Text>
         </View>
 
         <Text
           style={[
-            globalStyles.planUsageValue,
-            isNearLimit && globalStyles.planUsageValueWarning,
+            styles.planUsageValue,
+            isNearLimit && styles.planUsageValueWarning,
           ]}
         >
           {used}
@@ -44,17 +45,17 @@ function UsageItem({ icon, title, used, limit, suffix = "" }: UsageItemProps) {
         </Text>
       </View>
 
-      <View style={globalStyles.planUsageBarBackground}>
+      <View style={styles.planUsageBarBackground}>
         <View
           style={[
-            globalStyles.planUsageBar,
+            styles.planUsageBar,
             {
               width: `${percentage}%`,
               backgroundColor: isFull
-                ? COLORS.danger
+                ? theme.danger
                 : isNearLimit
-                  ? COLORS.warning
-                  : COLORS.primary,
+                  ? theme.warning
+                  : theme.primary,
             },
           ]}
         />
@@ -64,12 +65,13 @@ function UsageItem({ icon, title, used, limit, suffix = "" }: UsageItemProps) {
 }
 
 export function PlanUsageCard({ plano, uso }: PlanUsageCardProps) {
+  const { styles } = useTheme();
   return (
-    <View style={globalStyles.planUsageCard}>
+    <View style={styles.planUsageCard}>
       <View>
-        <Text style={globalStyles.planSectionTitle}>Uso do plano</Text>
+        <Text style={styles.planSectionTitle}>Uso do plano</Text>
 
-        <Text style={globalStyles.planSectionDescription}>
+        <Text style={styles.planSectionDescription}>
           Acompanhe os recursos utilizados da sua assinatura.
         </Text>
       </View>

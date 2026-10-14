@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -16,6 +17,7 @@ import { AppButton } from "@/components/buttons/AppButton";
 import { ClientCardSelect } from "@/components/cards/cliente/ClientCardSelect";
 import * as Linking from "expo-linking";
 import { cepMask } from "./mask";
+import { parseDecimal, sanitizeDecimalInput, formatDecimalInput } from "@/utils/format";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Cliente,
@@ -27,7 +29,12 @@ import { getClientById } from "@/services/api";
 
 interface ServicoForm extends Servico {
   id: number;
+  /** Texto digitado da quantidade (permite "12,5"). */
+  quantidade_texto?: string;
 }
+
+/* Opções de validade da proposta (dias). */
+const VALIDADE_OPCOES = [5, 7, 10, 15, 20, 30, 45, 60, 90];
 
 interface CategoriaForm extends Categoria {
   id: number;
@@ -39,7 +46,7 @@ interface OrcamentoFormProps {
   initialData?: Orcamento | null;
   onClose: () => void;
   onSave?: (data: any) => Promise<void>;
-  onGeneratePdf?: () => void;
+  onGeneratePdf?: () => Promise<void> | void;
   clientsList: Cliente[];
   feedbackMessage?: string;
   onSuccess?: () => void;
@@ -60,6 +67,7 @@ export function OrcamentoForm({
   onClientDetails,
 }: OrcamentoFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -73,7 +81,6 @@ export function OrcamentoForm({
   const [enderecoExpandido, setEnderecoExpandido] = useState(isAdd);
   const [nome, setNome] = useState(initialData?.nome || "");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [loadingClose, setLoadingClose] = useState(false);
   const [status, setStatus] = useState(initialData?.status || "PENDENTE");
   const [descricao, setDescricao] = useState(initialData?.descricao || "");
   const [clientModalVisible, setClientModalVisible] = useState(false);
@@ -185,7 +192,16 @@ export function OrcamentoForm({
       },
     ],
   );
-  const [bdi, setBdi] = useState(initialData?.bdi.toString() || "");
+  const [bdi, setBdi] = useState(
+    initialData?.bdi !== undefined && initialData?.bdi !== null
+      ? String(initialData.bdi).replace(".", ",")
+      : "",
+  );
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  const validadeOpcoes = Array.from(
+    new Set([...VALIDADE_OPCOES, ...(validade > 0 ? [validade] : [])]),
+  ).sort((a, b) => a - b);
   const [feedback, setFeedback] = useState("");
   const [feedbackSinapi, setFeedbackSinapi] = useState("");
   const dataPublicacao = initialData
@@ -281,12 +297,58 @@ export function OrcamentoForm({
     );
   }
 
+  function updateQuantidade(categoriaId: number, servicoId: number, text: string) {
+    const texto = sanitizeDecimalInput(text);
+    setCategorias((prev) =>
+      prev.map((categoria) => {
+        if (categoria.id !== categoriaId) return categoria;
+        const servicos = categoria.servicos.map((servico) => {
+          if (servico.id !== servicoId) return servico;
+          const quantidade = parseDecimal(texto);
+          return {
+            ...servico,
+            quantidade_texto: texto,
+            quantidade_unidade: quantidade,
+            preco_total: quantidade * Number(servico.preco_da_unidade),
+          };
+        });
+        return {
+          ...categoria,
+          servicos,
+          preco_total_da_categoria: servicos.reduce((acc, s) => acc + s.preco_total, 0),
+        };
+      }),
+    );
+  }
+
+  function removeCategoria(categoriaId: number) {
+    setCategorias((prev) =>
+      prev.length > 1 ? prev.filter((c) => c.id !== categoriaId) : prev,
+    );
+  }
+
+  function removeServico(categoriaId: number, servicoId: number) {
+    setCategorias((prev) =>
+      prev.map((categoria) => {
+        if (categoria.id !== categoriaId || categoria.servicos.length <= 1) {
+          return categoria;
+        }
+        const servicos = categoria.servicos.filter((s) => s.id !== servicoId);
+        return {
+          ...categoria,
+          servicos,
+          preco_total_da_categoria: servicos.reduce((acc, s) => acc + s.preco_total, 0),
+        };
+      }),
+    );
+  }
+
   const custoObraCalculado = categorias.reduce(
     (acc, categoria) => acc + categoria.preco_total_da_categoria,
     0,
   );
-  const custoTotalComBDI =
-    custoObraCalculado + custoObraCalculado * (Number(bdi || 0) / 100);
+  const bdiNumero = parseDecimal(bdi);
+  const custoTotalComBDI = custoObraCalculado + custoObraCalculado * (bdiNumero / 100);
 
   async function buscarCep(cepDigitado: string) {
     const cepLimpo = cepDigitado.replace(/\D/g, "");
@@ -319,13 +381,15 @@ export function OrcamentoForm({
     try {
       setFeedback("");
 
+      // Detalhes: o botão principal gera o PDF — inclusive para
+      // orçamentos aprovados, recusados ou arquivados.
+      if (isReadOnly) {
+        return handleGeneratePdf();
+      }
+
       if (isLocked) {
         setFeedback("Este orçamento não pode mais ser alterado.");
         return;
-      }
-
-      if (isReadOnly) {
-        return onGeneratePdf?.();
       }
 
       if (!token || !user) {
@@ -408,7 +472,7 @@ export function OrcamentoForm({
             return;
           }
 
-          if (servico.quantidade_unidade <= 0) {
+          if (!(servico.quantidade_unidade > 0)) {
             setFeedback(
               `Informe uma quantidade válida para o serviço ${j + 1} da categoria ${i + 1}.`,
             );
@@ -424,8 +488,8 @@ export function OrcamentoForm({
         }
       }
 
-      if (!bdi) {
-        setFeedback("Informe o BDI.");
+      if (!bdi.trim()) {
+        setFeedback("Informe o BDI (use 0 se não houver).");
         return;
       }
 
@@ -459,7 +523,7 @@ export function OrcamentoForm({
         })),
         status,
         preco: custoObraCalculado,
-        bdi: Number(bdi),
+        bdi: bdiNumero,
         preco_com_bdi: custoTotalComBDI,
         data_publicacao: dataPublicacao,
         valido_durante: validade,
@@ -499,35 +563,49 @@ export function OrcamentoForm({
     }
   }
 
+  async function handleGeneratePdf() {
+    if (!onGeneratePdf || pdfLoading) return;
+    setFeedback("");
+    setPdfLoading(true);
+    try {
+      await onGeneratePdf();
+    } catch (error: any) {
+      console.log("ERRO AO GERAR PDF:", error);
+      setFeedback(error?.message ? `Erro ao gerar PDF: ${error.message}` : "Erro ao gerar PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
+  // Página oficial do SINAPI (Caixa): sempre aponta para as tabelas vigentes.
   const handleOpenSinapiLink = async () => {
     const url =
-      "https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-05-formato-pdf.zip";
-    if (await Linking.canOpenURL(url)) await Linking.openURL(url);
-    else setFeedbackSinapi("Erro ao abrir link.");
+      "https://www.caixa.gov.br/poder-publico/modernizacao-gestao/sinapi/Paginas/default.aspx";
+    try {
+      setFeedbackSinapi("");
+      await Linking.openURL(url);
+    } catch {
+      setFeedbackSinapi("Não foi possível abrir o site da Caixa.");
+    }
   };
 
   const scrollRef = useRef<ScrollView>(null);
-  const irParaSalvar = () => {
-    scrollRef.current?.scrollToEnd({
-      animated: true,
-    });
-  };
 
-  async function handleClose() {
-    setLoadingClose(true);
-    setFeedback("Cancelando Orçamento...");
-    setTimeout(() => {
-      onClose();
-      setLoadingClose(false);
-      setFeedback("");
-    }, 1500);
+  // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
+  useEffect(() => {
+    if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
+  }, [feedback]);
+
+  function handleClose() {
+    setFeedback("");
+    onClose();
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable onPress={onClose} style={styles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
         <Text style={styles.addTitle}>
           {mode === "add"
@@ -537,42 +615,56 @@ export function OrcamentoForm({
               : "Detalhes"}
         </Text>
 
-        {mode === "details" && !isLocked ? (
+        {mode === "details" ? (
           <View style={styles.right}>
-            <Pressable onPress={onEdit} style={styles.rightAction}>
-              <Text style={styles.saveText}>Editar</Text>
-
-              <Ionicons name="pencil-sharp" size={25} color={theme.title} />
-            </Pressable>
-            <Pressable onPress={irParaSalvar} style={styles.rightAction}>
-              <Text style={styles.saveText}>Gerar PDF</Text>
-
-              <Ionicons
-                name="document-text-outline"
-                size={25}
-                color={theme.title}
-              />
+            {!isLocked && (
+              <Pressable
+                onPress={onEdit}
+                style={[styles.rightAction, { backgroundColor: "transparent", paddingHorizontal: 6 }]}
+                accessibilityLabel="Editar orçamento"
+              >
+                <Text style={styles.saveText}>Editar</Text>
+              </Pressable>
+            )}
+            <Pressable
+              onPress={handleGeneratePdf}
+              disabled={pdfLoading}
+              style={styles.rightAction}
+              accessibilityLabel="Gerar PDF"
+            >
+              {pdfLoading ? (
+                <ActivityIndicator size="small" color={theme.primary} />
+              ) : (
+                <Ionicons name="document-text-outline" size={16} color={theme.primary} />
+              )}
+              <Text style={styles.saveText}>PDF</Text>
             </Pressable>
           </View>
-        ) : mode !== "details" && !isLocked ? (
-          <Pressable onPress={irParaSalvar} style={styles.rightAction}>
+        ) : !isLocked ? (
+          <Pressable
+            onPress={handleSubmit}
+            disabled={loadingSubmit}
+            style={styles.rightAction}
+            accessibilityLabel="Salvar orçamento"
+          >
+            {loadingSubmit ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
+              <Ionicons name="checkmark" size={16} color={theme.primary} />
+            )}
             <Text style={styles.saveText}>Salvar</Text>
-
-            <Ionicons name="download" size={25} color={theme.title} />
           </Pressable>
-        ) : mode === "details" && isLocked ? (
-          <Pressable onPress={irParaSalvar} style={styles.rightAction}>
-            <Text style={styles.saveText}>Gerar PDF</Text>
-
-            <Ionicons
-              name="document-text-outline"
-              size={25}
-              color={theme.title}
-            />
-          </Pressable>
-        ) : null}
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
       </View>
-      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.subtitle}>Cliente</Text>
 
         <View style={styles.divider} />
@@ -640,12 +732,10 @@ export function OrcamentoForm({
               <Picker
                 selectedValue={status}
                 onValueChange={(itemValue) => setStatus(itemValue)}
-                style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
+                style={[styles.picker, !canEdit && styles.pickerReadOnly]}
+                enabled={canEdit}
               >
-                <Picker.Item
-                  label={"Selecione o Status do Orçamento " + nome}
-                  value=""
-                />
+                <Picker.Item label="Selecione o status" value="" />
                 <Picker.Item label="PENDENTE" value="PENDENTE" />
                 <Picker.Item label="APROVADO" value="APROVADO" />
                 <Picker.Item label="RECUSADO" value="RECUSADO" />
@@ -671,8 +761,9 @@ export function OrcamentoForm({
                 style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
                 enabled={canEdit}
               >
-                {Array.from({ length: 15 }, (_, i) => (
-                  <Picker.Item key={i} label={`${i} dias`} value={i} />
+                <Picker.Item label="Selecione" value={0} />
+                {validadeOpcoes.map((dias) => (
+                  <Picker.Item key={dias} label={`${dias} dias`} value={dias} />
                 ))}
               </Picker>
             </View>
@@ -898,32 +989,58 @@ export function OrcamentoForm({
         )}
         <Text style={styles.subtitle}>Categorias e Serviços</Text>
         <View style={styles.divider} />
-        <Text style={styles.label}>Link da tabela SINAPI:</Text>
-        <AppButton
-          title="Baixar Tabela SINAPI"
-          onPress={handleOpenSinapiLink}
-        />
+        {canEdit && (
+          <AppButton
+            title="Consultar preços na tabela SINAPI"
+            icon="open-outline"
+            variant="tinted"
+            onPress={handleOpenSinapiLink}
+          />
+        )}
         {feedbackSinapi !== "" && (
           <Text style={styles.feedback}>{feedbackSinapi}</Text>
         )}
         {categorias.map((cat, idx) => (
           <View key={cat.id} style={[styles.card, { marginTop: 20 }]}>
-            <Text style={styles.label}>
-              Nome da Categoria {idx + 1}:
-              {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
-            </Text>
+            <View style={styles.serviceHeaderRow}>
+              <Text style={styles.label}>
+                Etapa {idx + 1}:
+                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+              </Text>
+              {canEdit && categorias.length > 1 && (
+                <Pressable
+                  onPress={() => removeCategoria(cat.id)}
+                  hitSlop={8}
+                  style={styles.iconButton}
+                  accessibilityLabel={`Remover etapa ${idx + 1}`}
+                >
+                  <Ionicons name="trash-outline" size={16} color={theme.danger} />
+                </Pressable>
+              )}
+            </View>
             <AppInput
-              placeholder="Nome da Categoria"
+              placeholder="Ex.: Fundação, Alvenaria, Acabamento"
               value={cat.nome}
               onChangeText={(t) => updateCategoria(cat.id, "nome", t)}
               editable={canEdit}
             />
             {cat.servicos.map((s, sIdx) => (
               <View key={s.id} style={styles.serviceContainer}>
-                <Text style={styles.label}>
-                  Nome do Serviço {sIdx + 1}:
-                  {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
-                </Text>
+                <View style={styles.serviceHeaderRow}>
+                  <Text style={styles.label}>
+                    Serviço {sIdx + 1}:
+                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+                  </Text>
+                  {canEdit && cat.servicos.length > 1 && (
+                    <Pressable
+                      onPress={() => removeServico(cat.id, s.id)}
+                      hitSlop={8}
+                      accessibilityLabel={`Remover serviço ${sIdx + 1}`}
+                    >
+                      <Ionicons name="close-circle" size={20} color={theme.placeholder} />
+                    </Pressable>
+                  )}
+                </View>
                 <AppInput
                   placeholder="Nome do Serviço"
                   value={s.nome}
@@ -990,23 +1107,17 @@ export function OrcamentoForm({
                     </Text>
 
                     <AppInput
-                      placeholder="Qtd"
-                      value={String(s.quantidade_unidade)}
-                      onChangeText={(t) =>
-                        updateServico(
-                          cat.id,
-                          s.id,
-                          "quantidade_unidade",
-                          Number(t),
-                        )
-                      }
+                      placeholder="Ex.: 12,5"
+                      value={s.quantidade_texto ?? formatDecimalInput(s.quantidade_unidade)}
+                      onChangeText={(t) => updateQuantidade(cat.id, s.id, t)}
                       editable={canEdit}
-                      keyboardType="numeric"
+                      keyboardType="decimal-pad"
                     />
                   </View>
                 </View>
                 <Text style={styles.serviceTotalText}>
-                  Subtotal do Serviço {sIdx + 1}: R$ {s.preco_total.toFixed(2)}
+                  Subtotal:{" "}
+                  {s.preco_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
                 </Text>
               </View>
             ))}
@@ -1016,22 +1127,31 @@ export function OrcamentoForm({
                 { fontSize: 15, color: theme.primary },
               ]}
             >
-              Subtotal da Categoria {idx + 1}: R$
-              {cat.preco_total_da_categoria.toFixed(2)}
+              Subtotal da etapa:{" "}
+              {cat.preco_total_da_categoria.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
             </Text>
             <View style={styles.divider} />
 
             {canEdit && (
-              <AppButton title="+ Serviço" onPress={() => addServico(cat.id)} />
+              <AppButton
+                title="Adicionar serviço"
+                icon="add"
+                variant="secondary"
+                onPress={() => addServico(cat.id)}
+              />
             )}
           </View>
         ))}
 
         {canEdit && (
           <AppButton
-            title="+ Categoria"
+            title="Adicionar etapa"
+            icon="layers-outline"
+            variant="tinted"
             onPress={addCategoria}
-            color={theme.primary}
           />
         )}
 
@@ -1061,9 +1181,9 @@ export function OrcamentoForm({
               <AppInput
                 placeholder="BDI (%)"
                 value={bdi}
-                onChangeText={setBdi}
+                onChangeText={(t) => setBdi(sanitizeDecimalInput(t))}
                 editable={canEdit}
-                keyboardType="numeric"
+                keyboardType="decimal-pad"
               />
             </View>
           </View>
@@ -1078,33 +1198,31 @@ export function OrcamentoForm({
           />
         </View>
         {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
-        {feedbackMessage !== "" && (
+        {!!feedbackMessage && (
           <Text style={styles.feedback}>{feedbackMessage}</Text>
         )}
         <View style={styles.divider}></View>
+        {isReadOnly ? (
+          <AppButton
+            title="Gerar PDF do orçamento"
+            icon="document-text-outline"
+            onPress={handleGeneratePdf}
+            loading={pdfLoading}
+          />
+        ) : (
+          !isLocked && (
+            <AppButton
+              title={mode === "add" ? "Salvar orçamento" : "Salvar alterações"}
+              icon="checkmark"
+              onPress={handleSubmit}
+              loading={loadingSubmit}
+            />
+          )
+        )}
         <AppButton
-          title={
-            mode === "add"
-              ? "Salvar Novo Orçamento"
-              : mode === "edit"
-                ? "Salvar Alterações"
-                : "Gerar PDF"
-          }
-          onPress={handleSubmit}
-          color={theme.primary}
-          loading={loadingSubmit}
-        />
-        <AppButton
-          title={
-            mode === "add"
-              ? "Cancelar Orçamento"
-              : mode === "edit"
-                ? "Salvar Alterações"
-                : "Voltar"
-          }
+          variant="secondary"
+          title={isReadOnly ? "Voltar" : "Cancelar"}
           onPress={handleClose}
-          color={theme.danger}
-          loading={loadingClose}
         />
       </ScrollView>
       <Modal visible={clientModalVisible} animationType="slide" transparent>

@@ -1,10 +1,10 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
   ScrollView,
   Pressable,
-  StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,6 +23,9 @@ import {
 } from "@/components/layout/interface";
 import { getBudgetById, getClientById } from "@/services/api";
 import { maskDate } from "./mask";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { getWorkStatusMeta } from "@/utils/status";
 
 type ObraStatus = Obra["status"];
 
@@ -48,6 +51,8 @@ interface ObrasFormProps {
   loading?: boolean;
   onSuccess?: () => void;
   onEdit?: () => void;
+  /** Gera o relatório da obra em PDF (modo detalhes). */
+  onGeneratePdf?: () => Promise<void> | void;
 }
 
 function formatDateToBR(value?: Date | string | null): string {
@@ -253,8 +258,10 @@ export function ObrasForm({
   loading,
   onSuccess,
   onEdit,
+  onGeneratePdf,
 }: ObrasFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -366,24 +373,24 @@ export function ObrasForm({
     });
   }, [categorias]);
 
+  // Conclusão geral = dias previstos dos serviços concluídos / dias previstos
+  // totais (mesmo critério das etapas). Antes era ponderada pelos dias
+  // reais, o que marcava 100% com etapas ainda não iniciadas.
   const porcentagemConclusaoGeral = useMemo(() => {
-    const diasTotais = categoriasCalculadas.reduce(
-      (sum, cat) => sum + Number(cat.qt_dias_real ?? 0),
-      0,
+    let previstos = 0;
+    let concluidos = 0;
+
+    categoriasCalculadas.forEach((cat) =>
+      cat.servicos.forEach((serv) => {
+        const dias = Number(serv.qt_dias_prevista ?? 0);
+        previstos += dias;
+        if (serv.concluido) concluidos += dias;
+      }),
     );
 
-    const diasConcluidos = categoriasCalculadas.reduce(
-      (sum, cat) =>
-        sum +
-        Math.round(
-          ((cat.qt_dias_real ?? 0) * (cat.porcentagem_de_conclusao ?? 0)) / 100,
-        ),
-      0,
-    );
+    if (previstos === 0) return 0;
 
-    if (diasTotais === 0) return 0;
-
-    return Math.round((diasConcluidos / diasTotais) * 100);
+    return Math.min(100, Math.round((concluidos / previstos) * 100));
   }, [categoriasCalculadas]);
 
   // Total de dias previstos/reais da obra = soma dos totais de cada categoria
@@ -499,6 +506,30 @@ export function ObrasForm({
     return new Date(Number(ano), Number(mes) - 1, Number(dia));
   }
 
+  /** Data completa e existente no calendário (rejeita 31/02, etc.). */
+  function isValidBRDate(value: string) {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(value)) return false;
+    const d = parseDate(value);
+    return formatDateToBR(d) === value;
+  }
+
+  const [submitting, setSubmitting] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  async function handleGeneratePdf() {
+    if (!onGeneratePdf || pdfLoading) return;
+    setFeedback("");
+    setPdfLoading(true);
+    try {
+      await onGeneratePdf();
+    } catch (error: any) {
+      console.log("ERRO AO GERAR PDF DA OBRA:", error);
+      setFeedback(error?.message ? `Erro ao gerar PDF: ${error.message}` : "Erro ao gerar PDF.");
+    } finally {
+      setPdfLoading(false);
+    }
+  }
+
   async function handleSubmit() {
     if (isReadOnly) return;
 
@@ -524,8 +555,27 @@ export function ObrasForm({
       return;
     }
 
+    if (!isValidBRDate(dataInicioPrevista)) {
+      setFeedback("Data de início prevista inválida. Use DD/MM/AAAA.");
+      return;
+    }
+
     if (!isAdd && !dataInicioReal) {
       setFeedback("Informe a data de início real da obra.");
+      return;
+    }
+
+    if (dataInicioReal && !isValidBRDate(dataInicioReal)) {
+      setFeedback("Data de início real inválida. Use DD/MM/AAAA.");
+      return;
+    }
+
+    const semPrazo = categoriasCalculadas
+      .flatMap((cat) => cat.servicos)
+      .find((serv) => !(Number(serv.qt_dias_prevista) > 0));
+
+    if (isAdd && semPrazo) {
+      setFeedback(`Informe os dias previstos do serviço "${semPrazo.nome}".`);
       return;
     }
 
@@ -559,81 +609,104 @@ export function ObrasForm({
       })),
     };
 
-    if (onSave) await onSave(workData);
-    if (onSuccess) onSuccess();
+    try {
+      setSubmitting(true);
+      if (onSave) await onSave(workData);
+      if (onSuccess) onSuccess();
+    } catch (error: any) {
+      console.log("ERRO AO SALVAR OBRA:", error?.response?.data || error);
+      setFeedback(
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Erro ao salvar a obra.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const scrollRef = useRef<ScrollView>(null);
-  const irParaSalvar = () => {
-    scrollRef.current?.scrollToEnd({
-      animated: true,
-    });
-  };
 
-  const [loadingClose, setLoadingClose] = useState(false);
-
-  async function handleClose() {
-    setLoadingClose(true);
-    setFeedback("Cancelando Serviço...");
-    setTimeout(() => {
-      onClose();
-      setLoadingClose(false);
-      setFeedback("");
-    }, 1500);
+  // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
+  useEffect(() => {
+    if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
+  }, [feedback]);
+  function handleClose() {
+    setFeedback("");
+    onClose();
   }
 
-  function getStatusColor(status: ObraStatus) {
-    switch (status) {
-      case "ENTREGUE":
-        return theme.primary;
 
-      case "ADIANTADO":
-        return theme.success;
-
-      case "ATRASADO":
-        return theme.danger;
-
-      case "CANCELADO":
-        return theme.danger;
-
-      default:
-        return theme.warning;
-    }
-  }
 
   const [enderecoExpandido, setEnderecoExpandido] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable onPress={onClose} style={styles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
 
         <Text style={styles.addTitle}>
           {mode === "add"
-            ? "Novo Serviço"
+            ? "Nova Obra"
             : mode === "edit"
-              ? "Editar Serviço"
-              : "Detalhes"}
+              ? "Atualizar Obra"
+              : "Detalhes da Obra"}
         </Text>
 
-        <Pressable
-          onPress={mode === "details" ? onEdit : irParaSalvar}
-          style={styles.rightAction}
-        >
-          <Text style={styles.saveText}>
-            {mode === "details" ? "Editar" : "Salvar"}
-          </Text>
-          <Ionicons
-            name={mode === "details" ? "pencil-sharp" : "download"}
-            size={25}
-            color={theme.title}
-          />
-        </Pressable>
+        {mode === "details" ? (
+          <View style={styles.right}>
+            {onEdit && (
+              <Pressable
+                onPress={onEdit}
+                style={[styles.rightAction, { backgroundColor: "transparent", paddingHorizontal: 6 }]}
+                accessibilityLabel="Atualizar andamento"
+              >
+                <Text style={styles.saveText}>Editar</Text>
+              </Pressable>
+            )}
+            {onGeneratePdf && (
+              <Pressable
+                onPress={handleGeneratePdf}
+                disabled={pdfLoading}
+                style={styles.rightAction}
+                accessibilityLabel="Gerar relatório em PDF"
+              >
+                {pdfLoading ? (
+                  <ActivityIndicator size="small" color={theme.primary} />
+                ) : (
+                  <Ionicons name="document-text-outline" size={16} color={theme.primary} />
+                )}
+                <Text style={styles.saveText}>PDF</Text>
+              </Pressable>
+            )}
+          </View>
+        ) : (
+          <Pressable
+            onPress={handleSubmit}
+            disabled={submitting || loading}
+            style={styles.rightAction}
+            accessibilityLabel="Salvar obra"
+          >
+            {submitting || loading ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
+              <Ionicons name="checkmark" size={16} color={theme.primary} />
+            )}
+            <Text style={styles.saveText}>Salvar</Text>
+          </Pressable>
+        )}
       </View>
 
-      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.subtitle}>Informações Gerais</Text>
         <View style={styles.divider} />
         <View style={styles.card}>
@@ -643,24 +716,8 @@ export function ObrasForm({
             {orcamentoAtrelado?.nome ?? ""}
           </Text>
           {!isAdd && (
-            <View
-              style={[
-                styles.obraStatusBadge,
-                {
-                  backgroundColor: `${getStatusColor(obraStatusCalculado)}20`,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.obraStatusText,
-                  {
-                    color: getStatusColor(obraStatusCalculado),
-                  },
-                ]}
-              >
-                {obraStatusCalculado}
-              </Text>
+            <View style={{ alignSelf: "center", marginBottom: 8 }}>
+              <StatusPill meta={getWorkStatusMeta(obraStatusCalculado, theme)} withIcon />
             </View>
           )}
           <Text style={styles.label}>Cliente:</Text>
@@ -684,7 +741,7 @@ export function ObrasForm({
             </View>
           ) : (
             <ClientCardSelect
-              name={cliente?.nome ?? ""}
+              name={cliente?.nome ?? "Cliente não encontrado"}
               phone={cliente?.telefone ?? ""}
               onClick={() => {
                 setCliente(cliente);
@@ -732,46 +789,11 @@ export function ObrasForm({
             <View style={{ marginTop: 10 }}>
               <Text style={styles.label}>Conclusão Geral:</Text>
 
-              <View
-                style={[
-                  styles.progressContainer,
-                  {
-                    width: "100%",
-                    marginTop: 8,
-                  },
-                ]}
-              >
-                <View
-                  style={[
-                    styles.progressBarBackground,
-                    {
-                      minWidth: 0,
-                    },
-                  ]}
-                >
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      {
-                        width: `${Math.min(
-                          100,
-                          Math.max(0, porcentagemConclusaoGeral),
-                        )}%`,
-                      },
-                    ]}
-                  />
-                </View>
-
-                <Text
-                  style={[
-                    styles.workCardProgress,
-                    {
-                      marginLeft: 10,
-                    },
-                  ]}
-                >
-                  {porcentagemConclusaoGeral}%
-                </Text>
+              <View style={{ marginTop: 8 }}>
+                <ProgressBar
+                  value={porcentagemConclusaoGeral}
+                  color={getWorkStatusMeta(obraStatusCalculado, theme).color}
+                />
               </View>
             </View>
           )}
@@ -787,9 +809,16 @@ export function ObrasForm({
 
               <AppInput
                 value={
-                  `${orcamentoAtrelado?.endereco?.rua ?? ""}, ` +
-                  `${orcamentoAtrelado?.endereco?.numero ?? ""} - ` +
-                  `${orcamentoAtrelado?.endereco?.cidade ?? ""}/${orcamentoAtrelado?.endereco?.estado ?? ""}`
+                  [
+                    [orcamentoAtrelado?.endereco?.rua, orcamentoAtrelado?.endereco?.numero]
+                      .filter(Boolean)
+                      .join(", "),
+                    [orcamentoAtrelado?.endereco?.cidade, orcamentoAtrelado?.endereco?.estado]
+                      .filter(Boolean)
+                      .join("/"),
+                  ]
+                    .filter(Boolean)
+                    .join(" - ") || "Endereço não informado"
                 }
                 editable={false}
               />
@@ -896,7 +925,7 @@ export function ObrasForm({
         <View style={styles.divider} />
         {categoriasCalculadas.map((categoria, idx) => (
           <View key={categoria.id} style={styles.card}>
-            <Text style={styles.label}>Nome da Categoria {idx + 1}:</Text>
+            <Text style={styles.label}>Etapa {idx + 1}:</Text>
             <AppInput value={categoria.nome} editable={false} />
             <View style={styles.row}>
               <View style={styles.column}>
@@ -919,11 +948,14 @@ export function ObrasForm({
             {!isAdd && (
               <View style={styles.row}>
                 <View style={styles.column}>
-                  <Text style={styles.label}>Status da Categoria:</Text>
-                  <AppInput value={categoria.status} editable={false} />
+                  <Text style={styles.label}>Status da etapa:</Text>
+                  <AppInput
+                    value={getWorkStatusMeta(categoria.status, theme).label}
+                    editable={false}
+                  />
                 </View>
                 <View style={styles.column}>
-                  <Text style={styles.label}>Progresso da Categoria:</Text>
+                  <Text style={styles.label}>Progresso da etapa:</Text>
                   <AppInput
                     value={`${categoria.porcentagem_de_conclusao || 0}%`}
                     editable={false}
@@ -933,25 +965,15 @@ export function ObrasForm({
             )}
             {categoria.servicos.map((servico, sIdx) => (
               <View key={servico.id} style={styles.serviceCard}>
-                <View
-                  style={[
-                    styles.obraStatusBadge,
-                    {
-                      backgroundColor: `${getStatusColor(servico.status)}20`,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.obraStatusText,
-                      {
-                        color: getStatusColor(servico.status),
-                      },
-                    ]}
-                  >
-                    {servico.status}
-                  </Text>
-                </View>
+                {!isAdd && (
+                  <StatusPill
+                    meta={
+                      servico.concluido
+                        ? getWorkStatusMeta(servico.status, theme)
+                        : { label: "Em execução", color: theme.info, icon: "time" }
+                    }
+                  />
+                )}
 
                 <Text style={styles.label}>Nome do Serviço {sIdx + 1}:</Text>
 
@@ -1082,20 +1104,23 @@ export function ObrasForm({
             <View style={styles.column}>
               <Text style={styles.label}>Orçamento Aprovado:</Text>
               <AppInput
-                value={`R$ ${(orcamentoAtrelado?.preco_com_bdi ?? 0).toFixed(2)}`}
+                value={(orcamentoAtrelado?.preco_com_bdi ?? 0).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
                 editable={false}
               />
             </View>
-            {!isAdd && (
-              <View style={styles.column}>
-                <Text style={styles.label}>Total gasto:</Text>
-                <AppInput
-                  placeholder="R$ 0,00"
-                  value={"R$ 0.00"}
-                  editable={false}
-                />
-              </View>
-            )}
+            <View style={styles.column}>
+              <Text style={styles.label}>Custo direto:</Text>
+              <AppInput
+                value={(orcamentoAtrelado?.preco ?? 0).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                editable={false}
+              />
+            </View>
           </View>
         </View>
 
@@ -1104,33 +1129,30 @@ export function ObrasForm({
           <Text style={styles.feedback}>{feedbackMessage}</Text>
         )}
         <View style={styles.divider}></View>
+        {isReadOnly ? (
+          onGeneratePdf && (
+            <AppButton
+              title="Gerar relatório da obra (PDF)"
+              icon="document-text-outline"
+              onPress={handleGeneratePdf}
+              loading={pdfLoading}
+            />
+          )
+        ) : (
+          <AppButton
+            title={mode === "add" ? "Criar obra" : "Salvar andamento"}
+            icon="checkmark"
+            onPress={handleSubmit}
+            loading={submitting || loading}
+          />
+        )}
         <AppButton
-          title={
-            mode === "add"
-              ? "Salvar Novo Serviço"
-              : mode === "edit"
-                ? "Salvar Alterações"
-                : "Gerar PDF"
-          }
-          onPress={handleSubmit}
-          loading={loading}
-          color={theme.primary}
-        />
-        <AppButton
-          title={
-            mode === "add"
-              ? "Cancelar Serviço"
-              : mode === "edit"
-                ? "Cancelar Alterações"
-                : "Voltar"
-          }
+          variant="secondary"
+          title={isReadOnly ? "Voltar" : "Cancelar"}
           onPress={handleClose}
-          loading={loadingClose}
-          color={theme.danger}
         />
       </ScrollView>
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
