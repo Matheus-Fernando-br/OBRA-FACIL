@@ -11,7 +11,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { router } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Eye, EyeOff, Fingerprint, ShieldCheck } from "lucide-react-native";
 
@@ -24,22 +24,45 @@ import { GradientBackground } from "../styles/GradientBackground";
 // Deixe este valor fácil de editar depois, em milissegundos.
 export const LOGIN_SUCCESS_TRANSITION_DURATION = 3000;
 
-function InitialSplash() {
+function InitialSplash({ onFinish }: { onFinish: () => void }) {
   const { styles } = useTheme();
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => onFinish());
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [opacity, onFinish]);
 
   return (
-    <View style={styles.authSplash}>
-      <View style={styles.authSplashMark}>
-        <Image
-          source={require("../assets/images/icon.png")}
-          style={styles.authSplashLogo}
-        />
-      </View>
-      <Text style={styles.authSplashTitle}>OBRA FÁCIL</Text>
-      <Text style={styles.authSplashSubtitle}>
-        gestão simples para obras melhores
-      </Text>
-      <ActivityIndicator color="#C45F00" style={styles.authSplashLoader} />
+    <View style={[styles.authSplash, { flex: 1 }]}>
+      <Animated.View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          opacity,
+        }}
+      >
+        <View style={styles.authSplashMark}>
+          <Image
+            source={require("../assets/images/icon.png")}
+            style={styles.authSplashLogo}
+          />
+        </View>
+
+        <Text style={styles.authSplashTitle}>OBRA FÁCIL</Text>
+
+        <Text style={styles.authSplashSubtitle}>
+          gestão simples para obras melhores
+        </Text>
+      </Animated.View>
     </View>
   );
 }
@@ -177,13 +200,29 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [biometricLoading, setBiometricLoading] = useState(false);
   const [successTransition, setSuccessTransition] = useState(false);
+  const [splashFinished, setSplashFinished] = useState(false);
+  const [splashVisible, setSplashVisible] = useState(true);
+  const loginOpacity = useRef(new Animated.Value(0)).current;
+
+  const handleSplashFinish = useCallback(() => {
+    setSplashFinished(true);
+    setSplashVisible(false);
+
+    Animated.timing(loginOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, [loginOpacity]);
 
   useEffect(() => {
     // Sessões restauradas automaticamente entram direto, sem repetir a animação.
     if (!initializing && user && !successTransition) router.replace("/(tabs)");
   }, [initializing, successTransition, user]);
 
-  if (initializing) return <InitialSplash />;
+  if (!splashFinished || initializing) {
+    return <InitialSplash onFinish={handleSplashFinish} />;
+  }
 
   async function handleLogin() {
     if (!email.trim() || !password) {
@@ -226,7 +265,12 @@ export default function LoginScreen() {
 
   return (
     <GradientBackground style={styles.loginContainer}>
-      <Animated.View style={{ flex: 1 }}>
+      <Animated.View
+        style={{
+          flex: 1,
+          opacity: loginOpacity,
+        }}
+      >
         <SafeAreaView style={styles.loginSafeArea}>
           <KeyboardAvoidingView
             style={styles.loginKeyboard}
