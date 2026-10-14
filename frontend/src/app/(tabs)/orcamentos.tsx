@@ -1,18 +1,18 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 
 import { useState, useEffect, useMemo } from "react";
 
 import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
 import { Header } from "@/components/cards/Header";
 
-import { AppInput } from "../../components/forms/AppInput";
+import { SearchField } from "@/components/ui/SearchField";
+import { FilterChips } from "@/components/ui/FilterChips";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FadeInView } from "@/components/ui/FadeInView";
+import { ListSkeleton } from "@/components/ui/Skeleton";
+import { StatusSegment } from "@/components/ui/StatusSegment";
+import { formatDate } from "@/utils/format";
+import { isBudgetExpired } from "@/utils/status";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -34,7 +34,6 @@ import { BudgetDetailsModal } from "@/components/modals/orcamento/BudgetDetailsM
 
 import { Orcamento, Cliente } from "@/components/layout/interface";
 
-import { GradientBackground } from "@/styles/GradientBackground";
 
 import FilterModal, {
   BudgetFilters,
@@ -125,6 +124,14 @@ export default function OrcamentosScreen() {
 
     loadBudgets();
   }, [token]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await loadBudgets();
+    setRefreshing(false);
+  }
 
   // ============================================================
   // ARQUIVAR / DESARQUIVAR
@@ -652,211 +659,118 @@ export default function OrcamentosScreen() {
 
   return (
     <View style={styles.screen}>
-      <GradientBackground style={styles.container}>
-        <ScrollView
-          contentContainerStyle={{
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ==================================================
-              CABEÇALHO
-          =================================================== */}
-          <Header
-            title="Orçamentos"
-            showFilter
-            activeFiltersCount={activeFiltersCount}
-            onFilterPress={() => setFilterVisible(true)}
-            showAdd
-            onAddPress={() => setAddVisible(true)}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
           />
+        }
+      >
+        <Header
+          title="Orçamentos"
+          subtitle={
+            loading
+              ? "Carregando…"
+              : `${filteredBudgets.length} de ${budgetsList.length} orçamento${budgetsList.length === 1 ? "" : "s"}`
+          }
+          showFilter
+          activeFiltersCount={activeFiltersCount}
+          onFilterPress={() => setFilterVisible(true)}
+          showAdd
+          onAddPress={() => setAddVisible(true)}
+        />
 
-          {/* ==================================================
-              BUSCA
-          =================================================== */}
+        <SearchField
+          placeholder="Buscar por orçamento ou cliente"
+          value={search}
+          onChangeText={setSearch}
+        />
 
-          <AppInput
-            placeholder="Buscar orçamento..."
-            value={search}
-            onChangeText={setSearch}
-          />
+        <StatusSegment
+          value={filters.status}
+          onChange={(status) => setFilters((prev) => ({ ...prev, status }))}
+          options={[
+            { value: "all", label: "Todos" },
+            { value: "pendente", label: "Pendentes" },
+            { value: "aprovado", label: "Aprovados" },
+            { value: "recusado", label: "Recusados" },
+          ]}
+        />
 
-          {/* ==================================================
-              FILTROS ATIVOS
-          =================================================== */}
-
-          {activeFilterLabels.length > 0 && (
-            <View
-              style={{
-                marginTop: 12,
-                marginBottom: 4,
-              }}
-            >
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 8,
-                  paddingRight: 8,
-                }}
-              >
-                {/* FILTROS */}
-
-                {activeFilterLabels.map((label) => (
-                  <View
-                    key={label}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: theme.primary,
-                      borderRadius: 999,
-                      paddingHorizontal: 12,
-                      paddingVertical: 7,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: theme.white,
-                        fontSize: 12,
-                        fontWeight: "600",
-                      }}
-                      numberOfLines={1}
-                    >
-                      {label}
-                    </Text>
-                  </View>
-                ))}
-
-                {/* LIMPAR */}
-
-                <Pressable
-                  onPress={clearFilters}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 5,
-                    paddingHorizontal: 10,
-                    paddingVertical: 7,
-                  }}
-                >
-                  <Ionicons
-                    name="close-circle-outline"
-                    size={17}
-                    color={theme.textSecondary}
-                  />
-
-                  <Text
-                    style={{
-                      color: theme.textSecondary,
-                      fontSize: 12,
-                      fontWeight: "600",
-                    }}
-                  >
-                    Limpar
-                  </Text>
-                </Pressable>
-              </ScrollView>
-            </View>
+        <FilterChips
+          labels={activeFilterLabels.filter(
+            (label) => !["Pendente", "Aprovado", "Recusado"].includes(label),
           )}
+          onClear={clearFilters}
+        />
 
-          {/* ==================================================
-              NENHUM ORÇAMENTO
-          =================================================== */}
-
-          {!loading && filteredBudgets.length === 0 && (
-            <Text style={styles.sectionTitle}>
-              {filters.archived === "archived"
-                ? "Nenhum orçamento arquivado encontrado."
-                : "Nenhum orçamento encontrado."}
-            </Text>
-          )}
-
-          {/* ==================================================
-              LOADING
-          =================================================== */}
-
-          {loading ? (
-            <View
-              style={[
-                styles.screen,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 40,
-                },
-              ]}
-            >
-              <ActivityIndicator size="large" color={theme.primary} />
-
-              <Text
-                style={{
-                  color: theme.text,
-                  marginTop: 15,
-                }}
-              >
-                Carregando Orçamentos...
-              </Text>
-            </View>
+        {loading && budgetsList.length === 0 ? (
+          <ListSkeleton count={3} />
+        ) : filteredBudgets.length === 0 ? (
+          budgetsList.length === 0 ? (
+            <EmptyState
+              icon="document-text-outline"
+              title="Nenhum orçamento ainda"
+              message="Monte seu primeiro orçamento com categorias, serviços e BDI — e gere o PDF para o cliente."
+              actionLabel="Novo orçamento"
+              onAction={() => setAddVisible(true)}
+            />
           ) : (
-            /* ==================================================
-               LISTA
-            ================================================== */
+            <EmptyState
+              icon="search-outline"
+              title={
+                filters.archived === "archived"
+                  ? "Nenhum orçamento arquivado"
+                  : "Nenhum orçamento encontrado"
+              }
+              message="Ajuste a busca ou os filtros para ver outros orçamentos."
+            />
+          )
+        ) : (
+          filteredBudgets.map((budget, index) => {
+            const nomeCliente =
+              typeof budget.cliente === "object"
+                ? (budget.cliente?.nome ?? "")
+                : "Cliente não encontrado";
 
-            filteredBudgets.map((budget) => {
-              const nomeCliente =
-                typeof budget.cliente === "object"
-                  ? (budget.cliente?.nome ?? "")
-                  : "Cliente não encontrado";
-
-              return (
+            return (
+              <FadeInView key={budget._id} index={index}>
                 <BudgetCard
-                  key={budget._id}
                   client={nomeCliente}
                   nome={budget.nome}
                   status={budget.status}
                   value={budget.preco_com_bdi}
-                  date={new Date(budget.data_validade).toLocaleDateString(
-                    "pt-BR",
-                  )}
+                  date={formatDate(budget.data_validade)}
+                  issuedAt={formatDate(budget.data_publicacao)}
+                  expired={isBudgetExpired(budget)}
                   arquivado={budget.arquivado}
                   onDetails={() => {
                     setSelectedBudget(budget);
-
                     setDetailsVisible(true);
                   }}
                   onEdit={() => {
                     setSelectedBudget(budget);
-
                     setEditVisible(true);
                   }}
                   onDelete={() => {
                     setSelectedBudget(budget);
-
                     setDeleteVisible(true);
                   }}
                   onArchive={() => handleArchiveBudget(budget)}
                   loadingArchive={loadingArquivo === budget._id}
                 />
-              );
-            })
-          )}
-        </ScrollView>
-      </GradientBackground>
-
-      {/* ======================================================
-          BOTÃO NOVO ORÇAMENTO
-      ====================================================== */}
-
-      <View style={styles.bottomActionContainer}>
-        <Pressable
-          style={styles.bottomActionButton}
-          onPress={() => setAddVisible(true)}
-        >
-          <Text style={styles.bottomActionButtonText}>+ Novo Orçamento</Text>
-        </Pressable>
-      </View>
+              </FadeInView>
+            );
+          })
+        )}
+      </ScrollView>
 
       {/* ======================================================
           MODAL - ADICIONAR

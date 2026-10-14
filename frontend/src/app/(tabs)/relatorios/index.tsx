@@ -1,7 +1,7 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { View, ScrollView } from "react-native";
 import { useState } from "react";
 
-import { globalStyles } from "@/styles/globalStyles";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
@@ -11,6 +11,7 @@ import { SettingsSelect } from "@/components/settings/SettingsSelect";
 import { AppButton } from "@/components/buttons/AppButton";
 
 export default function RelatoriosScreen() {
+  const { styles } = useTheme();
   const [formato, setFormato] = useState("PDF");
   const [assinatura, setAssinatura] = useState(true);
   const [logoEmpresa, setLogoEmpresa] = useState(true);
@@ -23,7 +24,7 @@ export default function RelatoriosScreen() {
 
       {/* CONTEÚDO COM SCROLL */}
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 30,

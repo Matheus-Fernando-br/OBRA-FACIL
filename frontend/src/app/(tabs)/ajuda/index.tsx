@@ -1,18 +1,19 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { View, ScrollView, Alert } from "react-native";
 
-import { globalStyles } from "@/styles/globalStyles";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
 
 export default function AjudaScreen() {
+  const { styles } = useTheme();
   return (
     <View style={{ flex: 1 }}>
       <PageHeader title="Ajuda" />
 
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
       >
         <SettingsSection title="Central de Ajuda">

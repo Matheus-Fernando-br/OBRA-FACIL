@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
@@ -255,6 +256,7 @@ export function ObrasForm({
   onEdit,
 }: ObrasFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -604,10 +606,10 @@ export function ObrasForm({
   const [enderecoExpandido, setEnderecoExpandido] = useState(false);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable onPress={onClose} style={styles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
 
         <Text style={styles.addTitle}>
@@ -627,13 +629,19 @@ export function ObrasForm({
           </Text>
           <Ionicons
             name={mode === "details" ? "pencil-sharp" : "download"}
-            size={25}
+            size={16}
             color={theme.title}
           />
         </Pressable>
       </View>
 
-      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.subtitle}>Informações Gerais</Text>
         <View style={styles.divider} />
         <View style={styles.card}>
@@ -1116,7 +1124,7 @@ export function ObrasForm({
           loading={loading}
           color={theme.primary}
         />
-        <AppButton
+        <AppButton variant="secondary"
           title={
             mode === "add"
               ? "Cancelar Serviço"
@@ -1126,7 +1134,6 @@ export function ObrasForm({
           }
           onPress={handleClose}
           loading={loadingClose}
-          color={theme.danger}
         />
       </ScrollView>
     </View>

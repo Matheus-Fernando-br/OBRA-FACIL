@@ -1,3 +1,4 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import {
     Alert,
     Modal,
@@ -11,8 +12,7 @@ import {
   
   import { Ionicons } from "@expo/vector-icons";
   
-  import { COLORS, globalStyles } from "@/styles/globalStyles";
-  
+    
   import { AppButton } from "../buttons/AppButton";
   import { AppInput } from "../forms/AppInput";
   
@@ -29,6 +29,7 @@ import {
     visible,
     onClose,
   }: Props) {
+  const { styles, theme } = useTheme();
     const { user, token, logout } = useAuth();
   
     const [confirmacao, setConfirmacao] = useState("");
@@ -106,9 +107,9 @@ import {
           <Pressable
             onPress={(e) => e.stopPropagation()}
           >
-            <View style={globalStyles.addCard}>
-              <View style={globalStyles.modalHeader}>
-                <Text style={globalStyles.addTitle}>
+            <View style={styles.addCard}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.addTitle}>
                   Excluir Conta
                 </Text>
   
@@ -116,16 +117,16 @@ import {
                   <Ionicons
                     name="close"
                     size={28}
-                    color={COLORS.white}
+                    color={theme.white}
                   />
                 </Pressable>
               </View>
   
-              <View style={globalStyles.divider} />
+              <View style={styles.divider} />
   
               <Text
                 style={{
-                  color: COLORS.danger,
+                  color: theme.danger,
                   fontWeight: "700",
                   marginBottom: 20,
                   lineHeight: 22,
@@ -138,7 +139,7 @@ import {
                 poderão ser perdidos.
               </Text>
   
-              <Text style={globalStyles.label}>
+              <Text style={styles.label}>
                 Digite EXCLUIR
               </Text>
   
@@ -148,7 +149,7 @@ import {
                 onChangeText={setConfirmacao}
               />
   
-              <Text style={globalStyles.label}>
+              <Text style={styles.label}>
                 Confirme sua senha
               </Text>
   
@@ -160,23 +161,23 @@ import {
                 style={{
                     width: "100%",
                     height: 55,
-                    backgroundColor: COLORS.white,
+                    backgroundColor: theme.white,
                     borderRadius: 14,
                     paddingHorizontal: 30,
                     marginBottom: 16,
                   }}
               />
   
-              <View style={globalStyles.divider} />
+              <View style={styles.divider} />
   
               <AppButton
                 title="Excluir Conta"
-                color={COLORS.danger}
+                color={theme.danger}
                 loading={loading}
                 onPress={handleDelete}
               />
   
-              <AppButton
+              <AppButton variant="secondary"
                 title="Cancelar"
                 onPress={onClose}
               />

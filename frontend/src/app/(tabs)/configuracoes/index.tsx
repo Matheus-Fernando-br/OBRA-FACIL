@@ -1,7 +1,7 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { View, ScrollView } from "react-native";
 import { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { globalStyles } from "@/styles/globalStyles";
 import { router } from "expo-router";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
@@ -10,6 +10,7 @@ import { SettingsSelect } from "@/components/settings/SettingsSelect";
 import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 
 export default function ConfiguracoesScreen() {
+  const { styles } = useTheme();
   const [deleteVisible, setDeleteVisible] = useState(false);
 
   const [tema, setTema] = useState("Sistema");
@@ -29,7 +30,7 @@ export default function ConfiguracoesScreen() {
 
       {/* CONTEÚDO QUE ROLA */}
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 30,

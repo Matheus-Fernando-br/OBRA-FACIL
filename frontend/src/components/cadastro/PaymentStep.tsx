@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import { CreditCard } from "lucide-react-native";
+import { CreditCard } from "@/components/ui/icons";
 import { AppButton } from "../buttons/AppButton";
 import { useTheme } from "@/contexts/ThemeContext";
 
@@ -35,7 +35,7 @@ export function PaymentStep({ loading, feedback, onBack, onContinue }: Props) {
         loading={loading}
         color={theme.title}
       />
-      <AppButton title="Voltar" onPress={onBack} color={theme.placeholder} />
+      <AppButton variant="secondary" title="Voltar" onPress={onBack} />
     </View>
   );
 }

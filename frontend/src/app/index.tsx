@@ -13,7 +13,7 @@ import {
 import { router } from "expo-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Eye, EyeOff, Fingerprint, ShieldCheck } from "lucide-react-native";
+import { Eye, EyeOff, Fingerprint, ShieldCheck } from "@/components/ui/icons";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";

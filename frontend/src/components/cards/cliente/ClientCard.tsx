@@ -1,12 +1,16 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { phoneMask } from "@/components/forms/mask";
 import { useTheme } from "@/contexts/ThemeContext";
+import { PressableScale } from "@/components/ui/PressableScale";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface Props {
   name: string;
   phone: string;
   email: string;
+  /** Quantidade de orçamentos do cliente (opcional). */
+  budgetsCount?: number;
   onDetails: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -16,96 +20,80 @@ export function ClientCard({
   name,
   phone,
   email,
+  budgetsCount,
   onDetails,
   onEdit,
   onDelete,
 }: Props) {
   const { styles, theme } = useTheme();
-
-  function getInitials(nome: string) {
-    const nomes = nome.trim().split(" ");
-
-    if (nomes.length === 1) {
-      return nomes[0][0].toUpperCase();
-    }
-
-    return (nomes[0][0] + nomes[1][0]).toUpperCase();
-  }
-
-  function getAvatarColor(nome: string) {
-    const colors = [
-      "#DBEAFE",
-      "#DCFCE7",
-      "#FEF3C7",
-      "#FCE7F3",
-      "#EDE9FE",
-      "#FFE4E6",
-      "#E0F2FE",
-      "#F3E8FF",
-      "#ECFCCB",
-      "#FDE68A",
-    ];
-
-    let hash = 0;
-
-    for (let i = 0; i < nome.length; i++) {
-      hash = nome.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return colors[Math.abs(hash) % colors.length];
-  }
-
-  const telefone = phoneMask(phone || "");
+  const digits = (phone || "").replace(/\D/g, "");
+  const telefone = phoneMask(digits);
 
   return (
-    <Pressable onPress={onDetails} style={styles.clientCard}>
-      {/* Avatar */}
+    <PressableScale
+      onPress={onDetails}
+      activeScale={0.985}
+      style={styles.listCard}
+      accessibilityLabel={`Cliente ${name}`}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+        <Avatar name={name} size={46} />
 
-      <View
-        style={{
-          width: 55,
-          height: 55,
-          borderRadius: 100,
-          backgroundColor: getAvatarColor(name),
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: 15,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "700",
-            color: theme.primary,
-          }}
+        <View style={{ flex: 1 }}>
+          <Text style={styles.clientCardName} numberOfLines={1}>
+            {name}
+          </Text>
+          {email ? (
+            <Text style={styles.clientCardInfo} numberOfLines={1}>
+              {email}
+            </Text>
+          ) : null}
+          {telefone ? <Text style={styles.clientCardInfo}>{telefone}</Text> : null}
+        </View>
+
+        {typeof budgetsCount === "number" && (
+          <View style={{ alignItems: "center" }}>
+            <Text style={[styles.listCardTitle, { fontVariant: ["tabular-nums"] }]}>
+              {budgetsCount}
+            </Text>
+            <Text style={styles.caption}>orç.</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.listCardActions}>
+        {digits.length >= 10 && (
+          <>
+            <PressableScale
+              onPress={() => Linking.openURL(`tel:${digits}`)}
+              style={styles.iconButton}
+              accessibilityLabel={`Ligar para ${name}`}
+            >
+              <Ionicons name="call" size={15} color={theme.info} />
+            </PressableScale>
+            <PressableScale
+              onPress={() => Linking.openURL(`https://wa.me/55${digits}`)}
+              style={styles.iconButton}
+              accessibilityLabel={`Abrir WhatsApp de ${name}`}
+            >
+              <Ionicons name="logo-whatsapp" size={16} color={theme.success} />
+            </PressableScale>
+          </>
+        )}
+
+        <View style={{ flex: 1 }} />
+
+        <PressableScale onPress={onEdit} style={styles.iconButton} accessibilityLabel="Editar cliente">
+          <Ionicons name="pencil" size={15} color={theme.text} />
+        </PressableScale>
+        <PressableScale
+          onPress={onDelete}
+          style={styles.iconButton}
+          accessibilityLabel="Excluir cliente"
         >
-          {getInitials(name)}
-        </Text>
+          <Ionicons name="trash-outline" size={16} color={theme.danger} />
+        </PressableScale>
       </View>
-
-      {/* Informações */}
-
-      <View style={{ flex: 1 }}>
-        <Text style={styles.clientCardName}>{name}</Text>
-
-        <Text style={styles.clientCardInfo}>{email}</Text>
-
-        <Text style={styles.clientCardInfo}>{telefone}</Text>
-      </View>
-
-      <View style={styles.dividerVertical} />
-
-      {/* Ações */}
-
-      <View style={styles.clientIcons}>
-        <Pressable onPress={onEdit}>
-          <Ionicons name="pencil" size={30} color={theme.primary} />
-        </Pressable>
-
-        <Pressable onPress={onDelete}>
-          <Ionicons name="trash-outline" size={30} color={theme.danger} />
-        </Pressable>
-      </View>
-    </Pressable>
+    </PressableScale>
   );
 }

@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -48,6 +49,7 @@ export function ClientForm({
   onBudgetEdit,
 }: ClientFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token } = useAuth();
   const isReadOnly = mode === "details";
@@ -354,14 +356,14 @@ export function ClientForm({
   // ===========================
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable
           onPress={onClose}
           style={styles.leftAction}
           disabled={loadingSubmit}
         >
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
 
         <Text style={styles.addTitle}>
@@ -387,13 +389,18 @@ export function ClientForm({
                   ? "download"
                   : "pencil-sharp"
             }
-            size={25}
+            size={16}
             color={theme.title}
           />
         </Pressable>
       </View>
 
-      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.addCard}>
           <Text style={styles.subtitle}>Informações Pessoais</Text>
 
@@ -527,13 +534,12 @@ export function ClientForm({
             )}
           </View>
           {!isReadOnly && (
-            <AppButton
+            <AppButton variant="secondary"
               title={
                 mode === "add" ? "Cancelar Cadastro" : "Cancelar Alterações"
               }
               onPress={handleClose}
               loading={loadingClose}
-              color={theme.danger}
             />
           )}
         </View>

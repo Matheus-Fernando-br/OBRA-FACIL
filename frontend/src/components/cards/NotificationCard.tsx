@@ -1,7 +1,7 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-import { COLORS } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
@@ -30,10 +30,11 @@ export function NotificationCard({
 
   onDelete,
 }: Props) {
+  const { theme } = useTheme();
   return (
     <View
       style={{
-        backgroundColor: COLORS.card,
+        backgroundColor: theme.card,
         borderRadius: 14,
         padding: 18,
         marginBottom: 14,
@@ -51,7 +52,7 @@ export function NotificationCard({
             height: 10,
             borderRadius: 50,
 
-            backgroundColor: read ? COLORS.border : COLORS.warning,
+            backgroundColor: read ? theme.border : theme.warning,
 
             marginRight: 12,
           }}
@@ -64,7 +65,7 @@ export function NotificationCard({
         >
           <Text
             style={{
-              color: COLORS.text,
+              color: theme.text,
               fontWeight: "700",
               fontSize: 16,
             }}
@@ -74,7 +75,7 @@ export function NotificationCard({
 
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               marginTop: 4,
             }}
           >
@@ -83,7 +84,7 @@ export function NotificationCard({
 
           <Text
             style={{
-              color: COLORS.placeholder,
+              color: theme.placeholder,
               marginTop: 8,
               fontSize: 12,
             }}
@@ -106,11 +107,11 @@ export function NotificationCard({
             marginRight: 20,
           }}
         >
-          <Ionicons name="eye-outline" size={22} color={COLORS.primary} />
+          <Ionicons name="eye-outline" size={22} color={theme.primary} />
         </Pressable>
 
         <Pressable onPress={onDelete}>
-          <Ionicons name="trash-outline" size={22} color={COLORS.danger} />
+          <Ionicons name="trash-outline" size={22} color={theme.danger} />
         </Pressable>
       </View>
     </View>

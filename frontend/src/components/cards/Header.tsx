@@ -1,10 +1,13 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useTheme } from "@/contexts/ThemeContext";
+import { PressableScale } from "@/components/ui/PressableScale";
 
 interface PageHeaderProps {
   title: string;
+  /** Linha de apoio, ex.: "12 orçamentos". */
+  subtitle?: string;
 
   // Filtro
   showFilter?: boolean;
@@ -19,8 +22,10 @@ interface PageHeaderProps {
   addIcon?: keyof typeof Ionicons.glyphMap;
 }
 
+/** Cabeçalho das listas: título grande + ações circulares. */
 export function Header({
   title,
+  subtitle,
   showFilter = false,
   activeFiltersCount = 0,
   onFilterPress,
@@ -34,26 +39,33 @@ export function Header({
 
   return (
     <View style={styles.pageHeaderRow}>
-      {/* TÍTULO */}
-      <Text style={styles.pageHeaderTitle}>{title}</Text>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.pageHeaderTitle} accessibilityRole="header">
+          {title}
+        </Text>
+        {subtitle ? <Text style={styles.pageHeaderSubtitle}>{subtitle}</Text> : null}
+      </View>
 
-      {/* AÇÕES */}
       <View style={styles.pageHeaderActions}>
-        {/* FILTRO */}
         {showFilter && (
-          <Pressable
+          <PressableScale
             onPress={onFilterPress}
-            style={({ pressed }) => [
+            activeScale={0.9}
+            accessibilityLabel={
+              hasActiveFilters
+                ? `Filtros, ${activeFiltersCount} ativos`
+                : "Filtros"
+            }
+            style={[
               styles.pageHeaderAction,
               styles.pageHeaderFilterButton,
               hasActiveFilters && styles.pageHeaderFilterActive,
-              pressed && styles.pageHeaderButtonPressed,
             ]}
           >
             <Ionicons
-              name="filter-outline"
-              size={20}
-              color={hasActiveFilters ? theme.white : theme.text}
+              name="options-outline"
+              size={19}
+              color={hasActiveFilters ? theme.primary : theme.text}
             />
 
             {hasActiveFilters && (
@@ -63,21 +75,18 @@ export function Header({
                 </Text>
               </View>
             )}
-          </Pressable>
+          </PressableScale>
         )}
 
-        {/* ADICIONAR */}
         {showAdd && (
-          <Pressable
+          <PressableScale
             onPress={onAddPress}
-            style={({ pressed }) => [
-              styles.pageHeaderAction,
-              styles.pageHeaderAddButton,
-              pressed && styles.pageHeaderButtonPressed,
-            ]}
+            activeScale={0.9}
+            accessibilityLabel="Adicionar"
+            style={[styles.pageHeaderAction, styles.pageHeaderAddButton]}
           >
-            <Ionicons name={addIcon} size={22} color={theme.white} />
-          </Pressable>
+            <Ionicons name={addIcon} size={22} color={theme.onAccent} />
+          </PressableScale>
         )}
       </View>
     </View>

@@ -1,6 +1,7 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
+import { withAlpha } from "@/styles/globalStyles";
 
 interface Props {
   title: string;
@@ -21,6 +22,7 @@ interface Props {
   onPress?: () => void;
 }
 
+/** Linha de configuração: ícone tonal, título/descrição e acessório. */
 export function SettingsItem({
   title,
   description,
@@ -32,86 +34,40 @@ export function SettingsItem({
   rightComponent,
   onPress,
 }: Props) {
-  const { theme } = useTheme();
+  const { theme, styles } = useTheme();
+  const tint = danger ? theme.danger : (iconColor ?? theme.primary);
+  const interactive = !disabled && Boolean(onPress);
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      disabled={disabled || !onPress}
+    <Pressable
+      disabled={!interactive}
       onPress={onPress}
-      style={{
-        backgroundColor: theme.white,
-        borderRadius: 18,
-        padding: 18,
-        marginBottom: 14,
-
-        flexDirection: "row",
-        alignItems: "center",
-      }}
+      accessibilityRole={interactive ? "button" : undefined}
+      style={({ pressed }) => [
+        styles.menuCard,
+        pressed && { backgroundColor: theme.surfaceMuted },
+        disabled && { opacity: 0.5 },
+      ]}
     >
-      <View
-        style={{
-          width: 48,
-          height: 48,
-          borderRadius: 14,
-          backgroundColor: `${iconColor}20`,
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: 15,
-        }}
-      >
-        <Ionicons name={icon} size={24} color={iconColor} />
+      <View style={[styles.menuCardIcon, { backgroundColor: withAlpha(tint, 0.14) }]}>
+        <Ionicons name={icon} size={17} color={tint} />
       </View>
 
-      <View
-        style={{
-          flex: 1,
-        }}
-      >
-        <Text
-          style={{
-            color: danger ? theme.danger : theme.text,
-            fontWeight: "700",
-            fontSize: 16,
-          }}
-        >
-          {title}
-        </Text>
+      <View style={{ flex: 1, marginRight: 8 }}>
+        <Text style={[styles.menuText, danger && { color: theme.danger }]}>{title}</Text>
 
-        {!!description && (
-          <Text
-            style={{
-              color: theme.textSecondary,
-              marginTop: 4,
-              fontSize: 13,
-            }}
-          >
-            {description}
-          </Text>
-        )}
+        {!!description && <Text style={styles.menuCardDescription}>{description}</Text>}
       </View>
 
       {rightComponent ? (
         rightComponent
       ) : value ? (
-        <Text
-          style={{
-            color: theme.primary,
-            fontWeight: "700",
-            marginRight: 10,
-          }}
-        >
-          {value}
-        </Text>
+        <Text style={[styles.menuCardDescription, { marginRight: 6 }]}>{value}</Text>
       ) : null}
 
-      {!disabled && !rightComponent && (
-        <Ionicons
-          name="chevron-forward"
-          color={theme.textSecondary}
-          size={20}
-        />
+      {interactive && !rightComponent && (
+        <Ionicons name="chevron-forward" color={theme.placeholder} size={17} />
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }

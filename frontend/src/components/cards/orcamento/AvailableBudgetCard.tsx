@@ -1,10 +1,14 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 import { Ionicons } from "@expo/vector-icons";
 import { getClientById } from "@/services/api";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
+import { PressableScale } from "@/components/ui/PressableScale";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { getBudgetStatusMeta } from "@/utils/status";
+import { formatCurrency, formatDate } from "@/utils/format";
 import { Orcamento } from "@/components/layout/interface";
 
 interface Props {
@@ -21,6 +25,7 @@ export function AvailableBudgetCard({
   onPress,
 }: Props) {
   const { token } = useAuth();
+  const { styles, theme } = useTheme();
 
   const [clientDisplayName, setClientDisplayName] = useState(
     clientName || "Carregando cliente...",
@@ -83,118 +88,76 @@ export function AvailableBudgetCard({
   }${estado ? `/${estado}` : ""}`.trim();
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      activeScale={0.985}
       style={[
-        globalStyles.orcamentoCard,
+        styles.listCard,
         {
-          marginBottom: 15,
-          borderWidth: selected ? 2 : 1,
-          borderColor: selected ? COLORS.primary : COLORS.border,
+          borderWidth: selected ? 2 : StyleSheet.hairlineWidth,
+          borderColor: selected ? theme.primary : theme.separator,
         },
       ]}
+      accessibilityState={{ selected }}
     >
-      {/* HEADER */}
-
-      <View style={globalStyles.orcamentoHeader}>
-        <Text style={globalStyles.orcamentoCliente} numberOfLines={1}>
+      <View style={styles.listCardHeader}>
+        <Text style={[styles.listCardTitle, { flex: 1 }]} numberOfLines={2}>
           {budget.nome}
         </Text>
+        <StatusPill meta={getBudgetStatusMeta("APROVADO", theme)} withIcon />
+      </View>
 
-        <View
-          style={[
-            globalStyles.orcamentoStatusBadge,
-            {
-              backgroundColor: COLORS.success,
-            },
-          ]}
-        >
-          <Text
-            style={[
-              globalStyles.orcamentoStatusText,
-              {
-                color: COLORS.white,
-              },
-            ]}
-          >
-            APROVADO
+      <View style={[styles.listCardMeta, { marginTop: 6 }]}>
+        <Ionicons name="person-outline" size={13} color={theme.textSecondary} />
+        {loadingClient ? (
+          <ActivityIndicator size="small" color={theme.primary} />
+        ) : (
+          <Text style={styles.listCardMetaText} numberOfLines={1}>
+            {clientDisplayName}
+          </Text>
+        )}
+      </View>
+
+      <Text style={styles.listCardValue}>
+        {formatCurrency(budget.preco_com_bdi ?? 0)}
+      </Text>
+
+      <View style={styles.listCardMetaRow}>
+        <View style={styles.listCardMeta}>
+          <Ionicons name="calendar-outline" size={13} color={theme.textSecondary} />
+          <Text style={styles.listCardMetaText}>
+            Emitido {formatDate(budget.data_publicacao)}
+          </Text>
+        </View>
+        <View style={[styles.listCardMeta, { flexShrink: 1 }]}>
+          <Ionicons name="location-outline" size={13} color={theme.textSecondary} />
+          <Text style={styles.listCardMetaText} numberOfLines={1}>
+            {enderecoCompleto || "Endereço não informado"}
           </Text>
         </View>
       </View>
 
-      {/* CLIENTE */}
-
-      {loadingClient ? (
-          <ActivityIndicator size="small" color={COLORS.primary} />
-        ) : (
-          <Text style={globalStyles.orcamentoInfo}>
-            Cliente: {clientDisplayName}
-          </Text>
-        )}
-
-      {/* VALOR */}
-
-      <Text style={globalStyles.orcamentoInfo}>
-        Valor:{" "}
-        {Number(budget.preco_com_bdi ?? 0).toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
-        })}
-      </Text>
-
-      {/* PUBLICAÇÃO */}
-
-      <Text style={globalStyles.orcamentoInfo}>
-        Publicação:{" "}
-        {budget.data_publicacao
-          ? new Date(budget.data_publicacao).toLocaleDateString("pt-BR")
-          : "-"}
-      </Text>
-
-      {/* ENDEREÇO */}
-
-      <Text style={globalStyles.orcamentoInfo}>
-        Endereço: {enderecoCompleto || "Não informado"}
-      </Text>
-
-      {/* BOTÃO */}
-
       <View
-        style={{
-          marginTop: 15,
-        }}
+        style={[
+          styles.bottomActionButton,
+          {
+            height: 44,
+            marginTop: 14,
+            backgroundColor: selected ? theme.success : theme.primary,
+            shadowOpacity: 0,
+            elevation: 0,
+          },
+        ]}
       >
-        <Pressable
-          onPress={onPress}
-          style={[
-            globalStyles.orcamentoMainButton,
-            {
-              flexDirection: "row",
-              justifyContent: "center",
-              width:"100%",
-              alignItems: "center",
-              backgroundColor: selected ? COLORS.success : COLORS.primary,
-            },
-          ]}
-        >
-          <Ionicons
-            name={selected ? "checkmark-circle" : "add-circle-outline"}
-            size={18}
-            color={COLORS.white}
-          />
-
-          <Text
-            style={[
-              globalStyles.orcamentoDetailsButtonText,
-              {
-                marginLeft: 8,
-              },
-            ]}
-          >
-            {selected ? "Selecionado" : "Selecionar"}
-          </Text>
-        </Pressable>
+        <Ionicons
+          name={selected ? "checkmark-circle" : "add-circle-outline"}
+          size={18}
+          color={theme.onAccent}
+        />
+        <Text style={[styles.bottomActionButtonText, { fontSize: 15 }]}>
+          {selected ? "Selecionado" : "Usar este orçamento"}
+        </Text>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }

@@ -15,7 +15,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 
 import { updateUser } from "@/services/api";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 import { useTheme } from "@/contexts/ThemeContext";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { AppSwitch } from "@/components/settings/AppSwitch";
@@ -23,7 +22,7 @@ import { AppButton } from "@/components/buttons/AppButton";
 
 export default function SegurancaScreen() {
   const { user, token } = useAuth();
-  const { styles } = useTheme();
+  const { styles, theme } = useTheme();
 
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
@@ -77,7 +76,7 @@ export default function SegurancaScreen() {
       <PageHeader title="Privacidade e Segurança" />
 
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
       >
         <SettingsSection title="Alterar Senha">
@@ -85,7 +84,7 @@ export default function SegurancaScreen() {
           <AppInput
             secureTextEntry
             placeholder="Informe a sua Senha Atual"
-            placeholderTextColor={COLORS.placeholder}
+            placeholderTextColor={theme.placeholder}
             value={senhaAtual}
             onChangeText={setSenhaAtual}
           />
@@ -94,7 +93,7 @@ export default function SegurancaScreen() {
           <AppInput
             secureTextEntry
             placeholder="Informe a Nova Senha"
-            placeholderTextColor={COLORS.placeholder}
+            placeholderTextColor={theme.placeholder}
             value={novaSenha}
             onChangeText={setNovaSenha}
           />
@@ -103,7 +102,7 @@ export default function SegurancaScreen() {
           <AppInput
             secureTextEntry
             placeholder="Confirme a Nova Senha"
-            placeholderTextColor={COLORS.placeholder}
+            placeholderTextColor={theme.placeholder}
             value={confirmarSenha}
             onChangeText={setConfirmarSenha}
           />
@@ -116,14 +115,14 @@ export default function SegurancaScreen() {
         </SettingsSection>
 
         <SettingsSection title="Proteção">
-          <View style={globalStyles.menuCard}>
-            <Text style={globalStyles.menuText}>Login com biometria</Text>
+          <View style={styles.menuCard}>
+            <Text style={styles.menuText}>Login com biometria</Text>
 
             <AppSwitch value={biometria} onValueChange={setBiometria} />
           </View>
 
-          <View style={globalStyles.menuCard}>
-            <Text style={globalStyles.menuText}>
+          <View style={styles.menuCard}>
+            <Text style={styles.menuText}>
               Autenticação em duas etapas
             </Text>
 
@@ -133,8 +132,8 @@ export default function SegurancaScreen() {
             />
           </View>
 
-          <View style={globalStyles.menuCard}>
-            <Text style={globalStyles.menuText}>Manter conectado</Text>
+          <View style={styles.menuCard}>
+            <Text style={styles.menuText}>Manter conectado</Text>
 
             <AppSwitch value={lembrarLogin} onValueChange={setLembrarLogin} />
           </View>

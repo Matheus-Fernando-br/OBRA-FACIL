@@ -1,8 +1,8 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Modal, View, Text } from "react-native";
 
 import { useState } from "react";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -25,6 +25,7 @@ export function DeleteOrcamentoModal({
   onClose,
   onSuccess,
 }: Props) {
+  const { styles, theme } = useTheme();
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -69,7 +70,7 @@ export function DeleteOrcamentoModal({
         <View
           style={{
             width: "90%",
-            backgroundColor: COLORS.white,
+            backgroundColor: theme.white,
             borderRadius: 20,
             padding: 25,
           }}
@@ -88,7 +89,7 @@ export function DeleteOrcamentoModal({
           <Text
             style={{
               fontSize: 16,
-              color: COLORS.placeholder,
+              color: theme.placeholder,
               textAlign: "center",
               marginBottom: 25,
               lineHeight: 24,
@@ -98,7 +99,7 @@ export function DeleteOrcamentoModal({
             <Text
               style={{
                 fontWeight: "700",
-                color: COLORS.text,
+                color: theme.text,
               }}
             >
               {budgetName}
@@ -108,14 +109,14 @@ export function DeleteOrcamentoModal({
           </Text>
 
           {feedback !== "" && (
-            <Text style={globalStyles.feedback}>{feedback}</Text>
+            <Text style={styles.feedback}>{feedback}</Text>
           )}
 
           <AppButton
             title="Excluir Orçamento"
             loading={loading}
             onPress={handleDelete}
-            color={COLORS.primary}
+            color={theme.danger}
           />
 
           <View
@@ -124,7 +125,7 @@ export function DeleteOrcamentoModal({
             }}
           />
 
-          <AppButton title="Cancelar" onPress={onClose} color={COLORS.danger} />
+          <AppButton variant="secondary" title="Cancelar" onPress={onClose} />
         </View>
       </View>
     </Modal>

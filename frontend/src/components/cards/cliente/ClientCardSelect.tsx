@@ -2,6 +2,7 @@ import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { phoneMask } from "@/components/forms/mask";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Avatar } from "@/components/ui/Avatar";
 
 interface Props {
   name: string;
@@ -10,6 +11,7 @@ interface Props {
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
+/** Linha de cliente usada nos formulários (seleção / visualização). */
 export function ClientCardSelect({
   name,
   phone,
@@ -17,86 +19,33 @@ export function ClientCardSelect({
   icon = "chevron-down",
 }: Props) {
   const { styles, theme } = useTheme();
-
-  function getInitials(nome: string) {
-    const nomes = nome.trim().split(" ");
-
-    if (!nome.trim()) {
-      return "?";
-    }
-
-    if (nomes.length === 1) {
-      return nomes[0][0].toUpperCase();
-    }
-
-    return (nomes[0][0] + nomes[1][0]).toUpperCase();
-  }
-
-  function getAvatarColor(nome: string) {
-    const theme = [
-      "#DBEAFE",
-      "#DCFCE7",
-      "#FEF3C7",
-      "#FCE7F3",
-      "#EDE9FE",
-      "#FFE4E6",
-      "#E0F2FE",
-      "#F3E8FF",
-      "#ECFCCB",
-      "#FDE68A",
-    ];
-
-    let hash = 0;
-
-    for (let i = 0; i < nome.length; i++) {
-      hash = nome.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return theme[Math.abs(hash) % theme.length];
-  }
-
+  const isPlaceholder = !name || name === "Selecionar Cliente";
   const telefone = phoneMask(phone || "");
 
   return (
-    <View style={styles.clientCard}>
-      {/* Avatar */}
-      <View
-        style={{
-          width: 55,
-          height: 55,
-          borderRadius: 100,
-          backgroundColor: getAvatarColor(name),
-          justifyContent: "center",
-          alignItems: "center",
-          marginRight: 15,
-        }}
-      >
-        {name === "Selecionar Cliente" ? (
-          <Ionicons name="person-outline" size={28} color={theme.primary} />
-        ) : (
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "700",
-              color: theme.primary,
-            }}
-          >
-            {getInitials(name)}
-          </Text>
-        )}
+    <Pressable
+      onPress={onClick}
+      style={({ pressed }) => [styles.clientCard, pressed && { opacity: 0.85 }]}
+      accessibilityRole="button"
+      accessibilityLabel={isPlaceholder ? "Selecionar cliente" : `Cliente ${name}`}
+    >
+      <View style={{ marginRight: 14 }}>
+        <Avatar name={isPlaceholder ? undefined : name} size={44} placeholderIcon="person-add" />
       </View>
 
-      {/* Informações */}
       <View style={{ flex: 1 }}>
-        <Text style={styles.clientCardName}>{name}</Text>
-
-        <Text style={styles.clientCardInfo}>{telefone}</Text>
+        <Text
+          style={[styles.clientCardName, isPlaceholder && { color: theme.primary }]}
+          numberOfLines={1}
+        >
+          {isPlaceholder ? "Selecionar cliente" : name}
+        </Text>
+        {telefone ? <Text style={styles.clientCardInfo}>{telefone}</Text> : null}
       </View>
 
-      {/* Ação */}
-      <Pressable onPress={onClick} style={styles.clientIcons}>
-        <Ionicons name={icon} size={30} color={theme.primary} />
-      </Pressable>
-    </View>
+      <View style={styles.iconButton}>
+        <Ionicons name={icon} size={17} color={theme.primary} />
+      </View>
+    </Pressable>
   );
 }

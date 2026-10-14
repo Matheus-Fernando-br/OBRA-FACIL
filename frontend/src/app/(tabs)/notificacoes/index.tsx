@@ -1,7 +1,7 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { View, ScrollView } from "react-native";
 import { useState } from "react";
 
-import { globalStyles } from "@/styles/globalStyles";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
@@ -9,6 +9,7 @@ import { SettingsItem } from "@/components/settings/SettingsItem";
 import { AppSwitch } from "@/components/settings/AppSwitch";
 
 export default function NotificacoesScreen() {
+  const { styles } = useTheme();
   const [push, setPush] = useState(true);
   const [email, setEmail] = useState(true);
   const [clientes, setClientes] = useState(true);
@@ -23,7 +24,7 @@ export default function NotificacoesScreen() {
 
       {/* CONTEÚDO COM SCROLL */}
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: 30,

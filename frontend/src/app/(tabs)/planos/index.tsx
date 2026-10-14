@@ -1,3 +1,4 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
@@ -14,7 +15,6 @@ import { PlanUsageCard } from "@/components/cards/planos/PlanUsageCard";
 import { PlanOptionCard } from "@/components/cards/planos/PlanOptionCard";
 import { PaymentMethodCard } from "@/components/cards/planos/PaymentMethodCard";
 
-import { COLORS, globalStyles } from "@/styles/globalStyles";
 
 const planos: Plano[] = [
   {
@@ -80,6 +80,7 @@ const planos: Plano[] = [
 ];
 
 export default function PlanosScreen() {
+  const { styles, theme } = useTheme();
   const [renovacaoAutomatica, setRenovacaoAutomatica] = useState(true);
 
   const [notificacaoCobranca, setNotificacaoCobranca] = useState(true);
@@ -170,8 +171,8 @@ export default function PlanosScreen() {
       <PageHeader title="Planos e assinatura" />
 
       <ScrollView
-        style={globalStyles.container}
-        contentContainerStyle={globalStyles.planPageContent}
+        style={styles.container}
+        contentContainerStyle={styles.planPageContent}
         showsVerticalScrollIndicator={false}
       >
         <CurrentPlanCard
@@ -222,8 +223,8 @@ export default function PlanosScreen() {
         </SettingsSection>
 
         <SettingsSection title="Planos disponíveis">
-          <View style={globalStyles.planOptionsHeader}>
-            <Text style={globalStyles.planSectionDescription}>
+          <View style={styles.planOptionsHeader}>
+            <Text style={styles.planSectionDescription}>
               Compare os planos e escolha a opção mais adequada para sua
               operação.
             </Text>
@@ -254,28 +255,28 @@ export default function PlanosScreen() {
 
           <Pressable
             style={({ pressed }) => [
-              globalStyles.planCancelButton,
-              pressed && globalStyles.pressOpacity,
+              styles.planCancelButton,
+              pressed && styles.pressOpacity,
             ]}
             onPress={handleCancelSubscription}
           >
             <Ionicons
               name="close-circle-outline"
               size={20}
-              color={COLORS.danger}
+              color={theme.danger}
             />
 
-            <View style={globalStyles.planCancelContent}>
-              <Text style={globalStyles.planCancelTitle}>
+            <View style={styles.planCancelContent}>
+              <Text style={styles.planCancelTitle}>
                 Cancelar assinatura
               </Text>
 
-              <Text style={globalStyles.planCancelDescription}>
+              <Text style={styles.planCancelDescription}>
                 Encerrar sua assinatura do OBRA-FÁCIL
               </Text>
             </View>
 
-            <Ionicons name="chevron-forward" size={20} color={COLORS.danger} />
+            <Ionicons name="chevron-forward" size={20} color={theme.danger} />
           </Pressable>
         </SettingsSection>
       </ScrollView>

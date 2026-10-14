@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -60,6 +61,7 @@ export function OrcamentoForm({
   onClientDetails,
 }: OrcamentoFormProps) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const { token, user } = useAuth();
   const isReadOnly = mode === "details";
@@ -524,10 +526,10 @@ export function OrcamentoForm({
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
         <Pressable onPress={onClose} style={styles.leftAction}>
-          <Ionicons name="arrow-back" size={25} color={theme.text} />
+          <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
         <Text style={styles.addTitle}>
           {mode === "add"
@@ -542,14 +544,14 @@ export function OrcamentoForm({
             <Pressable onPress={onEdit} style={styles.rightAction}>
               <Text style={styles.saveText}>Editar</Text>
 
-              <Ionicons name="pencil-sharp" size={25} color={theme.title} />
+              <Ionicons name="pencil" size={16} color={theme.title} />
             </Pressable>
             <Pressable onPress={irParaSalvar} style={styles.rightAction}>
               <Text style={styles.saveText}>Gerar PDF</Text>
 
               <Ionicons
                 name="document-text-outline"
-                size={25}
+                size={16}
                 color={theme.title}
               />
             </Pressable>
@@ -558,7 +560,7 @@ export function OrcamentoForm({
           <Pressable onPress={irParaSalvar} style={styles.rightAction}>
             <Text style={styles.saveText}>Salvar</Text>
 
-            <Ionicons name="download" size={25} color={theme.title} />
+            <Ionicons name="checkmark" size={16} color={theme.title} />
           </Pressable>
         ) : mode === "details" && isLocked ? (
           <Pressable onPress={irParaSalvar} style={styles.rightAction}>
@@ -566,13 +568,19 @@ export function OrcamentoForm({
 
             <Ionicons
               name="document-text-outline"
-              size={25}
+              size={16}
               color={theme.title}
             />
           </Pressable>
         ) : null}
       </View>
-      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 32 }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.subtitle}>Cliente</Text>
 
         <View style={styles.divider} />

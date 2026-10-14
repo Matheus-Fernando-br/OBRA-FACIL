@@ -1,5 +1,5 @@
 import { ActivityIndicator, Text, View } from "react-native";
-import { Check, ShieldCheck } from "lucide-react-native";
+import { Check, ShieldCheck } from "@/components/ui/icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";

@@ -1,19 +1,16 @@
-import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import { View, ScrollView, RefreshControl } from "react-native";
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Ionicons } from "@expo/vector-icons";
-
-import { globalStyles, COLORS } from "../../styles/globalStyles";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Header } from "@/components/cards/Header";
 
-import { AppInput } from "../../components/forms/AppInput";
+import { SearchField } from "@/components/ui/SearchField";
+import { FilterChips } from "@/components/ui/FilterChips";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { FadeInView } from "@/components/ui/FadeInView";
+import { ListSkeleton } from "@/components/ui/Skeleton";
+import { formatDate } from "@/utils/format";
 
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -34,7 +31,6 @@ import FilterModal, {
   DEFAULT_WORK_FILTERS,
 } from "@/components/modals/FilterModal";
 
-import { GradientBackground } from "@/styles/GradientBackground";
 
 /* ============================================================
     TELA DE OBRAS
@@ -42,6 +38,7 @@ import { GradientBackground } from "@/styles/GradientBackground";
 
 export default function ObrasScreen() {
   const { token } = useAuth();
+  const { styles, theme } = useTheme();
 
   /* ==========================================================
       VALOR MÁXIMO DO FILTRO
@@ -144,6 +141,14 @@ export default function ObrasScreen() {
 
     loadWorks();
   }, [token]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await loadWorks();
+    setRefreshing(false);
+  }
 
   /* ============================================================
       ARQUIVAR / DESARQUIVAR
@@ -839,159 +844,72 @@ export default function ObrasScreen() {
     ============================================================ */
 
   return (
-    <View style={globalStyles.screen}>
-      <GradientBackground style={globalStyles.container}>
-        <ScrollView
-          contentContainerStyle={{
-            paddingBottom: 100,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* ==================================================
-                CABEÇALHO
-            =================================================== */}
-
-          <Header
-            title="Obras"
-            showFilter
-            activeFiltersCount={activeFiltersCount}
-            onFilterPress={() => setFilterVisible(true)}
-            showAdd
-            onAddPress={() => setAddObraVisible(true)}
+    <View style={styles.screen}>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
           />
+        }
+      >
+        <Header
+          title="Obras"
+          subtitle={
+            loading
+              ? "Carregando…"
+              : `${filteredWorks.length} de ${worksList.length} obra${worksList.length === 1 ? "" : "s"}`
+          }
+          showFilter
+          activeFiltersCount={activeFiltersCount}
+          onFilterPress={() => setFilterVisible(true)}
+          showAdd
+          onAddPress={() => setAddObraVisible(true)}
+        />
 
-          {/* ==================================================
-                BUSCA
-            =================================================== */}
+        <SearchField
+          placeholder="Buscar por obra ou cliente"
+          value={search}
+          onChangeText={setSearch}
+        />
 
-          <AppInput
-            placeholder="Buscar obra..."
-            value={search}
-            onChangeText={setSearch}
-          />
+        <FilterChips labels={activeFilterLabels} onClear={clearFilters} />
 
-          {/* ==================================================
-                FILTROS ATIVOS
-            =================================================== */}
-
-          {activeFilterLabels.length > 0 && (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                flexDirection: "row",
-                alignItems: "center",
-                gap: 8,
-                paddingTop: 12,
-                paddingBottom: 4,
-              }}
-            >
-              {activeFilterLabels.map((label) => (
-                <View
-                  key={label}
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    backgroundColor: COLORS.primary,
-                    borderRadius: 999,
-                    paddingHorizontal: 12,
-                    paddingVertical: 7,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: COLORS.white,
-                      fontSize: 12,
-                      fontWeight: "600",
-                    }}
-                  >
-                    {label}
-                  </Text>
-                </View>
-              ))}
-
-              {/* ==================================================
-                    LIMPAR
-                =================================================== */}
-
-              <Pressable
-                onPress={clearFilters}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 5,
-                  paddingHorizontal: 10,
-                  paddingVertical: 7,
-                }}
-              >
-                <Ionicons
-                  name="close-circle-outline"
-                  size={17}
-                  color={COLORS.textSecondary}
-                />
-
-                <Text
-                  style={{
-                    color: COLORS.textSecondary,
-                    fontSize: 12,
-                    fontWeight: "600",
-                  }}
-                >
-                  Limpar
-                </Text>
-              </Pressable>
-            </ScrollView>
-          )}
-
-          {/* ==================================================
-                NENHUMA OBRA
-            =================================================== */}
-
-          {!loading && filteredWorks.length === 0 && (
-            <Text style={globalStyles.sectionTitle}>
-              {workFilters.archived === "archived"
-                ? "Nenhuma obra arquivada encontrada."
-                : "Nenhuma obra encontrada."}
-            </Text>
-          )}
-
-          {/* ==================================================
-                LOADING
-            =================================================== */}
-
-          {loading ? (
-            <View
-              style={[
-                globalStyles.screen,
-                {
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 40,
-                },
-              ]}
-            >
-              <ActivityIndicator size="large" color={COLORS.primary} />
-
-              <Text
-                style={{
-                  color: COLORS.text,
-                  marginTop: 15,
-                }}
-              >
-                Carregando Obras...
-              </Text>
-            </View>
+        {loading && worksList.length === 0 ? (
+          <ListSkeleton count={3} />
+        ) : filteredWorks.length === 0 ? (
+          worksList.length === 0 ? (
+            <EmptyState
+              icon="construct-outline"
+              title="Nenhuma obra cadastrada"
+              message="Transforme um orçamento aprovado em obra para acompanhar prazos e progresso de cada serviço."
+              actionLabel="Nova obra"
+              onAction={() => setAddObraVisible(true)}
+            />
           ) : (
-            /* =================================================
-                LISTA DE OBRAS
-              ================================================= */
+            <EmptyState
+              icon="search-outline"
+              title={
+                workFilters.archived === "archived"
+                  ? "Nenhuma obra arquivada"
+                  : "Nenhuma obra encontrada"
+              }
+              message="Ajuste a busca ou os filtros para ver outras obras."
+            />
+          )
+        ) : (
+          filteredWorks.map((work, index) => {
+            const budget = getBudget(work);
 
-            filteredWorks.map((work) => {
-              const budget = getBudget(work);
-
-              return (
+            return (
+              <FadeInView key={work._id} index={index}>
                 <ObrasCard
-                  key={work._id}
                   title={budget?.nome ?? "Obra"}
                   client={
                     typeof budget?.cliente === "string"
@@ -1000,26 +918,19 @@ export default function ObrasScreen() {
                   }
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
-                  EndDate={new Date(work.data_fim_prevista).toLocaleDateString(
-                    "pt-BR",
-                  )}
-                  startDate={new Date(
-                    work.data_inicio_prevista,
-                  ).toLocaleDateString("pt-BR")}
+                  EndDate={formatDate(work.data_fim_prevista)}
+                  startDate={formatDate(work.data_inicio_prevista)}
                   arquivado={work.arquivado}
                   onDetails={() => {
                     setSelectedWork(work);
-
                     setDetailsVisible(true);
                   }}
                   onEdit={() => {
                     setSelectedWork(work);
-
                     setEditVisible(true);
                   }}
                   onDelete={() => {
                     setSelectedWork(work);
-
                     setDeleteVisible(true);
                   }}
                   onArchive={() => {
@@ -1027,24 +938,11 @@ export default function ObrasScreen() {
                   }}
                   loadingArchive={loadingArquivo === work._id}
                 />
-              );
-            })
-          )}
-        </ScrollView>
-      </GradientBackground>
-
-      {/* ======================================================
-            BOTÃO NOVA OBRA
-        ====================================================== */}
-
-      <View style={globalStyles.bottomActionContainer}>
-        <Pressable
-          style={globalStyles.bottomActionButton}
-          onPress={() => setAddObraVisible(true)}
-        >
-          <Text style={globalStyles.bottomActionButtonText}>+ Nova Obra</Text>
-        </Pressable>
-      </View>
+              </FadeInView>
+            );
+          })
+        )}
+      </ScrollView>
 
       {/* ======================================================
             FILTROS

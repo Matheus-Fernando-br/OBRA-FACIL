@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Text, View } from "react-native";
-import { Check, CreditCard, Mail, UserRound } from "lucide-react-native";
+import { Check, CreditCard, Mail, UserRound } from "@/components/ui/icons";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {

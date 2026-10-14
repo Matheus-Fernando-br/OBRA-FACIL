@@ -4,7 +4,12 @@ import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props extends TextInputProps {}
 
-export function AppInput({ editable = true, style, ...rest }: Props) {
+/**
+ * Campo de texto padrão do app: preenchido (estilo iOS), com borda de
+ * acento apenas quando focado. Campos somente-leitura ficam sem fundo,
+ * para que a leitura de detalhes seja limpa.
+ */
+export function AppInput({ editable = true, style, onFocus, onBlur, ...rest }: Props) {
   const [focused, setFocused] = useState(false);
   const { theme, styles } = useTheme();
 
@@ -13,21 +18,21 @@ export function AppInput({ editable = true, style, ...rest }: Props) {
       {...rest}
       editable={editable}
       placeholderTextColor={theme.placeholder}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
+      selectionColor={theme.primary}
+      onFocus={(e) => {
+        setFocused(true);
+        onFocus?.(e);
+      }}
+      onBlur={(e) => {
+        setFocused(false);
+        onBlur?.(e);
+      }}
       style={[
         styles.appInput,
         {
-          backgroundColor: editable ? theme.white : theme.border,
-          color: editable ? theme.text : theme.placeholder,
-          borderColor: editable
-            ? focused
-              ? theme.primary
-              : theme.border
-            : theme.borderNull,
-          shadowColor: editable ? theme.text : "transparent",
-          shadowOpacity: editable ? 0.08 : 0,
-          elevation: editable ? 2 : 0,
+          backgroundColor: editable ? theme.surfaceMuted : "transparent",
+          color: editable ? theme.text : theme.textSecondary,
+          borderColor: editable && focused ? theme.primary : editable ? "transparent" : theme.border,
         },
         style,
       ]}

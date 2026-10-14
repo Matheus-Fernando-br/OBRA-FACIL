@@ -1,89 +1,44 @@
-import { View, TouchableOpacity, Image } from "react-native";
+import { View } from "react-native";
 import { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NotificationModal } from "../modals/NotificationModal";
-import { COLORS } from "@/styles/globalStyles";
 import { MenuModal } from "../modals/MenuModal";
+import { PressableScale } from "@/components/ui/PressableScale";
+import { BrandMark } from "@/components/ui/BrandMark";
 import { useTheme } from "@/contexts/ThemeContext";
 
-interface Props {
-  onMenu?: () => void;
-  onNotifications?: () => void;
-}
-
-export function AppHeader({ onMenu }: Props) {
+/** Barra superior das abas: menu lateral · marca · notificações. */
+export function AppHeader() {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const [notificationVisible, setNotificationVisible] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
+
   return (
-    <View
-      style={{
-        height: 80,
-        backgroundColor: theme.white,
-        paddingRight: 20,
-        paddingLeft: 5,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
-      {/* Esquerda */}
-      <TouchableOpacity
-        onPress={() => {
-          setMenuVisible(true);
-          onMenu?.();
-        }}
+    <View style={[styles.appHeader, { paddingTop: insets.top + 6 }]}>
+      <PressableScale
+        onPress={() => setMenuVisible(true)}
+        style={styles.appHeaderButton}
+        accessibilityLabel="Abrir menu"
+        activeScale={0.9}
       >
-        <Ionicons name="menu" size={35} color={theme.text} />
-      </TouchableOpacity>
+        <Ionicons name="menu" size={20} color={theme.text} />
+      </PressableScale>
 
-      {/* Centro */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          backgroundColor: COLORS.white,
-          padding: 5,
-          borderRadius: 5,
-        }}
+      <BrandMark size={28} />
+
+      <PressableScale
+        onPress={() => setNotificationVisible(true)}
+        style={styles.appHeaderButton}
+        accessibilityLabel="Notificações"
+        activeScale={0.9}
       >
-        <Image
-          source={require("../../assets/images/logo_titulo.png")}
-          style={styles.logoHeaderImg}
-        />
-      </View>
+        <Ionicons name="notifications-outline" size={19} color={theme.text} />
+      </PressableScale>
 
-      {/* Direita */}
-      <TouchableOpacity onPress={() => setNotificationVisible(true)}>
-        <View>
-          <Ionicons name="notifications" size={28} color={theme.text} />
+      <MenuModal visible={menuVisible} onClose={() => setMenuVisible(false)} />
 
-          <View
-            style={{
-              position: "absolute",
-              top: -2,
-              right: -2,
-
-              width: 10,
-              height: 10,
-
-              borderRadius: 20,
-
-              backgroundColor: theme.title,
-            }}
-          />
-        </View>
-      </TouchableOpacity>
-      {/* MODAL DO MENU */}
-      <MenuModal
-        visible={menuVisible}
-        onClose={() => setMenuVisible(false)}
-        onOptionPress={(option) => {
-          console.log("Opção selecionada:", option);
-        }}
-      />
-
-      {/* MODAL DE NOTIFICAÇÕES */}
       <NotificationModal
         visible={notificationVisible}
         onClose={() => setNotificationVisible(false)}

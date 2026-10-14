@@ -1,60 +1,58 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   title: string;
+  subtitle?: string;
 }
 
-export function PageHeader({ title }: Props) {
+/**
+ * Cabeçalho das telas internas: "Voltar" no topo e título grande.
+ * Volta para a tela anterior (histórico das abas) ou para "Ajustes".
+ */
+export function PageHeader({ title, subtitle }: Props) {
   const { styles, theme } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  function goBack() {
+    if (router.canGoBack()) router.back();
+    else router.navigate("/mais");
+  }
 
   return (
     <View
       style={{
-        backgroundColor: theme.white,
-        padding: 10,
+        backgroundColor: theme.background,
+        paddingTop: insets.top + 4,
+        paddingHorizontal: 16,
+        paddingBottom: 8,
       }}
     >
-      <View
-        style={{
-          position: "relative",
-          width: "100%",
-          minHeight: 44,
-          justifyContent: "center",
+      <Pressable
+        onPress={goBack}
+        hitSlop={12}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+        style={({ pressed }) => ({
+          flexDirection: "row",
           alignItems: "center",
-          paddingHorizontal: 50,
-        }}
+          alignSelf: "flex-start",
+          minHeight: 40,
+          marginLeft: -6,
+          opacity: pressed ? 0.5 : 1,
+        })}
       >
-        <Pressable
-          onPress={() => router.replace("/(tabs)/mais")}
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            width: 44,
-            height: 44,
-            alignItems: "flex-start",
-            justifyContent: "center",
-          }}
-        >
-          <Ionicons name="arrow-back" size={24} color={theme.title} />
-        </Pressable>
+        <Ionicons name="chevron-back" size={24} color={theme.primary} />
+        <Text style={[styles.body, { color: theme.primary }]}>Voltar</Text>
+      </Pressable>
 
-        <Text
-          style={[
-            styles.title,
-            {
-              textAlign: "center",
-            },
-          ]}
-        >
-          {title}
-        </Text>
-      </View>
-
-      <View style={styles.divider} />
+      <Text style={styles.pageHeaderTitle} accessibilityRole="header">
+        {title}
+      </Text>
+      {subtitle ? <Text style={styles.pageHeaderSubtitle}>{subtitle}</Text> : null}
     </View>
   );
 }

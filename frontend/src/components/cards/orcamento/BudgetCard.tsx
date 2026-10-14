@@ -1,13 +1,22 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
-import { COLORS } from "@/styles/globalStyles";
+import { PressableScale } from "@/components/ui/PressableScale";
+import { StatusPill } from "@/components/ui/StatusPill";
+import { getBudgetStatusMeta } from "@/utils/status";
+import { formatCurrency } from "@/utils/format";
+
 interface Props {
   client: string;
   nome: string;
   status: string;
   value: number;
+  /** Data de validade já formatada. */
   date: string;
+  /** Data de emissão já formatada. */
+  issuedAt?: string;
+  /** Pendente com validade vencida. */
+  expired?: boolean;
   arquivado?: boolean;
   loadingArchive?: boolean;
   onDetails(): void;
@@ -22,6 +31,8 @@ export function BudgetCard({
   status,
   value,
   date,
+  issuedAt,
+  expired = false,
   arquivado = false,
   loadingArchive,
   onDetails,
@@ -30,165 +41,120 @@ export function BudgetCard({
   onArchive,
 }: Props) {
   const { styles, theme } = useTheme();
+  const meta = getBudgetStatusMeta(status, theme);
 
-  function getStatusColor() {
-    switch (status.toLowerCase()) {
-      case "aprovado":
-        return theme.success;
-
-      case "recusado":
-        return theme.danger;
-
-      default:
-        return theme.warning;
-    }
-  }
-
-  const isLocked =
-    arquivado ||
-    status.toUpperCase() === "APROVADO" ||
-    status.toUpperCase() === "RECUSADO";
-
-  const canArchive =
-    status.toUpperCase() === "APROVADO" || status.toUpperCase() === "RECUSADO";
+  const upper = status.toUpperCase();
+  const isLocked = arquivado || upper === "APROVADO" || upper === "RECUSADO";
+  const canArchive = upper === "APROVADO" || upper === "RECUSADO";
 
   return (
-    <View style={styles.orcamentoCard}>
-      {/* HEADER */}
-
-      {/* HEADER */}
-
-      <View style={styles.orcamentoHeader}>
-        <Text style={styles.orcamentoCliente}>{nome}</Text>
-
-        <View style={{ alignItems: "flex-end", gap: 5 }}>
-          {/* STATUS ATUAL */}
-          <View
-            style={[
-              styles.orcamentoStatusBadge,
-              {
-                backgroundColor: `${getStatusColor()}20`,
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.orcamentoStatusText,
-                {
-                  color: getStatusColor(),
-                },
-              ]}
-            >
-              {status}
+    <PressableScale
+      onPress={onDetails}
+      activeScale={0.985}
+      style={[styles.listCard, arquivado && { opacity: 0.78 }]}
+      accessibilityLabel={`Orçamento ${nome}, ${meta.label}, ${formatCurrency(value)}`}
+    >
+      <View style={styles.listCardHeader}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.listCardTitle} numberOfLines={2}>
+            {nome}
+          </Text>
+          <View style={[styles.listCardMeta, { marginTop: 4 }]}>
+            <Ionicons name="person-outline" size={13} color={theme.textSecondary} />
+            <Text style={styles.listCardMetaText} numberOfLines={1}>
+              {client}
             </Text>
           </View>
+        </View>
 
-          {/* ARQUIVADO */}
+        <View style={{ alignItems: "flex-end", gap: 6 }}>
+          <StatusPill meta={meta} />
           {arquivado && (
-            <View
-              style={[
-                styles.orcamentoStatusBadge,
-                {
-                  backgroundColor: `${theme.textSecondary}20`,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.orcamentoStatusText,
-                  {
-                    color: theme.textSecondary,
-                  },
-                ]}
-              >
-                Arquivado
-              </Text>
-            </View>
+            <StatusPill
+              meta={{ label: "Arquivado", color: theme.textSecondary, icon: "archive" }}
+              withIcon
+            />
           )}
         </View>
       </View>
 
-      {/* INFORMAÇÕES */}
+      <Text style={styles.listCardValue}>{formatCurrency(value)}</Text>
 
-      <Text style={styles.orcamentoInfo}>Cliente: {client}</Text>
+      <View style={styles.listCardMetaRow}>
+        {issuedAt ? (
+          <View style={styles.listCardMeta}>
+            <Ionicons name="calendar-outline" size={13} color={theme.textSecondary} />
+            <Text style={styles.listCardMetaText}>Emitido {issuedAt}</Text>
+          </View>
+        ) : null}
+        <View style={styles.listCardMeta}>
+          <Ionicons
+            name={expired ? "hourglass" : "hourglass-outline"}
+            size={13}
+            color={expired ? theme.danger : theme.textSecondary}
+          />
+          <Text
+            style={[
+              styles.listCardMetaText,
+              expired && { color: theme.danger, fontWeight: "600" },
+            ]}
+          >
+            {expired ? `Vencido em ${date}` : `Válido até ${date}`}
+          </Text>
+        </View>
+      </View>
 
-      <Text style={styles.orcamentoInfo}>Valor: R$ {value.toFixed(2)}</Text>
+      <View style={styles.listCardActions}>
+        <PressableScale onPress={onDetails} style={styles.actionChip}>
+          <Ionicons name="eye-outline" size={15} color={theme.text} />
+          <Text style={styles.actionChipText}>Detalhes</Text>
+        </PressableScale>
 
-      <Text style={styles.orcamentoInfo}>Criado em: {date}</Text>
-
-      {/* BOTÕES */}
-
-      <View style={styles.orcamentoButtons}>
-        {/* DETALHES */}
-
-        <Pressable
-          style={[styles.orcamentoDetailsButton, styles.orcamentoMainButton]}
-          onPress={onDetails}
-        >
-          <Ionicons name="eye" size={18} color={COLORS.white} />
-
-          <Text style={styles.orcamentoDetailsButtonText}>Ver Detalhes</Text>
-        </Pressable>
-
-        {/* EDITAR + EXCLUIR */}
+        <View style={{ flex: 1 }} />
 
         {!isLocked && (
           <>
-            <Pressable
-              style={[
-                styles.orcamentoDetailsButton,
-                styles.orcamentoEditButton,
-              ]}
+            <PressableScale
               onPress={onEdit}
+              style={styles.iconButton}
+              accessibilityLabel="Editar orçamento"
             >
-              <Ionicons name="create" size={18} color={COLORS.white} />
-              <Text style={styles.orcamentoTextButton}>Editar</Text>
-            </Pressable>
-
-            <Pressable
-              style={[
-                styles.orcamentoDetailsButton,
-                styles.orcamentoDeleteButton,
-              ]}
+              <Ionicons name="pencil" size={16} color={theme.text} />
+            </PressableScale>
+            <PressableScale
               onPress={onDelete}
+              style={styles.iconButton}
+              accessibilityLabel="Excluir orçamento"
             >
-              <Ionicons name="trash" size={18} color={COLORS.white} />
-              <Text style={styles.orcamentoTextButton}>Excluir</Text>
-            </Pressable>
+              <Ionicons name="trash-outline" size={16} color={theme.danger} />
+            </PressableScale>
           </>
         )}
 
-        {/* ARQUIVAR / DESARQUIVAR */}
         {canArchive && (
-          <Pressable
-            style={[
-              styles.orcamentoDetailsButton,
-              {
-                backgroundColor: arquivado ? theme.success : theme.title,
-                paddingHorizontal: 20,
-                opacity: loadingArchive ? 0.7 : 1,
-              },
-            ]}
+          <PressableScale
             onPress={onArchive}
             disabled={loadingArchive}
+            style={styles.actionChip}
+            accessibilityLabel={arquivado ? "Desarquivar" : "Arquivar"}
           >
             {loadingArchive ? (
-              <ActivityIndicator size="small" color={theme.white} />
+              <ActivityIndicator size="small" color={theme.text} />
             ) : (
               <>
                 <Ionicons
-                  name={arquivado ? "archive" : "archive-outline"}
-                  size={18}
-                  color={COLORS.white}
+                  name={arquivado ? "arrow-undo-outline" : "archive-outline"}
+                  size={15}
+                  color={theme.text}
                 />
-                <Text style={styles.orcamentoTextButton}>
+                <Text style={styles.actionChipText}>
                   {arquivado ? "Desarquivar" : "Arquivar"}
                 </Text>
               </>
             )}
-          </Pressable>
+          </PressableScale>
         )}
       </View>
-    </View>
+    </PressableScale>
   );
 }

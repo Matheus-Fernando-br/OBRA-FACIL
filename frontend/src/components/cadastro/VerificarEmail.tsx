@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Text, View } from "react-native";
-import { MailCheck } from "lucide-react-native";
+import { MailCheck } from "@/components/ui/icons";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -95,7 +95,7 @@ export function VerificarEmail({ email, onBack, onVerified }: Props) {
         loading={resending}
         color={theme.primary}
       />
-      <AppButton title="Voltar" onPress={onBack} color={theme.placeholder} />
+      <AppButton variant="secondary" title="Voltar" onPress={onBack} />
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import { useState } from "react";
 import { router } from "expo-router";
-import { Eye, EyeOff } from "lucide-react-native";
+import { Eye, EyeOff } from "@/components/ui/icons";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cpfMask, cnpjMask, emailMask } from "@/components/forms/mask";
 import { AppInput } from "@/components/forms/AppInput";
@@ -220,10 +220,9 @@ export function CadastroStep({
         loading={checkingEmail}
         color={theme.title}
       />
-      <AppButton
+      <AppButton variant="secondary"
         title="Voltar para o login"
         onPress={voltar}
-        color={theme.placeholder}
       />
     </View>
   );

@@ -1,34 +1,163 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
-/* =========================
-   CORES GLOBAIS
-========================= */
+/* ==========================================================
+   DESIGN TOKENS — OBRA FÁCIL
+
+   Paleta inspirada nos materiais do ecossistema Apple: fundos
+   agrupados neutros, superfícies brancas, tipografia do sistema
+   (San Francisco no iOS, Roboto no Android) e um único acento de
+   marca (o laranja do logotipo).
+
+   As cores de status foram validadas para daltonismo (CVD) e
+   contraste em modo claro e escuro.
+========================================================== */
 
 export const COLORS = {
-  primary: "#3B82F6",
+  /* Acento de marca */
+  primary: "#C2570C",
+  title: "#C2570C",
+  titleBackground: "rgba(194, 87, 12, 0.12)",
+  accentGradientEnd: "#E58A3A",
+  onAccent: "#FFFFFF",
+
   secondary: "#0D6B75",
-  backgroundDestaque: "rgba(0, 0, 0, 0.32)",
-  gradientStart: "#FFFFFF",
-  gradientEnd: "#c45f0080",
-  card: "#D9D7D7",
-  cardHover: "#1E293B",
+  info: "#0A72D6",
 
-  white: "#FFFFFF",
-  title: "#c45f00",
-  titleBackground: "#c45f0080",
-  text: "#000000",
-  textSecondary: "#474242e5",
-  placeholder: "#575B69",
-  border: "#D5D6DB",
-  borderNull: "#BFC0C7",
-  success: "#22C55E",
-  warning: "#F59E0B",
-  danger: "#EF4444",
+  /* Fundos e superfícies */
+  background: "#F2F2F7",
+  gradientStart: "#F7F7FA",
+  gradientEnd: "#EEEEF3",
+  white: "#FFFFFF", // superfície principal (cards, folhas, barras)
+  surfaceMuted: "#F2F2F7",
+  card: "#FFFFFF",
+  cardHover: "#1C1C1E",
+  backgroundDestaque: "rgba(0, 0, 0, 0.35)",
 
-  tabBarHeight: 70,
+  /* Texto */
+  text: "#1C1C1E",
+  textSecondary: "#6C6C70",
+  placeholder: "#A1A1A6",
+
+  /* Linhas */
+  border: "#E5E5EA",
+  borderNull: "#D1D1D6",
+  separator: "rgba(60, 60, 67, 0.12)",
+
+  /* Status (validados p/ CVD) */
+  success: "#13876F",
+  warning: "#C98208",
+  danger: "#D43C5C",
+
+  shadow: "#000000",
+
+  tabBarHeight: 64,
 };
 
-export function createGlobalStyles(colors: typeof COLORS) {
+export type ThemeColors = typeof COLORS;
+
+export const DARK_COLORS: ThemeColors = {
+  ...COLORS,
+
+  primary: "#F08A3C",
+  title: "#F08A3C",
+  titleBackground: "rgba(240, 138, 60, 0.16)",
+  accentGradientEnd: "#B8500B",
+  info: "#3D9BFF",
+
+  background: "#000000",
+  gradientStart: "#000000",
+  gradientEnd: "#0B0B0E",
+  white: "#1C1C1E",
+  surfaceMuted: "#2C2C2E",
+  card: "#1C1C1E",
+  cardHover: "#2C2C2E",
+  backgroundDestaque: "rgba(0, 0, 0, 0.6)",
+
+  text: "#F5F5F7",
+  textSecondary: "#A1A1A6",
+  placeholder: "#6E6E73",
+
+  border: "#38383A",
+  borderNull: "#48484A",
+  separator: "rgba(84, 84, 88, 0.45)",
+
+  success: "#209A80",
+  warning: "#B38A12",
+  danger: "#E25C78",
+};
+
+/* ==========================================================
+   TIPOGRAFIA — escala única para todo o app
+   (fonte do sistema; pesos e tamanhos na hierarquia da Apple)
+========================================================== */
+
+export const TYPE = {
+  largeTitle: { fontSize: 32, fontWeight: "700", letterSpacing: 0.2 },
+  title1: { fontSize: 26, fontWeight: "700", letterSpacing: 0.2 },
+  title2: { fontSize: 22, fontWeight: "700", letterSpacing: 0.1 },
+  title3: { fontSize: 19, fontWeight: "600", letterSpacing: 0 },
+  headline: { fontSize: 16, fontWeight: "600", letterSpacing: -0.2 },
+  body: { fontSize: 16, fontWeight: "400", letterSpacing: -0.2 },
+  callout: { fontSize: 15, fontWeight: "400", letterSpacing: -0.1 },
+  subhead: { fontSize: 14, fontWeight: "400", letterSpacing: -0.1 },
+  footnote: { fontSize: 13, fontWeight: "400", letterSpacing: 0 },
+  caption: { fontSize: 12, fontWeight: "500", letterSpacing: 0 },
+  overline: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+} satisfies Record<string, TextStyle>;
+
+export const NUMERIC: TextStyle = { fontVariant: ["tabular-nums"] };
+
+export const SPACE = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+export const RADIUS = {
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 26,
+  pill: 999,
+};
+
+export function elevation(level: 1 | 2 | 3, color = "#000"): ViewStyle {
+  const map = {
+    1: { opacity: 0.05, radius: 8, y: 2, elevation: 1 },
+    2: { opacity: 0.08, radius: 16, y: 6, elevation: 3 },
+    3: { opacity: 0.14, radius: 28, y: 12, elevation: 8 },
+  }[level];
+
+  return {
+    shadowColor: color,
+    shadowOpacity: map.opacity,
+    shadowRadius: map.radius,
+    shadowOffset: { width: 0, height: map.y },
+    elevation: map.elevation,
+  };
+}
+
+/** Cor com transparência a partir de um hex (#RRGGBB). */
+export function withAlpha(hex: string, alpha: number) {
+  if (!hex.startsWith("#") || hex.length !== 7) return hex;
+  const a = Math.round(Math.min(1, Math.max(0, alpha)) * 255)
+    .toString(16)
+    .padStart(2, "0");
+  return `${hex}${a}`;
+}
+
+const isIOS = Platform.OS === "ios";
+
+export function createGlobalStyles(colors: ThemeColors) {
   return StyleSheet.create({
     /* ==========================================================
        AUTENTICAÇÃO E CADASTRO
@@ -176,16 +305,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
     appInput: {
       width: "100%",
-      minHeight: 58,
-      borderWidth: 1.2,
-      borderRadius: 10,
-      paddingHorizontal: 18,
-      paddingVertical: 14,
-      marginBottom: 16,
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      shadowOffset: { width: 0, height: 2 },
-      elevation: 2,
+      minHeight: 50,
+      ...TYPE.body,
+      borderWidth: 1,
+      borderRadius: RADIUS.md,
+      paddingHorizontal: SPACE.lg,
+      paddingVertical: 13,
+      marginBottom: SPACE.md,
     },
     authPasswordWrap: { position: "relative" },
     authPasswordInput: { paddingRight: 50 },
@@ -575,803 +701,403 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
     stepIndicatorLabelActive: { color: colors.title },
 
-    /* =========================
-     LAYOUT
-  ========================= */
+
+    /* ==========================================================
+       LAYOUT BASE
+    ========================================================== */
 
     screen: {
       flex: 1,
+      backgroundColor: colors.background,
     },
 
     container: {
       flex: 1,
-      backgroundColor: colors.white,
-      paddingVertical: 10,
-      paddingHorizontal: 10,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACE.lg,
+      paddingTop: SPACE.sm,
     },
 
     pageContainer: {
       flex: 1,
-      backgroundColor: colors.white,
-      padding: 24,
+      backgroundColor: colors.background,
+      padding: SPACE.xxl,
+    },
+
+    scrollContent: {
+      paddingBottom: 140,
     },
 
     feedback: {
+      ...TYPE.footnote,
       color: colors.danger,
-      fontSize: 14,
-      marginTop: 5,
-      marginBottom: 15,
-      textAlign: "center",
       fontWeight: "600",
+      marginTop: SPACE.sm,
+      marginBottom: SPACE.md,
+      textAlign: "center",
     },
 
     logoHeaderImg: {
-      width: 80,
-      height: 52,
+      width: 72,
+      height: 44,
+      resizeMode: "contain",
     },
 
     obrigatorio: {
-      fontFamily: "Montserrat_700Bold",
-      marginLeft: 5,
-      fontSize: 12,
+      ...TYPE.footnote,
+      fontWeight: "700",
+      marginLeft: 4,
       color: colors.danger,
     },
 
     checkbox: {
-      marginTop: 8,
-      width: 22,
-      height: 22,
-      borderRadius: 5,
+      marginTop: 2,
+      width: 24,
+      height: 24,
+      borderRadius: 7,
     },
 
-    /* =========================
-   ORÇAMENTOS
-========================= */
+    row: { flexDirection: "row", gap: SPACE.md },
+    column: { flex: 1, minWidth: 0 },
 
-    serviceCard: {
-      backgroundColor: colors.white,
-      borderRadius: 8,
-      padding: 15,
-      marginBottom: 10,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-
-    orcamentoCard: {
-      backgroundColor: colors.white,
-      shadowColor: colors.text,
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-
-      borderRadius: 18,
-
-      padding: 18,
-      marginBottom: 30,
-    },
-
-    orcamentoCliente: {
-      fontSize: 18,
-      fontWeight: "700",
-
-      color: colors.text,
-
-      marginBottom: 12,
-    },
-
-    orcamentoInfo: {
-      color: colors.textSecondary,
-
-      marginBottom: 6,
-    },
-    orcamentoTextButton: {
-      color: COLORS.white,
-      marginBottom: 6,
-      fontFamily: "Montserrat_500Bold",
-    },
-
-    orcamentoDetailsButton: {
-      marginTop: 16,
-      height: 45,
-      borderRadius: 12,
-      backgroundColor: colors.primary,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-
-    orcamentoDetailsButtonText: {
-      color: COLORS.white,
-      fontWeight: "700",
-    },
-
-    filterButtonText: {
-      color: colors.text,
-    },
-
-    orcamentoHeader: {
-      flexDirection: "row",
-
-      justifyContent: "space-between",
-
-      alignItems: "center",
-
-      marginBottom: 12,
-    },
-
-    orcamentoStatusBadge: {
-      paddingHorizontal: 15,
-
-      paddingVertical: 10,
-
-      borderRadius: 20,
-    },
-
-    orcamentoStatusText: {
-      fontWeight: "700",
-
-      fontSize: 12,
-    },
-
-    obraStatusBadge: {
-      alignContent: "center",
-      alignItems: "center",
-      alignSelf: "center",
-      width: "30%",
-      paddingHorizontal: 10,
-      paddingVertical: 10,
-      borderRadius: 20,
-    },
-
-    obraStatusText: {
-      fontWeight: "700",
-
-      fontSize: 12,
-    },
-
-    orcamentoButtons: {
-      flexDirection: "row",
-
-      marginTop: 20,
-    },
-
-    orcamentoMainButton: {
-      flexDirection: "row",
-
-      justifyContent: "center",
-
-      alignItems: "center",
-
-      textAlign: "center",
-
-      backgroundColor: colors.primary,
-
-      borderRadius: 5,
-
-      width: "60%",
-
-      marginRight: 8,
-
-      padding: 5,
-    },
-
-    obraMainButton: {
-      flexDirection: "row",
-
-      justifyContent: "center",
-
-      alignItems: "center",
-
-      textAlign: "center",
-
-      backgroundColor: colors.primary,
-
-      borderRadius: 5,
-
-      marginTop: 5,
-
-      marginHorizontal: 60,
-
-      padding: 5,
-    },
-
-    orcamentoEditButton: {
-      backgroundColor: colors.warning,
-      paddingHorizontal: 30,
-      padding: 15,
-      marginRight: 8,
-      width: 48,
-    },
-
-    orcamentoDeleteButton: {
-      backgroundColor: colors.danger,
-      paddingHorizontal: 30,
-      padding: 15,
-      width: 48,
-    },
-
-    card: {
-      backgroundColor: colors.white,
-      borderRadius: 20,
-      paddingVertical: 18,
-      paddingHorizontal: 18,
-      marginBottom: 24,
-
-      borderWidth: 1,
-      borderColor: colors.border,
-
-      shadowColor: colors.text,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.08,
-      shadowRadius: 10,
-
-      elevation: 10,
-    },
-
-    picker: {
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.separator,
       width: "100%",
-      height: 60,
-      backgroundColor: colors.white,
-      borderRadius: 10,
-      borderColor: colors.border,
-      paddingHorizontal: 20,
-      shadowColor: colors.text,
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
+      marginVertical: SPACE.sm,
     },
 
-    pickerReadOnly: {
-      backgroundColor: colors.borderNull,
-      borderColor: colors.border,
-      color: colors.placeholder,
-      shadowOpacity: 0,
-      elevation: 0,
+    dividerVertical: {
+      width: StyleSheet.hairlineWidth,
+      backgroundColor: colors.separator,
+      alignSelf: "stretch",
+      marginHorizontal: SPACE.md,
     },
 
-    row: { flexDirection: "row", gap: 10 },
-    column: { flex: 1 },
-
-    serviceContainer: {
-      padding: 20,
-      backgroundColor: colors.white,
-      borderRadius: 10,
-      marginBottom: 10,
-      shadowColor: colors.text,
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-    },
-    serviceTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 5 },
-    serviceTotalText: {
-      fontFamily: "Montserrat_700Bold",
-      textAlign: "left",
-      fontWeight: "bold",
-      color: colors.success,
-      marginTop: 5,
-    },
-    categoryTotalText: {
-      fontSize: 16,
-      fontWeight: "bold",
-      color: colors.primary,
-      textAlign: "right",
+    pressOpacity: {
+      opacity: 0.6,
     },
 
-    workCardBody: {
-      padding: 16,
-    },
-
-    workCardHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-
-    workCardDate: {
-      marginBottom: 8,
-      fontSize: 13,
-      color: colors.placeholder,
-    },
-
-    /* =========================
-     TAB BAR
-  ========================= */
-
-    tabBar: {
-      height: colors.tabBarHeight,
-      paddingTop: 10,
-      paddingBottom: 10,
-      backgroundColor: colors.white,
-      borderTopWidth: 3,
-      borderTopColor: colors.border,
-    },
-
-    /* =========================
-   HEADER
-========================= */
-
-    pageHeader: {
-      marginTop: 60,
-      marginBottom: 20,
-    },
-
-    homeHeader: {
-      marginBottom: 24,
-      marginLeft: 7,
-      flexDirection: "row",
-      justifyContent: "space-between",
-    },
-
-    pageHeaderRow: {
-      marginTop: 10,
-      marginBottom: 20,
-
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-
-      minHeight: 44,
-    },
-
-    /* =========================
-   TÍTULO
-========================= */
-
-    pageHeaderTitle: {
-      color: colors.title,
-
-      fontSize: 28,
-      fontWeight: "700",
-
-      letterSpacing: -0.7,
-
-      flex: 1,
-    },
-
-    /* =========================
-   AÇÕES
-========================= */
-
-    pageHeaderActions: {
-      flexDirection: "row",
-      alignItems: "center",
-
-      gap: 10,
-
-      marginLeft: 16,
-    },
-
-    /* =========================
-   BOTÕES
-========================= */
-
-    pageHeaderAction: {
-      width: 44,
-      height: 44,
-
-      borderRadius: 14,
-
-      justifyContent: "center",
-      alignItems: "center",
-
-      position: "relative",
-
-      borderWidth: 1,
-
-      // aparência semelhante aos controles do iOS
-      backgroundColor: colors.primary,
-
-      borderColor: "rgba(120, 120, 128, 0.18)",
-
-      shadowColor: "#000",
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-      shadowOpacity: 0.08,
-      shadowRadius: 6,
-
-      elevation: 2,
-    },
-
-    pageHeaderAddButton: {
-      backgroundColor: colors.title,
-
-      borderColor: colors.title,
-
-      shadowOpacity: 0.12,
-    },
-
-    pageHeaderFilterButton: {
-      backgroundColor: colors.placeholder,
-    },
-
-    pageHeaderFilterActive: {
-      backgroundColor: colors.primary,
-
-      borderColor: colors.primary,
-
-      shadowOpacity: 0.14,
-    },
-
-    /* =========================
-   PRESS
-========================= */
-
-    pageHeaderButtonPressed: {
-      opacity: 0.65,
-
-      transform: [
-        {
-          scale: 0.94,
-        },
-      ],
-    },
-
-    /* =========================
-   BADGE DO FILTRO
-========================= */
-
-    pageHeaderFilterBadge: {
-      position: "absolute",
-
-      top: -6,
-      right: -6,
-
-      minWidth: 19,
-      height: 19,
-
-      paddingHorizontal: 4,
-
-      borderRadius: 999,
-
-      backgroundColor: colors.danger,
-
-      justifyContent: "center",
-      alignItems: "center",
-
-      borderWidth: 2,
-      borderColor: colors.placeholder,
-    },
-
-    pageHeaderFilterBadgeText: {
-      color: colors.white,
-
-      fontSize: 9,
-      fontWeight: "800",
-
-      lineHeight: 11,
-
-      textAlign: "center",
-    },
-    /* =========================
-     TIPOGRAFIA
-  ========================= */
+    /* ==========================================================
+       TIPOGRAFIA
+    ========================================================== */
 
     title: {
-      fontFamily: "Montserrat_600SemiBold",
-      fontSize: 24,
-      fontWeight: "700",
-      color: colors.title,
+      ...TYPE.title2,
+      color: colors.text,
     },
 
     pageTitle: {
-      fontFamily: "IntelOneMono_700Bold",
-      fontSize: 28,
+      ...TYPE.largeTitle,
       color: colors.text,
-      marginTop: 60,
-      marginBottom: 20,
+      marginTop: SPACE.lg,
+      marginBottom: SPACE.lg,
     },
 
     sectionTitle: {
-      fontFamily: "Montserrat_500Medium,",
-      fontWeight: "600",
-      fontSize: 16,
+      ...TYPE.title3,
       color: colors.text,
-      marginLeft: 7,
-      marginBottom: 16,
-      marginTop: 16,
+      marginTop: SPACE.xxl,
+      marginBottom: SPACE.md,
+    },
+
+    sectionHeaderRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      justifyContent: "space-between",
+      marginTop: SPACE.xxl,
+      marginBottom: SPACE.md,
+    },
+
+    sectionHeaderTitle: {
+      ...TYPE.title3,
+      color: colors.text,
+    },
+
+    sectionHeaderLink: {
+      ...TYPE.subhead,
+      fontWeight: "600",
+      color: colors.primary,
     },
 
     subtitle: {
-      fontFamily: "IntelOneMono_400Regular",
-      fontSize: 12,
+      ...TYPE.overline,
       color: colors.textSecondary,
+      marginTop: SPACE.xxl,
+      marginBottom: SPACE.xs,
+      marginLeft: SPACE.xs,
     },
 
     body: {
-      fontFamily: "IntelOneMono_400Regular",
+      ...TYPE.body,
       color: colors.text,
     },
 
+    caption: {
+      ...TYPE.caption,
+      color: colors.textSecondary,
+    },
+
+    label: {
+      ...TYPE.footnote,
+      fontWeight: "600",
+      alignSelf: "flex-start",
+      color: colors.textSecondary,
+      marginBottom: SPACE.sm,
+      marginTop: SPACE.md,
+    },
+
     section: {
-      marginBottom: 20,
-      padding: 10,
-      paddingHorizontal: 5,
-      borderRadius: 12,
-      backgroundColor: "transparent",
+      marginBottom: SPACE.lg,
     },
 
-    profileImageIndex: {
-      width: 50,
-      height: 50,
-      marginTop: 5,
-      borderRadius: 999,
+    /* ==========================================================
+       SUPERFÍCIES
+    ========================================================== */
+
+    card: {
+      backgroundColor: colors.white,
+      borderRadius: RADIUS.lg,
+      padding: SPACE.lg,
+      marginBottom: SPACE.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
     },
 
-    /* =========================
-     DASHBOARD
-  ========================= */
+    listCard: {
+      backgroundColor: colors.white,
+      borderRadius: RADIUS.lg,
+      padding: SPACE.lg,
+      marginBottom: SPACE.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
 
-    dashboardGrid: {
+    listCardHeader: {
       flexDirection: "row",
+      alignItems: "flex-start",
       justifyContent: "space-between",
+      gap: SPACE.md,
+    },
+
+    listCardTitle: {
+      ...TYPE.headline,
+      color: colors.text,
+    },
+
+    listCardSubtitle: {
+      ...TYPE.subhead,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    listCardMetaRow: {
+      flexDirection: "row",
       flexWrap: "wrap",
-    },
-
-    quickAccessHeader: {
-      marginTop: 24,
-      marginBottom: 18,
-
-      flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
+      gap: SPACE.md,
+      marginTop: SPACE.md,
     },
 
-    quickAccessRow: {
+    listCardMeta: {
       flexDirection: "row",
-      justifyContent: "space-between",
-    },
-
-    /* =========================
-   DASHBOARD CARD
-========================= */
-
-    dashboardCard: {
-      backgroundColor: colors.textSecondary,
-      flexDirection: "column",
-      padding: 8,
-      borderRadius: 18,
-      width: "24%",
-      marginBottom: 16,
-      shadowColor: colors.danger,
-      shadowOffset: {
-        width: 0,
-        height: 2,
-      },
-
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-
-      elevation: 3,
-    },
-
-    dashboardCardTitle: {
-      fontSize: 12,
-      color: colors.white,
-      marginBottom: 5,
-    },
-
-    dashboardCardValue: {
-      fontSize: 18,
-      marginTop: 10,
-      fontWeight: "bold",
-      color: colors.white,
-    },
-
-    /* =========================
-     FILTROS
-  ========================= */
-
-    filterRow: {
-      flexDirection: "row",
-      marginBottom: 20,
-    },
-
-    filterButton: {
-      backgroundColor: colors.card,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 12,
-      marginRight: 10,
-    },
-
-    /* =========================
-     TELA MAIS
-  ========================= */
-
-    maisContainer: {
-      flex: 1,
-      backgroundColor: colors.white,
-      padding: 15,
-    },
-
-    profileCard: {
-      backgroundColor: colors.title,
-      padding: 24,
-      borderRadius: 22,
-      marginBottom: 24,
-      shadowColor: colors.textSecondary,
-
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-
-      shadowOpacity: 0.8,
-      shadowRadius: 4,
-
-      elevation: 6,
-    },
-
-    profileName: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: COLORS.white,
-    },
-
-    profileEmail: {
-      marginTop: 6,
-      color: COLORS.white,
-    },
-
-    menuCard: {
-      backgroundColor: colors.white,
-      padding: 20,
-      borderRadius: 18,
-      marginBottom: 14,
-
-      flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
+      gap: 5,
     },
 
-    menuText: {
-      fontSize: 16,
+    listCardMetaText: {
+      ...TYPE.footnote,
+      color: colors.textSecondary,
+    },
+
+    listCardValue: {
+      ...TYPE.title3,
+      ...NUMERIC,
+      color: colors.text,
+      marginTop: SPACE.md,
+    },
+
+    listCardActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: SPACE.sm,
+      marginTop: SPACE.lg,
+      paddingTop: SPACE.md,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: colors.separator,
+    },
+
+    actionChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 6,
+      minHeight: 36,
+      paddingHorizontal: SPACE.md,
+      borderRadius: RADIUS.pill,
+      backgroundColor: colors.surfaceMuted,
+    },
+
+    actionChipText: {
+      ...TYPE.footnote,
       fontWeight: "600",
       color: colors.text,
     },
 
-    profileImage: {
-      width: 80,
-      height: 80,
-      borderRadius: 999,
-      marginBottom: 16,
-    },
-
-    fabButton: {
-      position: "absolute",
-
-      bottom: 100,
-      right: 24,
-
-      width: 65,
-      height: 65,
-
-      borderRadius: 999,
-
-      backgroundColor: colors.primary,
-
-      justifyContent: "center",
+    iconButton: {
+      width: 36,
+      height: 36,
+      borderRadius: RADIUS.pill,
       alignItems: "center",
-
-      shadowColor: colors.textSecondary,
-
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
-
-      elevation: 6,
-    },
-
-    bottomActionContainer: {
-      position: "absolute",
-
-      bottom: 10,
-      left: 24,
-      right: 24,
-    },
-
-    bottomActionButton: {
-      height: 56,
-
-      backgroundColor: colors.title,
-
-      borderRadius: 16,
-
       justifyContent: "center",
-      alignItems: "center",
+      backgroundColor: colors.surfaceMuted,
     },
 
-    bottomActionButtonText: {
-      color: COLORS.white,
-      fontSize: 16,
+    statusPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      alignSelf: "flex-start",
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: RADIUS.pill,
+    },
+
+    statusPillDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+    },
+
+    statusPillText: {
+      ...TYPE.caption,
       fontWeight: "700",
     },
 
-    /* =========================
-   CLIENT CARD
-========================= */
+    emptyState: {
+      alignItems: "center",
+      paddingVertical: 48,
+      paddingHorizontal: SPACE.xxl,
+    },
 
-    clientCard: {
+    emptyStateIcon: {
+      width: 64,
+      height: 64,
+      borderRadius: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.titleBackground,
+      marginBottom: SPACE.lg,
+    },
+
+    emptyStateTitle: {
+      ...TYPE.headline,
+      color: colors.text,
+      textAlign: "center",
+    },
+
+    emptyStateText: {
+      ...TYPE.subhead,
+      color: colors.textSecondary,
+      textAlign: "center",
+      marginTop: SPACE.xs,
+      lineHeight: 20,
+    },
+
+    /* ==========================================================
+       CAMPOS
+    ========================================================== */
+
+    picker: {
+      width: "100%",
+      minHeight: 50,
+      backgroundColor: colors.surfaceMuted,
+      color: colors.text,
+      borderRadius: RADIUS.md,
+      borderWidth: 0,
+      paddingHorizontal: SPACE.md,
+      marginBottom: SPACE.md,
+    },
+
+    pickerReadOnly: {
+      color: colors.textSecondary,
+      opacity: 0.85,
+    },
+
+    searchField: {
       flexDirection: "row",
       alignItems: "center",
-
-      backgroundColor: colors.white,
-
-      borderRadius: 10,
-
-      padding: 18,
-
-      marginBottom: 15,
-
-      shadowColor: colors.text,
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-
-      elevation: 4,
+      gap: SPACE.sm,
+      minHeight: 44,
+      paddingHorizontal: SPACE.md,
+      borderRadius: RADIUS.md,
+      backgroundColor: isIOS ? "rgba(118, 118, 128, 0.12)" : colors.white,
+      borderWidth: isIOS ? 0 : StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      marginBottom: SPACE.md,
     },
 
-    clientCardName: {
-      fontFamily: "Montserrat_600SemiBold",
-      fontSize: 18,
+    searchInput: {
+      flex: 1,
+      ...TYPE.body,
       color: colors.text,
+      paddingVertical: 10,
     },
 
-    clientCardInfo: {
-      color: colors.textSecondary,
-      marginTop: 6,
-      fontSize: 10,
+    /* ==========================================================
+       FORMULÁRIOS (modais em tela cheia)
+    ========================================================== */
+
+    formScreen: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACE.lg,
     },
 
-    clientIcons: {
+    formScroll: {
+      flex: 1,
+      paddingHorizontal: SPACE.lg,
+    },
+
+    serviceCard: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: RADIUS.md,
+      padding: SPACE.md,
+      marginTop: SPACE.md,
+    },
+
+    serviceContainer: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: RADIUS.md,
+      padding: SPACE.md,
+      marginTop: SPACE.md,
+    },
+
+    serviceHeaderRow: {
       flexDirection: "row",
-      justifyContent: "flex-end",
-      gap: 25,
-      marginRight: 5,
+      alignItems: "center",
+      justifyContent: "space-between",
     },
 
-    /* =========================
-    ADD CARD
-========================= */
+    serviceTotalText: {
+      ...TYPE.subhead,
+      ...NUMERIC,
+      fontWeight: "600",
+      color: colors.success,
+      marginTop: SPACE.sm,
+    },
 
     addCard: {
       flex: 1,
       maxHeight: "100%",
-      backgroundColor: colors.white,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      paddingTop: 20,
-      paddingBottom: 20,
-      paddingHorizontal: 20,
-    },
-
-    addTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      color: colors.text,
-      marginBottom: 10,
-
-      textAlign: "center",
+      backgroundColor: colors.background,
+      borderTopLeftRadius: RADIUS.xl,
+      borderTopRightRadius: RADIUS.xl,
+      paddingTop: SPACE.xl,
+      paddingBottom: SPACE.xl,
+      paddingHorizontal: SPACE.xl,
     },
 
     modalHeader: {
@@ -1379,24 +1105,46 @@ export function createGlobalStyles(colors: typeof COLORS) {
       justifyContent: "space-between",
       alignItems: "center",
       width: "100%",
-      marginBottom: 10,
-      position: "relative",
+      minHeight: 52,
+      paddingVertical: SPACE.sm,
+      marginBottom: SPACE.xs,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.separator,
+    },
+
+    addTitle: {
+      ...TYPE.headline,
+      flex: 1,
+      color: colors.text,
+      textAlign: "center",
+      marginHorizontal: SPACE.sm,
     },
 
     leftAction: {
-      zIndex: 1, // Garante que a área de clique fique por cima do título
+      minWidth: 40,
+      height: 36,
+      borderRadius: RADIUS.pill,
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1,
     },
 
     rightAction: {
-      flexDirection: "column",
+      flexDirection: "row",
       alignItems: "center",
-      zIndex: 1, // Garante clique sobre o título
+      gap: 6,
+      minHeight: 36,
+      paddingHorizontal: SPACE.md,
+      borderRadius: RADIUS.pill,
+      backgroundColor: colors.titleBackground,
+      zIndex: 1,
     },
+
     right: {
       flexDirection: "row",
-      alignItems: "flex-end",
+      alignItems: "center",
+      gap: SPACE.sm,
       zIndex: 10,
-      gap: 25, // Garante clique sobre o título
     },
 
     modalCloseButton: {
@@ -1407,124 +1155,54 @@ export function createGlobalStyles(colors: typeof COLORS) {
       borderRadius: 18,
     },
 
-    label: {
-      fontFamily: "Poppins_500Medium",
-      alignSelf: "flex-start",
-      color: colors.text,
-      marginBottom: 6,
-      marginTop: 12,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: colors.borderNull,
-      width: "100%",
-      marginVertical: 10,
-    },
-
-    dividerVertical: {
-      width: 1,
-      backgroundColor: colors.borderNull,
-      height: "100%",
-      marginVertical: 5,
-      marginHorizontal: 20,
-    },
-
     saveTextStack: {
       flexDirection: "column",
-      alignItems: "flex-end", // Alinha os textos à direita (perto do ícone)
+      alignItems: "flex-end",
     },
 
     saveText: {
-      fontFamily: "Poppins_700Bold",
-      fontSize: 13, // Fonte um pouco menor já que está em duas linhas
-      color: colors.title,
-      lineHeight: 14, // Deixa as palavras mais próximas uma da outra
-    },
-
-    /* =========================
-   QUICK ACCESS CARD
-========================= */
-
-    quickButton: {
-      flex: 1,
-      backgroundColor: colors.white,
-      borderWidth: 1,
-      borderColor: colors.borderNull,
-      borderRadius: 18,
-      padding: 16,
-      paddingVertical: 10,
-      paddingHorizontal: 4,
-      alignItems: "center",
-      marginHorizontal: 2,
-    },
-
-    quickButtonHover: {
-      backgroundColor: colors.cardHover,
-    },
-
-    quickButtonText: {
-      marginTop: 10,
-      fontFamily: "Montserrat_400Regular",
-      fontSize: 12,
+      ...TYPE.subhead,
       fontWeight: "600",
-      color: colors.text,
-      textAlign: "center",
+      color: colors.primary,
     },
 
-    quickAccessEditButton: {
-      width: 60,
-      height: 60,
-      borderRadius: 12,
-      justifyContent: "center",
-      alignItems: "center",
+    /* ==========================================================
+       STATUS (legado — usados por formulários)
+    ========================================================== */
+
+    orcamentoStatusBadge: {
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: RADIUS.pill,
     },
 
-    /* =========================
-   WORK CARD
-========================= */
-
-    workCard: {
-      backgroundColor: colors.white,
-      flexDirection: "row",
-      alignItems: "center",
-      padding: 18,
-      borderRadius: 18,
-      marginBottom: 16,
-      shadowColor: colors.text,
-      shadowOpacity: 0.3,
-      shadowRadius: 5,
-      shadowOffset: {
-        width: 0,
-        height: 3,
-      },
-    },
-
-    workCardImage: {
-      width: 120,
-      height: 90,
-      borderRadius: 14,
-      marginRight: 16,
-    },
-
-    workCardContent: {
-      flex: 1,
-    },
-
-    workCardTitle: {
-      fontFamily: "Montserrat_600SemiBold",
-      fontSize: 17,
+    orcamentoStatusText: {
+      ...TYPE.caption,
       fontWeight: "700",
-      color: colors.text,
-      marginBottom: 4,
     },
 
-    workCardInfo: {
-      fontFamily: "Montserrat_400Regular",
-      fontSize: 13,
-      fontWeight: "400",
-      color: colors.textSecondary,
-      marginBottom: 12,
+    obraStatusBadge: {
+      alignSelf: "flex-start",
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: RADIUS.pill,
+      marginBottom: SPACE.xs,
     },
+
+    obraStatusText: {
+      ...TYPE.caption,
+      fontWeight: "700",
+    },
+
+    orcamentoInfo: {
+      ...TYPE.subhead,
+      color: colors.textSecondary,
+      marginBottom: SPACE.xs,
+    },
+
+    /* ==========================================================
+       PROGRESSO
+    ========================================================== */
 
     progressContainer: {
       flexDirection: "row",
@@ -1533,157 +1211,509 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     progressBarBackground: {
       flex: 1,
-      height: 8,
-      backgroundColor: colors.borderNull,
-      borderRadius: 999,
+      height: 6,
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: RADIUS.pill,
       overflow: "hidden",
     },
 
     progressBarFill: {
       height: "100%",
-      backgroundColor: colors.success,
-      borderRadius: 999,
+      backgroundColor: colors.primary,
+      borderRadius: RADIUS.pill,
     },
 
     workCardProgress: {
-      width: 42,
+      ...TYPE.footnote,
+      ...NUMERIC,
+      minWidth: 40,
       textAlign: "right",
-      marginLeft: 10,
+      marginLeft: SPACE.md,
       fontWeight: "600",
       color: colors.text,
     },
+
     /* ==========================================================
-   OBRAS CARD
-========================================================== */
+       CABEÇALHOS
+    ========================================================== */
 
-    obrasCard: {
-      position: "relative",
-      overflow: "hidden",
-
-      backgroundColor: colors.textSecondary,
-
-      borderRadius: 22,
-
-      marginBottom: 18,
-
-      shadowColor: colors.text,
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-
-      shadowOffset: {
-        width: 0,
-        height: 5,
-      },
-
-      elevation: 5,
-    },
-
-    /* =========================
-   IMAGEM DE FUNDO
-========================= */
-
-    /*obrasCardBackground: {
-    position: "absolute",
-
-    width: "100%",
-    height: "100%",
-
-    resizeMode: "cover",
-  },*/
-
-    obrasCardOverlay: {
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: colors.white,
-    },
-
-    /* =========================
-   CONTEÚDO
-========================= */
-
-    obrasCardContent: {
-      padding: 18,
-    },
-
-    /* =========================
-   HEADER
-========================= */
-
-    obrasCardHeader: {
+    appHeader: {
       flexDirection: "row",
-
-      justifyContent: "space-between",
-
       alignItems: "center",
-
-      marginBottom: 10,
+      justifyContent: "space-between",
+      paddingHorizontal: SPACE.lg,
+      paddingBottom: SPACE.sm,
+      backgroundColor: colors.background,
     },
 
-    menuButton: {
-      width: 36,
-
-      height: 36,
-
-      borderRadius: 18,
-
-      justifyContent: "center",
-
+    appHeaderButton: {
+      width: 40,
+      height: 40,
+      borderRadius: RADIUS.pill,
       alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
 
+    appHeaderBadge: {
+      position: "absolute",
+      top: 8,
+      right: 9,
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+      backgroundColor: colors.danger,
+      borderWidth: 1.5,
+      borderColor: colors.white,
+    },
+
+    homeHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: SPACE.sm,
+      marginBottom: SPACE.lg,
+    },
+
+    pageHeaderRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      justifyContent: "space-between",
+      marginTop: SPACE.sm,
+      marginBottom: SPACE.lg,
+      minHeight: 44,
+    },
+
+    pageHeaderTitle: {
+      ...TYPE.largeTitle,
+      color: colors.text,
+    },
+
+    pageHeaderSubtitle: {
+      ...TYPE.subhead,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    pageHeaderActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: SPACE.sm,
+      marginLeft: SPACE.lg,
+      marginBottom: 4,
+    },
+
+    pageHeaderAction: {
+      width: 40,
+      height: 40,
+      borderRadius: RADIUS.pill,
+      justifyContent: "center",
+      alignItems: "center",
+      position: "relative",
+    },
+
+    pageHeaderAddButton: {
+      backgroundColor: colors.primary,
+      ...elevation(2, colors.primary),
+    },
+
+    pageHeaderFilterButton: {
+      backgroundColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+    },
+
+    pageHeaderFilterActive: {
+      backgroundColor: colors.titleBackground,
+      borderColor: colors.primary,
+    },
+
+    pageHeaderButtonPressed: {
+      opacity: 0.7,
+      transform: [{ scale: 0.94 }],
+    },
+
+    pageHeaderFilterBadge: {
+      position: "absolute",
+      top: -4,
+      right: -4,
+      minWidth: 18,
+      height: 18,
+      paddingHorizontal: 4,
+      borderRadius: RADIUS.pill,
+      backgroundColor: colors.primary,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: colors.background,
+    },
+
+    pageHeaderFilterBadgeText: {
+      color: colors.onAccent,
+      fontSize: 10,
+      fontWeight: "800",
+      ...NUMERIC,
+    },
+
+    /* ==========================================================
+       DASHBOARD
+    ========================================================== */
+
+    dashboardGrid: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: SPACE.md,
+    },
+
+    dashboardCard: {
+      flexGrow: 1,
+      flexBasis: "45%",
+      minWidth: 140,
+      backgroundColor: colors.white,
+      borderRadius: RADIUS.lg,
+      padding: SPACE.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
+
+    dashboardCardIcon: {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: SPACE.md,
+    },
+
+    dashboardCardValue: {
+      ...TYPE.title1,
+      ...NUMERIC,
+      color: colors.text,
+    },
+
+    dashboardCardTitle: {
+      ...TYPE.footnote,
+      fontWeight: "500",
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    heroCard: {
+      borderRadius: RADIUS.xl,
+      padding: SPACE.xl,
+      overflow: "hidden",
+      ...elevation(3, colors.primary),
+    },
+
+    heroLabel: {
+      ...TYPE.footnote,
+      fontWeight: "600",
+      color: "rgba(255,255,255,0.85)",
+    },
+
+    heroValue: {
+      ...TYPE.largeTitle,
+      ...NUMERIC,
+      fontSize: 36,
+      color: "#FFFFFF",
+      marginTop: SPACE.xs,
+    },
+
+    heroFooter: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: SPACE.sm,
+      marginTop: SPACE.lg,
+    },
+
+    heroChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: RADIUS.pill,
+      backgroundColor: "rgba(255,255,255,0.18)",
+    },
+
+    heroChipText: {
+      ...TYPE.caption,
+      fontWeight: "600",
+      color: "#FFFFFF",
+    },
+
+    quickAccessHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+
+    quickAccessRow: {
+      flexDirection: "row",
+      gap: SPACE.md,
+    },
+
+    quickButton: {
+      flex: 1,
+      alignItems: "center",
+      paddingVertical: SPACE.md,
+      paddingHorizontal: SPACE.xs,
+      borderRadius: RADIUS.lg,
+      backgroundColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
+
+    quickButtonIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    quickButtonText: {
+      ...TYPE.caption,
+      fontWeight: "600",
+      marginTop: SPACE.sm,
+      color: colors.text,
+      textAlign: "center",
+    },
+
+    quickAccessEditButton: {
+      width: 44,
+      height: 44,
+      borderRadius: 12,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    chartLegendRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: SPACE.lg,
+      marginTop: SPACE.md,
+    },
+
+    chartLegendItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+    },
+
+    chartLegendSwatch: {
+      width: 10,
+      height: 10,
+      borderRadius: 3,
+    },
+
+    chartLegendText: {
+      ...TYPE.footnote,
+      ...NUMERIC,
+      color: colors.textSecondary,
+    },
+
+    chartLegendValue: {
+      ...TYPE.footnote,
+      ...NUMERIC,
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    /* ==========================================================
+       TELA MAIS / LISTAS AGRUPADAS
+    ========================================================== */
+
+    maisContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: SPACE.lg,
+      paddingTop: SPACE.sm,
+    },
+
+    groupedList: {
+      backgroundColor: colors.white,
+      borderRadius: RADIUS.lg,
+      overflow: "hidden",
+      marginBottom: SPACE.xl,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+    },
+
+    profileCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.white,
+      padding: SPACE.lg,
+      borderRadius: RADIUS.lg,
+      marginBottom: SPACE.xl,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
+
+    profileName: {
+      ...TYPE.title3,
+      color: colors.text,
+    },
+
+    profileEmail: {
+      ...TYPE.subhead,
+      marginTop: 2,
+      color: colors.textSecondary,
+    },
+
+    menuCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      minHeight: 56,
+      paddingHorizontal: SPACE.lg,
+      paddingVertical: SPACE.md,
       backgroundColor: colors.white,
     },
 
-    /* =========================
-   TITULO
-========================= */
-
-    obrasCardTitle: {
-      fontFamily: "Poppins_700Bold",
-
-      fontSize: 20,
-
-      color: colors.title,
+    menuCardDivider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.separator,
+      marginLeft: 64,
     },
 
-    /* =========================
-   STATUS
-========================= */
-
-    obrasStatusBadge: {
-      alignSelf: "flex-start",
-
-      paddingHorizontal: 12,
-
-      paddingVertical: 5,
-
-      borderRadius: 30,
-
-      marginRight: 14,
-
-      marginTop: 5,
+    menuCardIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 9,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: SPACE.lg,
     },
 
-    obrasStatusText: {
-      fontFamily: "Poppins_600SemiBold",
-
-      fontSize: 12,
+    menuText: {
+      ...TYPE.body,
+      color: colors.text,
     },
 
-    // ==============================
-    // PLANOS E ASSINATURA
-    // ==============================
+    menuCardDescription: {
+      ...TYPE.footnote,
+      color: colors.textSecondary,
+      marginTop: 1,
+    },
+
+    /* ==========================================================
+       BOTÕES
+    ========================================================== */
+
+    fabButton: {
+      position: "absolute",
+      bottom: 100,
+      right: SPACE.xxl,
+      width: 60,
+      height: 60,
+      borderRadius: RADIUS.pill,
+      backgroundColor: colors.primary,
+      justifyContent: "center",
+      alignItems: "center",
+      ...elevation(3, colors.primary),
+    },
+
+    bottomActionContainer: {
+      position: "absolute",
+      bottom: SPACE.lg,
+      left: SPACE.lg,
+      right: SPACE.lg,
+    },
+
+    bottomActionButton: {
+      height: 54,
+      flexDirection: "row",
+      gap: SPACE.sm,
+      backgroundColor: colors.primary,
+      borderRadius: RADIUS.md,
+      justifyContent: "center",
+      alignItems: "center",
+      ...elevation(3, colors.primary),
+    },
+
+    bottomActionButtonText: {
+      ...TYPE.headline,
+      color: colors.onAccent,
+    },
+
+    /* ==========================================================
+       CLIENTES
+    ========================================================== */
+
+    clientCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: colors.white,
+      borderRadius: RADIUS.lg,
+      padding: SPACE.lg,
+      marginBottom: SPACE.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
+
+    clientCardName: {
+      ...TYPE.headline,
+      color: colors.text,
+    },
+
+    clientCardInfo: {
+      ...TYPE.footnote,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    clientIcons: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: SPACE.sm,
+    },
+
+    /* ==========================================================
+       OBRAS (cards da home)
+    ========================================================== */
+
+    workCard: {
+      backgroundColor: colors.white,
+      padding: SPACE.lg,
+      borderRadius: RADIUS.lg,
+      marginBottom: SPACE.md,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(1, colors.shadow),
+    },
+
+    workCardTitle: {
+      ...TYPE.headline,
+      color: colors.text,
+    },
+
+    workCardInfo: {
+      ...TYPE.footnote,
+      color: colors.textSecondary,
+      marginTop: 2,
+    },
+
+    /* ==========================================================
+       PLANOS E ASSINATURA
+    ========================================================== */
 
     planPageContent: {
       paddingBottom: 30,
     },
 
     planCurrentCard: {
-      backgroundColor: COLORS.card,
+      backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
       borderRadius: 18,
       padding: 18,
       marginBottom: 16,
@@ -1703,7 +1733,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planCurrentLabel: {
       fontSize: 11,
       fontWeight: "700",
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       letterSpacing: 0.8,
       marginBottom: 5,
     },
@@ -1711,14 +1741,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planCurrentName: {
       fontSize: 24,
       fontWeight: "700",
-      color: COLORS.text,
+      color: colors.text,
       marginBottom: 5,
     },
 
     planCurrentDescription: {
       fontSize: 13,
       lineHeight: 19,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planActiveBadge: {
@@ -1728,23 +1758,23 @@ export function createGlobalStyles(colors: typeof COLORS) {
       paddingHorizontal: 9,
       paddingVertical: 6,
       borderRadius: 20,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
     },
 
     planActiveDot: {
       width: 7,
       height: 7,
       borderRadius: 4,
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
       marginRight: 6,
     },
 
     planActiveText: {
       fontSize: 11,
       fontWeight: "700",
-      color: COLORS.primary,
+      color: colors.primary,
     },
 
     planCurrentPriceRow: {
@@ -1756,18 +1786,18 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planCurrentPrice: {
       fontSize: 28,
       fontWeight: "800",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planCurrentPeriod: {
       fontSize: 13,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       marginLeft: 4,
     },
 
     planCurrentInfo: {
       borderTopWidth: 1,
-      borderTopColor: COLORS.border,
+      borderTopColor: colors.border,
       marginTop: 18,
       paddingTop: 16,
       gap: 14,
@@ -1781,14 +1811,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     planCurrentInfoLabel: {
       fontSize: 11,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       marginBottom: 2,
     },
 
     planCurrentInfoValue: {
       fontSize: 13,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planChangeButton: {
@@ -1796,7 +1826,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       height: 46,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: COLORS.primary,
+      borderColor: colors.primary,
       alignItems: "center",
       justifyContent: "center",
       flexDirection: "row",
@@ -1806,13 +1836,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planChangeButtonText: {
       fontSize: 14,
       fontWeight: "700",
-      color: COLORS.primary,
+      color: colors.primary,
     },
 
     planUsageCard: {
-      backgroundColor: COLORS.card,
+      backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
       borderRadius: 18,
       padding: 18,
       marginBottom: 16,
@@ -1821,13 +1851,13 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planSectionTitle: {
       fontSize: 17,
       fontWeight: "700",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planSectionDescription: {
       fontSize: 13,
       lineHeight: 19,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planUsageItem: {
@@ -1850,17 +1880,17 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planUsageTitle: {
       fontSize: 13,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planUsageValue: {
       fontSize: 12,
       fontWeight: "600",
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planUsageValueWarning: {
-      color: COLORS.warning,
+      color: colors.warning,
     },
 
     planUsageBarBackground: {
@@ -1868,7 +1898,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
       width: "100%",
       borderRadius: 10,
       overflow: "hidden",
-      backgroundColor: COLORS.border,
+      backgroundColor: colors.border,
     },
 
     planUsageBar: {
@@ -1881,16 +1911,16 @@ export function createGlobalStyles(colors: typeof COLORS) {
     },
 
     planOptionCard: {
-      backgroundColor: COLORS.card,
+      backgroundColor: colors.card,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
       borderRadius: 18,
       padding: 18,
       marginBottom: 14,
     },
 
     planOptionCardFeatured: {
-      borderColor: COLORS.primary,
+      borderColor: colors.primary,
     },
 
     planRecommendedBadge: {
@@ -1901,14 +1931,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
       paddingHorizontal: 9,
       paddingVertical: 5,
       borderRadius: 20,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       marginBottom: 12,
     },
 
     planRecommendedText: {
       fontSize: 11,
       fontWeight: "700",
-      color: COLORS.primary,
+      color: colors.primary,
     },
 
     planOptionHeader: {
@@ -1925,29 +1955,29 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planOptionName: {
       fontSize: 20,
       fontWeight: "700",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planCurrentBadge: {
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 12,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
     },
 
     planCurrentBadgeText: {
       fontSize: 10,
       fontWeight: "700",
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planOptionDescription: {
       marginTop: 5,
       fontSize: 13,
       lineHeight: 19,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planOptionPriceRow: {
@@ -1959,18 +1989,18 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planOptionPrice: {
       fontSize: 25,
       fontWeight: "800",
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planOptionPeriod: {
       fontSize: 12,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
       marginLeft: 4,
     },
 
     planLimits: {
       borderTopWidth: 1,
-      borderTopColor: COLORS.border,
+      borderTopColor: colors.border,
       paddingTop: 14,
       gap: 10,
     },
@@ -1983,7 +2013,7 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     planLimitText: {
       fontSize: 13,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planFeatures: {
@@ -2001,32 +2031,32 @@ export function createGlobalStyles(colors: typeof COLORS) {
       flex: 1,
       fontSize: 13,
       lineHeight: 18,
-      color: COLORS.text,
+      color: colors.text,
     },
 
     planSelectButton: {
       height: 44,
       borderRadius: 11,
-      backgroundColor: COLORS.primary,
+      backgroundColor: colors.primary,
       alignItems: "center",
       justifyContent: "center",
       marginTop: 18,
     },
 
     planSelectButtonCurrent: {
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
     },
 
     planSelectButtonText: {
       fontSize: 13,
       fontWeight: "700",
-      color: COLORS.white,
+      color: colors.white,
     },
 
     planSelectButtonTextCurrent: {
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     paymentMethodCard: {
@@ -2042,9 +2072,9 @@ export function createGlobalStyles(colors: typeof COLORS) {
       width: 44,
       height: 44,
       borderRadius: 12,
-      backgroundColor: COLORS.white,
+      backgroundColor: colors.white,
       borderWidth: 1,
-      borderColor: COLORS.border,
+      borderColor: colors.border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -2056,14 +2086,14 @@ export function createGlobalStyles(colors: typeof COLORS) {
     paymentMethodTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: COLORS.text,
+      color: colors.text,
       marginBottom: 3,
     },
 
     paymentMethodDescription: {
       fontSize: 12,
       lineHeight: 17,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
     planCancelButton: {
@@ -2082,34 +2112,21 @@ export function createGlobalStyles(colors: typeof COLORS) {
     planCancelTitle: {
       fontSize: 14,
       fontWeight: "600",
-      color: COLORS.danger,
+      color: colors.danger,
       marginBottom: 3,
     },
 
     planCancelDescription: {
       fontSize: 12,
       lineHeight: 17,
-      color: COLORS.textSecondary,
+      color: colors.textSecondary,
     },
 
-    pressOpacity: {
-      opacity: 0.7,
-    },
 
-    /* =========================
-   TEXTOS
-========================= */
 
-    obrasCardDate: {
-      fontFamily: "Poppins_400Regular",
-
-      fontSize: 13,
-
-      color: colors.text,
-
-      marginBottom: 4,
-    },
-
+    /* ==========================================================
+       NOTIFICAÇÕES
+    ========================================================== */
     /* ==========================================================
    MENU
 ========================================================== */
@@ -2280,6 +2297,11 @@ export function createGlobalStyles(colors: typeof COLORS) {
       fontWeight: "800",
     },
 
+
+    /* ==========================================================
+       MENU LATERAL (SIDEBAR)
+    ========================================================== */
+
     menuContainer: {
       flex: 1,
       flexDirection: "row",
@@ -2292,153 +2314,229 @@ export function createGlobalStyles(colors: typeof COLORS) {
 
     menu: {
       height: "100%",
-      elevation: 15,
-
-      shadowColor: colors.text,
-      shadowOffset: {
-        width: 4,
-        height: 0,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
+      backgroundColor: colors.background,
+      borderTopRightRadius: RADIUS.xl,
+      borderBottomRightRadius: RADIUS.xl,
+      overflow: "hidden",
+      ...elevation(3, colors.shadow),
     },
 
     menuScroll: {
-      paddingTop: 20,
-      paddingBottom: 25,
+      paddingHorizontal: SPACE.md,
+      paddingBottom: SPACE.xxl,
     },
 
     menuHeader: {
-      position: "relative",
+      flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 20,
-      paddingTop: 5,
-      paddingBottom: 22,
-    },
-
-    menuCloseButton: {
-      position: "absolute",
-      right: 16,
-      top: 0,
-
-      width: 38,
-      height: 38,
-
-      borderRadius: 19,
-
-      alignItems: "center",
-      justifyContent: "center",
-
-      zIndex: 10,
+      justifyContent: "space-between",
+      paddingHorizontal: SPACE.sm,
+      paddingBottom: SPACE.lg,
     },
 
     menuLogo: {
-      width: 190,
-      height: 60,
+      width: 120,
+      height: 40,
       resizeMode: "contain",
-      marginTop: -10,
-      marginBottom: 15,
     },
 
-    menuUserInfo: {
+    menuCloseButton: {
+      width: 34,
+      height: 34,
+      borderRadius: RADIUS.pill,
       alignItems: "center",
-      marginTop: 2,
+      justifyContent: "center",
+      backgroundColor: colors.surfaceMuted,
+    },
+
+    menuUserCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: SPACE.md,
+      padding: SPACE.md,
+      borderRadius: RADIUS.lg,
+      backgroundColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      marginBottom: SPACE.sm,
     },
 
     menuUserName: {
-      fontSize: 18,
-      fontWeight: "700",
-    },
-
-    menuUserRole: {
-      flexDirection: "row",
-      alignItems: "center",
-      marginTop: 5,
+      ...TYPE.headline,
+      color: colors.text,
     },
 
     menuUserRoleText: {
-      fontSize: 13,
-      marginLeft: 5,
-      fontWeight: "500",
-    },
-
-    menuDivider: {
-      height: 1,
-      marginHorizontal: 20,
+      ...TYPE.footnote,
+      color: colors.textSecondary,
+      marginTop: 1,
     },
 
     menuSection: {
-      marginTop: 23,
-      paddingHorizontal: 14,
+      marginTop: SPACE.lg,
     },
 
     menuSectionTitle: {
-      fontSize: 11,
-      fontWeight: "700",
-      letterSpacing: 1.1,
-
-      marginLeft: 8,
-      marginBottom: 8,
+      ...TYPE.overline,
+      color: colors.textSecondary,
+      marginLeft: SPACE.md,
+      marginBottom: SPACE.xs,
     },
 
     menuItem: {
-      minHeight: 56,
-
+      minHeight: 46,
       flexDirection: "row",
       alignItems: "center",
+      paddingHorizontal: SPACE.sm,
+      paddingVertical: 6,
+      borderRadius: RADIUS.md,
+      gap: SPACE.md,
+    },
 
-      paddingHorizontal: 7,
-      paddingVertical: 5,
-
-      borderRadius: 12,
+    menuItemActive: {
+      backgroundColor: colors.titleBackground,
     },
 
     menuIcon: {
-      width: 40,
-      height: 40,
-
-      borderRadius: 11,
-
+      width: 32,
+      height: 32,
+      borderRadius: 9,
       alignItems: "center",
       justifyContent: "center",
+      backgroundColor: colors.white,
     },
 
     menuItemContent: {
       flex: 1,
-      marginLeft: 13,
     },
 
     menuItemText: {
-      fontSize: 15,
+      ...TYPE.callout,
+      fontWeight: "500",
+      color: colors.text,
+    },
+
+    menuItemTextActive: {
+      color: colors.primary,
       fontWeight: "600",
     },
 
     menuItemSubtitle: {
-      fontSize: 12,
-      marginTop: 2,
+      ...TYPE.caption,
+      fontWeight: "400",
+      color: colors.textSecondary,
+      marginTop: 1,
+    },
+
+    menuSoonBadge: {
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: RADIUS.pill,
+      backgroundColor: colors.surfaceMuted,
+    },
+
+    menuSoonBadgeText: {
+      ...TYPE.caption,
+      fontSize: 10,
+      fontWeight: "700",
+      color: colors.textSecondary,
+    },
+
+    themeSegment: {
+      flexDirection: "row",
+      padding: 3,
+      borderRadius: RADIUS.md,
+      backgroundColor: colors.surfaceMuted,
+      marginHorizontal: SPACE.sm,
+      marginTop: SPACE.xs,
+    },
+
+    themeSegmentItem: {
+      flex: 1,
+      flexDirection: "row",
+      gap: 6,
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: 34,
+      borderRadius: 11,
+    },
+
+    themeSegmentItemActive: {
+      backgroundColor: colors.white,
+      ...elevation(1, colors.shadow),
+    },
+
+    themeSegmentText: {
+      ...TYPE.footnote,
+      fontWeight: "600",
+      color: colors.textSecondary,
+    },
+
+    themeSegmentTextActive: {
+      color: colors.text,
     },
 
     menuFooter: {
-      marginTop: 24,
+      marginTop: SPACE.xxl,
       alignItems: "center",
-      paddingHorizontal: 20,
-    },
-
-    menuFooterDivider: {
-      width: "100%",
-      height: 1,
-      marginBottom: 16,
     },
 
     menuFooterText: {
-      fontSize: 12,
-      fontWeight: "600",
+      ...TYPE.caption,
+      color: colors.textSecondary,
     },
 
     menuVersionText: {
-      fontSize: 11,
+      ...TYPE.caption,
+      fontWeight: "400",
+      marginTop: 2,
+      color: colors.placeholder,
+    },
+
+    /* ==========================================================
+       BARRA DE ABAS
+    ========================================================== */
+
+    tabBarWrap: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      paddingHorizontal: SPACE.md,
+    },
+
+    tabBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      height: colors.tabBarHeight,
+      paddingHorizontal: SPACE.xs,
+      borderRadius: RADIUS.xl,
+      backgroundColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: colors.separator,
+      ...elevation(3, colors.shadow),
+    },
+
+    tabBarItem: {
+      flex: 1,
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    tabBarIndicator: {
+      position: "absolute",
+      top: 7,
+      bottom: 7,
+      left: 4,
+      borderRadius: RADIUS.lg,
+      backgroundColor: colors.titleBackground,
+    },
+
+    tabBarLabel: {
+      fontSize: 10.5,
+      fontWeight: "600",
       marginTop: 3,
-      opacity: 0.7,
     },
 
     /*FILTROS*/
@@ -2821,11 +2919,3 @@ export function createGlobalStyles(colors: typeof COLORS) {
 }
 
 export const globalStyles = createGlobalStyles(COLORS);
-
-/* =========================
-   VARIÁVEIS GLOBAIS
-========================= */
-
-export const APP_CONFIG = {
-  tabBarActiveColor: COLORS.primary,
-};

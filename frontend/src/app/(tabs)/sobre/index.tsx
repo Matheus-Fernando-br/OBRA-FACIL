@@ -1,24 +1,25 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { ScrollView, Alert, Text, View } from "react-native";
 
-import { globalStyles, COLORS } from "@/styles/globalStyles";
 
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { AppButton } from "@/components/buttons/AppButton";
 
 export default function SobreScreen() {
+  const { styles, theme } = useTheme();
   return (
     <View style={{ flex: 1 }}>
       <PageHeader title="Sobre o OBRA-FÁCIL" />
 
       <ScrollView
-        style={globalStyles.container}
+        style={styles.container}
         showsVerticalScrollIndicator={false}
       >
         <SettingsSection title="O Projeto">
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               fontSize: 15,
               lineHeight: 24,
             }}
@@ -35,7 +36,7 @@ export default function SobreScreen() {
         <SettingsSection title="Para quem foi desenvolvido">
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               fontSize: 15,
               lineHeight: 24,
             }}
@@ -52,7 +53,7 @@ export default function SobreScreen() {
         <SettingsSection title="Principais recursos">
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               fontSize: 15,
               lineHeight: 24,
             }}
@@ -69,7 +70,7 @@ export default function SobreScreen() {
         <SettingsSection title="Tecnologias">
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               fontSize: 15,
               lineHeight: 24,
             }}
@@ -96,7 +97,7 @@ export default function SobreScreen() {
           >
             <Text
               style={{
-                color: COLORS.text,
+                color: theme.text,
                 fontWeight: "700",
                 fontSize: 16,
               }}
@@ -106,7 +107,7 @@ export default function SobreScreen() {
 
             <Text
               style={{
-                color: COLORS.textSecondary,
+                color: theme.textSecondary,
                 marginTop: 5,
               }}
             >
@@ -121,7 +122,7 @@ export default function SobreScreen() {
           >
             <Text
               style={{
-                color: COLORS.text,
+                color: theme.text,
                 fontWeight: "700",
                 fontSize: 16,
               }}
@@ -131,7 +132,7 @@ export default function SobreScreen() {
 
             <Text
               style={{
-                color: COLORS.textSecondary,
+                color: theme.textSecondary,
                 marginTop: 5,
               }}
             >
@@ -143,7 +144,7 @@ export default function SobreScreen() {
         <SettingsSection title="Sugestões">
           <Text
             style={{
-              color: COLORS.textSecondary,
+              color: theme.textSecondary,
               marginBottom: 18,
               lineHeight: 22,
             }}

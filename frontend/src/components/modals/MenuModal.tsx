@@ -1,523 +1,322 @@
 import { useEffect, useRef } from "react";
-import { useRouter } from "expo-router";
-import type { Href } from "expo-router";
 import {
   Modal,
   View,
   Text,
-  TouchableOpacity,
-  Image,
   Pressable,
   ScrollView,
   Animated,
-  Dimensions,
+  Easing,
+  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { router, usePathname } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
-import { COLORS, globalStyles } from "@/styles/globalStyles";
+import { Avatar } from "@/components/ui/Avatar";
+import { BrandMark } from "@/components/ui/BrandMark";
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onOptionPress?: (option: MenuOption) => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+type IconName = keyof typeof Ionicons.glyphMap;
 
-const MENU_WIDTH = Math.min(320, SCREEN_WIDTH * 0.82);
+interface MenuEntry {
+  label: string;
+  icon: IconName;
+  /** Sem rota = recurso ainda não disponível ("Em breve"). */
+  route?: string;
+  /** Prefixo usado para destacar a tela ativa. */
+  match?: string;
+  subtitle?: string;
+}
+
+const SECTIONS: { title: string; items: MenuEntry[] }[] = [
+  {
+    title: "Principal",
+    items: [
+      { label: "Início", icon: "home-outline", route: "/(tabs)", match: "/" },
+      { label: "Clientes", icon: "people-outline", route: "/clientes", match: "/clientes" },
+      {
+        label: "Orçamentos",
+        icon: "document-text-outline",
+        route: "/orcamentos",
+        match: "/orcamentos",
+      },
+      { label: "Obras", icon: "construct-outline", route: "/obras", match: "/obras" },
+    ],
+  },
+  {
+    title: "Gestão",
+    items: [
+      {
+        label: "Relatórios e PDFs",
+        icon: "bar-chart-outline",
+        route: "/relatorios",
+        match: "/relatorios",
+        subtitle: "Exportar dados e documentos",
+      },
+      { label: "Materiais", icon: "cube-outline" },
+      { label: "Financeiro", icon: "wallet-outline" },
+    ],
+  },
+  {
+    title: "Conta",
+    items: [
+      {
+        label: "Configurações",
+        icon: "settings-outline",
+        route: "/configuracoes",
+        match: "/configuracoes",
+      },
+      {
+        label: "Planos e assinatura",
+        icon: "card-outline",
+        route: "/planos",
+        match: "/planos",
+      },
+      { label: "Ajuda e suporte", icon: "help-circle-outline", route: "/ajuda", match: "/ajuda" },
+      {
+        label: "Sobre o Obra Fácil",
+        icon: "information-circle-outline",
+        route: "/sobre",
+        match: "/sobre",
+      },
+    ],
+  },
+];
 
 /**
- * ================================================================
- * ROTAS DO MENU
- * ================================================================
+ * Menu lateral: desliza da esquerda com mola, destaca a tela atual e
+ * permite alternar o tema sem sair do fluxo.
  */
-const MENU_ROUTES = {
-  inicio: "/",
-  clientes: "/clientes",
-  obras: "/obras",
-  orcamentos: "/orcamentos",
-  relatorios: "/relatorios",
-  documentos: "/documentos",
-  materiais: "/materiais",
-  financeiro: "/planos",
-  configuracoes: "/configuracoes",
-  ajuda: "/ajuda",
-  sobre: "/sobre",
-} as const;
-
-type MenuOption = keyof typeof MENU_ROUTES;
-
-export function MenuModal({ visible, onClose, onOptionPress }: Props) {
-  const router = useRouter();
-
-  const { isDark, theme, toggleTheme } = useTheme();
-
+export function MenuModal({ visible, onClose }: Props) {
+  const { isDark, theme, styles, setTheme } = useTheme();
   const { user } = useAuth();
+  const pathname = usePathname();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
 
-  const slideAnim = useRef(new Animated.Value(-MENU_WIDTH)).current;
+  const menuWidth = Math.min(340, width * 0.84);
 
-  const overlayAnim = useRef(new Animated.Value(0)).current;
+  const slide = useRef(new Animated.Value(-menuWidth)).current;
+  const fade = useRef(new Animated.Value(0)).current;
 
-  /*
-   * ABRIR MENU
-   */
   useEffect(() => {
     if (!visible) return;
 
-    slideAnim.setValue(-MENU_WIDTH);
-    overlayAnim.setValue(0);
+    slide.setValue(-menuWidth);
+    fade.setValue(0);
 
     Animated.parallel([
-      Animated.spring(slideAnim, {
+      Animated.spring(slide, {
         toValue: 0,
         useNativeDriver: true,
-        damping: 24,
-        stiffness: 180,
-        mass: 0.8,
+        damping: 26,
+        stiffness: 220,
+        mass: 0.9,
       }),
-
-      Animated.timing(overlayAnim, {
+      Animated.timing(fade, {
         toValue: 1,
         duration: 220,
+        easing: Easing.out(Easing.quad),
         useNativeDriver: true,
       }),
     ]).start();
-  }, [visible]);
+  }, [visible, menuWidth, slide, fade]);
 
-  /*
-   * FECHAR MENU
-   */
-  const handleClose = () => {
+  function close(after?: () => void) {
     Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: -MENU_WIDTH,
-        duration: 220,
+      Animated.timing(slide, {
+        toValue: -menuWidth,
+        duration: 200,
+        easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
-
-      Animated.timing(overlayAnim, {
+      Animated.timing(fade, {
         toValue: 0,
         duration: 180,
         useNativeDriver: true,
       }),
-    ]).start(({ finished }) => {
-      if (finished) {
-        onClose();
-      }
-    });
-  };
-
-  /*
-   * OPÇÃO DO MENU
-   */
-  const handleOptionPress = (option: MenuOption) => {
-    onOptionPress?.(option);
-
-    const destination = MENU_ROUTES[option];
-
-    // Fecha o modal primeiro e só depois troca a tela.
-    handleCloseWithNavigation(destination);
-  };
-
-  const handleCloseWithNavigation = (destination: Href) => {
-    Animated.parallel([
-      Animated.timing(slideAnim, {
-        toValue: -MENU_WIDTH,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-
-      Animated.timing(overlayAnim, {
-        toValue: 0,
-        duration: 180,
-        useNativeDriver: true,
-      }),
-    ]).start(({ finished }) => {
-      if (!finished) return;
-
+    ]).start(() => {
       onClose();
-      router.replace(destination);
+      after?.();
     });
-  };
+  }
 
-  const menuTextColor = theme.text;
+  function isActive(entry: MenuEntry) {
+    if (!entry.match) return false;
+    if (entry.match === "/") return pathname === "/" || pathname === "/index";
+    return pathname.startsWith(entry.match);
+  }
 
-  const menuSecondaryColor = theme.textSecondary ?? COLORS.textSecondary;
+  function renderItem(entry: MenuEntry) {
+    const active = isActive(entry);
+    const available = Boolean(entry.route);
+    const tint = active ? theme.primary : theme.text;
 
-  const iconColor = theme.text;
-
-  /*
-   * ITEM DO MENU
-   */
-  const renderMenuItem = (
-    option: MenuOption,
-    icon: keyof typeof Ionicons.glyphMap,
-    label: string,
-    subtitle?: string,
-  ) => {
     return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={() => handleOptionPress(option)}
-        style={globalStyles.menuItem}
-      >
-        <View
-          style={[
-            globalStyles.menuIcon,
-            {
-              backgroundColor: isDark
-                ? "rgba(255,255,255,0.07)"
-                : "rgba(0,0,0,0.045)",
-            },
-          ]}
-        >
-          <Ionicons name={icon} size={21} color={iconColor} />
-        </View>
-
-        <View style={globalStyles.menuItemContent}>
-          <Text
-            style={[
-              globalStyles.menuItemText,
-              {
-                color: menuTextColor,
-              },
-            ]}
-          >
-            {label}
-          </Text>
-
-          {subtitle && (
-            <Text
-              style={[
-                globalStyles.menuItemSubtitle,
-                {
-                  color: menuSecondaryColor,
-                },
-              ]}
-            >
-              {subtitle}
-            </Text>
-          )}
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  /*
-   * TÍTULO DA SEÇÃO
-   */
-  const renderSectionTitle = (title: string) => {
-    return (
-      <Text
-        style={[
-          globalStyles.menuSectionTitle,
-          {
-            color: menuSecondaryColor,
-          },
+      <Pressable
+        key={entry.label}
+        disabled={!available}
+        accessibilityRole="button"
+        accessibilityState={{ selected: active, disabled: !available }}
+        onPress={() =>
+          close(() => {
+            if (!active && entry.route) router.navigate(entry.route as any);
+          })
+        }
+        style={({ pressed }) => [
+          styles.menuItem,
+          active && styles.menuItemActive,
+          pressed && !active && { backgroundColor: theme.surfaceMuted },
+          !available && { opacity: 0.55 },
         ]}
       >
-        {title}
-      </Text>
+        <View style={styles.menuIcon}>
+          <Ionicons name={entry.icon} size={18} color={tint} />
+        </View>
+
+        <View style={styles.menuItemContent}>
+          <Text style={[styles.menuItemText, active && styles.menuItemTextActive]}>
+            {entry.label}
+          </Text>
+          {entry.subtitle && (
+            <Text style={styles.menuItemSubtitle}>{entry.subtitle}</Text>
+          )}
+        </View>
+
+        {!available ? (
+          <View style={styles.menuSoonBadge}>
+            <Text style={styles.menuSoonBadgeText}>EM BREVE</Text>
+          </View>
+        ) : (
+          !active && (
+            <Ionicons name="chevron-forward" size={16} color={theme.placeholder} />
+          )
+        )}
+      </Pressable>
     );
-  };
+  }
 
   return (
     <Modal
       visible={visible}
       transparent
       animationType="none"
-      onRequestClose={handleClose}
+      onRequestClose={() => close()}
       statusBarTranslucent
     >
-      <View style={globalStyles.menuContainer}>
-        {/* FUNDO ESCURO */}
-
-        <Animated.View
-          style={[
-            globalStyles.menuOverlay,
-            {
-              opacity: overlayAnim,
-            },
-          ]}
-        >
+      <View style={styles.menuContainer}>
+        <Animated.View style={[styles.menuOverlay, { opacity: fade }]}>
           <Pressable
-            style={{
-              flex: 1,
-            }}
-            onPress={handleClose}
+            style={{ flex: 1 }}
+            onPress={() => close()}
+            accessibilityLabel="Fechar menu"
           />
         </Animated.View>
 
-        {/* MENU */}
-
         <Animated.View
           style={[
-            globalStyles.menu,
-            {
-              width: MENU_WIDTH,
-              backgroundColor: theme.white,
-              transform: [
-                {
-                  translateX: slideAnim,
-                },
-              ],
-            },
+            styles.menu,
+            { width: menuWidth, transform: [{ translateX: slide }] },
           ]}
         >
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={globalStyles.menuScroll}
+            contentContainerStyle={[
+              styles.menuScroll,
+              { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 24 },
+            ]}
             bounces={false}
           >
-            {/* ============================== */}
-            {/* CABEÇALHO */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuHeader}>
-              {/* X */}
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={handleClose}
-                style={[
-                  globalStyles.menuCloseButton,
-                  {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.07)"
-                      : "rgba(0,0,0,0.045)",
-                  },
-                ]}
+            <View style={styles.menuHeader}>
+              <BrandMark size={30} />
+              <Pressable
+                onPress={() => close()}
+                style={styles.menuCloseButton}
+                accessibilityLabel="Fechar menu"
+                hitSlop={8}
               >
-                <Ionicons name="close" size={23} color={menuTextColor} />
-              </TouchableOpacity>
+                <Ionicons name="close" size={18} color={theme.text} />
+              </Pressable>
+            </View>
 
-              {/* LOGO */}
-
-              <Image
-                source={require("../../assets/images/logo_titulo.png")}
-                style={globalStyles.menuLogo}
-              />
-
-              {/* USUÁRIO */}
-
-              <View style={globalStyles.menuUserInfo}>
-                <Text
-                  style={[
-                    globalStyles.menuUserName,
-                    {
-                      color: menuTextColor,
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
+            <Pressable
+              style={styles.menuUserCard}
+              onPress={() =>
+                close(() => {
+                  if (!pathname.startsWith("/mais")) router.navigate("/mais");
+                })
+              }
+              accessibilityLabel="Ver perfil"
+            >
+              <Avatar name={user?.nome} size={42} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.menuUserName} numberOfLines={1}>
                   {user?.nome || "Usuário"}
                 </Text>
+                <Text style={styles.menuUserRoleText} numberOfLines={1}>
+                  {user?.email || "Conta Obra Fácil"}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={theme.placeholder} />
+            </Pressable>
 
-                <View style={globalStyles.menuUserRole}>
-                  <Ionicons
-                    name="shield-checkmark-outline"
-                    size={14}
-                    color={menuSecondaryColor}
-                  />
+            {SECTIONS.map((section) => (
+              <View key={section.title} style={styles.menuSection}>
+                <Text style={styles.menuSectionTitle}>{section.title}</Text>
+                {section.items.map(renderItem)}
+              </View>
+            ))}
 
-                  <Text
-                    style={[
-                      globalStyles.menuUserRoleText,
-                      {
-                        color: menuSecondaryColor,
-                      },
-                    ]}
-                  >
-                    Administrador
-                  </Text>
-                </View>
+            <View style={styles.menuSection}>
+              <Text style={styles.menuSectionTitle}>Aparência</Text>
+              <View style={styles.themeSegment} accessibilityRole="radiogroup">
+                {(
+                  [
+                    { mode: "light", label: "Claro", icon: "sunny-outline" },
+                    { mode: "dark", label: "Escuro", icon: "moon-outline" },
+                  ] as const
+                ).map((option) => {
+                  const selected = (option.mode === "dark") === isDark;
+                  return (
+                    <Pressable
+                      key={option.mode}
+                      onPress={() => setTheme(option.mode)}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected }}
+                      style={[
+                        styles.themeSegmentItem,
+                        selected && styles.themeSegmentItemActive,
+                      ]}
+                    >
+                      <Ionicons
+                        name={option.icon}
+                        size={15}
+                        color={selected ? theme.text : theme.textSecondary}
+                      />
+                      <Text
+                        style={[
+                          styles.themeSegmentText,
+                          selected && styles.themeSegmentTextActive,
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
 
-            {/* DIVISOR */}
-
-            <View
-              style={[
-                globalStyles.menuDivider,
-                {
-                  backgroundColor: isDark
-                    ? "rgba(255,255,255,0.10)"
-                    : "rgba(0,0,0,0.08)",
-                },
-              ]}
-            />
-
-            {/* ============================== */}
-            {/* PRINCIPAL */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuSection}>
-              {renderSectionTitle("PRINCIPAL")}
-
-              {renderMenuItem("inicio", "home-outline", "Início")}
-
-              {renderMenuItem("clientes", "people-outline", "Clientes")}
-
-              {renderMenuItem(
-                "orcamentos",
-                "document-text-outline",
-                "Orçamentos",
-              )}
-              {renderMenuItem("obras", "business-outline", "Obras / Serviços")}
-            </View>
-
-            {/* ============================== */}
-            {/* GESTÃO */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuSection}>
-              {renderSectionTitle("GESTÃO")}
-
-              {renderMenuItem("relatorios", "bar-chart-outline", "Relatórios")}
-
-              {renderMenuItem(
-                "documentos",
-                "document-attach-outline",
-                "Documentos / PDFs",
-              )}
-
-              {renderMenuItem("materiais", "cube-outline", "Materiais")}
-
-              {renderMenuItem(
-                "financeiro",
-                "wallet-outline",
-                "Planos / Assinaturas",
-              )}
-            </View>
-
-            {/* ============================== */}
-            {/* SISTEMA */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuSection}>
-              {renderSectionTitle("SISTEMA")}
-
-              {renderMenuItem(
-                "configuracoes",
-                "settings-outline",
-                "Configurações",
-              )}
-
-              {/* APARÊNCIA */}
-
-              <TouchableOpacity
-                activeOpacity={0.7}
-                onPress={toggleTheme}
-                style={globalStyles.menuItem}
-              >
-                <View
-                  style={[
-                    globalStyles.menuIcon,
-                    {
-                      backgroundColor: isDark
-                        ? "rgba(255,255,255,0.07)"
-                        : "rgba(0,0,0,0.045)",
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={isDark ? "moon-outline" : "sunny-outline"}
-                    size={21}
-                    color={iconColor}
-                  />
-                </View>
-
-                <View style={globalStyles.menuItemContent}>
-                  <Text
-                    style={[
-                      globalStyles.menuItemText,
-                      {
-                        color: menuTextColor,
-                      },
-                    ]}
-                  >
-                    Aparência
-                  </Text>
-
-                  <Text
-                    style={[
-                      globalStyles.menuItemSubtitle,
-                      {
-                        color: menuSecondaryColor,
-                      },
-                    ]}
-                  >
-                    {isDark ? "Modo escuro" : "Modo claro"}
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name="swap-horizontal-outline"
-                  size={19}
-                  color={menuSecondaryColor}
-                />
-              </TouchableOpacity>
-            </View>
-
-            {/* ============================== */}
-            {/* OUTROS */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuSection}>
-              {renderSectionTitle("OUTROS")}
-
-              {renderMenuItem(
-                "ajuda",
-                "help-circle-outline",
-                "Ajuda / Suporte",
-              )}
-
-              {renderMenuItem(
-                "sobre",
-                "information-circle-outline",
-                "Sobre o Obra Fácil",
-              )}
-            </View>
-
-            {/* ============================== */}
-            {/* RODAPÉ */}
-            {/* ============================== */}
-
-            <View style={globalStyles.menuFooter}>
-              <View
-                style={[
-                  globalStyles.menuFooterDivider,
-                  {
-                    backgroundColor: isDark
-                      ? "rgba(255,255,255,0.10)"
-                      : "rgba(0,0,0,0.08)",
-                  },
-                ]}
-              />
-
-              <Text
-                style={[
-                  globalStyles.menuFooterText,
-                  {
-                    color: menuSecondaryColor,
-                  },
-                ]}
-              >
-                Obra Fácil
-              </Text>
-
-              <Text
-                style={[
-                  globalStyles.menuVersionText,
-                  {
-                    color: menuSecondaryColor,
-                  },
-                ]}
-              >
-                Versão 1.0.0
-              </Text>
+            <View style={styles.menuFooter}>
+              <Text style={styles.menuFooterText}>Obra Fácil</Text>
+              <Text style={styles.menuVersionText}>Versão 1.0.0</Text>
             </View>
           </ScrollView>
         </Animated.View>
