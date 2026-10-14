@@ -1,69 +1,41 @@
-import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  ActivityIndicator,
-  Platform,
-} from "react-native";
+import { useState } from "react";
+import { Modal, View, Text, Pressable, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import * as Sharing from "expo-sharing";
-import * as WebBrowser from "expo-web-browser";
-import * as FileSystem from "expo-file-system";
-import { COLORS } from "@/styles/globalStyles";
+import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
+import { useTheme } from "@/contexts/ThemeContext";
 import { AppButton } from "@/components/buttons/AppButton";
+import { GeneratedPdf, printPdf, sharePdf } from "@/utils/pdf/output";
 
 interface Props {
   visible: boolean;
   onClose(): void;
-  pdfUri: string | null;
+  pdf: GeneratedPdf | null;
+  /** Nome do documento exibido no modal. */
   budgetTitle: string;
 }
 
-export function PdfViewerModal({
-  visible,
-  onClose,
-  pdfUri,
-  budgetTitle,
-}: Props) {
-  const [loading, setLoading] = useState(false);
+/**
+ * Documento pronto: visualizar/imprimir (o diálogo do sistema também
+ * permite "Salvar como PDF") ou compartilhar (WhatsApp, e-mail, Arquivos).
+ */
+export function PdfViewerModal({ visible, onClose, pdf, budgetTitle }: Props) {
+  const { styles, theme } = useTheme();
+  const [busy, setBusy] = useState<"print" | "share" | null>(null);
+  const [error, setError] = useState("");
+  const isWeb = Platform.OS === "web";
 
-  async function handleOpen() {
-    if (!pdfUri) return;
-
-    setLoading(true);
-
+  async function run(kind: "print" | "share") {
+    if (!pdf) return;
+    setError("");
+    setBusy(kind);
     try {
-      await WebBrowser.openBrowserAsync(pdfUri);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleShare() {
-    if (!pdfUri) return;
-
-    try {
-      await Sharing.shareAsync(pdfUri);
-    } catch (e) {
+      if (kind === "print") await printPdf(pdf);
+      else await sharePdf(pdf);
+    } catch (e: any) {
       console.log(e);
-    }
-  }
-
-  async function handleDownload() {
-    if (!pdfUri) return;
-
-    if (Platform.OS === "web") {
-      window.open(pdfUri, "_blank");
-      return;
-    }
-
-    const info = await FileSystem.getInfoAsync(pdfUri);
-
-    if (info.exists) {
-      await Sharing.shareAsync(pdfUri);
+      setError(e?.message || "Não foi possível concluir a ação.");
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -73,127 +45,84 @@ export function PdfViewerModal({
       animationType="fade"
       transparent
       statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          <View style={styles.header}>
-            <Text style={styles.title}>Orçamento Gerado</Text>
+      <Animated.View
+        entering={FadeIn.duration(180)}
+        style={{
+          flex: 1,
+          backgroundColor: theme.backgroundDestaque,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 20,
+        }}
+      >
+        <Animated.View
+          entering={ZoomIn.springify().damping(18)}
+          style={[styles.card, { width: "100%", maxWidth: 440, padding: 22, marginBottom: 0 }]}
+        >
+          <Pressable
+            onPress={onClose}
+            style={[styles.menuCloseButton, { position: "absolute", top: 14, right: 14, zIndex: 2 }]}
+            accessibilityLabel="Fechar"
+            hitSlop={8}
+          >
+            <Ionicons name="close" size={18} color={theme.text} />
+          </Pressable>
 
-            <Pressable onPress={onClose}>
-              <Ionicons name="close-circle" size={32} color={COLORS.primary} />
-            </Pressable>
+          <View style={{ alignItems: "center", marginTop: 6 }}>
+            <View
+              style={[
+                styles.emptyStateIcon,
+                { width: 72, height: 72, borderRadius: 22, marginBottom: 14 },
+              ]}
+            >
+              <Ionicons name="document-text" size={34} color={theme.primary} />
+            </View>
+            <Text style={styles.title}>Documento pronto</Text>
+            <Text style={[styles.emptyStateText, { marginTop: 6 }]} numberOfLines={2}>
+              {budgetTitle}
+            </Text>
+            {pdf?.fileName ? (
+              <View style={[styles.actionChip, { marginTop: 12 }]}>
+                <Ionicons name="document-outline" size={14} color={theme.textSecondary} />
+                <Text style={[styles.caption, { maxWidth: 260 }]} numberOfLines={1}>
+                  {pdf.fileName}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
-          <Ionicons
-            name="document-text"
-            size={90}
-            color={COLORS.primary}
-            style={{ alignSelf: "center" }}
-          />
-
-          <Text style={styles.success}>PDF gerado com sucesso!</Text>
-
-          <Text style={styles.subtitle}>{budgetTitle}</Text>
-
-          <View style={styles.preview}>
-            <Ionicons name="document" size={60} color={COLORS.primary} />
-
-            <Text style={styles.previewText}>
-              Seu orçamento já está pronto.
-            </Text>
-
-            <Text style={styles.previewSub}>
-              Clique em "Abrir PDF" para visualizar.
-            </Text>
-          </View>
-
-          {loading ? (
-            <ActivityIndicator
-              size="large"
-              color={COLORS.primary}
-              style={{ marginVertical: 20 }}
+          <View style={{ marginTop: 18 }}>
+            <AppButton
+              title={isWeb ? "Abrir para imprimir ou salvar" : "Visualizar e imprimir"}
+              icon="print-outline"
+              onPress={() => run("print")}
+              loading={busy === "print"}
+              disabled={!pdf || busy !== null}
             />
-          ) : (
-            <>
-              <AppButton title="Abrir PDF" onPress={handleOpen} />
+            {!isWeb && (
+              <AppButton
+                title="Compartilhar ou salvar"
+                icon="share-outline"
+                variant="tinted"
+                onPress={() => run("share")}
+                loading={busy === "share"}
+                disabled={!pdf || busy !== null}
+              />
+            )}
+            <AppButton title="Fechar" variant="ghost" onPress={onClose} />
+          </View>
 
-              <View style={{ height: 12 }} />
+          {error ? <Text style={styles.feedback}>{error}</Text> : null}
 
-              <AppButton title="Baixar PDF" onPress={handleDownload} />
-
-              <View style={{ height: 12 }} />
-
-              <AppButton title="Compartilhar" onPress={handleShare} />
-            </>
-          )}
-        </View>
-      </View>
+          <Text style={[styles.caption, { textAlign: "center", marginTop: 4 }]}>
+            {isWeb
+              ? "Na janela de impressão, escolha “Salvar como PDF”."
+              : "Envie pelo WhatsApp, e-mail ou salve em Arquivos/Drive."}
+          </Text>
+        </Animated.View>
+      </Animated.View>
     </Modal>
   );
 }
-
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: COLORS.backgroundDestaque,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 25,
-  },
-
-  container: {
-    width: "100%",
-    maxWidth: 520,
-    backgroundColor: COLORS.white,
-    borderRadius: 25,
-    padding: 25,
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-  },
-
-  success: {
-    marginTop: 15,
-    textAlign: "center",
-    fontSize: 19,
-    color: COLORS.success,
-    fontWeight: "700",
-  },
-
-  subtitle: {
-    marginTop: 8,
-    marginBottom: 20,
-    textAlign: "center",
-    fontSize: 15,
-    color: COLORS.placeholder,
-  },
-
-  preview: {
-    padding: 25,
-    borderRadius: 18,
-    backgroundColor: COLORS.white,
-    alignItems: "center",
-    marginBottom: 25,
-  },
-
-  previewText: {
-    marginTop: 15,
-    fontSize: 18,
-    fontWeight: "600",
-  },
-
-  previewSub: {
-    marginTop: 8,
-    color: COLORS.border,
-    textAlign: "center",
-  },
-});

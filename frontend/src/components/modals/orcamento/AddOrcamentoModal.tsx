@@ -50,8 +50,14 @@ export function AddOrcamentoModal({ visible, onClose }: Props) {
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={{ flex: 1 }}>
         <OrcamentoForm mode="add" onClose={onClose} onSave={handleSave} clientsList={clientsList} feedbackMessage={feedback} />
       </View>
     </Modal>

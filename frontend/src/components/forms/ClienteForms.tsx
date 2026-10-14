@@ -68,7 +68,6 @@ export function ClientForm({
   const [loadingOrcamentos, setLoadingOrcamentos] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [loadingClose, setLoadingClose] = useState(false);
   const documento = onlyNumbers(cpf);
   const telefoneLimpo = onlyNumbers(telefone);
 
@@ -78,13 +77,13 @@ export function ClientForm({
 
   const scrollRef = useRef<ScrollView>(null);
 
+  // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
+  useEffect(() => {
+    if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
+  }, [feedback]);
+
   const salvarRef = useRef<View>(null);
 
-  function irParaSalvar() {
-    scrollRef.current?.scrollToEnd({
-      animated: true,
-    });
-  }
 
   // ===========================
   // PREENCHER DADOS
@@ -330,25 +329,11 @@ export function ClientForm({
   // FECHAR
   // ===========================
 
-  async function handleClose() {
+  function handleClose() {
     if (loadingSubmit) return;
-
-    setLoadingClose(true);
-
-    setFeedback(
-      mode === "add"
-        ? "Cancelando cadastro..."
-        : mode === "edit"
-          ? "Cancelando alterações..."
-          : "Fechando...",
-    );
-
-    setTimeout(() => {
-      limparFormulario();
-      onClose();
-      setLoadingClose(false);
-      setFeedback("");
-    }, 1200);
+    limparFormulario();
+    setFeedback("");
+    onClose();
   }
 
   // ===========================
@@ -375,7 +360,8 @@ export function ClientForm({
         </Text>
 
         <Pressable
-          onPress={mode === "details" ? onEdit : irParaSalvar}
+          onPress={mode === "details" ? onEdit : handleSubmit}
+          disabled={loadingSubmit}
           style={styles.rightAction}
         >
           <Text style={styles.saveText}>
@@ -539,7 +525,6 @@ export function ClientForm({
                 mode === "add" ? "Cancelar Cadastro" : "Cancelar Alterações"
               }
               onPress={handleClose}
-              loading={loadingClose}
             />
           )}
         </View>

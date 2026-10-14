@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme } from "react-native";
 import {
   createContext,
   ReactNode,
@@ -16,13 +17,16 @@ import {
 } from "@/styles/globalStyles";
 
 type ThemeMode = "light" | "dark";
+/** Preferência salva: tema fixo ou acompanhar o sistema. */
+export type ThemePreference = ThemeMode | "system";
 
 interface ThemeContextData {
   isDark: boolean;
+  preference: ThemePreference;
   theme: ThemeColors;
   styles: ReturnType<typeof createGlobalStyles>;
   toggleTheme: () => void;
-  setTheme: (mode: ThemeMode) => void;
+  setTheme: (mode: ThemePreference) => void;
 }
 
 interface Props {
@@ -34,7 +38,10 @@ const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
 const THEME_STORAGE_KEY = "@obra_facil_theme";
 
 export function ThemeProvider({ children }: Props) {
-  const [mode, setMode] = useState<ThemeMode>("light");
+  const [preference, setPreference] = useState<ThemePreference>("light");
+  const systemScheme = useColorScheme();
+  const mode: ThemeMode =
+    preference === "system" ? (systemScheme === "dark" ? "dark" : "light") : preference;
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -45,8 +52,8 @@ export function ThemeProvider({ children }: Props) {
     try {
       const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
 
-      if (savedTheme === "dark" || savedTheme === "light") {
-        setMode(savedTheme);
+      if (savedTheme === "dark" || savedTheme === "light" || savedTheme === "system") {
+        setPreference(savedTheme);
       }
     } catch (error) {
       console.log("Erro ao carregar tema:", error);
@@ -55,9 +62,9 @@ export function ThemeProvider({ children }: Props) {
     }
   }
 
-  async function setTheme(themeMode: ThemeMode) {
+  async function setTheme(themeMode: ThemePreference) {
     try {
-      setMode(themeMode);
+      setPreference(themeMode);
 
       await AsyncStorage.setItem(THEME_STORAGE_KEY, themeMode);
     } catch (error) {
@@ -81,12 +88,13 @@ export function ThemeProvider({ children }: Props) {
   const value = useMemo(
     () => ({
       isDark: mode === "dark",
+      preference,
       theme,
       styles,
       toggleTheme,
       setTheme,
     }),
-    [mode, theme, styles],
+    [mode, preference, theme, styles],
   );
 
   if (!loaded) {

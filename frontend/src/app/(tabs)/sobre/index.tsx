@@ -10,7 +10,7 @@ export default function SobreScreen() {
   const { styles, theme } = useTheme();
   return (
     <View style={{ flex: 1 }}>
-      <PageHeader title="Sobre o OBRA-FÁCIL" />
+      <PageHeader title="Sobre" subtitle="Obra Fácil · versão 1.0.0" />
 
       <ScrollView
         style={styles.container}
@@ -154,13 +154,10 @@ export default function SobreScreen() {
           </Text>
 
           <AppButton
-            title="Enviar Feedback"
-            onPress={() =>
-              Alert.alert(
-                "Em breve",
-                "O envio de feedback estará disponível nas próximas versões.",
-              )
-            }
+            title="Envio de feedback em breve"
+            variant="secondary"
+            disabled
+            onPress={() => {}}
           />
         </SettingsSection>
       </ScrollView>

@@ -1,159 +1,82 @@
-import { useTheme } from "@/contexts/ThemeContext";
-import { View, ScrollView } from "react-native";
+import { View, ScrollView, Text } from "react-native";
 import { useState } from "react";
-import { PageHeader } from "@/components/layout/PageHeader";
 import { router } from "expo-router";
+import { useTheme, ThemePreference } from "@/contexts/ThemeContext";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
-import { AppSwitch } from "@/components/settings/AppSwitch";
-import { SettingsSelect } from "@/components/settings/SettingsSelect";
+import { StatusSegment } from "@/components/ui/StatusSegment";
 import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 
+/*
+ * Apenas opções que funcionam de fato. Chaves antigas (animações,
+ * backup, sincronização, inicialização rápida, salvar filtros,
+ * última tela) não estavam ligadas a nenhum comportamento e foram
+ * retiradas para não induzir o usuário a erro.
+ */
 export default function ConfiguracoesScreen() {
-  const { styles } = useTheme();
+  const { styles, theme, preference, setTheme } = useTheme();
   const [deleteVisible, setDeleteVisible] = useState(false);
 
-  const [tema, setTema] = useState("Sistema");
-  const [animacoes, setAnimacoes] = useState(true);
-
-  const [inicioAutomatico, setInicioAutomatico] = useState(true);
-  const [lembrarFiltros, setLembrarFiltros] = useState(true);
-  const [abrirUltimaTela, setAbrirUltimaTela] = useState(false);
-
-  const [backupAutomatico, setBackupAutomatico] = useState(true);
-  const [sincronizacao, setSincronizacao] = useState("Automática");
-
   return (
-    <View style={{ flex: 1 }}>
-      {/* HEADER FIXO */}
-      <PageHeader title="Configurações" />
+    <View style={styles.screen}>
+      <PageHeader title="Configurações" subtitle="Preferências do aplicativo" />
 
-      {/* CONTEÚDO QUE ROLA */}
       <ScrollView
         style={styles.container}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: 30,
-        }}
+        contentContainerStyle={{ paddingBottom: 140 }}
       >
-        <SettingsSection title="Aparência">
-          <SettingsItem
-            icon="moon"
-            title="Tema"
-            description="Modo de aparência"
-            rightComponent={
-              <SettingsSelect
-                title="Tema"
-                value={tema}
-                options={["Sistema", "Claro", "Escuro"]}
-                onChange={setTema}
-              />
-            }
-          />
+        <Text style={styles.subtitle}>Aparência</Text>
+        <StatusSegment<ThemePreference>
+          value={preference}
+          onChange={setTheme}
+          options={[
+            { value: "light", label: "Claro" },
+            { value: "dark", label: "Escuro" },
+            { value: "system", label: "Sistema" },
+          ]}
+        />
+        <Text style={[styles.caption, { marginHorizontal: 4, marginBottom: 12 }]}>
+          “Sistema” acompanha o modo claro/escuro do aparelho automaticamente.
+        </Text>
 
+        <SettingsSection title="Documentos">
           <SettingsItem
-            icon="sparkles"
-            title="Animações"
-            description="Ativar animações"
-            rightComponent={
-              <AppSwitch value={animacoes} onValueChange={setAnimacoes} />
-            }
-          />
-        </SettingsSection>
-
-        <SettingsSection title="Sincronização">
-          <SettingsItem
-            icon="cloud-upload"
-            title="Backup automático"
-            description="Enviar dados automaticamente"
-            rightComponent={
-              <AppSwitch
-                value={backupAutomatico}
-                onValueChange={setBackupAutomatico}
-              />
-            }
-          />
-
-          <SettingsItem
-            icon="sync"
-            title="Modo"
-            description="Forma de sincronização"
-            rightComponent={
-              <SettingsSelect
-                title="Modo"
-                value={sincronizacao}
-                options={["Automática", "Manual", "Somente Wi-Fi"]}
-                onChange={setSincronizacao}
-              />
-            }
-          />
-        </SettingsSection>
-        <SettingsSection title="Aplicativo">
-          <SettingsItem
-            icon="rocket"
-            title="Inicialização rápida"
-            description="Abrir o app mais rápido"
-            rightComponent={
-              <AppSwitch
-                value={inicioAutomatico}
-                onValueChange={setInicioAutomatico}
-              />
-            }
-          />
-
-          <SettingsItem
-            icon="filter"
-            title="Salvar filtros"
-            description="Memorizar filtros utilizados"
-            rightComponent={
-              <AppSwitch
-                value={lembrarFiltros}
-                onValueChange={setLembrarFiltros}
-              />
-            }
-          />
-
-          <SettingsItem
-            icon="layers"
-            title="Última tela"
-            description="Abrir última tela acessada"
-            rightComponent={
-              <AppSwitch
-                value={abrirUltimaTela}
-                onValueChange={setAbrirUltimaTela}
-              />
-            }
-          />
-          <SettingsItem
-            icon="information-circle"
-            title="Sobre o app"
-            description="Versão e informações"
-            onPress={() => router.push("../sobre")}
+            icon="document-text"
+            iconColor={theme.primary}
+            title="Relatórios e PDFs"
+            description="Formato, marca, assinatura e valores"
+            onPress={() => router.push("/relatorios")}
           />
         </SettingsSection>
 
         <SettingsSection title="Conta">
           <SettingsItem
             icon="shield-checkmark"
-            title="Privacidade e Segurança"
-            description="Senha e autenticação"
-            onPress={() => router.push("../seguranca")}
+            iconColor={theme.info}
+            title="Segurança"
+            description="Senha e acesso"
+            onPress={() => router.push("/seguranca")}
           />
-
+          <SettingsItem
+            icon="information-circle"
+            iconColor={theme.textSecondary}
+            title="Sobre o app"
+            description="Versão e informações"
+            onPress={() => router.push("/sobre")}
+          />
           <SettingsItem
             icon="trash"
-            title="Excluir Conta"
-            description="Remover permanentemente"
+            title="Excluir conta"
+            description="Remove permanentemente seus dados"
             danger
             onPress={() => setDeleteVisible(true)}
           />
         </SettingsSection>
       </ScrollView>
 
-      <DeleteAccountModal
-        visible={deleteVisible}
-        onClose={() => setDeleteVisible(false)}
-      />
+      <DeleteAccountModal visible={deleteVisible} onClose={() => setDeleteVisible(false)} />
     </View>
   );
 }

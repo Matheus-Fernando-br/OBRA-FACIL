@@ -6,6 +6,8 @@ import { getClients } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { PdfViewerModal } from "@/components/modals/PdfViewerModal";
 import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
+import { loadPdfOptions } from "@/utils/pdf/preferences";
+import { GeneratedPdf } from "@/utils/pdf/output";
 
 interface Props {
   visible: boolean;
@@ -22,36 +24,39 @@ export function BudgetDetailsModal({
   onClose,
   onEdit,
   onClientDetails,
-  onClientEdit,
 }: Props) {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
-  const [pdfLoading, setPdfLoading] = useState(false);
-  const [pdfUri, setPdfUri] = useState<string | null>(null);
+  const [pdf, setPdf] = useState<GeneratedPdf | null>(null);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   useEffect(() => {
-    if (visible && token) getClients(token).then(setClientsList);
+    if (visible && token) {
+      getClients(token)
+        .then((data) => setClientsList(Array.isArray(data) ? data : []))
+        .catch((e) => console.log("ERRO AO CARREGAR CLIENTES:", e));
+    }
   }, [visible, token]);
 
+  /** Gera o PDF; lança erro para o formulário exibir a mensagem. */
   const handleGeneratePdf = async () => {
     if (!budget) return;
 
-    setPdfLoading(true);
+    const clientId =
+      typeof budget.cliente === "object" ? budget.cliente?._id : budget.cliente;
+    const client =
+      clientsList.find((c) => c._id === clientId) ??
+      (typeof budget.cliente === "object" ? budget.cliente : null);
 
-    try {
-      const uri = await generateBudgetPdf(budget);
+    const generated = await generateBudgetPdf({
+      budget,
+      client,
+      issuer: user ?? undefined,
+      options: await loadPdfOptions(),
+    });
 
-      setPdfUri(uri);
-
-      setShowPdfViewer(true);
-    } catch (e) {
-      console.log(e);
-
-      alert("Erro ao gerar PDF.");
-    } finally {
-      setPdfLoading(false);
-    }
+    setPdf(generated);
+    setShowPdfViewer(true);
   };
 
   if (!budget) return null;
@@ -62,8 +67,9 @@ export function BudgetDetailsModal({
       animationType="slide"
       transparent
       statusBarTranslucent
+      onRequestClose={onClose}
     >
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.6)" }}>
+      <View style={{ flex: 1 }}>
         <OrcamentoForm
           mode="details"
           initialData={budget}
@@ -72,12 +78,11 @@ export function BudgetDetailsModal({
           onGeneratePdf={handleGeneratePdf}
           onEdit={onEdit}
           onClientDetails={onClientDetails}
-          onClientEdit={onClientEdit}
         />
         <PdfViewerModal
           visible={showPdfViewer}
           onClose={() => setShowPdfViewer(false)}
-          pdfUri={pdfUri}
+          pdf={pdf}
           budgetTitle={budget.nome}
         />
       </View>

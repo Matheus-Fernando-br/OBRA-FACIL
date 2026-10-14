@@ -4,18 +4,20 @@ import {
   Text,
   Pressable,
   ScrollView,
-  Alert,
+  ActivityIndicator,
   Animated,
   Dimensions,
 } from "react-native";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 
-import { Notification, notificationsMock } from "@/data/notifications";
+import { Notification } from "@/data/notifications";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAlerts } from "@/utils/alerts";
 
 import { NotificationCard } from "@/components/cards/NotificationCard";
 
@@ -33,8 +35,10 @@ const NOTIFICATION_WIDTH = Math.min(390, SCREEN_WIDTH * 0.86);
 export function NotificationModal({ visible, onClose }: Props) {
   const { isDark, theme, styles } = useTheme();
 
-  const [notifications, setNotifications] =
-    useState<Notification[]>(notificationsMock);
+  const { token } = useAuth();
+  // Alertas reais (orçamentos a vencer/vencidos, obras atrasadas ou com
+  // entrega próxima) — antes eram exibidos dados fictícios.
+  const { items: notifications, loading, markRead, dismiss } = useAlerts(token, visible);
 
   const slideAnim = useRef(new Animated.Value(NOTIFICATION_WIDTH)).current;
 
@@ -115,21 +119,12 @@ export function NotificationModal({ visible, onClose }: Props) {
    * ABRIR NOTIFICAÇÃO
    */
   function openNotification(notification: Notification) {
-    setNotifications((old) =>
-      old.map((item) =>
-        item.id === notification.id
-          ? {
-              ...item,
-              read: true,
-            }
-          : item,
-      ),
-    );
+    markRead([notification.id]);
 
     handleClose();
 
     setTimeout(() => {
-      router.push(notification.route as any);
+      router.navigate(notification.route as any);
     }, 230);
   }
 
@@ -137,28 +132,14 @@ export function NotificationModal({ visible, onClose }: Props) {
    * REMOVER
    */
   function removeNotification(id: string) {
-    setNotifications((old) => old.filter((item) => item.id !== id));
+    dismiss([id]);
   }
 
   /*
-   * LIMPAR TODAS
+   * LIMPAR TODAS (sem Alert: o Alert do React Native não funciona na web)
    */
   function clearAll() {
-    Alert.alert(
-      "Limpar notificações",
-      "Deseja remover todas as notificações?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Limpar",
-          style: "destructive",
-          onPress: () => setNotifications([]),
-        },
-      ],
-    );
+    dismiss(notifications.map((n) => n.id));
   }
 
   /*
@@ -166,13 +147,7 @@ export function NotificationModal({ visible, onClose }: Props) {
    */
   function readAll() {
     if (unreadCount === 0) return;
-
-    setNotifications((old) =>
-      old.map((item) => ({
-        ...item,
-        read: true,
-      })),
-    );
+    markRead(notifications.map((n) => n.id));
   }
 
   const textColor = theme.text;
@@ -452,7 +427,11 @@ export function NotificationModal({ visible, onClose }: Props) {
             {/* VAZIO */}
             {/* ================================= */}
 
-            {notifications.length === 0 && (
+            {loading && notifications.length === 0 && (
+              <ActivityIndicator style={{ marginTop: 60 }} color={theme.primary} />
+            )}
+
+            {!loading && notifications.length === 0 && (
               <View style={styles.notificationEmpty}>
                 <View
                   style={[
@@ -490,7 +469,7 @@ export function NotificationModal({ visible, onClose }: Props) {
                     },
                   ]}
                 >
-                  Você não possui nenhuma notificação no momento.
+                  Nenhum orçamento vencendo e nenhuma obra atrasada no momento.
                 </Text>
               </View>
             )}

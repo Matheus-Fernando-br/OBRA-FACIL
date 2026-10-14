@@ -11,14 +11,16 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { FadeInView } from "@/components/ui/FadeInView";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { formatDate } from "@/utils/format";
+import { getClientName, isWorkFinished } from "@/utils/status";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getWork, getBudgets, archiveWork } from "../../services/api";
+import { getWork, getBudgets, getClients, archiveWork } from "../../services/api";
 
 import { ObrasCard } from "@/components/cards/obras/ObrasCard";
 
-import { Obra, Orcamento } from "@/components/layout/interface";
+import { Cliente, Obra, Orcamento } from "@/components/layout/interface";
 
 import { AddObrasModal } from "@/components/modals/obras/AddObrasModal";
 import { CreateObraModal } from "@/components/modals/obras/CreateObraModal";
@@ -57,6 +59,8 @@ export default function ObrasScreen() {
   const [worksList, setWorksList] = useState<Obra[]>([]);
 
   const [budgets, setBudgets] = useState<Orcamento[]>([]);
+
+  const [clients, setClients] = useState<Cliente[]>([]);
 
   const [selectedWork, setSelectedWork] = useState<Obra | null>(null);
 
@@ -101,10 +105,14 @@ export default function ObrasScreen() {
 
       setLoading(true);
 
-      const [worksData, budgetsData] = await Promise.all([
+      const [worksData, budgetsData, clientsData] = await Promise.all([
         getWork(token),
         getBudgets(token),
+        // Necessário para exibir o nome quando o orçamento traz só o ID do cliente.
+        getClients(token).catch(() => []),
       ]);
+
+      setClients(Array.isArray(clientsData) ? clientsData : []);
 
       /* ======================================================
           OBRAS
@@ -141,6 +149,15 @@ export default function ObrasScreen() {
 
     loadWorks();
   }, [token]);
+
+  // Atalho "Nova obra" (dashboard): abre a seleção de orçamento direto.
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  useEffect(() => {
+    if (action !== "new") return;
+    setAddObraVisible(true);
+    router.setParams({ action: undefined });
+  }, [action]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -186,6 +203,17 @@ export default function ObrasScreen() {
       return acc;
     }, {});
   }, [budgets]);
+
+  const clientsById = useMemo(() => {
+    return clients.reduce((acc: Record<string, Cliente>, client) => {
+      acc[client._id] = client;
+      return acc;
+    }, {});
+  }, [clients]);
+
+  function clientLabel(budget?: Orcamento) {
+    return budget ? getClientName(budget.cliente, clientsById) : "Cliente não encontrado";
+  }
 
   /* ============================================================
       PEGAR ORÇAMENTO DA OBRA
@@ -396,10 +424,7 @@ export default function ObrasScreen() {
           NOME DO CLIENTE
         ====================================================== */
 
-      const nomeCliente =
-        typeof budget?.cliente === "string"
-          ? budget.cliente.toLowerCase()
-          : (budget?.cliente?.nome?.toLowerCase() ?? "");
+      const nomeCliente = clientLabel(budget).toLowerCase();
 
       /* ======================================================
           BUSCA
@@ -492,7 +517,14 @@ export default function ObrasScreen() {
 
       const valor = Number(budget?.preco_com_bdi ?? 0);
 
-      if (valor < workFilters.value.min || valor > workFilters.value.max) {
+      // O teto do controle (maxValue) significa "sem limite": antes, obras
+      // acima de R$ 500 mil eram ocultadas mesmo sem filtro ativo.
+      const semTeto = workFilters.value.max >= maxValue;
+
+      if (
+        valor < workFilters.value.min ||
+        (!semTeto && valor > workFilters.value.max)
+      ) {
         return false;
       }
 
@@ -513,15 +545,9 @@ export default function ObrasScreen() {
         ==================================================== */
 
       if (workFilters.clientSort) {
-        const clientA =
-          typeof budgetA?.cliente === "string"
-            ? budgetA.cliente
-            : (budgetA?.cliente?.nome ?? "");
+        const clientA = clientLabel(budgetA);
 
-        const clientB =
-          typeof budgetB?.cliente === "string"
-            ? budgetB.cliente
-            : (budgetB?.cliente?.nome ?? "");
+        const clientB = clientLabel(budgetB);
 
         const comparison = clientA.localeCompare(clientB, "pt-BR", {
           sensitivity: "base",
@@ -552,7 +578,7 @@ export default function ObrasScreen() {
     });
 
     return filtered;
-  }, [worksList, budgetsMap, search, workFilters]);
+  }, [worksList, budgetsMap, clientsById, search, workFilters]);
 
   /* ============================================================
       ESTADOS DISPONÍVEIS
@@ -911,16 +937,13 @@ export default function ObrasScreen() {
               <FadeInView key={work._id} index={index}>
                 <ObrasCard
                   title={budget?.nome ?? "Obra"}
-                  client={
-                    typeof budget?.cliente === "string"
-                      ? budget.cliente
-                      : (budget?.cliente?.nome ?? "Cliente não encontrado")
-                  }
+                  client={clientLabel(budget)}
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
                   EndDate={formatDate(work.data_fim_prevista)}
                   startDate={formatDate(work.data_inicio_prevista)}
                   arquivado={work.arquivado}
+                  finished={isWorkFinished(work)}
                   onDetails={() => {
                     setSelectedWork(work);
                     setDetailsVisible(true);

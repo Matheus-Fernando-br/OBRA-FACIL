@@ -82,7 +82,7 @@ export async function resendVerificationCode(data: { email: string }) {
 // USER
 // ==========================
 
-import { Usuario } from "@/components/layout/interface";
+import { UpdateUsuario } from "@/components/layout/interface";
 
 export async function getUser(token: string) {
   const { data } = await api.get("/user/me", {
@@ -94,7 +94,7 @@ export async function getUser(token: string) {
   return data;
 }
 
-export async function updateUser(id: string, body: Usuario, token: string) {
+export async function updateUser(id: string, body: UpdateUsuario, token: string) {
   const { data } = await api.put(`/user/${id}`, body, {
     headers: {
       Authorization: `Bearer ${token}`,

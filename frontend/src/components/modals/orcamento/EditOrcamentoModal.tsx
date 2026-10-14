@@ -43,8 +43,11 @@ export function EditOrcamentoModal({
       await updateBudget(budget._id, formData, token!);
       onClose();
       onSuccess();
-    } catch (error) {
-      setFeedback("Erro ao atualizar Orçamento.");
+    } catch (error: any) {
+      console.log("ERRO AO ATUALIZAR ORÇAMENTO:", error?.response?.data || error);
+      // Repassa o erro: antes ele era engolido e o formulário exibia
+      // "Orçamento salvo com sucesso!" mesmo com falha na API.
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -53,8 +56,14 @@ export function EditOrcamentoModal({
   if (!budget) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
-      <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)" }}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={{ flex: 1 }}>
         <OrcamentoForm
           mode="edit"
           initialData={budget}

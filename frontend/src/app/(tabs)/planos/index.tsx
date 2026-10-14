@@ -1,6 +1,8 @@
+import { useAuth } from "@/contexts/AuthContext";
+import { getBudgets, getClients, getWork } from "@/services/api";
 import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { router } from "expo-router";
 
@@ -88,20 +90,40 @@ export default function PlanosScreen() {
   const planoAtual =
     planos.find((plano) => plano.id === "profissional") || planos[0];
 
-  const [assinatura] = useState<Assinatura>({
+  const { token } = useAuth();
+
+  const [assinatura, setAssinatura] = useState<Assinatura>({
     plano: planoAtual,
     status: "ATIVA",
     inicio: "2026-08-10",
     proxima_cobranca: "2026-10-10",
     forma_pagamento: "Cartão de crédito",
     uso: {
-      clientes: 32,
-      orcamentos: 78,
-      obras: 12,
-      usuarios: 2,
-      armazenamento: 3,
+      clientes: 0,
+      orcamentos: 0,
+      obras: 0,
+      usuarios: 1,
+      armazenamento: 0,
     },
   });
+
+  // Uso real do plano: antes eram números fixos no código (32/78/12).
+  useEffect(() => {
+    if (!token) return;
+    Promise.all([getClients(token), getBudgets(token), getWork(token)])
+      .then(([clients, budgets, works]) =>
+        setAssinatura((prev) => ({
+          ...prev,
+          uso: {
+            ...prev.uso,
+            clientes: Array.isArray(clients) ? clients.length : 0,
+            orcamentos: Array.isArray(budgets) ? budgets.length : 0,
+            obras: Array.isArray(works) ? works.length : (works?.obras?.length ?? 0),
+          },
+        })),
+      )
+      .catch((error) => console.log("ERRO AO CARREGAR USO DO PLANO:", error));
+  }, [token]);
 
   function handleChangePlan() {
     Alert.alert("Alterar plano", "Escolha um dos planos disponíveis abaixo.");

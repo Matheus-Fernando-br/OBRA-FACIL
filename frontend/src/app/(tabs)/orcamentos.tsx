@@ -12,11 +12,12 @@ import { FadeInView } from "@/components/ui/FadeInView";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { StatusSegment } from "@/components/ui/StatusSegment";
 import { formatDate } from "@/utils/format";
-import { isBudgetExpired } from "@/utils/status";
+import { getClientName, isBudgetExpired } from "@/utils/status";
+import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
 
-import { getBudgets, archiveBudget } from "../../services/api";
+import { getBudgets, getClients, archiveBudget } from "../../services/api";
 
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
 
@@ -53,6 +54,16 @@ export default function OrcamentosScreen() {
   const [loading, setLoading] = useState(true);
 
   const [budgetsList, setBudgetsList] = useState<Orcamento[]>([]);
+
+  const [clientsList, setClientsList] = useState<Cliente[]>([]);
+
+  // Nome do cliente mesmo quando o orçamento traz apenas o ID.
+  const clientsById = useMemo(() => {
+    return clientsList.reduce((acc: Record<string, Cliente>, client) => {
+      acc[client._id] = client;
+      return acc;
+    }, {});
+  }, [clientsList]);
 
   const [addVisible, setAddVisible] = useState(false);
 
@@ -99,9 +110,13 @@ export default function OrcamentosScreen() {
 
       setLoading(true);
 
-      const data = await getBudgets(token);
+      const [data, clients] = await Promise.all([
+        getBudgets(token),
+        getClients(token).catch(() => []),
+      ]);
 
       setBudgetsList(Array.isArray(data) ? data : []);
+      setClientsList(Array.isArray(clients) ? clients : []);
     } catch (error: any) {
       console.log("ERRO AO CARREGAR ORÇAMENTOS:", error);
 
@@ -124,6 +139,15 @@ export default function OrcamentosScreen() {
 
     loadBudgets();
   }, [token]);
+
+  // Atalho "Novo orçamento" (dashboard): abre o formulário direto.
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  useEffect(() => {
+    if (action !== "new") return;
+    setAddVisible(true);
+    router.setParams({ action: undefined });
+  }, [action]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -295,10 +319,7 @@ export default function OrcamentosScreen() {
 
       const nome = budget.nome?.toLowerCase() || "";
 
-      const clienteNome =
-        typeof budget.cliente === "string"
-          ? budget.cliente.toLowerCase()
-          : budget.cliente?.nome?.toLowerCase() || "";
+      const clienteNome = getClientName(budget.cliente, clientsById).toLowerCase();
 
       const matchSearch =
         !searchLower ||
@@ -368,9 +389,12 @@ export default function OrcamentosScreen() {
       // VALOR COM BDI
       // ======================================================
 
+      // O teto do controle (500 mil) significa "sem limite": antes,
+      // orçamentos acima disso eram ocultados mesmo sem filtro ativo.
       const valor = Number(budget.preco_com_bdi ?? 0);
+      const semTeto = filters.value.max >= 500000;
 
-      if (valor < filters.value.min || valor > filters.value.max) {
+      if (valor < filters.value.min || (!semTeto && valor > filters.value.max)) {
         return false;
       }
 
@@ -403,11 +427,9 @@ export default function OrcamentosScreen() {
 
     if (filters.clientSort) {
       result.sort((a, b) => {
-        const clienteA =
-          typeof a.cliente === "string" ? a.cliente : a.cliente?.nome || "";
+        const clienteA = getClientName(a.cliente, clientsById);
 
-        const clienteB =
-          typeof b.cliente === "string" ? b.cliente : b.cliente?.nome || "";
+        const clienteB = getClientName(b.cliente, clientsById);
 
         if (filters.clientSort === "asc") {
           return clienteA.localeCompare(clienteB, "pt-BR", {
@@ -422,7 +444,7 @@ export default function OrcamentosScreen() {
     }
 
     return result;
-  }, [budgetsList, search, filters]);
+  }, [budgetsList, clientsById, search, filters]);
 
   // ============================================================
   // ESTADOS DISPONÍVEIS
@@ -735,10 +757,7 @@ export default function OrcamentosScreen() {
           )
         ) : (
           filteredBudgets.map((budget, index) => {
-            const nomeCliente =
-              typeof budget.cliente === "object"
-                ? (budget.cliente?.nome ?? "")
-                : "Cliente não encontrado";
+            const nomeCliente = getClientName(budget.cliente, clientsById);
 
             return (
               <FadeInView key={budget._id} index={index}>

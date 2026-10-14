@@ -10,6 +10,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@/components/cards/Header";
 import { SearchField } from "@/components/ui/SearchField";
 import { FilterChips } from "@/components/ui/FilterChips";
@@ -83,6 +84,15 @@ export default function ClientesScreen() {
   // ============================================================
 
   const [loading, setLoading] = useState(true);
+
+  // Atalho "Novo cliente" (dashboard): abre o cadastro direto.
+  const { action } = useLocalSearchParams<{ action?: string }>();
+
+  useEffect(() => {
+    if (action !== "new") return;
+    setAddVisible(true);
+    router.setParams({ action: undefined });
+  }, [action]);
 
   const [refreshing, setRefreshing] = useState(false);
 
