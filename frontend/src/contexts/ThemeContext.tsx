@@ -38,7 +38,7 @@ const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
 const THEME_STORAGE_KEY = "@obra_facil_theme";
 
 export function ThemeProvider({ children }: Props) {
-  const [preference, setPreference] = useState<ThemePreference>("light");
+  const [preference, setPreference] = useState<ThemePreference>("system");
   const systemScheme = useColorScheme();
   const mode: ThemeMode =
     preference === "system" ? (systemScheme === "dark" ? "dark" : "light") : preference;

@@ -16,6 +16,8 @@ import { getClientName, isBudgetExpired } from "@/utils/status";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanLimit } from "@/components/modals/PlanLimitModal";
+import { countForLimit } from "@/config/plans";
 
 import { getBudgets, getClients, archiveBudget } from "../../services/api";
 
@@ -140,14 +142,20 @@ export default function OrcamentosScreen() {
     loadBudgets();
   }, [token]);
 
+  // Limites do plano (config/plans.ts): bloqueia o cadastro acima do limite.
+  const { guard, limitModal } = usePlanLimit();
+  const openAdd = () => guard("orcamentos", countForLimit("orcamentos", budgetsList), () => setAddVisible(true));
+
   // Atalho "Novo orçamento" (dashboard): abre o formulário direto.
   const { action } = useLocalSearchParams<{ action?: string }>();
 
   useEffect(() => {
     if (action !== "new") return;
-    setAddVisible(true);
+    if (loading) return; // espera a lista para conferir o limite
+    openAdd();
     router.setParams({ action: undefined });
-  }, [action]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, loading]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -706,7 +714,7 @@ export default function OrcamentosScreen() {
           activeFiltersCount={activeFiltersCount}
           onFilterPress={() => setFilterVisible(true)}
           showAdd
-          onAddPress={() => setAddVisible(true)}
+          onAddPress={openAdd}
         />
 
         <SearchField
@@ -742,7 +750,7 @@ export default function OrcamentosScreen() {
               title="Nenhum orçamento ainda"
               message="Monte seu primeiro orçamento com categorias, serviços e BDI — e gere o PDF para o cliente."
               actionLabel="Novo orçamento"
-              onAction={() => setAddVisible(true)}
+              onAction={openAdd}
             />
           ) : (
             <EmptyState
@@ -917,6 +925,7 @@ export default function OrcamentosScreen() {
           setFilterVisible(false);
         }}
       />
+      {limitModal}
     </View>
   );
 }

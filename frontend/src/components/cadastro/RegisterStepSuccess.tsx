@@ -11,7 +11,7 @@ export function RegisterStepSuccess() {
 
   async function handleGoToLogin() {
     setLoading(true);
-    router.replace("/");
+    router.replace("/login");
   }
 
   return (

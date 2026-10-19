@@ -1,4 +1,5 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { validateDocument } from "@/utils/document";
 import { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
@@ -242,8 +243,9 @@ export function ClientForm({
       return false;
     }
 
-    if (documento.length !== 11 && documento.length !== 14) {
-      setFeedback("O CPF deve conter 11 dígitos ou o CNPJ 14 dígitos.");
+    const documentoErro = validateDocument(documento);
+    if (documentoErro) {
+      setFeedback(documentoErro);
       return false;
     }
 

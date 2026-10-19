@@ -6,11 +6,14 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
+import { router } from "expo-router";
 
 import {
+  api,
   login as apiLogin,
   logout as apiLogout,
   refreshToken,
@@ -195,6 +198,59 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
     }
   }
+
+  /*
+   * Sessão expirada: se a API responder 401 numa rota autenticada, tenta
+   * renovar o token uma única vez e repete a requisição. Se não der,
+   * encerra a sessão e volta para o login.
+   */
+  const tokenRef = useRef<string | null>(null);
+  tokenRef.current = token;
+  const refreshing = useRef<Promise<string | null> | null>(null);
+
+  useEffect(() => {
+    const id = api.interceptors.response.use(undefined, async (error) => {
+      const original = error?.config;
+      const status = error?.response?.status;
+      const url: string = original?.url ?? "";
+      const current = tokenRef.current;
+
+      if (status !== 401 || !current || url.startsWith("/auth/") || original?._retried) {
+        return Promise.reject(error);
+      }
+
+      original._retried = true;
+
+      refreshing.current ??= refreshToken(current)
+        .then(async (response) => {
+          const next = response?.accessToken ?? null;
+          if (next) {
+            await saveToken(next);
+            setToken(next);
+          }
+          return next;
+        })
+        .catch(() => null)
+        .finally(() => {
+          refreshing.current = null;
+        });
+
+      const next = await refreshing.current;
+
+      if (next) {
+        original.headers = { ...original.headers, Authorization: `Bearer ${next}` };
+        return api.request(original);
+      }
+
+      await removeToken();
+      setUser(null);
+      setToken(null);
+      router.replace({ pathname: "/login", params: { sessao: "expirada" } });
+      return Promise.reject(error);
+    });
+
+    return () => api.interceptors.response.eject(id);
+  }, []);
 
   return (
     <AuthContext.Provider

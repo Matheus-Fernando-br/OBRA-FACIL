@@ -17,6 +17,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar } from "@/components/ui/Avatar";
 import { BrandMark } from "@/components/ui/BrandMark";
+import { APP_VERSION } from "@/utils/appInfo";
 
 interface Props {
   visible: boolean;
@@ -316,7 +317,7 @@ export function MenuModal({ visible, onClose }: Props) {
 
             <View style={styles.menuFooter}>
               <Text style={styles.menuFooterText}>Obra Fácil</Text>
-              <Text style={styles.menuVersionText}>Versão 1.0.0</Text>
+              <Text style={styles.menuVersionText}>Versão {APP_VERSION}</Text>
             </View>
           </ScrollView>
         </Animated.View>

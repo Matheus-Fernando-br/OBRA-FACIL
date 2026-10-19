@@ -19,7 +19,7 @@ export default function MaisScreen() {
   async function handleLogout() {
     try {
       await logout();
-      router.replace("/");
+      router.replace("/login");
     } catch (error) {
       console.log(error);
     }
@@ -104,6 +104,12 @@ export default function MaisScreen() {
               title="Ajuda"
               description="FAQ e suporte"
               onPress={() => router.push("/ajuda")}
+            />
+            <SettingsItem
+              icon="document-lock"
+              iconColor={theme.textSecondary}
+              title="Termos e privacidade"
+              onPress={() => router.push("/legal")}
             />
             <SettingsItem
               icon="information-circle"

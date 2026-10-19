@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, TextStyle, ViewStyle } from "react-native";
+import { Dimensions, Platform, StyleSheet, TextStyle, ViewStyle } from "react-native";
 
 /* ==========================================================
    DESIGN TOKENS — OBRA FÁCIL
@@ -156,6 +156,9 @@ export function withAlpha(hex: string, alpha: number) {
 }
 
 const isIOS = Platform.OS === "ios";
+
+/** Celulares estreitos (ex.: 360 dp, comum no Android): títulos menores. */
+const NARROW = Dimensions.get("window").width < 380;
 
 export function createGlobalStyles(colors: ThemeColors) {
   return StyleSheet.create({
@@ -1287,6 +1290,7 @@ export function createGlobalStyles(colors: ThemeColors) {
 
     pageHeaderTitle: {
       ...TYPE.largeTitle,
+      ...(NARROW && { fontSize: 27 }),
       color: colors.text,
     },
 
@@ -1416,7 +1420,7 @@ export function createGlobalStyles(colors: ThemeColors) {
     heroValue: {
       ...TYPE.largeTitle,
       ...NUMERIC,
-      fontSize: 36,
+      fontSize: NARROW ? 28 : 36,
       color: "#FFFFFF",
       marginTop: SPACE.xs,
     },

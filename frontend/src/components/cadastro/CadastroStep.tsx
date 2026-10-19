@@ -1,4 +1,5 @@
 import { Pressable, Text, View } from "react-native";
+import { validateDocument } from "@/utils/document";
 import { useState } from "react";
 import { router } from "expo-router";
 import { Eye, EyeOff } from "@/components/ui/icons";
@@ -59,6 +60,8 @@ export function CadastroStep({
       if (senha !== confirmarSenha)
         return setFeedback("As senhas não coincidem");
       if (!documento.trim()) return setFeedback(`Informe seu ${tipoDocumento}`);
+      const documentoErro = validateDocument(documento);
+      if (documentoErro) return setFeedback(documentoErro);
 
       const response = await checkEmailExists(email);
       if (response.exists) {
@@ -83,7 +86,7 @@ export function CadastroStep({
     setSenha("");
     setConfirmarSenha("");
     setDocumento("");
-    router.replace("/");
+    router.replace("/login");
   }
 
   function handleDocumento(text: string) {

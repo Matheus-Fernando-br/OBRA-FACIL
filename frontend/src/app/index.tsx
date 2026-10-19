@@ -10,7 +10,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Eye, EyeOff, Fingerprint, ShieldCheck } from "@/components/ui/icons";
@@ -203,6 +203,16 @@ export default function LoginScreen() {
   const [splashFinished, setSplashFinished] = useState(false);
   const [splashVisible, setSplashVisible] = useState(true);
   const loginOpacity = useRef(new Animated.Value(0)).current;
+  const { sessao, conta } = useLocalSearchParams<{ sessao?: string; conta?: string }>();
+
+  // Vindo de uma sessão expirada (interceptor do AuthContext).
+  useEffect(() => {
+    if (sessao === "expirada") {
+      setFeedback("Sua sessão expirou. Entre novamente para continuar.");
+    } else if (conta === "excluida") {
+      setFeedback("Sua conta foi excluída. Obrigado por usar o Obra Fácil.");
+    }
+  }, [sessao, conta]);
 
   const handleSplashFinish = useCallback(() => {
     setSplashFinished(true);

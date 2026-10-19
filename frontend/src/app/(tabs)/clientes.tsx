@@ -10,6 +10,8 @@ import { useState, useEffect, useMemo } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanLimit } from "@/components/modals/PlanLimitModal";
+import { countForLimit } from "@/config/plans";
 import { router, useLocalSearchParams } from "expo-router";
 import { Header } from "@/components/cards/Header";
 import { SearchField } from "@/components/ui/SearchField";
@@ -85,14 +87,20 @@ export default function ClientesScreen() {
 
   const [loading, setLoading] = useState(true);
 
+  // Limites do plano (config/plans.ts): bloqueia o cadastro acima do limite.
+  const { guard, limitModal } = usePlanLimit();
+  const openAdd = () => guard("clientes", countForLimit("clientes", clientsList), () => setAddVisible(true));
+
   // Atalho "Novo cliente" (dashboard): abre o cadastro direto.
   const { action } = useLocalSearchParams<{ action?: string }>();
 
   useEffect(() => {
     if (action !== "new") return;
-    setAddVisible(true);
+    if (loading) return; // espera a lista para conferir o limite
+    openAdd();
     router.setParams({ action: undefined });
-  }, [action]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, loading]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -391,7 +399,7 @@ export default function ClientesScreen() {
           activeFiltersCount={activeFiltersCount}
           onFilterPress={() => setFilterVisible(true)}
           showAdd
-          onAddPress={() => setAddVisible(true)}
+          onAddPress={openAdd}
         />
 
         <SearchField
@@ -411,7 +419,7 @@ export default function ClientesScreen() {
               title="Nenhum cliente ainda"
               message="Cadastre seus clientes para criar orçamentos e acompanhar obras."
               actionLabel="Novo cliente"
-              onAction={() => setAddVisible(true)}
+              onAction={openAdd}
             />
           ) : (
             <EmptyState
@@ -518,6 +526,7 @@ export default function ClientesScreen() {
           loadBudgets();
         }}
       />
+      {limitModal}
     </View>
   );
 }

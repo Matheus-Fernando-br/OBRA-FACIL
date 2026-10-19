@@ -4,6 +4,9 @@ import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn } from "react-native-reanimated";
 
 import { useTheme } from "@/contexts/ThemeContext";
+import { router } from "expo-router";
+import { COMPANY, SUPPORT, openSupportEmail, openWhatsApp } from "@/config/support";
+import { APP_VERSION } from "@/utils/appInfo";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SettingsSection } from "@/components/settings/SettingsSection";
 import { SettingsItem } from "@/components/settings/SettingsItem";
@@ -108,20 +111,38 @@ export default function AjudaScreen() {
           })}
         </View>
 
-        <SettingsSection title="Suporte">
+        <SettingsSection title="Suporte" footer={`Atendimento ${COMPANY.nome} · respondemos em dias úteis.`}>
           <SettingsItem
-            icon="chatbubbles"
-            iconColor={theme.textSecondary}
-            title="Falar com o suporte"
-            description="Em breve"
-            disabled
+            icon="logo-whatsapp"
+            iconColor={theme.success}
+            title="WhatsApp"
+            description={SUPPORT.whatsappDisplay}
+            onPress={() => openWhatsApp()}
+          />
+          <SettingsItem
+            icon="mail"
+            iconColor={theme.info}
+            title="E-mail"
+            description={SUPPORT.email}
+            onPress={() => openSupportEmail()}
           />
           <SettingsItem
             icon="bug"
-            iconColor={theme.textSecondary}
+            iconColor={theme.danger}
             title="Reportar problema"
-            description="Em breve"
-            disabled
+            description="Envie o que aconteceu e, se puder, um print"
+            onPress={() =>
+              openSupportEmail(
+                "Problema no Obra Fácil",
+                `Versão do app: ${APP_VERSION}\n\nO que aconteceu:\n`,
+              )
+            }
+          />
+          <SettingsItem
+            icon="document-lock"
+            iconColor={theme.textSecondary}
+            title="Termos e privacidade"
+            onPress={() => router.push("/legal")}
           />
         </SettingsSection>
       </ScrollView>

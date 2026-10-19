@@ -1,4 +1,5 @@
 import { Modal, View, Text, Pressable, ScrollView } from "react-native";
+import { validateDocument } from "@/utils/document";
 import { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -64,8 +65,8 @@ export function EditUserModal({ visible, onClose, user }: Props) {
         return;
       }
 
-      if (!documento.trim()) {
-        setFeedback("Informe seu CPF/CNPJ");
+      if (!documento.trim() || validateDocument(documento)) {
+        setFeedback(validateDocument(documento) ?? "Informe seu CPF/CNPJ");
         return;
       }
 

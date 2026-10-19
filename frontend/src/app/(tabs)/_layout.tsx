@@ -1,4 +1,5 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs } from "expo-router";
+import { useAuth } from "@/contexts/AuthContext";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { AppTabBar } from "@/components/layout/AppTabBar";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -16,6 +17,10 @@ const INTERNAL_SCREENS = [
 
 export default function TabsLayout() {
   const { theme } = useTheme();
+  const { token, initializing } = useAuth();
+
+  // Sem sessão (logout, sessão expirada, conta excluída): volta ao login.
+  if (!initializing && !token) return <Redirect href="/login" />;
 
   return (
     <Tabs

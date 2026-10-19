@@ -67,6 +67,13 @@ export default function ConfiguracoesScreen() {
             onPress={() => router.push("/sobre")}
           />
           <SettingsItem
+            icon="document-lock"
+            iconColor={theme.textSecondary}
+            title="Termos e privacidade"
+            description="Política de privacidade e termos de uso"
+            onPress={() => router.push("/legal")}
+          />
+          <SettingsItem
             icon="trash"
             title="Excluir conta"
             description="Remove permanentemente seus dados"

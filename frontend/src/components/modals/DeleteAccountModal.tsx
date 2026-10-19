@@ -1,189 +1,136 @@
+import { useState } from "react";
+import { Modal, Pressable, Text, View, ScrollView } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { useTheme } from "@/contexts/ThemeContext";
-import {
-    Alert,
-    Modal,
-    Pressable,
-    Text,
-    TextInput,
-    View,
-  } from "react-native";
-  
-  import { useState } from "react";
-  
-  import { Ionicons } from "@expo/vector-icons";
-  
-    
-  import { AppButton } from "../buttons/AppButton";
-  import { AppInput } from "../forms/AppInput";
-  
-  import { useAuth } from "@/contexts/AuthContext";
-  
-  import { deleteUser } from "@/services/api";
-  
-  interface Props {
-    visible: boolean;
-    onClose: () => void;
-  }
-  
-  export function DeleteAccountModal({
-    visible,
-    onClose,
-  }: Props) {
+import { useAuth } from "@/contexts/AuthContext";
+import { AppButton } from "../buttons/AppButton";
+import { AppInput } from "../forms/AppInput";
+import { deleteUser } from "@/services/api";
+import { withAlpha } from "@/styles/globalStyles";
+
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+}
+
+/**
+ * Exclusão de conta (exigência do Google Play): confirmação por texto e
+ * senha; ao concluir, encerra a sessão e volta para o login.
+ */
+export function DeleteAccountModal({ visible, onClose }: Props) {
   const { styles, theme } = useTheme();
-    const { user, token, logout } = useAuth();
-  
-    const [confirmacao, setConfirmacao] = useState("");
-    const [senha, setSenha] = useState("");
-    const [loading, setLoading] = useState(false);
-  
-    async function handleDelete() {
-      try {
-        if (!user || !token) {
-          Alert.alert(
-            "Erro",
-            "Usuário não encontrado."
-          );
-          return;
-        }
-  
-        if (confirmacao.trim().toUpperCase() !== "EXCLUIR") {
-          Alert.alert(
-            "Confirmação inválida",
-            'Digite "EXCLUIR" para continuar.'
-          );
-          return;
-        }
-  
-        if (!senha.trim()) {
-          Alert.alert(
-            "Erro",
-            "Informe sua senha."
-          );
-          return;
-        }
-  
-        setLoading(true);
-  
-        /*
-        Futuramente o backend poderá validar
-        a senha antes da exclusão.
-        */
-  
-        await deleteUser(user._id, token);
-  
-        Alert.alert(
-          "Conta excluída",
-          "Sua conta foi removida com sucesso."
-        );
-  
-        await logout();
-      } catch (error: any) {
-        console.log(error.response?.data);
-  
-        Alert.alert(
-          "Erro",
-          error?.response?.data?.message ??
-            "Erro ao excluir conta."
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-  
-    return (
-      <Modal
-        visible={visible}
-        transparent
-        animationType="slide"
-      >
-        <Pressable
-          onPress={onClose}
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,.65)",
-          }}
-        >
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.addCard}>
-              <View style={styles.modalHeader}>
-                <Text style={styles.addTitle}>
-                  Excluir Conta
-                </Text>
-  
-                <Pressable onPress={onClose}>
-                  <Ionicons
-                    name="close"
-                    size={28}
-                    color={theme.white}
-                  />
-                </Pressable>
-              </View>
-  
-              <View style={styles.divider} />
-  
-              <Text
-                style={{
-                  color: theme.danger,
-                  fontWeight: "700",
-                  marginBottom: 20,
-                  lineHeight: 22,
-                }}
-              >
-                Esta ação é permanente.
-                {"\n\n"}
-                Todos os seus clientes,
-                obras, orçamentos e dados
-                poderão ser perdidos.
-              </Text>
-  
-              <Text style={styles.label}>
-                Digite EXCLUIR
-              </Text>
-  
-              <AppInput
-                placeholder="EXCLUIR"
-                value={confirmacao}
-                onChangeText={setConfirmacao}
-              />
-  
-              <Text style={styles.label}>
-                Confirme sua senha
-              </Text>
-  
-              <TextInput
-                placeholder="Senha"
-                secureTextEntry
-                value={senha}
-                onChangeText={setSenha}
-                style={{
-                    width: "100%",
-                    height: 55,
-                    backgroundColor: theme.white,
-                    borderRadius: 14,
-                    paddingHorizontal: 30,
-                    marginBottom: 16,
-                  }}
-              />
-  
-              <View style={styles.divider} />
-  
-              <AppButton
-                title="Excluir Conta"
-                color={theme.danger}
-                loading={loading}
-                onPress={handleDelete}
-              />
-  
-              <AppButton variant="secondary"
-                title="Cancelar"
-                onPress={onClose}
-              />
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    );
+  const { user, token, logout } = useAuth();
+  const insets = useSafeAreaInsets();
+
+  const [confirmacao, setConfirmacao] = useState("");
+  const [senha, setSenha] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
+  function close() {
+    if (loading) return;
+    setConfirmacao("");
+    setSenha("");
+    setFeedback("");
+    onClose();
   }
+
+  async function handleDelete() {
+    setFeedback("");
+
+    if (!user || !token) return setFeedback("Sessão expirada. Entre novamente.");
+    if (confirmacao.trim().toUpperCase() !== "EXCLUIR")
+      return setFeedback('Digite "EXCLUIR" para confirmar.');
+    if (!senha) return setFeedback("Informe sua senha para confirmar.");
+
+    try {
+      setLoading(true);
+      await deleteUser(user._id, token, senha);
+      await logout();
+      onClose();
+      router.replace({ pathname: "/login", params: { conta: "excluida" } });
+    } catch (error: any) {
+      const status = error?.response?.status;
+      setFeedback(
+        status === 401 || status === 403
+          ? "Senha incorreta."
+          : (error?.response?.data?.message ?? "Não foi possível excluir a conta. Tente novamente."),
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={close} statusBarTranslucent>
+      <Pressable
+        onPress={close}
+        style={{ flex: 1, justifyContent: "flex-end", backgroundColor: theme.backgroundDestaque }}
+      >
+        <Pressable onPress={(e) => e.stopPropagation()}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            style={[styles.addCard, { maxHeight: 640 }]}
+            contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
+          >
+            <View style={styles.modalHeader}>
+              <View style={{ width: 36 }} />
+              <Text style={styles.addTitle}>Excluir conta</Text>
+              <Pressable onPress={close} style={styles.menuCloseButton} accessibilityLabel="Fechar">
+                <Ionicons name="close" size={18} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 10,
+                padding: 14,
+                borderRadius: 14,
+                marginTop: 12,
+                backgroundColor: withAlpha(theme.danger, 0.1),
+              }}
+            >
+              <Ionicons name="warning" size={20} color={theme.danger} />
+              <Text style={{ flex: 1, color: theme.danger, fontWeight: "600", lineHeight: 20 }}>
+                Esta ação é permanente. Sua conta e todos os clientes, orçamentos e obras
+                serão apagados. Se quiser guardar algo, exporte antes em Relatórios.
+              </Text>
+            </View>
+
+            <Text style={styles.label}>Digite EXCLUIR para confirmar</Text>
+            <AppInput
+              placeholder="EXCLUIR"
+              value={confirmacao}
+              onChangeText={setConfirmacao}
+              autoCapitalize="characters"
+            />
+
+            <Text style={styles.label}>Sua senha</Text>
+            <AppInput
+              placeholder="Senha atual"
+              secureTextEntry
+              value={senha}
+              onChangeText={setSenha}
+              autoComplete="current-password"
+            />
+
+            {!!feedback && <Text style={styles.feedback}>{feedback}</Text>}
+
+            <AppButton
+              title="Excluir minha conta"
+              icon="trash-outline"
+              color={theme.danger}
+              loading={loading}
+              onPress={handleDelete}
+            />
+            <AppButton variant="secondary" title="Cancelar" onPress={close} />
+          </ScrollView>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}

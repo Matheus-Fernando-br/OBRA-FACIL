@@ -1,4 +1,5 @@
 import axios from "axios";
+import { emitNetworkError } from "./networkEvents";
 
 export const api = axios.create({
   baseURL: "https://obra-facil-backend-n4du.onrender.com",
@@ -6,6 +7,12 @@ export const api = axios.create({
   // O servidor no Render (plano gratuito) "dorme" e pode levar ~1 min para
   // acordar. Sem timeout, a tela inicial ficava carregando indefinidamente.
   timeout: 60000,
+});
+
+// Falha sem resposta do servidor = sem internet ou servidor fora do ar.
+api.interceptors.response.use(undefined, (error) => {
+  if (!error?.response) emitNetworkError();
+  return Promise.reject(error);
 });
 
 // ==========================
@@ -129,11 +136,13 @@ export async function updateUser(id: string, body: UpdateUsuario, token: string)
   return data;
 }
 
-export async function deleteUser(id: string, token: string) {
+/** A senha vai no corpo para o backend confirmar a identidade antes de excluir. */
+export async function deleteUser(id: string, token: string, senha?: string) {
   const { data } = await api.delete(`/user/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    data: senha ? { senha } : undefined,
   });
 
   return data;

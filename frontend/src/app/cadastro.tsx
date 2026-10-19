@@ -10,7 +10,7 @@ import { router } from "expo-router";
 
 import { CadastroStep } from "../components/cadastro/CadastroStep";
 import { VerificarEmail } from "../components/cadastro/VerificarEmail";
-import { PaymentStep } from "../components/cadastro/PaymentStep";
+import { PlanoStep } from "../components/cadastro/PlanoStep";
 import { RegisterStepSuccess } from "../components/cadastro/RegisterStepSuccess";
 import { StepIndicator } from "../components/cadastro/StepIndicator";
 import { registerUser } from "../services/api";
@@ -41,7 +41,7 @@ export default function CadastroScreen() {
         CNPJ: documentType === "CNPJ" ? document : "",
       });
       setStep(4);
-      setTimeout(() => router.replace("/"), 2500);
+      setTimeout(() => router.replace("/login"), 2500);
     } catch (error: any) {
       console.log(error);
       if (error.response?.status === 409) {
@@ -109,7 +109,7 @@ export default function CadastroScreen() {
               />
             )}
             {step === 3 && (
-              <PaymentStep
+              <PlanoStep
                 loading={loading}
                 feedback={feedback}
                 onBack={() => setStep(2)}

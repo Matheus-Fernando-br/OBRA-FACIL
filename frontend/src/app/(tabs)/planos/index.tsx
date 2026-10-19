@@ -1,305 +1,225 @@
-import { useAuth } from "@/contexts/AuthContext";
-import { getBudgets, getClients, getWork } from "@/services/api";
-import { useTheme } from "@/contexts/ThemeContext";
-import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
-import { router } from "expo-router";
+import { ScrollView, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { Assinatura, Plano } from "@/components/layout/interface";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useSubscription } from "@/contexts/SubscriptionContext";
+import { getBudgets, getClients, getWork } from "@/services/api";
+import { requestPlanChange } from "@/services/subscription";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { SettingsItem } from "@/components/settings/SettingsItem";
 import { SettingsSection } from "@/components/settings/SettingsSection";
-import { AppSwitch } from "@/components/settings/AppSwitch";
+import { SettingsItem } from "@/components/settings/SettingsItem";
+import { AppButton } from "@/components/buttons/AppButton";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { FadeInView } from "@/components/ui/FadeInView";
+import { withAlpha } from "@/styles/globalStyles";
+import {
+  countForLimit,
+  formatPlanPrice,
+  LIMIT_LABELS,
+  LimitKey,
+  PLANS,
+  PlanDefinition,
+} from "@/config/plans";
+import { openSupportEmail, openWhatsApp, SUPPORT } from "@/config/support";
 
-import { CurrentPlanCard } from "@/components/cards/planos/CurrentPlanCard";
-import { PlanUsageCard } from "@/components/cards/planos/PlanUsageCard";
-import { PlanOptionCard } from "@/components/cards/planos/PlanOptionCard";
-import { PaymentMethodCard } from "@/components/cards/planos/PaymentMethodCard";
+/*
+ * Planos: limites e preços vêm de config/plans.ts.
+ * A compra é feita em services/subscription.ts (TODO(pagamento)).
+ */
 
-
-const planos: Plano[] = [
-  {
-    id: "basico",
-    nome: "Básico",
-    descricao: "Para profissionais que estão começando.",
-    preco: 19.9,
-    periodo: "mensal",
-    limites: {
-      clientes: 30,
-      orcamentos: 50,
-      obras: 10,
-      usuarios: 1,
-      armazenamento: 2,
-    },
-    recursos: ["Cadastro de clientes", "Orçamentos", "Controle de obras"],
-  },
-
-  {
-    id: "profissional",
-    nome: "Profissional",
-    descricao: "Para profissionais e pequenas equipes.",
-    preco: 39.9,
-    periodo: "mensal",
-    destaque: true,
-    limites: {
-      clientes: 200,
-      orcamentos: 200,
-      obras: 50,
-      usuarios: 3,
-      armazenamento: 10,
-    },
-    recursos: [
-      "Todos os recursos do Básico",
-      "Mais clientes e obras",
-      "Até 3 usuários",
-      "10 GB de armazenamento",
-      "Recursos avançados",
-    ],
-  },
-
-  {
-    id: "empresarial",
-    nome: "Empresarial",
-    descricao: "Para empresas com equipes maiores.",
-    preco: 79.9,
-    periodo: "mensal",
-    limites: {
-      clientes: 1000,
-      orcamentos: 1000,
-      obras: 250,
-      usuarios: 10,
-      armazenamento: 50,
-    },
-    recursos: [
-      "Todos os recursos do Profissional",
-      "Até 10 usuários",
-      "50 GB de armazenamento",
-      "Maior capacidade de operação",
-      "Recursos empresariais",
-    ],
-  },
-];
+const LIMIT_KEYS: LimitKey[] = ["clientes", "orcamentos", "obras"];
 
 export default function PlanosScreen() {
   const { styles, theme } = useTheme();
-  const [renovacaoAutomatica, setRenovacaoAutomatica] = useState(true);
-
-  const [notificacaoCobranca, setNotificacaoCobranca] = useState(true);
-
-  const planoAtual =
-    planos.find((plano) => plano.id === "profissional") || planos[0];
-
   const { token } = useAuth();
+  const { plan: currentPlan } = useSubscription();
 
-  const [assinatura, setAssinatura] = useState<Assinatura>({
-    plano: planoAtual,
-    status: "ATIVA",
-    inicio: "2026-08-10",
-    proxima_cobranca: "2026-10-10",
-    forma_pagamento: "Cartão de crédito",
-    uso: {
-      clientes: 0,
-      orcamentos: 0,
-      obras: 0,
-      usuarios: 1,
-      armazenamento: 0,
-    },
-  });
+  const [usage, setUsage] = useState<Record<LimitKey, number> | null>(null);
+  const [pendingPlan, setPendingPlan] = useState<PlanDefinition | null>(null);
+  const [message, setMessage] = useState("");
 
-  // Uso real do plano: antes eram números fixos no código (32/78/12).
   useEffect(() => {
     if (!token) return;
     Promise.all([getClients(token), getBudgets(token), getWork(token)])
       .then(([clients, budgets, works]) =>
-        setAssinatura((prev) => ({
-          ...prev,
-          uso: {
-            ...prev.uso,
-            clientes: Array.isArray(clients) ? clients.length : 0,
-            orcamentos: Array.isArray(budgets) ? budgets.length : 0,
-            obras: Array.isArray(works) ? works.length : (works?.obras?.length ?? 0),
-          },
-        })),
+        setUsage({
+          clientes: countForLimit("clientes", Array.isArray(clients) ? clients : []),
+          orcamentos: countForLimit("orcamentos", Array.isArray(budgets) ? budgets : []),
+          obras: countForLimit(
+            "obras",
+            Array.isArray(works) ? works : (works?.obras ?? []),
+          ),
+        }),
       )
       .catch((error) => console.log("ERRO AO CARREGAR USO DO PLANO:", error));
   }, [token]);
 
-  function handleChangePlan() {
-    Alert.alert("Alterar plano", "Escolha um dos planos disponíveis abaixo.");
-  }
-
-  function handleSelectPlan(plano: Plano) {
-    if (plano.id === assinatura.plano.id) {
-      return;
+  async function handleSelect(plan: PlanDefinition) {
+    if (!token || plan.id === currentPlan.id) return;
+    setMessage("");
+    try {
+      await requestPlanChange(plan.id, token);
+    } catch (error: any) {
+      setPendingPlan(plan);
+      setMessage(error?.message ?? "Não foi possível mudar de plano agora.");
     }
-
-    Alert.alert("Alterar plano", `Deseja selecionar o plano ${plano.nome}?`, [
-      {
-        text: "Cancelar",
-        style: "cancel",
-      },
-      {
-        text: "Continuar",
-        onPress: () => {
-          Alert.alert(
-            "Plano selecionado",
-            `O plano ${plano.nome} foi selecionado. A integração com o pagamento será feita posteriormente.`,
-          );
-        },
-      },
-    ]);
-  }
-
-  function handlePaymentMethod() {
-    Alert.alert(
-      "Forma de pagamento",
-      "A configuração da forma de pagamento será integrada posteriormente.",
-    );
-  }
-
-  function handleBillingHistory() {
-    Alert.alert(
-      "Histórico de cobranças",
-      "O histórico de cobranças será disponibilizado aqui.",
-    );
-  }
-
-  function handleCancelSubscription() {
-    Alert.alert(
-      "Cancelar assinatura",
-      "Tem certeza que deseja cancelar sua assinatura?",
-      [
-        {
-          text: "Voltar",
-          style: "cancel",
-        },
-        {
-          text: "Cancelar assinatura",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert(
-              "Assinatura",
-              "O cancelamento será integrado posteriormente.",
-            );
-          },
-        },
-      ],
-    );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <PageHeader title="Planos e assinatura" />
+    <View style={styles.screen}>
+      <PageHeader title="Planos" subtitle="Escolha o espaço ideal para o seu trabalho" />
 
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.planPageContent}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140 }}
       >
-        <CurrentPlanCard
-          assinatura={assinatura}
-          onChangePlan={handleChangePlan}
-        />
-
-        <PlanUsageCard plano={assinatura.plano} uso={assinatura.uso} />
-
-        <SettingsSection title="Pagamento">
-          <PaymentMethodCard
-            paymentMethod={assinatura.forma_pagamento}
-            onPress={handlePaymentMethod}
-          />
-
-          <SettingsItem
-            icon="receipt-outline"
-            title="Histórico de cobranças"
-            description="Consulte suas cobranças e pagamentos"
-            onPress={handleBillingHistory}
-          />
-        </SettingsSection>
-
-        <SettingsSection title="Opções da assinatura">
-          <SettingsItem
-            icon="refresh-outline"
-            title="Renovação automática"
-            description="Renovar o plano automaticamente"
-            rightComponent={
-              <AppSwitch
-                value={renovacaoAutomatica}
-                onValueChange={setRenovacaoAutomatica}
-              />
-            }
-          />
-
-          <SettingsItem
-            icon="notifications-outline"
-            title="Notificações de cobrança"
-            description="Receber avisos antes das cobranças"
-            rightComponent={
-              <AppSwitch
-                value={notificacaoCobranca}
-                onValueChange={setNotificacaoCobranca}
-              />
-            }
-          />
-        </SettingsSection>
-
-        <SettingsSection title="Planos disponíveis">
-          <View style={styles.planOptionsHeader}>
-            <Text style={styles.planSectionDescription}>
-              Compare os planos e escolha a opção mais adequada para sua
-              operação.
-            </Text>
-          </View>
-
-          {planos.map((plano) => (
-            <PlanOptionCard
-              key={plano.id}
-              plano={plano}
-              atual={plano.id === assinatura.plano.id}
-              onSelect={() => handleSelectPlan(plano)}
-            />
-          ))}
-        </SettingsSection>
-
-        <SettingsSection title="Gerenciamento">
-          <SettingsItem
-            icon="help-circle-outline"
-            title="Precisa de ajuda?"
-            description="Entre em contato com o suporte"
-            onPress={() =>
-              Alert.alert(
-                "Suporte",
-                "O canal de suporte será integrado posteriormente.",
-              )
-            }
-          />
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.planCancelButton,
-              pressed && styles.pressOpacity,
-            ]}
-            onPress={handleCancelSubscription}
-          >
-            <Ionicons
-              name="close-circle-outline"
-              size={20}
-              color={theme.danger}
-            />
-
-            <View style={styles.planCancelContent}>
-              <Text style={styles.planCancelTitle}>
-                Cancelar assinatura
-              </Text>
-
-              <Text style={styles.planCancelDescription}>
-                Encerrar sua assinatura do OBRA-FÁCIL
-              </Text>
+        {/* PLANO ATUAL + USO */}
+        <FadeInView>
+          <View style={styles.card}>
+            <Text style={styles.subtitle}>Seu plano</Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 8 }}>
+              <Text style={styles.pageHeaderTitle}>{currentPlan.nome}</Text>
+              <Text style={styles.caption}>{formatPlanPrice(currentPlan)}</Text>
             </View>
 
-            <Ionicons name="chevron-forward" size={20} color={theme.danger} />
-          </Pressable>
+            {LIMIT_KEYS.map((key) => {
+              const limit = currentPlan.limites[key];
+              const used = usage?.[key] ?? 0;
+              const pct = limit ? (used / limit) * 100 : 0;
+              const color = pct >= 100 ? theme.danger : pct >= 80 ? theme.warning : theme.primary;
+              return (
+                <View key={key} style={{ marginTop: 16 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                    <Text style={styles.menuText}>
+                      {LIMIT_LABELS[key].plural.charAt(0).toUpperCase() +
+                        LIMIT_LABELS[key].plural.slice(1)}
+                    </Text>
+                    <Text style={[styles.caption, { fontVariant: ["tabular-nums"] }]}>
+                      {usage ? used : "…"} / {limit ?? "ilimitado"}
+                    </Text>
+                  </View>
+                  {limit !== null && (
+                    <View style={{ marginTop: 8 }}>
+                      <ProgressBar value={pct} color={color} showLabel={false} />
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </FadeInView>
+
+        {/* AVISO DE ASSINATURA EM BREVE */}
+        {pendingPlan && (
+          <FadeInView>
+            <View
+              style={[
+                styles.card,
+                { borderColor: theme.primary, backgroundColor: withAlpha(theme.primary, 0.06) },
+              ]}
+            >
+              <Text style={styles.listCardTitle}>Quer o plano {pendingPlan.nome}?</Text>
+              <Text style={[styles.menuCardDescription, { marginTop: 6, lineHeight: 19 }]}>
+                {message}
+              </Text>
+              <AppButton
+                title="Falar no WhatsApp"
+                icon="logo-whatsapp"
+                onPress={() =>
+                  openWhatsApp(`Olá! Quero assinar o plano ${pendingPlan.nome} do Obra Fácil.`)
+                }
+              />
+              <AppButton
+                title="Enviar e-mail"
+                icon="mail-outline"
+                variant="tinted"
+                onPress={() =>
+                  openSupportEmail(`Assinatura do plano ${pendingPlan.nome}`)
+                }
+              />
+            </View>
+          </FadeInView>
+        )}
+
+        {/* PLANOS */}
+        <Text style={styles.subtitle}>Planos disponíveis</Text>
+        {PLANS.map((plan, index) => {
+          const isCurrent = plan.id === currentPlan.id;
+          return (
+            <FadeInView key={plan.id} index={index + 1}>
+              <View
+                style={[
+                  styles.card,
+                  plan.destaque && { borderColor: theme.primary, borderWidth: 1.5 },
+                ]}
+              >
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.title}>{plan.nome}</Text>
+                    <Text style={[styles.menuCardDescription, { marginTop: 4 }]}>
+                      {plan.descricao}
+                    </Text>
+                  </View>
+                  {plan.destaque && !isCurrent && (
+                    <View style={[styles.statusPill, { backgroundColor: theme.titleBackground }]}>
+                      <Ionicons name="star" size={11} color={theme.primary} />
+                      <Text style={[styles.statusPillText, { color: theme.primary }]}>Recomendado</Text>
+                    </View>
+                  )}
+                  {isCurrent && (
+                    <View style={[styles.statusPill, { backgroundColor: withAlpha(theme.success, 0.13) }]}>
+                      <Ionicons name="checkmark-circle" size={11} color={theme.success} />
+                      <Text style={[styles.statusPillText, { color: theme.success }]}>Plano atual</Text>
+                    </View>
+                  )}
+                </View>
+
+                <Text style={[styles.dashboardCardValue, { marginTop: 14 }]}>
+                  {formatPlanPrice(plan)}
+                </Text>
+
+                <View style={{ marginTop: 10, gap: 8 }}>
+                  {plan.recursos.map((recurso) => (
+                    <View key={recurso} style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
+                      <Ionicons name="checkmark" size={16} color={theme.success} />
+                      <Text style={styles.menuCardDescription}>{recurso}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {!isCurrent && (
+                  <AppButton
+                    title={plan.precoMensal === 0 ? `Voltar para o ${plan.nome}` : `Assinar ${plan.nome}`}
+                    variant={plan.destaque ? "primary" : "tinted"}
+                    onPress={() => handleSelect(plan)}
+                  />
+                )}
+              </View>
+            </FadeInView>
+          );
+        })}
+
+        <SettingsSection
+          title="Dúvidas"
+          footer="As assinaturas serão cobradas pelo Google Play e poderão ser canceladas a qualquer momento na própria loja."
+        >
+          <SettingsItem
+            icon="logo-whatsapp"
+            iconColor={theme.success}
+            title="WhatsApp do suporte"
+            description={SUPPORT.whatsappDisplay}
+            onPress={() => openWhatsApp("Olá! Tenho uma dúvida sobre os planos do Obra Fácil.")}
+          />
+          <SettingsItem
+            icon="mail"
+            iconColor={theme.info}
+            title="E-mail do suporte"
+            description={SUPPORT.email}
+            onPress={() => openSupportEmail("Dúvida sobre planos")}
+          />
         </SettingsSection>
       </ScrollView>
     </View>

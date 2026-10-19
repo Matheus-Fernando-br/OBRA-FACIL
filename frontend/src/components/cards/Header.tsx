@@ -40,7 +40,13 @@ export function Header({
   return (
     <View style={styles.pageHeaderRow}>
       <View style={{ flex: 1 }}>
-        <Text style={styles.pageHeaderTitle} accessibilityRole="header">
+        <Text
+          style={styles.pageHeaderTitle}
+          accessibilityRole="header"
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.8}
+        >
           {title}
         </Text>
         {subtitle ? <Text style={styles.pageHeaderSubtitle}>{subtitle}</Text> : null}

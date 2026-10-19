@@ -33,7 +33,7 @@ export default function SenhaScreen() {
 
   function goToLogin() {
     if (redirectTimer.current) clearTimeout(redirectTimer.current);
-    router.replace("/");
+    router.replace("/login");
   }
 
   // Na tela de sucesso, volta sozinho para o login.

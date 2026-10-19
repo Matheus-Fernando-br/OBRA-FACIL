@@ -1,5 +1,8 @@
 import { useTheme } from "@/contexts/ThemeContext";
-import { ScrollView, Alert, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { router } from "expo-router";
+import { APP_VERSION } from "@/utils/appInfo";
+import { COMPANY, openSupportEmail, openWhatsApp } from "@/config/support";
 
 
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -10,7 +13,7 @@ export default function SobreScreen() {
   const { styles, theme } = useTheme();
   return (
     <View style={{ flex: 1 }}>
-      <PageHeader title="Sobre" subtitle="Obra Fácil · versão 1.0.0" />
+      <PageHeader title="Sobre" subtitle={`Obra Fácil · versão ${APP_VERSION} · ${COMPANY.nome}`} />
 
       <ScrollView
         style={styles.container}
@@ -24,7 +27,7 @@ export default function SobreScreen() {
               lineHeight: 24,
             }}
           >
-            O OBRA-FÁCIL é um sistema de gestão desenvolvido para facilitar o
+            O Obra Fácil é um aplicativo de gestão desenvolvido para facilitar o
             gerenciamento de obras, clientes, orçamentos e serviços da
             construção civil.
             {"\n\n"}A proposta é substituir planilhas, anotações e processos
@@ -111,7 +114,7 @@ export default function SobreScreen() {
                 marginTop: 5,
               }}
             >
-              1.0.0
+              {APP_VERSION}
             </Text>
           </View>
 
@@ -154,10 +157,20 @@ export default function SobreScreen() {
           </Text>
 
           <AppButton
-            title="Envio de feedback em breve"
-            variant="secondary"
-            disabled
-            onPress={() => {}}
+            title="Enviar sugestão por e-mail"
+            icon="mail-outline"
+            onPress={() => openSupportEmail("Sugestão para o Obra Fácil", `Versão: ${APP_VERSION}\n\n`)}
+          />
+          <AppButton
+            title="Falar no WhatsApp"
+            icon="logo-whatsapp"
+            variant="tinted"
+            onPress={() => openWhatsApp("Olá! Tenho uma sugestão para o Obra Fácil.")}
+          />
+          <AppButton
+            title="Termos e privacidade"
+            variant="ghost"
+            onPress={() => router.push("/legal")}
           />
         </SettingsSection>
       </ScrollView>

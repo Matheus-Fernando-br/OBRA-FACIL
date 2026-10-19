@@ -15,6 +15,8 @@ import { getClientName, isWorkFinished } from "@/utils/status";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { usePlanLimit } from "@/components/modals/PlanLimitModal";
+import { countForLimit } from "@/config/plans";
 
 import { getWork, getBudgets, getClients, archiveWork } from "../../services/api";
 
@@ -150,14 +152,20 @@ export default function ObrasScreen() {
     loadWorks();
   }, [token]);
 
+  // Limites do plano (config/plans.ts): bloqueia o cadastro acima do limite.
+  const { guard, limitModal } = usePlanLimit();
+  const openAdd = () => guard("obras", countForLimit("obras", worksList), () => setAddObraVisible(true));
+
   // Atalho "Nova obra" (dashboard): abre a seleção de orçamento direto.
   const { action } = useLocalSearchParams<{ action?: string }>();
 
   useEffect(() => {
     if (action !== "new") return;
-    setAddObraVisible(true);
+    if (loading) return; // espera a lista para conferir o limite
+    openAdd();
     router.setParams({ action: undefined });
-  }, [action]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [action, loading]);
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -896,7 +904,7 @@ export default function ObrasScreen() {
           activeFiltersCount={activeFiltersCount}
           onFilterPress={() => setFilterVisible(true)}
           showAdd
-          onAddPress={() => setAddObraVisible(true)}
+          onAddPress={openAdd}
         />
 
         <SearchField
@@ -916,7 +924,7 @@ export default function ObrasScreen() {
               title="Nenhuma obra cadastrada"
               message="Transforme um orçamento aprovado em obra para acompanhar prazos e progresso de cada serviço."
               actionLabel="Nova obra"
-              onAction={() => setAddObraVisible(true)}
+              onAction={openAdd}
             />
           ) : (
             <EmptyState
@@ -1064,6 +1072,7 @@ export default function ObrasScreen() {
           }, 200);
         }}
       />
+      {limitModal}
     </View>
   );
 }
