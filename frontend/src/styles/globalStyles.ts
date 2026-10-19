@@ -298,7 +298,6 @@ export function createGlobalStyles(colors: ThemeColors) {
       minHeight: 54,
       borderRadius: 14,
       marginBottom: 14,
-      backgroundColor: colors.white,
       shadowOpacity: 0,
       elevation: 0,
       paddingHorizontal: 16,
@@ -470,7 +469,6 @@ export function createGlobalStyles(colors: ThemeColors) {
     cadastroInput: {
       minHeight: 54,
       borderRadius: 14,
-      backgroundColor: colors.white,
       shadowOpacity: 0,
       elevation: 0,
       paddingHorizontal: 16,

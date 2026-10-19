@@ -24,6 +24,7 @@ function RootStack() {
       >
         <Stack.Screen name="index" />
         <Stack.Screen name="cadastro" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="senha" options={{ animation: "slide_from_right" }} />
         <Stack.Screen name="(tabs)" />
       </Stack>
     </>

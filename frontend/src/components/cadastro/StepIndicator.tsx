@@ -3,18 +3,25 @@ import { Text, View } from "react-native";
 import { Check, CreditCard, Mail, UserRound } from "@/components/ui/icons";
 import { useTheme } from "@/contexts/ThemeContext";
 
-interface Props {
-  step: number;
+export interface StepItem {
+  label: string;
+  icon: (props: { size?: number; color?: string; strokeWidth?: number }) => any;
 }
 
-const steps = [
+interface Props {
+  step: number;
+  /** Etapas exibidas (padrão: fluxo de cadastro). */
+  steps?: StepItem[];
+}
+
+const CADASTRO_STEPS: StepItem[] = [
   { label: "Dados", icon: UserRound },
   { label: "E-mail", icon: Mail },
   { label: "Plano", icon: CreditCard },
   { label: "Finalizado", icon: Check },
 ];
 
-export function StepIndicator({ step }: Props) {
+export function StepIndicator({ step, steps = CADASTRO_STEPS }: Props) {
   const { styles, theme } = useTheme();
 
   return (
@@ -39,7 +46,7 @@ export function StepIndicator({ step }: Props) {
                   <Icon
                     size={18}
                     color={
-                      isActive || isDone ? theme.white : theme.textSecondary
+                      isActive || isDone ? theme.onAccent : theme.textSecondary
                     }
                     strokeWidth={2.5}
                   />

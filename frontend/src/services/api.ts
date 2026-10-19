@@ -82,6 +82,28 @@ export async function resendVerificationCode(data: { email: string }) {
 }
 
 // ==========================
+// RECUPERAÇÃO DE SENHA
+// Endpoints no mesmo padrão de /auth/verify-email. Se o backend usar
+// outros caminhos ou nomes de campos, ajuste somente aqui.
+// ==========================
+
+export async function requestPasswordReset(data: { email: string }) {
+  const response = await api.post("/auth/forgot-password", data);
+
+  return response.data;
+}
+
+export async function resetPassword(data: {
+  email: string;
+  codigo: string;
+  novaSenha: string;
+}) {
+  const response = await api.post("/auth/reset-password", data);
+
+  return response.data;
+}
+
+// ==========================
 // USER
 // ==========================
 

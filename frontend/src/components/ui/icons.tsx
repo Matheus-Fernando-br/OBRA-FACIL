@@ -32,3 +32,5 @@ export const MailCheck = make("mail-open-outline");
 export const Mail = make("mail-outline");
 export const CreditCard = make("card-outline");
 export const UserRound = make("person-outline");
+export const KeyRound = make("key-outline");
+export const LockReset = make("lock-open-outline");

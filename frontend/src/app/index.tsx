@@ -324,10 +324,13 @@ export default function LoginScreen() {
                     <Text style={styles.authLabel}>Senha</Text>
                     <Pressable
                       onPress={() =>
-                        setFeedback(
-                          "Para redefinir sua senha, fale com o suporte da sua conta.",
-                        )
+                        router.push({
+                          pathname: "/senha",
+                          params: email ? { email } : {},
+                        })
                       }
+                      hitSlop={8}
+                      accessibilityRole="link"
                     >
                       <Text style={styles.authForgot}>Esqueci a senha</Text>
                     </Pressable>
