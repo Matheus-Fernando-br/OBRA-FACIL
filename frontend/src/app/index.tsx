@@ -32,10 +32,10 @@ function InitialSplash({ onFinish }: { onFinish: () => void }) {
     const timer = setTimeout(() => {
       Animated.timing(opacity, {
         toValue: 0,
-        duration: 500,
+        duration: 250,
         useNativeDriver: true,
       }).start(() => onFinish());
-    }, 1500);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [opacity, onFinish]);
