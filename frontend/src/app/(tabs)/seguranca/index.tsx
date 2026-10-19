@@ -57,6 +57,7 @@ export default function SegurancaScreen() {
           CPF: user.CPF,
           CNPJ: user.CNPJ,
           senha: novaSenha,
+          senhaAtual,
         },
         token,
       );

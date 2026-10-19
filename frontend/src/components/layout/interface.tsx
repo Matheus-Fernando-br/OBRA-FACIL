@@ -12,7 +12,7 @@ export interface Usuario {
 }
 
 /** Campos aceitos na atualização do usuário. */
-export type UpdateUsuario = Partial<Omit<Usuario, "_id">> & { senha?: string };
+export type UpdateUsuario = Partial<Omit<Usuario, "_id">> & { senha?: string; senhaAtual?: string };
 
 // ==============================
 // CLIENTE
