@@ -22,8 +22,9 @@ Tudo o que é do frontend já está pronto no código. Este guia cobre o que é 
    - https://matheus-fernando-br.github.io/OBRA-FACIL/termos.html
    - https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.html
    > Se mudar o texto, edite `frontend/src/content/legal.json` e rode `npm run legal:pages`.
-2. **Backend pronto para produção** (ver lista com seu parceiro): servidor sem "dormir"
-   (plano pago no Render), recuperação de senha, exclusão de conta e CORS.
+2. **Backend no ar** (pasta `/backend`, guia em `backend/README.md`): crie o serviço no Render pelo
+   Blueprint (`render.yaml`), preencha `MONGO_URI`, `BREVO_API_KEY`, `MAIL_FROM_EMAIL` e
+   `ADMIN_INITIAL_PASSWORD`, use o plano **Starter** (sem "dormir") e confira `/health`.
 3. Crie uma **conta de teste** para o revisor do Google (e-mail + senha) com alguns dados de exemplo.
 
 ## 1. Conta de desenvolvedor
@@ -58,14 +59,17 @@ eas build -p android --profile production
 Envio automático (opcional): `eas submit -p android` (exige uma conta de serviço do Google Play;
 veja https://docs.expo.dev/submit/android/).
 
-## 5. Planos e pagamento (quando for cobrar)
-- Planos, preços e limites: `frontend/src/config/plans.ts`.
-- Ponto de integração da compra: `frontend/src/services/subscription.ts` (procure **TODO(pagamento)**).
-- No Android, assinaturas digitais **precisam** usar o **Google Play Billing**
-  (react-native-iap ou RevenueCat). Crie os produtos em **Monetizar → Assinaturas** com os IDs
-  `obrafacil_basico_mensal` e `obrafacil_profissional_mensal` (já referenciados em `plans.ts`).
-- O backend deve validar a compra e aplicar os mesmos limites no servidor.
-- Ao ativar as compras, atualize no Play Console: classificação de conteúdo (compras digitais = Sim).
+## 5. Planos e pagamento
+- Preços, limites e textos: painel administrativo (`/admin` → **Planos e cobrança**). O app lê do servidor.
+- Cobrança: **Mercado Pago** (assinatura mensal), confirmada pelo servidor via webhook.
+- **Regra da Google Play:** assinaturas vendidas *dentro* do app Android precisam do Google Play Billing
+  (no Brasil, outro meio só com adesão ao programa de faturamento alternativo da Google). Por isso o
+  checkout do app Android começa **desligado**; quem quiser assinar usa a página web
+  `https://SEU-SERVICO.onrender.com/assinar`, e o plano aparece no app automaticamente.
+  O app não deve ter botões ou links que levem ao pagamento fora da Play Store.
+- Se no futuro quiser vender dentro do app Android: implementar o Google Play Billing (react-native-iap
+  ou RevenueCat) ou aderir ao programa de faturamento alternativo, e atualizar a classificação de
+  conteúdo (compras digitais = Sim).
 
 ## 6. iOS (depois)
 - Conta Apple Developer (US$ 99/ano) → `eas build -p ios --profile production` → `eas submit -p ios`.

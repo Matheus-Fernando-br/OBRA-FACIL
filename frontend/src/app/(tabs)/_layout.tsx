@@ -10,6 +10,7 @@ const INTERNAL_SCREENS = [
   "seguranca",
   "relatorios",
   "planos",
+  "catalogo",
   "notificacoes",
   "ajuda",
   "sobre",

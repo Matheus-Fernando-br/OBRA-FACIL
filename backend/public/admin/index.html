@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Obra Fácil · Painel</title>
+  <link rel="stylesheet" href="admin.css">
+  <script src="vendor/chart.umd.js" defer></script>
+  <script src="app.js" type="module"></script>
+</head>
+<body>
+  <!-- Login -->
+  <section id="view-login" class="auth" hidden>
+    <form id="login-form" class="auth-card" autocomplete="on">
+      <div class="brand"><span class="brand-mark">OF</span><div><strong>Obra Fácil</strong><small>Painel administrativo</small></div></div>
+      <h1>Entrar</h1>
+      <label>Usuário<input name="username" autocomplete="username" required value="admin"></label>
+      <label>Senha<input name="senha" type="password" autocomplete="current-password" required></label>
+      <p class="form-error" id="login-error" role="alert"></p>
+      <button class="btn primary block" type="submit">Entrar</button>
+    </form>
+  </section>
+
+  <!-- Troca obrigatória de senha -->
+  <section id="view-password" class="auth" hidden>
+    <form id="password-form" class="auth-card">
+      <div class="brand"><span class="brand-mark">OF</span><div><strong>Obra Fácil</strong><small>Primeiro acesso</small></div></div>
+      <h1>Defina sua senha</h1>
+      <p class="muted">Por segurança, troque a senha inicial antes de continuar. Use 10 ou mais caracteres, com letras e números.</p>
+      <label>Senha atual<input name="senhaAtual" type="password" autocomplete="current-password" required></label>
+      <label>Nova senha<input name="novaSenha" type="password" autocomplete="new-password" minlength="10" required></label>
+      <label>Confirmar nova senha<input name="confirmar" type="password" autocomplete="new-password" minlength="10" required></label>
+      <p class="form-error" id="password-error" role="alert"></p>
+      <button class="btn primary block" type="submit">Salvar e continuar</button>
+    </form>
+  </section>
+
+  <!-- Aplicação -->
+  <div id="view-app" class="shell" hidden>
+    <aside class="sidebar" id="sidebar">
+      <div class="brand"><span class="brand-mark">OF</span><div><strong>Obra Fácil</strong><small>Admin</small></div></div>
+      <nav>
+        <a href="#/dashboard" data-route="dashboard"><span class="ico">◧</span>Visão geral</a>
+        <a href="#/usuarios" data-route="usuarios"><span class="ico">◉</span>Usuários</a>
+        <a href="#/assinaturas" data-route="assinaturas"><span class="ico">↻</span>Assinaturas</a>
+        <a href="#/pagamentos" data-route="pagamentos"><span class="ico">$</span>Pagamentos</a>
+        <a href="#/planos" data-route="planos"><span class="ico">▤</span>Planos e cobrança</a>
+        <a href="#/integracoes" data-route="integracoes"><span class="ico">⇄</span>Integrações</a>
+        <a href="#/diagnostico" data-route="diagnostico"><span class="ico">✚</span>Diagnóstico</a>
+        <a href="#/auditoria" data-route="auditoria"><span class="ico">≡</span>Auditoria</a>
+        <a href="#/webhooks" data-route="webhooks"><span class="ico">⚑</span>Webhooks</a>
+      </nav>
+      <div class="sidebar-foot">
+        <a href="#/conta" data-route="conta"><span class="ico">⚙</span>Minha conta</a>
+        <button class="btn ghost block" id="logout">Sair</button>
+      </div>
+    </aside>
+    <main class="main">
+      <header class="topbar">
+        <button class="btn ghost icon" id="menu-toggle" aria-label="Abrir menu">☰</button>
+        <h2 id="page-title">Visão geral</h2>
+        <span class="who" id="who"></span>
+      </header>
+      <div id="content" class="content" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="modal" class="modal"><div id="modal-body"></div></dialog>
+</body>
+</html>

@@ -33,6 +33,23 @@ export interface Cliente {
 export type AddCliente = Omit<Cliente, "_id">;
 
 // ==============================
+// CATÁLOGO (PRODUTOS E SERVIÇOS)
+// ==============================
+
+export interface Produto {
+  _id: string;
+  nome: string;
+  descricao?: string;
+  tipo: "PRODUTO" | "SERVICO";
+  unidade: string;
+  preco_unidade: number;
+  categoria?: string;
+  ativo?: boolean;
+}
+
+export type AddProduto = Omit<Produto, "_id">;
+
+// ==============================
 // ENDEREÇO
 // ==============================
 

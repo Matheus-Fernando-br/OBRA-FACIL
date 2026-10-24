@@ -54,6 +54,13 @@ export default function MaisScreen() {
               onPress={() => router.push("/relatorios")}
             />
             <SettingsItem
+              icon="pricetags"
+              iconColor={theme.primary}
+              title="Catálogo de preços"
+              description="Produtos e serviços com preço padrão"
+              onPress={() => router.push("/catalogo")}
+            />
+            <SettingsItem
               icon="notifications"
               iconColor={theme.danger}
               title="Notificações"

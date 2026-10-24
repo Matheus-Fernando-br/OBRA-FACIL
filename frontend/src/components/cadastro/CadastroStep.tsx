@@ -8,6 +8,7 @@ import { cpfMask, cnpjMask, emailMask } from "@/components/forms/mask";
 import { AppInput } from "@/components/forms/AppInput";
 import { AppButton } from "../buttons/AppButton";
 import { checkEmailExists } from "../../services/api";
+import { TermsCheckbox } from "./TermsCheckbox";
 
 interface Props {
   nome: string;
@@ -22,7 +23,10 @@ interface Props {
   setDocumento: (text: string) => void;
   tipoDocumento: "CPF" | "CNPJ";
   setTipoDocumento: (tipo: "CPF" | "CNPJ") => void;
-  onNext: () => void;
+  aceite: boolean;
+  setAceite: (value: boolean) => void;
+  /** Cria a conta e envia o código de verificação. */
+  onNext: () => Promise<void>;
 }
 
 export function CadastroStep({
@@ -38,6 +42,8 @@ export function CadastroStep({
   setDocumento,
   tipoDocumento,
   setTipoDocumento,
+  aceite,
+  setAceite,
   onNext,
 }: Props) {
   const { styles, theme } = useTheme();
@@ -62,18 +68,20 @@ export function CadastroStep({
       if (!documento.trim()) return setFeedback(`Informe seu ${tipoDocumento}`);
       const documentoErro = validateDocument(documento);
       if (documentoErro) return setFeedback(documentoErro);
+      if (!aceite)
+        return setFeedback("Para criar a conta, aceite os Termos de Uso e a Política de Privacidade.");
 
-      const response = await checkEmailExists(email);
+      const response = await checkEmailExists(email.trim().toLowerCase());
       if (response.exists) {
         setFeedback("Já existe um usuário cadastrado com este e-mail.");
         return;
       }
-      onNext();
+      await onNext();
     } catch (error: any) {
       console.log(error);
       setFeedback(
         error.response?.data?.message ||
-          "Não foi possível verificar o e-mail. Tente novamente.",
+          "Não foi possível criar a conta. Tente novamente.",
       );
     } finally {
       setCheckingEmail(false);
@@ -216,9 +224,17 @@ export function CadastroStep({
         </Pressable>
       </View>
 
+      <TermsCheckbox
+        value={aceite}
+        onChange={(value) => {
+          setAceite(value);
+          if (feedback) setFeedback("");
+        }}
+      />
+
       {!!feedback && <Text style={styles.cadastroFeedback}>{feedback}</Text>}
       <AppButton
-        title={checkingEmail ? "Verificando..." : "Continuar"}
+        title={checkingEmail ? "Criando conta..." : "Continuar"}
         onPress={continuar}
         loading={checkingEmail}
         color={theme.title}

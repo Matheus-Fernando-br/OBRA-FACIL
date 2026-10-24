@@ -1,10 +1,9 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
-import { DEFAULT_PLAN_ID, getPlan, PlanDefinition, PlanId } from "@/config/plans";
-import { fetchCurrentPlanId } from "@/services/subscription";
+import { getPlan, PlanDefinition, PlanId } from "@/config/plans";
+import { EMPTY_SUBSCRIPTION, fetchSubscriptionState, SubscriptionState } from "@/services/subscription";
 
-interface SubscriptionContextData {
-  planId: PlanId;
+interface SubscriptionContextData extends SubscriptionState {
   plan: PlanDefinition;
   loading: boolean;
   refresh(): Promise<void>;
@@ -12,20 +11,20 @@ interface SubscriptionContextData {
 
 const SubscriptionContext = createContext({} as SubscriptionContextData);
 
-/** Plano atual do usuário logado (recarregado a cada login). */
+/** Plano atual do usuário logado (recarregado a cada login e ao abrir Planos). */
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
-  const [planId, setPlanId] = useState<PlanId>(DEFAULT_PLAN_ID);
+  const [state, setState] = useState<SubscriptionState>(EMPTY_SUBSCRIPTION);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!token) {
-      setPlanId(DEFAULT_PLAN_ID);
+      setState(EMPTY_SUBSCRIPTION);
       return;
     }
     setLoading(true);
     try {
-      setPlanId(await fetchCurrentPlanId(token));
+      setState(await fetchSubscriptionState(token));
     } finally {
       setLoading(false);
     }
@@ -35,8 +34,10 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  const plan = getPlan(state.planId as PlanId, state.plans);
+
   return (
-    <SubscriptionContext.Provider value={{ planId, plan: getPlan(planId), loading, refresh }}>
+    <SubscriptionContext.Provider value={{ ...state, plan, loading, refresh }}>
       {children}
     </SubscriptionContext.Provider>
   );

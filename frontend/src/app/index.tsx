@@ -246,8 +246,14 @@ export default function LoginScreen() {
       setSuccessTransition(true);
     } catch (error: any) {
       console.log(error);
-      if (error.response?.status === 401) {
+      const code = error.response?.data?.code;
+      if (code === "EMAIL_NOT_VERIFIED") {
+        // Conta criada mas e-mail não confirmado: o servidor já reenviou o código.
+        router.push({ pathname: "/cadastro", params: { verificar: email.trim().toLowerCase() } });
+      } else if (error.response?.status === 401) {
         setFeedback("E-mail ou senha incorretos.");
+      } else if (error.response?.status === 403 || error.response?.status === 429) {
+        setFeedback(error.response.data?.message || "Acesso não permitido.");
       } else if (error.response?.status === 400) {
         setFeedback(
           error.response.data?.message || "Confira os dados informados.",

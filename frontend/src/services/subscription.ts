@@ -1,61 +1,82 @@
-import { DEFAULT_PLAN_ID, PLANS, PlanId } from "@/config/plans";
-import { getMySubscription } from "./api";
+import { Linking } from "react-native";
+import { DEFAULT_PLAN_ID, LimitKey, PLANS, PlanDefinition, PlanId, plansFromServer } from "@/config/plans";
+import { cancelSubscription, getMySubscription, getPlans, startCheckout, syncSubscription } from "./api";
 
 /* ==========================================================
-   ASSINATURA — ponto único de integração com pagamento
+   ASSINATURA (Mercado Pago, via backend)
    ----------------------------------------------------------
-   Hoje: todo usuário fica no plano Gratuito, a menos que a API
-   (GET /subscription/me) informe outro plano.
-
-   TODO(pagamento) — quando a API de pagamento existir:
-   1. Google Play exige o Google Play Billing para assinaturas
-      digitais vendidas no app Android. Use react-native-iap ou
-      RevenueCat (exigem build de desenvolvimento; não rodam no
-      Expo Go). Os IDs de produto ficam em config/plans.ts
-      (playProductId).
-   2. Em requestPlanChange(): abrir a compra da loja, enviar o
-      comprovante (purchaseToken) ao backend para validação e
-      só então atualizar o plano.
-   3. Ajustar parsePlanId() ao formato real de /subscription/me.
+   - O plano efetivo vem sempre do servidor (GET /subscription/me).
+   - O checkout só aparece se o servidor liberar para a plataforma
+     (painel → Planos e cobrança). No Android começa desligado:
+     a Google Play exige o faturamento dela para vender assinaturas
+     dentro do app. A assinatura fica disponível na página web
+     /assinar do backend.
+   - O plano só muda quando o Mercado Pago confirma o pagamento
+     (webhook validado no servidor). O app nunca altera o plano.
 ========================================================== */
 
-export class PlanChangeUnavailableError extends Error {
-  constructor() {
-    super(
-      "A assinatura pelo app estará disponível em breve. Fale com o suporte para mudar de plano.",
-    );
-    this.name = "PlanChangeUnavailableError";
-  }
+export type SubscriptionStatus = "gratuito" | "cortesia" | "pendente" | "ativa" | "pausada" | "cancelada" | "expirada" | "suspeita";
+
+export interface SubscriptionState {
+  plans: PlanDefinition[];
+  planId: PlanId;
+  origem: "gratuito" | "assinatura" | "cortesia";
+  status: SubscriptionStatus;
+  renovaEm: string | null;
+  acessoAte: string | null;
+  inadimplente: boolean;
+  pendente: boolean;
+  uso: Partial<Record<LimitKey, number>>;
+  checkoutEnabled: boolean;
 }
 
-const VALID_IDS = new Set(PLANS.map((p) => p.id));
+export const EMPTY_SUBSCRIPTION: SubscriptionState = {
+  plans: PLANS,
+  planId: DEFAULT_PLAN_ID,
+  origem: "gratuito",
+  status: "gratuito",
+  renovaEm: null,
+  acessoAte: null,
+  inadimplente: false,
+  pendente: false,
+  uso: {},
+  checkoutEnabled: false,
+};
 
-/** Aceita formatos comuns de resposta: { plano: { id } }, { planoId }, { plano: "basico" }. */
-function parsePlanId(data: any): PlanId | null {
-  const raw =
-    data?.plano?.id ?? data?.plano?.nome ?? data?.planoId ?? data?.plano ?? data?.plan;
-  if (typeof raw !== "string") return null;
-  const id = raw
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "") as PlanId;
-  return VALID_IDS.has(id) ? id : null;
+const VALID_IDS = new Set<string>(PLANS.map((p) => p.id));
+
+/** Planos (servidor ou reserva local) + situação da assinatura do usuário. */
+export async function fetchSubscriptionState(token: string): Promise<SubscriptionState> {
+  const [plansRes, meRes] = await Promise.allSettled([getPlans(), getMySubscription(token)]);
+  const serverPlans = plansRes.status === "fulfilled" ? plansFromServer(plansRes.value?.plans) : null;
+  const me = meRes.status === "fulfilled" ? meRes.value : null;
+  const planId = VALID_IDS.has(me?.plano?.id) ? (me.plano.id as PlanId) : DEFAULT_PLAN_ID;
+
+  return {
+    plans: serverPlans ?? PLANS,
+    planId,
+    origem: me?.origem ?? "gratuito",
+    status: me?.status ?? "gratuito",
+    renovaEm: me?.renovaEm ?? null,
+    acessoAte: me?.acessoAte ?? null,
+    inadimplente: Boolean(me?.assinatura?.inadimplente),
+    pendente: Boolean(me?.pendente),
+    uso: me?.uso ?? {},
+    checkoutEnabled: Boolean(me?.checkout?.enabled ?? (plansRes.status === "fulfilled" && plansRes.value?.checkout?.enabled)),
+  };
 }
 
-/** Plano atual do usuário (Gratuito se a API não responder ou não informar). */
-export async function fetchCurrentPlanId(token: string): Promise<PlanId> {
-  try {
-    const data = await getMySubscription(token);
-    return parsePlanId(data) ?? DEFAULT_PLAN_ID;
-  } catch {
-    return DEFAULT_PLAN_ID;
-  }
+/** Abre o pagamento do Mercado Pago no navegador. */
+export async function openCheckout(planId: PlanId, token: string) {
+  const { initPoint } = await startCheckout(planId, token);
+  if (!initPoint) throw new Error("Não foi possível abrir o pagamento.");
+  await Linking.openURL(initPoint);
 }
 
-/**
- * Troca de plano. TODO(pagamento): implementar a compra (ver topo).
- * Enquanto isso, informa que a assinatura está em breve.
- */
-export async function requestPlanChange(_planId: PlanId, _token: string): Promise<void> {
-  throw new PlanChangeUnavailableError();
+export async function refreshFromProvider(token: string) {
+  return syncSubscription(token);
+}
+
+export async function cancelCurrentSubscription(token: string) {
+  return cancelSubscription(token);
 }

@@ -29,6 +29,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [documento, setDocumento] = useState("");
+  const [senhaAtual, setSenhaAtual] = useState("");
   const [loading, setLoading] = useState(false);
   const { token, setUser } = useAuth();
   const [feedback, setFeedback] = useState("");
@@ -70,6 +71,12 @@ export function EditUserModal({ visible, onClose, user }: Props) {
         return;
       }
 
+      const mudouEmail = email.trim().toLowerCase() !== user.email.toLowerCase();
+      if (mudouEmail && !senhaAtual) {
+        setFeedback("Para trocar o e-mail, informe sua senha atual.");
+        return;
+      }
+
       setLoading(true);
 
       const updatedUser = await updateUser(
@@ -79,6 +86,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
           email: email.trim(),
           CPF: user.CPF ? documento.trim() : undefined,
           CNPJ: user.CNPJ ? documento.trim() : undefined,
+          ...(mudouEmail ? { senhaAtual } : {}),
         },
         token,
       );
@@ -89,13 +97,14 @@ export function EditUserModal({ visible, onClose, user }: Props) {
       setNome("");
       setEmail("");
       setDocumento("");
+      setSenhaAtual("");
       setTimeout(() => {
         onClose();
       }, 1200);
     } catch (error: any) {
       console.log(error.response?.data);
 
-      setFeedback("Erro ao atualizar usuário.");
+      setFeedback(error.response?.data?.message ?? "Erro ao atualizar usuário.");
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -158,7 +167,21 @@ export function EditUserModal({ visible, onClose, user }: Props) {
                 value={email}
                 onChangeText={(text) => setEmail(emailMask(text))}
                 placeholder="Email"
+                autoCapitalize="none"
+                keyboardType="email-address"
               />
+
+              {!!user && email.trim().toLowerCase() !== user.email.toLowerCase() && (
+                <>
+                  <Text style={styles.label}>Senha atual (para trocar o e-mail)</Text>
+                  <AppInput
+                    value={senhaAtual}
+                    onChangeText={setSenhaAtual}
+                    placeholder="Sua senha atual"
+                    secureTextEntry
+                  />
+                </>
+              )}
 
               <Text style={styles.label}>CPF / CNPJ</Text>
 

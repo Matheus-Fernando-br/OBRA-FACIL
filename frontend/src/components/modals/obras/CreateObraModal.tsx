@@ -46,7 +46,7 @@ export function CreateObraModal({
       onClose();
     } catch (error: any) {
       console.log("ERRO AO CRIAR OBRA:", error?.response?.data || error);
-      throw new Error(error?.response?.data?.error ?? "Não foi possível criar a obra.");
+      throw new Error(error?.response?.data?.message ?? "Não foi possível criar a obra.");
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assinatura · Obra Fácil</title>
+  <meta name="description" content="Assine os planos Básico ou Profissional do Obra Fácil.">
+  <link rel="stylesheet" href="/assinar/assinar.css">
+  <script src="/assinar/assinar.js" type="module"></script>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <span class="mark">OF</span>
+      <div><strong>Obra Fácil</strong><small>Assinatura</small></div>
+      <button class="link" id="sair" hidden>Sair</button>
+    </header>
+
+    <section id="tela-login" class="card" hidden>
+      <h1>Entre com sua conta do app</h1>
+      <p class="muted">Use o mesmo e-mail e senha do aplicativo Obra Fácil.</p>
+      <form id="login" class="stack">
+        <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
+        <label>Senha<input type="password" name="senha" autocomplete="current-password" required></label>
+        <p class="erro" id="login-erro" role="alert"></p>
+        <button class="btn primary">Entrar</button>
+      </form>
+    </section>
+
+    <section id="tela-planos" hidden>
+      <div class="card" id="atual"></div>
+      <div class="planos" id="planos"></div>
+      <p class="muted small">Pagamento mensal processado pelo Mercado Pago. Você pode cancelar quando quiser; o plano continua até o fim do período já pago. Dúvidas: <a href="mailto:r2m.tec.adm@gmail.com">r2m.tec.adm@gmail.com</a>.</p>
+    </section>
+
+    <p class="erro" id="erro" role="alert"></p>
+  </main>
+</body>
+</html>

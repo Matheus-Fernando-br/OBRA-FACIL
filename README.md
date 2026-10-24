@@ -39,36 +39,26 @@ O OBRA-FÁCIL foi criado para resolver esse problema oferecendo uma plataforma �
 
 # 🚀 Tecnologias Utilizadas
 
-## Frontend
+## Frontend (`/frontend`)
 
-- React Native
-- Expo SDK 56
+- React Native + Expo SDK 57 (Expo Router)
 - TypeScript
-- Expo Router
-- React Navigation
-- Context API
-- Axios
+- Context API, Axios
+- Sessão no armazenamento seguro do aparelho + biometria
 
----
+## Backend (`/backend`)
 
-## Backend (Planejado)
+- Node.js 22 + Express 5
+- MongoDB (Mongoose)
+- Zod (validação), Pino (logs), JWT + refresh token rotativo
+- Mercado Pago (assinaturas), Brevo (e-mails), Telegram (alertas da equipe)
+- Painel administrativo em `/admin` e página de assinatura em `/assinar`
+- Deploy no Render (`render.yaml`) — guia completo em [backend/README.md](backend/README.md)
 
-- Python
-- FastAPI
-- PostgreSQL
-- SQLAlchemy
-- JWT Authentication
-- Docker
+## Publicação
 
----
-
-## Infraestrutura (Planejada)
-
-- Railway
-- Render
-- VPS Linux
-- Nginx
-- Cloudflare
+- Guia da Google Play: [loja/play-store/README.md](loja/play-store/README.md)
+- Política de privacidade e termos: pasta `docs/` (GitHub Pages)
 
 ---
 

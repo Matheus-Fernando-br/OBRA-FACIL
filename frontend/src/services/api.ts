@@ -1,12 +1,22 @@
 import axios from "axios";
+import { Platform } from "react-native";
 import { emitNetworkError } from "./networkEvents";
 
+/**
+ * Endereço da API (backend próprio, pasta /backend do repositório).
+ * Para apontar para outro servidor sem mudar o código, defina
+ * EXPO_PUBLIC_API_URL (arquivo .env local ou "env" no eas.json).
+ */
+export const API_URL = (
+  process.env.EXPO_PUBLIC_API_URL || "https://obra-facil-api.onrender.com"
+).replace(/\/+$/, "");
+
 export const api = axios.create({
-  baseURL: "https://obra-facil-backend-n4du.onrender.com",
-  withCredentials: true,
-  // O servidor no Render (plano gratuito) "dorme" e pode levar ~1 min para
-  // acordar. Sem timeout, a tela inicial ficava carregando indefinidamente.
+  baseURL: API_URL,
+  // Se o servidor estiver acordando, a primeira resposta pode demorar.
   timeout: 60000,
+  // A API usa a plataforma para regras de cobrança por loja (Android/iOS/web).
+  headers: { "X-Platform": Platform.OS === "ios" || Platform.OS === "android" ? Platform.OS : "web" },
 });
 
 // Falha sem resposta do servidor = sem internet ou servidor fora do ar.
@@ -28,32 +38,18 @@ export async function login(email: string, senha: string) {
   return data;
 }
 
-export async function refreshToken(token: string) {
-  const { data } = await api.post(
-    "/auth/refresh",
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  );
+/** Troca o refresh token por um par novo (o anterior deixa de valer). */
+export async function refreshToken(refreshToken: string): Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> {
+  const { data } = await api.post("/auth/refresh", { refreshToken });
 
   return data;
 }
 
-export async function logout(token?: string) {
-  await api.post(
-    "/auth/logout",
-    {},
-    {
-      headers: token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : undefined,
-    },
-  );
+export async function logout(refreshToken?: string | null) {
+  await api.post("/auth/logout", { refreshToken: refreshToken ?? undefined });
 }
 
 export async function registerUser(data: {
@@ -62,6 +58,8 @@ export async function registerUser(data: {
   senha: string;
   CPF?: string;
   CNPJ?: string;
+  aceiteTermos: true;
+  versaoTermos: string;
 }) {
   const response = await api.post("/auth/register", data);
 
@@ -90,8 +88,6 @@ export async function resendVerificationCode(data: { email: string }) {
 
 // ==========================
 // RECUPERAÇÃO DE SENHA
-// Endpoints no mesmo padrão de /auth/verify-email. Se o backend usar
-// outros caminhos ou nomes de campos, ajuste somente aqui.
 // ==========================
 
 export async function requestPasswordReset(data: { email: string }) {
@@ -379,12 +375,9 @@ export async function deleteWork(id: string, token: string) {
 // PLANOS E ASSINATURAS
 // ==============================
 
-export async function getPlans(token: string) {
-  const { data } = await api.get("/plans", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+/** Planos, limites e se o checkout está liberado nesta plataforma (público). */
+export async function getPlans() {
+  const { data } = await api.get("/plans");
 
   return data;
 }
@@ -399,9 +392,25 @@ export async function getMySubscription(token: string) {
   return data;
 }
 
-export async function changeSubscription(planoId: string, token: string) {
-  const { data } = await api.put(
-    `/subscription/${planoId}`,
+/** Cria o pagamento no Mercado Pago e devolve o link (initPoint). */
+export async function startCheckout(planoId: string, token: string): Promise<{ initPoint: string }> {
+  const { data } = await api.post(
+    "/subscription/checkout",
+    { planoId },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return data;
+}
+
+/** Consulta o Mercado Pago de novo (ex.: ao voltar do pagamento). */
+export async function syncSubscription(token: string) {
+  const { data } = await api.post(
+    "/subscription/sync",
     {},
     {
       headers: {
@@ -414,7 +423,56 @@ export async function changeSubscription(planoId: string, token: string) {
 }
 
 export async function cancelSubscription(token: string) {
-  const { data } = await api.delete("/subscription", {
+  const { data } = await api.post(
+    "/subscription/cancel",
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  return data;
+}
+
+// ==============================
+// CATÁLOGO (PRODUTOS E SERVIÇOS)
+// ==============================
+import { Produto, AddProduto } from "@/components/layout/interface";
+
+export async function getProdutos(token: string): Promise<Produto[]> {
+  const { data } = await api.get("/produto", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function createProduto(body: AddProduto, token: string) {
+  const { data } = await api.post("/produto", body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function updateProduto(id: string, body: Partial<AddProduto>, token: string) {
+  const { data } = await api.put(`/produto/${id}`, body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
+export async function deleteProduto(id: string, token: string) {
+  const { data } = await api.delete(`/produto/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

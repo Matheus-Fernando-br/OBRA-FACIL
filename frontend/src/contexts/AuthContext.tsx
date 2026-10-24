@@ -41,34 +41,84 @@ interface AuthContextData {
   authenticateWithBiometrics(): Promise<boolean>;
   setUser(user: User | null): void;
   setToken(token: string | null): void;
+  /** Guarda a sessão nova devolvida pela API (ex.: após trocar a senha). */
+  updateAccessToken(token: string, refreshToken?: string): Promise<void>;
 }
 
 const AuthContext = createContext({} as AuthContextData);
 const TOKEN_KEY = "@obra_facil_access_token";
+const REFRESH_KEY = "@obra_facil_refresh_token";
 
-async function saveToken(value: string) {
+/*
+ * Sessão: access token curto (1 h) + refresh token (30 dias), ambos no
+ * armazenamento seguro do aparelho. O refresh token é trocado a cada uso.
+ */
+async function storeItem(key: string, value: string) {
   if (Platform.OS === "web") {
-    await AsyncStorage.setItem(TOKEN_KEY, value);
+    await AsyncStorage.setItem(key, value);
     return;
   }
 
-  await SecureStore.setItemAsync(TOKEN_KEY, value, {
+  await SecureStore.setItemAsync(key, value, {
     keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
   });
 }
 
-async function readToken() {
-  if (Platform.OS === "web") return AsyncStorage.getItem(TOKEN_KEY);
-  return SecureStore.getItemAsync(TOKEN_KEY);
+async function readItem(key: string) {
+  if (Platform.OS === "web") return AsyncStorage.getItem(key);
+  return SecureStore.getItemAsync(key);
 }
 
-async function removeToken() {
+async function deleteItem(key: string) {
   if (Platform.OS === "web") {
-    await AsyncStorage.removeItem(TOKEN_KEY);
+    await AsyncStorage.removeItem(key);
     return;
   }
 
-  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(key);
+}
+
+const saveToken = (value: string) => storeItem(TOKEN_KEY, value);
+const readToken = () => readItem(TOKEN_KEY);
+
+async function saveSession(accessToken: string, refresh?: string) {
+  await saveToken(accessToken);
+  if (refresh) await storeItem(REFRESH_KEY, refresh);
+}
+
+async function removeToken() {
+  await Promise.all([deleteItem(TOKEN_KEY), deleteItem(REFRESH_KEY)]);
+}
+
+/** Erros 401 de regra de negócio (ex.: senha atual errada) não encerram a sessão. */
+const NOT_SESSION_ERRORS = ["WRONG_PASSWORD", "CURRENT_PASSWORD_REQUIRED", "INVALID_CREDENTIALS"];
+
+/** Renova a sessão com o refresh token salvo. Devolve o access token novo ou null. */
+async function renewSession(): Promise<string | null> {
+  const stored = await readItem(REFRESH_KEY);
+  if (!stored) return null;
+  try {
+    const response = await refreshToken(stored);
+    if (!response?.accessToken) return null;
+    await saveSession(response.accessToken, response.refreshToken);
+    return response.accessToken;
+  } catch (error: any) {
+    // Só descarta a sessão se o servidor recusar; falha de rede mantém.
+    if (error?.response?.status === 401) await removeToken();
+    return null;
+  }
+}
+
+/** Carrega o usuário; se o token expirou, renova uma vez e tenta de novo. */
+async function loadUserWithRenewal(savedToken: string) {
+  try {
+    return { token: savedToken, user: await getUser(savedToken) };
+  } catch (error: any) {
+    if (error?.response?.status !== 401) throw error;
+    const next = await renewSession();
+    if (!next) throw error;
+    return { token: next, user: await getUser(next) };
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -116,9 +166,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const savedToken = await readToken();
       if (!savedToken || !(await authenticateWithBiometrics())) return false;
 
-      const loggedUser = await getUser(savedToken);
-      setToken(savedToken);
-      setUser(loggedUser);
+      const session = await loadUserWithRenewal(savedToken);
+      setToken(session.token);
+      setUser(session.user);
       return true;
     } catch (error) {
       console.log("Não foi possível desbloquear a sessão:", error);
@@ -138,9 +188,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!unlocked) return;
       }
 
-      const loggedUser = await getUser(savedToken);
-      setToken(savedToken);
-      setUser(loggedUser);
+      const session = await loadUserWithRenewal(savedToken);
+      setToken(session.token);
+      setUser(session.user);
     } catch (error: any) {
       // Só descarta a sessão se o servidor recusar o token; falha de rede
       // ou servidor acordando não deve deslogar o usuário.
@@ -161,11 +211,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     try {
       const response = await apiLogin(email, senha);
-      await saveToken(response.accessToken);
+      await saveSession(response.accessToken, response.refreshToken);
       setToken(response.accessToken);
-
-      const loggedUser = await getUser(response.accessToken);
-      setUser(loggedUser);
+      setUser(response.user ?? (await getUser(response.accessToken)));
     } finally {
       setLoading(false);
     }
@@ -174,22 +222,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function refresh() {
     if (!token) return;
 
-    try {
-      const response = await refreshToken(token);
-      if (response.accessToken) {
-        await saveToken(response.accessToken);
-        setToken(response.accessToken);
-        setUser(await getUser(response.accessToken));
-      }
-    } catch (error) {
-      console.log(error);
+    const next = await renewSession();
+    if (next) {
+      setToken(next);
+      setUser(await getUser(next));
+    } else if (!(await readItem(REFRESH_KEY))) {
       await logout();
     }
   }
 
+  async function updateAccessToken(next: string, nextRefresh?: string) {
+    await saveSession(next, nextRefresh);
+    setToken(next);
+  }
+
   async function logout() {
     try {
-      if (token) await apiLogout(token);
+      await apiLogout(await readItem(REFRESH_KEY));
     } catch (error) {
       console.log(error);
     } finally {
@@ -215,22 +264,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const url: string = original?.url ?? "";
       const current = tokenRef.current;
 
-      if (status !== 401 || !current || url.startsWith("/auth/") || original?._retried) {
+      const code = error?.response?.data?.code;
+      if (
+        status !== 401 ||
+        !current ||
+        url.startsWith("/auth/") ||
+        original?._retried ||
+        NOT_SESSION_ERRORS.includes(code)
+      ) {
         return Promise.reject(error);
       }
 
       original._retried = true;
 
-      refreshing.current ??= refreshToken(current)
-        .then(async (response) => {
-          const next = response?.accessToken ?? null;
-          if (next) {
-            await saveToken(next);
-            setToken(next);
-          }
+      refreshing.current ??= renewSession()
+        .then((next) => {
+          if (next) setToken(next);
           return next;
         })
-        .catch(() => null)
         .finally(() => {
           refreshing.current = null;
         });
@@ -241,6 +292,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         original.headers = { ...original.headers, Authorization: `Bearer ${next}` };
         return api.request(original);
       }
+
+      // Sem internet na hora de renovar: mantém a sessão e só falha esta chamada.
+      if (await readItem(REFRESH_KEY)) return Promise.reject(error);
 
       await removeToken();
       setUser(null);
@@ -267,6 +321,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         authenticateWithBiometrics,
         setUser,
         setToken,
+        updateAccessToken,
       }}
     >
       {children}

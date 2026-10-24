@@ -1,5 +1,6 @@
 {
-  "atualizadoEm": "19 de outubro de 2026",
+  "versao": "2026-10-24",
+  "atualizadoEm": "24 de outubro de 2026",
   "privacidade": {
     "titulo": "Política de Privacidade",
     "intro": "Esta política explica como o aplicativo Obra Fácil, mantido pela R2M, coleta, usa e protege dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).",
@@ -10,11 +11,11 @@
       },
       {
         "titulo": "2. Dados que coletamos",
-        "texto": "Dados da sua conta: nome, e-mail, CPF ou CNPJ e senha (armazenada de forma criptografada pelo servidor). Dados que você cadastra no app para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra) e obras (datas, prazos e andamento). Dados técnicos mínimos necessários ao funcionamento, como registros de acesso exigidos pelo Marco Civil da Internet."
+        "texto": "Dados da sua conta: nome, e-mail, CPF ou CNPJ e senha (guardada apenas como código criptográfico irreversível), além da data em que você aceitou estes termos. Dados que você cadastra no app para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra), obras (datas, prazos e andamento) e o catálogo de produtos e serviços. Se você assinar um plano pago: plano contratado, valores, datas e situação das cobranças — os dados do cartão são informados diretamente ao Mercado Pago e não passam pelos nossos servidores. Dados técnicos mínimos necessários ao funcionamento e à segurança, como registros de acesso exigidos pelo Marco Civil da Internet."
       },
       {
         "titulo": "3. Para que usamos",
-        "texto": "Para criar e manter sua conta, autenticar seu acesso, armazenar e exibir seus clientes, orçamentos e obras, gerar documentos em PDF e relatórios, enviar códigos de verificação e de recuperação de senha, prestar suporte e cumprir obrigações legais. Não vendemos seus dados e não os usamos para publicidade."
+        "texto": "Para criar e manter sua conta, autenticar seu acesso, armazenar e exibir seus clientes, orçamentos, obras e catálogo, gerar documentos em PDF e relatórios, enviar códigos de verificação, de recuperação de senha e avisos sobre a conta e a assinatura, processar a assinatura de planos pagos, prevenir fraudes e abusos, prestar suporte e cumprir obrigações legais. Não vendemos seus dados e não os usamos para publicidade."
       },
       {
         "titulo": "4. Bases legais",
@@ -30,7 +31,7 @@
       },
       {
         "titulo": "7. Compartilhamento",
-        "texto": "Os dados são armazenados em provedores de hospedagem e banco de dados contratados pela R2M, que seguem padrões de segurança de mercado. Também podem ser compartilhados com autoridades quando houver obrigação legal. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
+        "texto": "Usamos fornecedores (operadores) contratados pela R2M, apenas para as finalidades desta política: Render (hospedagem do servidor), MongoDB Atlas (banco de dados), Brevo (envio de e-mails transacionais) e Mercado Pago (processamento das assinaturas, quando você contratar um plano pago). Alguns desses serviços podem armazenar dados fora do Brasil, com as salvaguardas previstas na LGPD. Os dados também podem ser compartilhados com autoridades quando houver obrigação legal. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
       },
       {
         "titulo": "8. Segurança",
@@ -38,7 +39,7 @@
       },
       {
         "titulo": "9. Por quanto tempo guardamos",
-        "texto": "Enquanto sua conta estiver ativa. Ao excluir a conta, os dados da conta, clientes, orçamentos e obras são apagados, exceto o que precisarmos manter por obrigação legal pelo prazo exigido em lei (por exemplo, registros de acesso por 6 meses)."
+        "texto": "Enquanto sua conta estiver ativa. Ao excluir a conta, os dados da conta, clientes, orçamentos, obras e catálogo são apagados. Mantemos apenas o que a lei exige, pelo prazo legal: registros de acesso por 6 meses (Marco Civil da Internet) e registros de pagamentos, sem vínculo com o seu nome, pelo prazo das obrigações fiscais."
       },
       {
         "titulo": "10. Seus direitos",
@@ -46,7 +47,7 @@
       },
       {
         "titulo": "11. Exclusão da conta",
-        "texto": "No app: Mais → Configurações gerais → Excluir conta. Fora do app: envie um e-mail para r2m.tec.adm@gmail.com com o assunto \"Excluir minha conta\" a partir do e-mail cadastrado. A solicitação é atendida em até 15 dias."
+        "texto": "No app: Mais → Configurações gerais → Excluir conta (confirmação com a sua senha). Fora do app: envie um e-mail para r2m.tec.adm@gmail.com com o assunto \"Excluir minha conta\" a partir do e-mail cadastrado; a solicitação é atendida em até 15 dias. A exclusão cancela cobranças futuras de assinatura. Você também pode pedir uma cópia dos seus dados pelo mesmo e-mail."
       },
       {
         "titulo": "12. Crianças e adolescentes",
@@ -76,7 +77,7 @@
       },
       {
         "titulo": "4. Planos e limites",
-        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional) com limites diferentes de clientes, orçamentos e obras, descritos na tela Planos. Quando disponíveis, as assinaturas serão cobradas pelo Google Play (ou App Store), com renovação e cancelamento gerenciados pela loja. Os preços e limites podem mudar, com aviso prévio no app."
+        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional) com limites diferentes de clientes, orçamentos, obras e itens de catálogo, descritos na tela Planos. As assinaturas são mensais, cobradas pelo Mercado Pago, com renovação automática até o cancelamento. Você pode cancelar a qualquer momento: não há novas cobranças e o plano continua até o fim do período já pago. Se uma cobrança for recusada e não for regularizada no prazo de tolerância, a conta volta ao plano Gratuito, sem perda dos dados. Preços e limites podem mudar, com aviso prévio; quem já assina mantém o valor contratado até o cancelamento."
       },
       {
         "titulo": "5. Seus dados",

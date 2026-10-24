@@ -1,7 +1,6 @@
 # Respostas para os formulários do Play Console
 
-Baseadas no que o app faz hoje (versão 1.0.0). **Revise com o backend** (seu parceiro) os itens
-marcados com ⚠️, pois dependem de como o servidor armazena os dados.
+Baseadas no que o app e o backend próprio (`/backend`) fazem hoje (versão 1.0.0).
 
 ---
 
@@ -21,6 +20,7 @@ e pela página https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.ht
 | Informações pessoais → **Número de telefone** (dos clientes cadastrados) | Sim | Não | Não | Funcionalidade do app |
 | Informações pessoais → **Endereço** (local das obras) | Sim | Não | Não | Funcionalidade do app |
 | Informações financeiras → **Outras informações financeiras** (valores de orçamentos) | Sim | Não | Não | Funcionalidade do app |
+| Informações financeiras → **Histórico de compras** (plano assinado e cobranças, só de quem assina pelo site) | Sim | Não | Não | Gerenciamento da conta |
 | Arquivos e documentos (PDFs gerados no aparelho) | Não* | Não | — | — |
 
 \* Os PDFs são gerados e ficam no aparelho; só saem quando o próprio usuário compartilha.
@@ -29,8 +29,12 @@ e pela página https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.ht
 identificadores de publicidade, dados de saúde, dados biométricos (a biometria é verificada pelo
 sistema do aparelho e o app não recebe nenhum dado biométrico).
 
-⚠️ Se o backend registrar IP/logs de acesso ou usar ferramenta de análise/erros (ex.: Sentry),
-marque também **Informações e desempenho do app → Registros de falhas / Diagnóstico**.
+Os provedores usados pela R2M (Render, MongoDB Atlas, Brevo, Mercado Pago) atuam como **prestadores
+de serviço** em nome da R2M — pela definição do Google, isso **não** conta como "compartilhamento".
+Dados do cartão vão direto para o Mercado Pago e não passam pelo app nem pelo servidor.
+
+Se no futuro for adicionada ferramenta de análise/erros (ex.: Sentry), marque também
+**Informações e desempenho do app → Registros de falhas / Diagnóstico**.
 
 ---
 
@@ -41,7 +45,8 @@ marque também **Informações e desempenho do app → Registros de falhas / Dia
 - Violência, sexo, linguagem imprópria, drogas, jogos de azar: **Não** para todos
 - Os usuários interagem entre si / trocam conteúdo? **Não**
 - Compartilha localização? **Não**
-- Permite compras digitais? **Não** na v1 (quando o Google Play Billing for implementado: **Sim**)
+- Permite compras digitais? **Não** — no app Android não há compra (o checkout fica desligado no
+  painel). Se um dia a compra for liberada dentro do app, atualize para **Sim**.
 
 Resultado esperado: **Classificação Livre (L)**.
 

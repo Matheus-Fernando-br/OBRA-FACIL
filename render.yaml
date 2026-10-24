@@ -1,0 +1,61 @@
+# Blueprint do Render — API do Obra Fácil (pasta /backend).
+# Render → New → Blueprint → selecione este repositório.
+# Segredos marcados com "sync: false" são preenchidos no painel do Render
+# (nunca coloque valores aqui). Os marcados com "generateValue" são criados
+# automaticamente pelo Render.
+services:
+  - type: web
+    name: obra-facil-api
+    runtime: node
+    rootDir: backend
+    region: virginia
+    # Plano pago: o gratuito "dorme" e o app demora ~1 min para abrir.
+    plan: starter
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: PUBLIC_BASE_URL
+        # Ajuste se o Render der outro endereço ao serviço.
+        value: https://obra-facil-api.onrender.com
+      - key: CORS_ORIGINS
+        value: ""
+      # --- banco de dados (MongoDB Atlas) ---
+      - key: MONGO_URI
+        sync: false
+      # --- segredos gerados pelo Render ---
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: SETTINGS_ENCRYPTION_KEY
+        generateValue: true
+      # --- painel administrativo ---
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_INITIAL_PASSWORD
+        sync: false
+      # --- e-mail (Brevo) ---
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM_EMAIL
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: Obra Fácil
+      - key: SUPPORT_EMAIL
+        value: r2m.tec.adm@gmail.com
+      # --- Mercado Pago ---
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false

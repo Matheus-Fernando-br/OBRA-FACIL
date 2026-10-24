@@ -13,7 +13,7 @@ import { updateUser } from "@/services/api";
 const MIN_PASSWORD = 6; // mesma regra do cadastro
 
 export default function SegurancaScreen() {
-  const { user, token, biometricAvailable } = useAuth();
+  const { user, token, biometricAvailable, updateAccessToken } = useAuth();
   const { styles, theme } = useTheme();
 
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -49,18 +49,9 @@ export default function SegurancaScreen() {
     try {
       setLoading(true);
 
-      await updateUser(
-        user._id,
-        {
-          nome: user.nome,
-          email: user.email,
-          CPF: user.CPF,
-          CNPJ: user.CNPJ,
-          senha: novaSenha,
-          senhaAtual,
-        },
-        token,
-      );
+      const updated = await updateUser(user._id, { senha: novaSenha, senhaAtual }, token);
+      // As outras sessões foram encerradas; este aparelho recebe tokens novos.
+      if (updated?.accessToken) await updateAccessToken(updated.accessToken, updated.refreshToken);
 
       setFeedback({ ok: true, text: "Senha alterada com sucesso." });
       setSenhaAtual("");
