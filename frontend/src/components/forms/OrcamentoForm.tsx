@@ -1,5 +1,5 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useState, useRef } from "react";
+import { ComponentRef, useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -589,7 +589,7 @@ export function OrcamentoForm({
     }
   };
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
   // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
   useEffect(() => {

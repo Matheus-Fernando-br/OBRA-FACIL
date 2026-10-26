@@ -41,7 +41,7 @@ const TAB_ORDER = Object.keys(VISIBLE_TABS);
  * Barra de abas flutuante: cápsula com indicador que desliza entre as
  * abas e ícones que alternam entre contorno e preenchido.
  */
-export function AppTabBar({ state, navigation, insets }: TabBarProps) {
+export function AppTabBar({ state, emitter, navigateToTab, insets }: TabBarProps) {
   const { styles, theme } = useTheme();
   const [barWidth, setBarWidth] = useState(0);
 
@@ -94,14 +94,14 @@ export function AppTabBar({ state, navigation, insets }: TabBarProps) {
               accessibilityState={{ selected: focused }}
               accessibilityLabel={config.label}
               onPress={() => {
-                const event = navigation.emit({
+                const event = emitter.emit({
                   type: "tabPress",
                   target: route.key,
                   canPreventDefault: true,
                 });
 
                 if (!focused && !event.defaultPrevented) {
-                  navigation.navigate(route.name, route.params);
+                  navigateToTab(route.key);
                 }
               }}
             >

@@ -4,7 +4,12 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { AppTabBar } from "@/components/layout/AppTabBar";
 import { useTheme } from "@/contexts/ThemeContext";
 
-/* Telas internas (abertas pelo menu / tela "Mais"): sem aba e sem header. */
+/*
+ * Telas internas (abertas pelo menu / tela "Mais"): sem header e fora da
+ * barra — a AppTabBar só desenha as abas de VISIBLE_TABS. Não use
+ * `href: null`: no expo-router 58 isso esconde a rota e redireciona
+ * para a primeira aba.
+ */
 const INTERNAL_SCREENS = [
   "configuracoes",
   "seguranca",
@@ -43,7 +48,7 @@ export default function TabsLayout() {
         <Tabs.Screen
           key={name}
           name={name}
-          options={{ href: null, headerShown: false, animation: "fade" }}
+          options={{ headerShown: false, animation: "fade" }}
         />
       ))}
     </Tabs>

@@ -1,6 +1,6 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { validateDocument } from "@/utils/document";
-import { useState, useEffect, useRef } from "react";
+import { ComponentRef, useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -76,14 +76,14 @@ export function ClientForm({
   // SCROLL
   // ===========================
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
   // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
   useEffect(() => {
     if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
   }, [feedback]);
 
-  const salvarRef = useRef<View>(null);
+  const salvarRef = useRef<ComponentRef<typeof View>>(null);
 
 
   // ===========================

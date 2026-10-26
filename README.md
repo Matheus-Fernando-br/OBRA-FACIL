@@ -41,7 +41,7 @@ O OBRA-FÁCIL foi criado para resolver esse problema oferecendo uma plataforma �
 
 ## Frontend (`/frontend`)
 
-- React Native + Expo SDK 57 (Expo Router)
+- React Native 0.88 + Expo SDK 58 (Expo Router)
 - TypeScript
 - Context API, Axios
 - Sessão no armazenamento seguro do aparelho + biometria

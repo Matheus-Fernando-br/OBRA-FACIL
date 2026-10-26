@@ -1,5 +1,5 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import { ComponentRef, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -626,7 +626,7 @@ export function ObrasForm({
     }
   }
 
-  const scrollRef = useRef<ScrollView>(null);
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
 
   // Mensagens de validação ficam no fim do formulário: leva o usuário até elas.
   useEffect(() => {

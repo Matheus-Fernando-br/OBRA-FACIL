@@ -62,7 +62,7 @@ Auditoria feita na criação deste backend, comparando com o backend anterior (Z
 | Painel sem segundo fator (2FA) | Médio | Senha forte, bloqueio por tentativas e auditoria. Próximo passo: TOTP ou restringir por IP no Render |
 | O `payer_email` do Mercado Pago é o e-mail da conta; pessoas que pagam com outra conta do Mercado Pago podem precisar usar o mesmo e-mail | Funcional | Orientação na página `/assinar`; avaliar o checkout com `card_token` (Bricks) |
 | Contas antigas foram marcadas como verificadas (migração 003) para não bloquear quem já usava o app | Baixo | Contas novas sempre verificam o e-mail |
-| `frontend`: avisos do `npm audit` em ferramentas de build do Expo (`node-forge`, `zod`, `uuid`) e em `decode-uri-component` (via `expo-router`) | Baixo (não exploráveis no app em uso normal) | A correção depende do Expo SDK 58; atualizar quando sair |
+| `frontend` (SDK 58): 5 avisos do `npm audit`, todos dentro do Expo CLI — ferramenta de build, não vai para o app — em `node-forge` (sem versão corrigida) e `zod` 3 (correção só no zod 4) | Baixo (não chegam ao app publicado) | Atualizar o `expo` quando o Expo CLI trocar essas dependências |
 | Checkout do Mercado Pago dentro do app Android viola a política da Google Play se ligado sem adesão ao programa de faturamento alternativo | Alto (remoção da loja) | Desligado por padrão no painel; assinatura pela web |
 
 ## Checklist de produção
