@@ -154,6 +154,8 @@ td .strong { font-weight: 600; }
 .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
 .filters input { max-width: 280px; }
 .filters select { width: auto; }
+.filters label.inline { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.filters label.inline input { width: auto; }
 .pager { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: var(--muted); }
 
 /* ---------- badges ---------- */

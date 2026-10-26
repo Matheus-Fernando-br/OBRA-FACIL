@@ -258,8 +258,10 @@ export default function LoginScreen() {
         setFeedback(
           error.response.data?.message || "Confira os dados informados.",
         );
+      } else if (!error.response && (error.code === "ERR_NETWORK" || error.code === "ECONNABORTED")) {
+        setFeedback("Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.");
       } else {
-        setFeedback("Não foi possível conectar ao servidor.");
+        setFeedback(error.response?.data?.message || "Ocorreu um erro inesperado. Tente novamente.");
       }
     }
   }

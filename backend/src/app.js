@@ -51,10 +51,12 @@ export function createApp() {
     }),
   );
 
-  // App nativo não envia Origin. No navegador, só as origens configuradas.
+  // App nativo não envia Origin. No navegador: origens configuradas e o
+  // Expo web local (localhost). A API usa token no cabeçalho, não cookie.
+  const LOCALHOST = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   app.use(
     cors({
-      origin: (origin, cb) => cb(null, !origin || env.corsOrigins.includes(origin)),
+      origin: (origin, cb) => cb(null, !origin || LOCALHOST.test(origin) || env.corsOrigins.includes(origin)),
       allowedHeaders: ['Authorization', 'Content-Type', 'X-Platform'],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
       maxAge: 600,

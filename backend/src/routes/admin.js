@@ -26,14 +26,16 @@ import {
   signAdminToken,
 } from '../services/admins.js';
 import { audit } from '../services/audit.js';
+import { auditPdf } from '../services/auditPdf.js';
 import { jobsStatus, runReconcileNow } from '../services/jobs.js';
-import { isMailConfigured, sendMail } from '../services/mail.js';
+import { isMailConfigured, sendMail, sendNoticeEmailSafe } from '../services/mail.js';
 import { isMercadoPagoConfigured, mp } from '../services/mercadopago.js';
 import { getPlans, getUsage, resolveEffectivePlan } from '../services/plans.js';
 import { getSetting, setSetting } from '../services/settings.js';
 import { cancelSubscription, syncPreapproval } from '../services/subscriptions.js';
 import { sendTelegramRaw } from '../services/telegram.js';
 import { revokeAllSessions } from '../services/tokens.js';
+import { hashPassword } from './auth.js';
 import { decryptSecret, encryptSecret, maskSecret } from '../utils/crypto.js';
 import { badRequest, forbidden, notFound, unauthorized } from '../utils/errors.js';
 
@@ -59,6 +61,8 @@ const pageQuery = z.object({
   plano: z.string().trim().max(30).optional(),
   verificado: z.enum(['sim', 'nao']).optional(),
   acao: z.string().trim().max(60).optional(),
+  de: z.coerce.date().optional(),
+  ate: z.coerce.date().optional(),
 });
 
 const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -335,6 +339,38 @@ router.delete('/users/:id/plan', validId(), async (req, res) => {
   res.json(await User.findById(user._id));
 });
 
+/**
+ * Define uma senha nova para o usuário (ex.: pedido de suporte). Encerra
+ * todas as sessões dele e avisa por e-mail. A senha não é registrada.
+ */
+router.post(
+  '/users/:id/password',
+  validId(),
+  validate(
+    z.object({
+      novaSenha: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.').max(128),
+      avisarPorEmail: z.boolean().default(true),
+    }),
+  ),
+  async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (!user) throw notFound('Usuário não encontrado.');
+    user.senha = await hashPassword(req.body.novaSenha);
+    user.tokenVersion = (user.tokenVersion ?? 0) + 1;
+    await user.save();
+    await revokeAllSessions(user._id);
+    if (req.body.avisarPorEmail) {
+      sendNoticeEmailSafe(user, 'Sua senha foi alterada — Obra Fácil', 'Senha alterada pelo suporte', [
+        `Olá, ${user.nome}. A senha da sua conta foi redefinida pela equipe do Obra Fácil, a seu pedido.`,
+        'Entre no app com a nova senha informada pelo suporte e troque-a em Mais → Segurança.',
+        'Se você não pediu essa alteração, fale com o suporte imediatamente.',
+      ]);
+    }
+    await log(req, 'usuario.senha_alterada_pelo_admin', { tipo: 'usuario', id: String(user._id) }, { avisadoPorEmail: req.body.avisarPorEmail });
+    res.json({ ok: true });
+  },
+);
+
 router.post('/users/:id/logout-all', validId(), async (req, res) => {
   const user = await User.findById(req.params.id);
   if (!user) throw notFound('Usuário não encontrado.');
@@ -610,11 +646,40 @@ router.post('/jobs/reconcile', async (req, res) => {
 
 // ------------------------------------------------------------------ auditoria e webhooks
 
-router.get('/audit', validate(pageQuery, 'query'), async (req, res) => {
-  const { page, limit, acao, q } = req.validQuery;
+function auditFilter({ acao, q, de, ate }) {
   const filter = {};
   if (acao) filter.acao = new RegExp(`^${escapeRegex(acao)}`);
   if (q) filter.$or = [{ 'ator.nome': new RegExp(escapeRegex(q), 'i') }, { 'alvo.id': q }];
+  if (de || ate) {
+    filter.createdAt = {};
+    if (de) filter.createdAt.$gte = de;
+    if (ate) filter.createdAt.$lte = new Date(ate.getTime() + 86399999); // até o fim do dia
+  }
+  return filter;
+}
+
+const AUDIT_PDF_MAX = 5000;
+
+/** Auditoria em PDF, com os mesmos filtros da tela (máx. 5.000 registros). */
+router.get('/audit/export.pdf', validate(pageQuery, 'query'), async (req, res) => {
+  const filtros = req.validQuery;
+  const filter = auditFilter(filtros);
+  const [items, total] = await Promise.all([
+    AuditLog.find(filter).sort({ createdAt: -1 }).limit(AUDIT_PDF_MAX).lean(),
+    AuditLog.countDocuments(filter),
+  ]);
+  await log(req, 'auditoria.exportada_pdf', { tipo: 'auditoria' }, { registros: items.length, acao: filtros.acao, q: filtros.q, de: filtros.de, ate: filtros.ate });
+
+  const stamp = new Date().toISOString().slice(0, 10);
+  res.setHeader('content-type', 'application/pdf');
+  res.setHeader('content-disposition', `attachment; filename="auditoria-obra-facil-${stamp}.pdf"`);
+  res.setHeader('cache-control', 'no-store');
+  auditPdf({ items, total, filtros, geradoPor: req.admin.username, limite: AUDIT_PDF_MAX }).pipe(res);
+});
+
+router.get('/audit', validate(pageQuery, 'query'), async (req, res) => {
+  const { page, limit } = req.validQuery;
+  const filter = auditFilter(req.validQuery);
   const [items, total] = await Promise.all([
     AuditLog.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).lean(),
     AuditLog.countDocuments(filter),

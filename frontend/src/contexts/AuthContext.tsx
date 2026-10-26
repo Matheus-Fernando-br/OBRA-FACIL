@@ -46,8 +46,9 @@ interface AuthContextData {
 }
 
 const AuthContext = createContext({} as AuthContextData);
-const TOKEN_KEY = "@obra_facil_access_token";
-const REFRESH_KEY = "@obra_facil_refresh_token";
+// O SecureStore só aceita letras, números, ".", "-" e "_" (sem "@").
+const TOKEN_KEY = "obra_facil_access_token";
+const REFRESH_KEY = "obra_facil_refresh_token";
 
 /*
  * Sessão: access token curto (1 h) + refresh token (30 dias), ambos no

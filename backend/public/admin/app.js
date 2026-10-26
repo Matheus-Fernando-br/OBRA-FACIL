@@ -296,6 +296,7 @@ async function renderUserDetail(id) {
       <button class="btn" id="a-plan">Conceder plano (cortesia)</button>
       ${u.planoManual?.planoId ? '<button class="btn" id="a-unplan">Remover cortesia</button>' : ''}
       ${u.email_verificado ? '' : '<button class="btn" id="a-verify">Marcar e-mail como verificado</button>'}
+      <button class="btn" id="a-password">Alterar senha</button>
       <button class="btn" id="a-logout">Encerrar sessões</button>
       ${u.status === 'bloqueado' ? '<button class="btn" id="a-unblock">Desbloquear</button>' : '<button class="btn danger" id="a-block">Bloquear</button>'}
       <button class="btn danger" id="a-delete">Excluir conta e dados</button>
@@ -337,6 +338,33 @@ async function renderUserDetail(id) {
     toast('E-mail marcado como verificado.');
     reload();
   });
+  $('#a-password').addEventListener('click', () =>
+    openModal(
+      `<h3>Alterar senha de ${esc(u.nome)}</h3>
+       <p class="muted">Defina uma senha nova (ex.: a pedido do usuário). Todas as sessões dele serão encerradas. Informe a senha ao usuário por um canal seguro e peça para trocá-la no app.</p>
+       <form id="pw-form" class="grid" autocomplete="off">
+         <label>Nova senha (mínimo 6 caracteres)<input type="password" name="novaSenha" minlength="6" maxlength="128" autocomplete="new-password" required></label>
+         <label>Confirmar nova senha<input type="password" name="confirmar" minlength="6" maxlength="128" autocomplete="new-password" required></label>
+         <label class="check"><input type="checkbox" name="avisar" checked>Avisar o usuário por e-mail (sem enviar a senha)</label>
+         <p class="form-error" id="pw-error" role="alert"></p>
+         <div class="actions" style="justify-content:flex-end"><button type="button" class="btn" data-close>Cancelar</button><button class="btn primary">Salvar senha</button></div>
+       </form>`,
+      (root) =>
+        $('#pw-form', root).addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const f = e.target;
+          if (f.novaSenha.value !== f.confirmar.value) return ($('#pw-error', root).textContent = 'A confirmação não confere.');
+          try {
+            await api(`/users/${id}/password`, { method: 'POST', body: { novaSenha: f.novaSenha.value, avisarPorEmail: f.avisar.checked } });
+            closeModal();
+            toast('Senha alterada e sessões encerradas.');
+            reload();
+          } catch (err) {
+            $('#pw-error', root).textContent = err.message;
+          }
+        }),
+    ),
+  );
   $('#a-logout').addEventListener('click', () => confirmAction('Encerrar sessões', 'O usuário precisará entrar novamente em todos os aparelhos.', async () => {
     await api(`/users/${id}/logout-all`, { method: 'POST' });
     toast('Sessões encerradas.');
@@ -679,10 +707,13 @@ function auditTable(items) {
 }
 
 async function renderAudit() {
-  const state = { page: 1, acao: '', q: '' };
+  const state = { page: 1, acao: '', q: '', de: '', ate: '' };
   content.innerHTML = `<div class="card"><div class="filters">
-    <select id="f-acao"><option value="">Todas as ações</option><option value="admin">Painel (admin.*)</option><option value="usuario">Usuários (usuario.*)</option><option value="assinatura">Assinaturas (assinatura.*)</option><option value="plano">Planos</option><option value="integracao">Integrações</option><option value="configuracao">Configurações</option></select>
-    <input id="f-q" type="search" placeholder="Filtrar por ator ou ID do alvo"></div>
+    <select id="f-acao"><option value="">Todas as ações</option><option value="admin">Painel (admin.*)</option><option value="usuario">Usuários (usuario.*)</option><option value="assinatura">Assinaturas (assinatura.*)</option><option value="plano">Planos</option><option value="integracao">Integrações</option><option value="configuracao">Configurações</option><option value="auditoria">Auditoria</option></select>
+    <input id="f-q" type="search" placeholder="Filtrar por ator ou ID do alvo">
+    <label class="inline">De<input id="f-de" type="date"></label>
+    <label class="inline">Até<input id="f-ate" type="date"></label>
+    <button class="btn" id="export-pdf">Exportar PDF</button></div>
     <div id="table"></div><div id="pager"></div></div>`;
   async function load() {
     const data = await api('/audit', { query: state });
@@ -690,12 +721,48 @@ async function renderAudit() {
     $('#pager').replaceChildren(pager(data, (p) => ((state.page = p), load())));
   }
   $('#f-acao').addEventListener('change', (e) => ((state.acao = e.target.value), (state.page = 1), load()));
+  $('#f-de').addEventListener('change', (e) => ((state.de = e.target.value), (state.page = 1), load()));
+  $('#f-ate').addEventListener('change', (e) => ((state.ate = e.target.value), (state.page = 1), load()));
   let timer;
   $('#f-q').addEventListener('input', (e) => {
     clearTimeout(timer);
     timer = setTimeout(() => ((state.q = e.target.value), (state.page = 1), load()), 300);
   });
+  $('#export-pdf').addEventListener('click', async (e) => {
+    e.target.disabled = true;
+    e.target.textContent = 'Gerando PDF…';
+    try {
+      await downloadFile('/audit/export.pdf', { acao: state.acao, q: state.q, de: state.de, ate: state.ate });
+      toast('PDF da auditoria baixado.');
+    } catch (err) {
+      toast(err.message, true);
+    } finally {
+      e.target.disabled = false;
+      e.target.textContent = 'Exportar PDF';
+    }
+  });
   await load();
+}
+
+/** Baixa um arquivo da API do painel (com o cabeçalho de proteção). */
+async function downloadFile(path, query) {
+  const url = new URL(`/admin/api${path}`, location.origin);
+  for (const [k, v] of Object.entries(query ?? {})) if (v) url.searchParams.set(k, v);
+  const res = await fetch(url, { credentials: 'same-origin', headers: { 'X-Admin-Request': '1' } });
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    if (res.status === 401) showView('login');
+    throw new ApiError(res.status, data);
+  }
+  const blob = await res.blob();
+  const name = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? 'auditoria.pdf';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
 async function renderWebhooks() {

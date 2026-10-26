@@ -160,3 +160,61 @@ describe('gestão', () => {
     assert.equal(r.status, 401);
   });
 });
+
+describe('senha de usuário e auditoria em PDF', () => {
+  let adm;
+  before(async () => {
+    adm = request.agent(ctx.app);
+    const r = await adm.post('/admin/api/login').set(H).send({ username: 'admin', senha: newPassword });
+    assert.equal(r.status, 200);
+  });
+
+  it('admin altera a senha do usuário e encerra as sessões', async () => {
+    const u = await createUser(ctx);
+    let r = await adm.post(`/admin/api/users/${u.user._id}/password`).set(H).send({ novaSenha: '123' });
+    assert.equal(r.status, 400);
+    r = await adm.post(`/admin/api/users/${u.user._id}/password`).set(H).send({ novaSenha: 'senhaNova99', avisarPorEmail: true });
+    assert.equal(r.status, 200);
+
+    assert.equal((await ctx.api().get('/user/me').set(u.auth)).status, 401, 'sessão antiga encerrada');
+    assert.equal((await ctx.api().post('/auth/refresh').send({ refreshToken: u.refreshToken })).status, 401);
+    assert.equal((await ctx.api().post('/auth/login').send({ email: u.email, senha: u.senha })).status, 401);
+    assert.equal((await ctx.api().post('/auth/login').send({ email: u.email, senha: 'senhaNova99' })).status, 200);
+    assert.ok(ctx.mails.some((m) => m.to === u.email && /senha foi alterada/i.test(m.subject) && !JSON.stringify(m).includes('senhaNova99')));
+
+    const audit = await adm.get('/admin/api/audit').set(H).query({ acao: 'usuario.senha_alterada_pelo_admin' });
+    assert.ok(audit.body.items.length >= 1);
+    assert.ok(!JSON.stringify(audit.body).includes('senhaNova99'));
+  });
+
+  it('exporta a auditoria em PDF com filtros de período', async () => {
+    const hoje = new Date().toISOString().slice(0, 10);
+    const r = await adm
+      .get('/admin/api/audit/export.pdf')
+      .set(H)
+      .query({ de: hoje, ate: hoje })
+      .buffer(true)
+      .parse((res, cb) => {
+        const chunks = [];
+        res.on('data', (c) => chunks.push(c));
+        res.on('end', () => cb(null, Buffer.concat(chunks)));
+      });
+    assert.equal(r.status, 200);
+    assert.match(r.headers['content-type'], /application\/pdf/);
+    assert.match(r.headers['content-disposition'], /auditoria-obra-facil-.*\.pdf/);
+    assert.equal(r.body.subarray(0, 5).toString(), '%PDF-');
+    assert.ok(r.body.length > 1000);
+
+    const semSessao = await request(ctx.app).get('/admin/api/audit/export.pdf').set(H);
+    assert.equal(semSessao.status, 401);
+  });
+});
+
+describe('CORS', () => {
+  it('libera o Expo web local e bloqueia outras origens', async () => {
+    let r = await ctx.api().options('/auth/login').set('Origin', 'http://localhost:8082').set('Access-Control-Request-Method', 'POST');
+    assert.equal(r.headers['access-control-allow-origin'], 'http://localhost:8082');
+    r = await ctx.api().options('/auth/login').set('Origin', 'https://site-malicioso.com').set('Access-Control-Request-Method', 'POST');
+    assert.equal(r.headers['access-control-allow-origin'], undefined);
+  });
+});
