@@ -592,7 +592,8 @@ router.get('/diagnostics', async (_req, res) => {
     avisos: [
       ...(process.env.ADMIN_INITIAL_PASSWORD ? ['Remova ADMIN_INITIAL_PASSWORD do Render (o administrador já foi criado).'] : []),
       ...(process.env.ADMIN_FORCE_RESET === 'true' ? ['Remova ADMIN_FORCE_RESET do Render.'] : []),
-      ...(!isMailConfigured() ? ['E-mail não configurado: cadastro e recuperação de senha não funcionam.'] : []),
+      ...(!isMailConfigured() && !env.MAIL_LOG_CODES ? ['E-mail não configurado: cadastro e recuperação de senha não funcionam.'] : []),
+      ...(env.MAIL_LOG_CODES ? ['MAIL_LOG_CODES=true: códigos de verificação vão para o log. Use só em testes e remova ao configurar o Brevo.'] : []),
       ...(isMercadoPagoConfigured() && !env.MP_WEBHOOK_SECRET ? ['MP_WEBHOOK_SECRET ausente: notificações do Mercado Pago serão recusadas.'] : []),
       ...(env.PUBLIC_BASE_URL.startsWith('http://') && env.isProd ? ['PUBLIC_BASE_URL deve usar https.'] : []),
     ],

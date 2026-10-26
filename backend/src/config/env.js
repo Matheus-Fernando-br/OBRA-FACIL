@@ -42,6 +42,12 @@ const schema = z.object({
   MP_ACCESS_TOKEN: optional,
   MP_WEBHOOK_SECRET: optional,
 
+  /** Só para testes sem Brevo: grava os códigos de e-mail no log do Render. */
+  MAIL_LOG_CODES: z
+    .string()
+    .optional()
+    .transform((v) => v === 'true'),
+
   DISABLE_JOBS: z
     .string()
     .optional()

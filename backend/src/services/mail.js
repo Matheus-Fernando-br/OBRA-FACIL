@@ -25,9 +25,10 @@ export function isMailConfigured() {
 
 async function brevoTransport({ to, subject, html, text, code }) {
   const env = getEnv();
-  if (!isMailConfigured() && env.NODE_ENV === 'development') {
-    // Desenvolvimento local sem Brevo: mostra o código no terminal.
-    logger.warn({ to, subject, codigoDev: code }, 'E-mail NÃO enviado (BREVO_API_KEY ausente, modo desenvolvimento)');
+  if (!isMailConfigured() && (env.NODE_ENV === 'development' || env.MAIL_LOG_CODES)) {
+    // Sem Brevo: em desenvolvimento ou com MAIL_LOG_CODES=true (fase de testes),
+    // o código aparece no log. Remova MAIL_LOG_CODES ao configurar o Brevo.
+    logger.warn({ to, subject, codigoDev: code }, 'E-mail NÃO enviado (BREVO_API_KEY ausente) — código no log');
     return {};
   }
   if (!isMailConfigured()) {
