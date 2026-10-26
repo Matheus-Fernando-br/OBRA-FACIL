@@ -87,6 +87,15 @@ router.post('/mercadopago', webhookLimiter, async (req, res) => {
     await event.save();
     return res.status(200).json({ ok: true });
   } catch (err) {
+    // Recurso inexistente no Mercado Pago (ex.: "Simular notificação" do painel):
+    // nada a fazer e não adianta o Mercado Pago reenviar.
+    if (err?.providerStatus === 404) {
+      event.status = 'ignorado';
+      event.erro = 'Recurso não encontrado no Mercado Pago';
+      event.processadoEm = new Date();
+      await event.save();
+      return res.status(200).json({ ok: true, ignorado: true });
+    }
     event.status = 'erro';
     event.erro = String(err?.message ?? err).slice(0, 300);
     await event.save();

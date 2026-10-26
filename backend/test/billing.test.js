@@ -217,6 +217,17 @@ describe('webhooks do Mercado Pago', () => {
     assert.ok(store.cancelados.includes(a.preId));
   });
 
+  it('notificação simulada (ID inexistente no Mercado Pago) responde 200', async () => {
+    const original = fakeMp.getPreapproval;
+    fakeMp.getPreapproval = async () => {
+      throw Object.assign(new Error('not found'), { providerStatus: 404 });
+    };
+    const r = await webhook('subscription_preapproval', '123456');
+    fakeMp.getPreapproval = original;
+    assert.equal(r.status, 200);
+    assert.equal(r.body.ignorado, true);
+  });
+
   it('notificação de assinatura desconhecida é ignorada', async () => {
     store.preapprovals.set('preDesconhecida', { id: 'preDesconhecida', status: 'authorized', external_reference: 'x', auto_recurring: { transaction_amount: 39.9, currency_id: 'BRL' } });
     const r = await webhook('subscription_preapproval', 'preDesconhecida');
