@@ -244,3 +244,27 @@ describe('webhooks do Mercado Pago', () => {
     assert.ok(store.cancelados.includes(preId));
   });
 });
+
+describe('e-mail do pagador no Mercado Pago', () => {
+  it('usa o e-mail da conta do Mercado Pago informado na página', async () => {
+    const u = await createUser(ctx);
+    const r = await ctx.api().post('/subscription/checkout').set(u.auth).set('X-Platform', 'web').send({ planoId: 'basico', payerEmail: 'Comprador@TestUser.com' });
+    assert.equal(r.status, 201);
+    const pre = store.preapprovals.get(r.body.initPoint.split('/').pop());
+    assert.equal(pre.payer_email, 'comprador@testuser.com');
+    const me = await ctx.api().get('/subscription/me').set(u.auth);
+    assert.ok(me.body.pendente.initPoint, 'link pendente disponível para continuar o pagamento');
+  });
+
+  it('recusa de conta real x teste vira mensagem clara', async () => {
+    const u = await createUser(ctx);
+    const original = fakeMp.createPreapproval;
+    fakeMp.createPreapproval = async () => {
+      throw Object.assign(new Error('x'), { status: 502, providerStatus: 400, providerMessage: 'Both payer and collector must be real or test users' });
+    };
+    const r = await ctx.api().post('/subscription/checkout').set(u.auth).set('X-Platform', 'web').send({ planoId: 'basico' });
+    fakeMp.createPreapproval = original;
+    assert.equal(r.status, 400);
+    assert.equal(r.body.code, 'PAYER_ENVIRONMENT_MISMATCH');
+  });
+});

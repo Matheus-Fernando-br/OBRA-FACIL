@@ -227,4 +227,6 @@ export const obraUpdateSchema = z.object({ ...obraBase, categoria: z.array(categ
 
 export const checkoutSchema = z.object({
   planoId: z.enum(['basico', 'profissional'], { error: 'Plano inválido.' }),
+  /** E-mail da conta do Mercado Pago que vai pagar (opcional). */
+  payerEmail: email.optional(),
 });

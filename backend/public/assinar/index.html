@@ -2,38 +2,97 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#C2570C">
   <title>Assinatura · Obra Fácil</title>
-  <meta name="description" content="Assine os planos Básico ou Profissional do Obra Fácil.">
+  <meta name="description" content="Assine os planos Básico ou Profissional do Obra Fácil com pagamento seguro pelo Mercado Pago.">
   <link rel="stylesheet" href="/assinar/assinar.css">
   <script src="/assinar/assinar.js" type="module"></script>
 </head>
 <body>
   <main class="wrap">
     <header class="head">
-      <span class="mark">OF</span>
-      <div><strong>Obra Fácil</strong><small>Assinatura</small></div>
-      <button class="link" id="sair" hidden>Sair</button>
+      <span class="mark" aria-hidden="true">OF</span>
+      <div class="head-txt"><strong>Obra Fácil</strong><small>Assinatura</small></div>
+      <button class="link" id="sair" type="button" hidden>Sair</button>
     </header>
 
+    <ol class="steps" id="steps" aria-label="Etapas da assinatura">
+      <li data-step="1" class="active"><span>1</span>Entrar</li>
+      <li data-step="2"><span>2</span>Escolher o plano</li>
+      <li data-step="3"><span>3</span>Pagar no Mercado Pago</li>
+    </ol>
+
+    <div id="alerta" class="alert" role="status" aria-live="polite" hidden></div>
+
+    <!-- Etapa 1: login -->
     <section id="tela-login" class="card" hidden>
       <h1>Entre com sua conta do app</h1>
       <p class="muted">Use o mesmo e-mail e senha do aplicativo Obra Fácil.</p>
-      <form id="login" class="stack">
-        <label>E-mail<input type="email" name="email" autocomplete="email" required></label>
-        <label>Senha<input type="password" name="senha" autocomplete="current-password" required></label>
-        <p class="erro" id="login-erro" role="alert"></p>
-        <button class="btn primary">Entrar</button>
+      <form id="login" class="stack" novalidate>
+        <label>E-mail
+          <input type="email" name="email" autocomplete="email" inputmode="email" required>
+        </label>
+        <label>Senha
+          <span class="pass">
+            <input type="password" name="senha" autocomplete="current-password" required>
+            <button type="button" class="pass-toggle" id="ver-senha" aria-label="Mostrar senha">Mostrar</button>
+          </span>
+        </label>
+        <button class="btn primary block" type="submit" id="btn-entrar">
+          <span class="spinner" aria-hidden="true"></span><span class="label">Entrar</span>
+        </button>
+        <p class="muted small center">Esqueceu a senha? No app, toque em <strong>Esqueci a senha</strong> na tela de entrada.</p>
       </form>
     </section>
 
+    <!-- Etapa 2: planos -->
     <section id="tela-planos" hidden>
-      <div class="card" id="atual"></div>
+      <div class="card" id="atual" aria-live="polite"></div>
+
+      <div class="card">
+        <h2>Conta do Mercado Pago que vai pagar</h2>
+        <p class="muted small">Informe o e-mail da sua conta do Mercado Pago. Pode ser diferente do e-mail do app.</p>
+        <label class="stack-sm">E-mail do Mercado Pago
+          <input type="email" id="payer-email" autocomplete="email" inputmode="email" required>
+        </label>
+      </div>
+
       <div class="planos" id="planos"></div>
-      <p class="muted small">Pagamento mensal processado pelo Mercado Pago. Você pode cancelar quando quiser; o plano continua até o fim do período já pago. Dúvidas: <a href="mailto:r2m.tec.adm@gmail.com">r2m.tec.adm@gmail.com</a>.</p>
+
+      <ul class="trust">
+        <li>🔒 Pagamento processado pelo Mercado Pago. Não vemos os dados do seu cartão.</li>
+        <li>🔁 Cobrança mensal automática. Cancele quando quiser, aqui ou no app.</li>
+        <li>✅ O plano muda no app assim que o pagamento for confirmado.</li>
+      </ul>
+      <p class="muted small center">Dúvidas? <a href="mailto:r2m.tec.adm@gmail.com">r2m.tec.adm@gmail.com</a> · WhatsApp <a class="nowrap" href="https://wa.me/5531986763652" rel="noopener">(31) 98676-3652</a></p>
     </section>
 
-    <p class="erro" id="erro" role="alert"></p>
+    <!-- Carregando -->
+    <section id="tela-carregando" class="card center" aria-live="polite">
+      <div class="spinner big" aria-hidden="true"></div>
+      <p id="carregando-txt">Carregando…</p>
+      <p class="muted small" id="carregando-dica" hidden>O servidor pode levar até 1 minuto para responder na primeira vez. Aguarde…</p>
+    </section>
   </main>
+
+  <!-- Confirmação de cancelamento -->
+  <dialog id="dlg-cancelar" class="dlg">
+    <h2>Cancelar assinatura?</h2>
+    <p class="muted">Não haverá novas cobranças. Você continua com o plano até o fim do período já pago e depois volta ao plano Gratuito. Seus dados continuam salvos.</p>
+    <div class="row end">
+      <button class="btn" type="button" id="dlg-voltar">Manter assinatura</button>
+      <button class="btn danger" type="button" id="dlg-confirmar"><span class="spinner" aria-hidden="true"></span><span class="label">Cancelar assinatura</span></button>
+    </div>
+  </dialog>
+
+  <!-- Redirecionando -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay-box" role="alertdialog" aria-live="assertive">
+      <div class="spinner big" aria-hidden="true"></div>
+      <p id="overlay-txt">Abrindo o Mercado Pago…</p>
+      <p class="muted small">Não feche esta página.</p>
+    </div>
+  </div>
 </body>
 </html>

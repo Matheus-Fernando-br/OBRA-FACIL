@@ -2,18 +2,34 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pagamento recebido · Obra Fácil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#C2570C">
+  <title>Confirmando pagamento · Obra Fácil</title>
   <link rel="stylesheet" href="/assinar/assinar.css">
   <script src="/assinar/retorno.js" type="module"></script>
 </head>
 <body>
   <main class="wrap">
-    <header class="head"><span class="mark">OF</span><div><strong>Obra Fácil</strong><small>Assinatura</small></div></header>
-    <section class="card">
-      <h1 id="titulo">Recebemos seu pedido</h1>
-      <p id="texto" class="muted">Assim que o Mercado Pago confirmar o pagamento, seu plano é atualizado automaticamente no app. Isso costuma levar poucos minutos.</p>
-      <p><a class="btn primary" href="/assinar">Ver minha assinatura</a></p>
+    <header class="head">
+      <span class="mark" aria-hidden="true">OF</span>
+      <div class="head-txt"><strong>Obra Fácil</strong><small>Assinatura</small></div>
+    </header>
+
+    <ol class="steps" aria-label="Etapas da assinatura">
+      <li class="done"><span>1</span>Entrar</li>
+      <li class="done"><span>2</span>Escolher o plano</li>
+      <li class="active" id="step-3"><span>3</span>Pagar no Mercado Pago</li>
+    </ol>
+
+    <section class="card center" aria-live="polite">
+      <div class="spinner big" id="spinner" aria-hidden="true"></div>
+      <div id="icone" class="icone" hidden></div>
+      <h1 id="titulo">Confirmando seu pagamento…</h1>
+      <p id="texto" class="muted">Estamos aguardando a confirmação do Mercado Pago. Isso costuma levar poucos segundos.</p>
+      <div class="row" style="justify-content:center;margin-top:16px;gap:10px">
+        <a class="btn primary" id="abrir-app" href="obrafacil://planos" hidden>Abrir o app</a>
+        <a class="btn" id="ver" href="/assinar">Ver minha assinatura</a>
+      </div>
     </section>
   </main>
 </body>

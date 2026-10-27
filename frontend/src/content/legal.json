@@ -1,103 +1,123 @@
 {
-  "versao": "2026-10-24",
-  "atualizadoEm": "24 de outubro de 2026",
+  "versao": "2026-10-27",
+  "atualizadoEm": "27 de outubro de 2026",
   "privacidade": {
     "titulo": "Política de Privacidade",
-    "intro": "Esta política explica como o aplicativo Obra Fácil, mantido pela R2M, coleta, usa e protege dados pessoais, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 — LGPD).",
+    "intro": "Esta política explica como o aplicativo Obra Fácil e o site de assinatura, mantidos pela R2M, coletam, usam, compartilham e protegem dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD) e o Marco Civil da Internet (Lei nº 12.965/2014).",
     "secoes": [
       {
         "titulo": "1. Quem é o responsável",
-        "texto": "O controlador dos dados da sua conta é a R2M. Para qualquer assunto sobre privacidade, inclusive o exercício dos seus direitos, fale com o nosso encarregado (DPO) pelo e-mail r2m.tec.adm@gmail.com ou pelo WhatsApp (31) 98676-3652."
+        "texto": "O controlador dos dados da sua conta é a R2M. O encarregado pelo tratamento de dados pessoais (DPO) atende pelo e-mail r2m.tec.adm@gmail.com e pelo WhatsApp (31) 98676-3652, para dúvidas sobre privacidade e para o exercício dos seus direitos."
       },
       {
         "titulo": "2. Dados que coletamos",
-        "texto": "Dados da sua conta: nome, e-mail, CPF ou CNPJ e senha (guardada apenas como código criptográfico irreversível), além da data em que você aceitou estes termos. Dados que você cadastra no app para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra), obras (datas, prazos e andamento) e o catálogo de produtos e serviços. Se você assinar um plano pago: plano contratado, valores, datas e situação das cobranças — os dados do cartão são informados diretamente ao Mercado Pago e não passam pelos nossos servidores. Dados técnicos mínimos necessários ao funcionamento e à segurança, como registros de acesso exigidos pelo Marco Civil da Internet."
+        "texto": "Dados da conta: nome, e-mail, CPF ou CNPJ e senha (guardada apenas como código criptográfico irreversível — nem a R2M consegue lê-la), além da data e da versão destes termos que você aceitou. Dados que você cadastra para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra), obras (datas, prazos e andamento) e o catálogo de produtos e serviços. Se você assinar um plano pago: plano contratado, valores, datas, situação das cobranças e o e-mail da conta do Mercado Pago informado no pagamento. Os dados do cartão são digitados diretamente no Mercado Pago e não passam pelos nossos servidores. Dados técnicos necessários à segurança: endereço IP, data e hora de acesso e identificação do aparelho ou navegador nas sessões."
       },
       {
         "titulo": "3. Para que usamos",
-        "texto": "Para criar e manter sua conta, autenticar seu acesso, armazenar e exibir seus clientes, orçamentos, obras e catálogo, gerar documentos em PDF e relatórios, enviar códigos de verificação, de recuperação de senha e avisos sobre a conta e a assinatura, processar a assinatura de planos pagos, prevenir fraudes e abusos, prestar suporte e cumprir obrigações legais. Não vendemos seus dados e não os usamos para publicidade."
+        "texto": "Para criar e manter sua conta; autenticar seu acesso; armazenar e exibir seus clientes, orçamentos, obras e catálogo; gerar documentos em PDF e relatórios; enviar e-mails de serviço (códigos de verificação, recuperação de senha e avisos sobre a conta e a assinatura); processar a assinatura de planos pagos; prevenir fraudes, abusos e acessos indevidos; prestar suporte; e cumprir obrigações legais. Não vendemos seus dados, não exibimos anúncios e não usamos seus dados para publicidade."
       },
       {
         "titulo": "4. Bases legais",
-        "texto": "Tratamos os dados para execução do contrato de uso do app (art. 7º, V, da LGPD), cumprimento de obrigação legal (art. 7º, II) e, quando aplicável, legítimo interesse para segurança e prevenção a fraudes (art. 7º, IX)."
+        "texto": "Tratamos os dados para a execução do contrato de uso do app e de procedimentos preliminares a ele (art. 7º, V, da LGPD); para o cumprimento de obrigações legais e regulatórias, como a guarda de registros de acesso e de documentos fiscais (art. 7º, II); para o exercício regular de direitos em processos (art. 7º, VI); e, quando aplicável, com base em legítimo interesse para segurança da conta e prevenção a fraudes (art. 7º, IX), sempre respeitando seus direitos e expectativas."
       },
       {
         "titulo": "5. Dados dos seus clientes",
-        "texto": "Os dados de clientes que você cadastra são tratados em seu nome: você é o controlador desses dados e a R2M atua como operadora, apenas armazenando-os e processando-os para as funções do app. Cadastre somente dados que você tenha autorização para usar."
+        "texto": "Os dados de clientes que você cadastra são tratados em seu nome: você é o controlador desses dados e a R2M atua como operadora, apenas armazenando-os e processando-os para as funções do app, conforme as suas instruções. Cadastre somente dados que você tenha autorização para usar e informe seus clientes sobre esse uso quando necessário."
       },
       {
         "titulo": "6. Biometria",
-        "texto": "O desbloqueio por digital ou Face ID é feito pelo próprio sistema do seu aparelho. O Obra Fácil não tem acesso, não coleta e não armazena nenhum dado biométrico; recebe apenas a confirmação de que o desbloqueio foi bem-sucedido."
+        "texto": "O desbloqueio por digital ou reconhecimento facial é feito pelo próprio sistema do seu aparelho. O Obra Fácil não tem acesso, não coleta e não armazena nenhum dado biométrico; recebe apenas a confirmação de que o desbloqueio foi bem-sucedido."
       },
       {
-        "titulo": "7. Compartilhamento",
-        "texto": "Usamos fornecedores (operadores) contratados pela R2M, apenas para as finalidades desta política: Render (hospedagem do servidor), MongoDB Atlas (banco de dados), Brevo (envio de e-mails transacionais) e Mercado Pago (processamento das assinaturas, quando você contratar um plano pago). Alguns desses serviços podem armazenar dados fora do Brasil, com as salvaguardas previstas na LGPD. Os dados também podem ser compartilhados com autoridades quando houver obrigação legal. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
+        "titulo": "7. Compartilhamento e transferência internacional",
+        "texto": "Compartilhamos dados apenas com fornecedores que atuam como operadores da R2M, para as finalidades desta política: Render (hospedagem do servidor, nos Estados Unidos), MongoDB Atlas (banco de dados em nuvem), Brevo (envio de e-mails de serviço, na União Europeia) e Mercado Pago (processamento das assinaturas, no Brasil). Por isso, alguns dados podem ser armazenados fora do Brasil, com as garantias do art. 33 da LGPD, como cláusulas contratuais e padrões de segurança desses fornecedores. Os dados também podem ser fornecidos a autoridades quando houver obrigação legal ou ordem judicial. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
       },
       {
-        "titulo": "8. Segurança",
-        "texto": "A comunicação com o servidor é criptografada (HTTPS), a sessão fica guardada no armazenamento seguro do aparelho (Keychain/Keystore) e o acesso aos dados exige autenticação."
+        "titulo": "8. Armazenamento no aparelho e rastreadores",
+        "texto": "O app guarda sua sessão no armazenamento seguro do aparelho (Keychain no iOS e Keystore no Android) e algumas preferências (tema, opções de PDF e alertas) na memória local do app. O site de assinatura guarda a sessão apenas enquanto a aba estiver aberta. Não usamos cookies de publicidade, ferramentas de rastreamento de terceiros nem identificadores de anúncio."
       },
       {
-        "titulo": "9. Por quanto tempo guardamos",
-        "texto": "Enquanto sua conta estiver ativa. Ao excluir a conta, os dados da conta, clientes, orçamentos, obras e catálogo são apagados. Mantemos apenas o que a lei exige, pelo prazo legal: registros de acesso por 6 meses (Marco Civil da Internet) e registros de pagamentos, sem vínculo com o seu nome, pelo prazo das obrigações fiscais."
+        "titulo": "9. Segurança",
+        "texto": "Adotamos medidas técnicas e administrativas para proteger os dados: comunicação criptografada (HTTPS), senhas guardadas com hash forte, sessões com validade limitada e renovação segura, separação dos dados por conta, limite de tentativas de acesso, registro das ações administrativas e acesso restrito ao painel de administração. Em caso de incidente de segurança que possa causar risco ou dano relevante, comunicaremos os titulares afetados e a Autoridade Nacional de Proteção de Dados (ANPD), conforme o art. 48 da LGPD."
       },
       {
-        "titulo": "10. Seus direitos",
-        "texto": "Você pode solicitar confirmação de tratamento, acesso, correção, anonimização, portabilidade, exclusão dos dados e informações sobre compartilhamento, além de revogar consentimentos (art. 18 da LGPD). Boa parte disso pode ser feita no próprio app; para o restante, fale com o encarregado."
+        "titulo": "10. Por quanto tempo guardamos",
+        "texto": "Enquanto sua conta estiver ativa. Ao excluir a conta, os dados da conta, clientes, orçamentos, obras e catálogo são apagados de imediato da base principal e das cópias de segurança no ciclo seguinte (em até 30 dias). Mantemos apenas o que a lei exige, pelo prazo legal: registros de acesso por 6 meses (art. 15 do Marco Civil da Internet) e registros de pagamentos, sem vínculo com o seu nome, pelo prazo das obrigações fiscais (5 anos)."
       },
       {
-        "titulo": "11. Exclusão da conta",
-        "texto": "No app: Mais → Configurações gerais → Excluir conta (confirmação com a sua senha). Fora do app: envie um e-mail para r2m.tec.adm@gmail.com com o assunto \"Excluir minha conta\" a partir do e-mail cadastrado; a solicitação é atendida em até 15 dias. A exclusão cancela cobranças futuras de assinatura. Você também pode pedir uma cópia dos seus dados pelo mesmo e-mail."
+        "titulo": "11. Seus direitos",
+        "texto": "Você pode, a qualquer momento e sem custo, solicitar: confirmação de que tratamos seus dados, acesso, correção de dados incompletos ou desatualizados, anonimização, bloqueio ou eliminação de dados desnecessários, portabilidade, eliminação dos dados, informação sobre com quem compartilhamos e revisão de decisões (art. 18 da LGPD). Boa parte disso pode ser feita no próprio app (editar perfil, exportar relatórios e excluir conta); para o restante, fale com o encarregado. Respondemos em até 15 dias (art. 19). Se não ficar satisfeito, você também pode reclamar à ANPD (gov.br/anpd)."
       },
       {
-        "titulo": "12. Crianças e adolescentes",
-        "texto": "O Obra Fácil é destinado a profissionais maiores de 18 anos e não coleta intencionalmente dados de menores."
+        "titulo": "12. Exclusão da conta",
+        "texto": "No app: Mais → Configurações gerais → Excluir conta (confirmação com a sua senha). Fora do app: envie um e-mail para r2m.tec.adm@gmail.com com o assunto \"Excluir minha conta\" a partir do e-mail cadastrado; a solicitação é atendida em até 15 dias. A exclusão apaga todos os seus dados de trabalho e cancela cobranças futuras de assinatura. Antes de excluir, você pode pedir uma cópia dos seus dados pelo mesmo e-mail."
       },
       {
-        "titulo": "13. Alterações",
-        "texto": "Esta política pode ser atualizada. Alterações relevantes serão comunicadas no app. A data da última atualização está no início do documento."
+        "titulo": "13. Crianças e adolescentes",
+        "texto": "O Obra Fácil é destinado a profissionais maiores de 18 anos e não coleta intencionalmente dados de crianças ou adolescentes. Se identificarmos uma conta de menor de idade, ela será excluída."
+      },
+      {
+        "titulo": "14. Alterações",
+        "texto": "Esta política pode ser atualizada para refletir mudanças no app ou na lei. Alterações relevantes serão comunicadas no app ou por e-mail antes de entrarem em vigor. A data da última atualização está no início do documento."
       }
     ]
   },
   "termos": {
     "titulo": "Termos de Uso",
-    "intro": "Ao criar uma conta ou usar o Obra Fácil, aplicativo mantido pela R2M, você concorda com estes termos.",
+    "intro": "Estes termos regem o uso do aplicativo Obra Fácil e do site de assinatura, mantidos pela R2M. Ao criar uma conta ou usar o serviço, você declara que leu e concorda com eles e com a Política de Privacidade.",
     "secoes": [
       {
         "titulo": "1. O serviço",
-        "texto": "O Obra Fácil ajuda profissionais da construção civil a organizar clientes, orçamentos e obras e a gerar documentos. O app é uma ferramenta de apoio: os valores, quantitativos, prazos e informações técnicas dos orçamentos e relatórios são de responsabilidade de quem os elabora."
+        "texto": "O Obra Fácil ajuda profissionais da construção civil a organizar clientes, orçamentos, obras e um catálogo de produtos e serviços, e a gerar documentos e relatórios. O app é uma ferramenta de apoio: valores, quantitativos, prazos e informações técnicas dos orçamentos e relatórios são de responsabilidade de quem os elabora, e o app não substitui orientação técnica ou contábil profissional."
       },
       {
         "titulo": "2. Sua conta",
-        "texto": "Você deve ser maior de 18 anos, informar dados verdadeiros e manter sua senha em sigilo. Atividades realizadas na sua conta são de sua responsabilidade."
+        "texto": "Para usar o app você precisa ter 18 anos ou mais, informar dados verdadeiros (inclusive CPF ou CNPJ válido) e confirmar seu e-mail. Você é responsável por manter sua senha em sigilo e pelas atividades realizadas na sua conta. Se perceber uso indevido, troque a senha e avise o suporte."
       },
       {
         "titulo": "3. Uso adequado",
-        "texto": "É proibido usar o app para fins ilegais, cadastrar dados de terceiros sem autorização, tentar acessar contas ou sistemas de outras pessoas ou prejudicar o funcionamento do serviço."
+        "texto": "É proibido usar o app para fins ilegais; cadastrar dados de terceiros sem autorização; tentar acessar contas, dados ou sistemas de outras pessoas; copiar, revender ou fazer engenharia reversa do serviço; ou prejudicar seu funcionamento, por exemplo com acessos automatizados abusivos."
       },
       {
-        "titulo": "4. Planos e limites",
-        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional) com limites diferentes de clientes, orçamentos, obras e itens de catálogo, descritos na tela Planos. As assinaturas são mensais, cobradas pelo Mercado Pago, com renovação automática até o cancelamento. Você pode cancelar a qualquer momento: não há novas cobranças e o plano continua até o fim do período já pago. Se uma cobrança for recusada e não for regularizada no prazo de tolerância, a conta volta ao plano Gratuito, sem perda dos dados. Preços e limites podem mudar, com aviso prévio; quem já assina mantém o valor contratado até o cancelamento."
+        "titulo": "4. Planos, preços e pagamento",
+        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional), com limites diferentes de clientes, orçamentos ativos, obras ativas e itens de catálogo, informados na tela Planos e no site de assinatura antes da contratação. As assinaturas são feitas pelo site de assinatura do Obra Fácil e cobradas mensalmente pelo Mercado Pago, com renovação automática até o cancelamento. Os preços incluem os tributos aplicáveis. O plano pago é liberado assim que o Mercado Pago confirma o pagamento. Se uma cobrança for recusada e não for regularizada no prazo de tolerância informado, a conta volta ao plano Gratuito, sem perda dos dados — apenas a criação de novos itens fica sujeita aos limites do Gratuito."
       },
       {
-        "titulo": "5. Seus dados",
-        "texto": "Os dados que você cadastra continuam sendo seus. Você pode exportá-los em Relatórios e excluir sua conta a qualquer momento. O tratamento de dados segue a nossa Política de Privacidade."
+        "titulo": "5. Cancelamento e direito de arrependimento",
+        "texto": "Você pode cancelar a assinatura a qualquer momento, no app ou no site de assinatura, sem multa: não haverá novas cobranças e o plano continua até o fim do período já pago. Na primeira contratação de um plano, você pode desistir em até 7 dias (art. 49 do Código de Defesa do Consumidor) e receber o valor pago de volta integralmente — basta cancelar e pedir o reembolso pelo e-mail r2m.tec.adm@gmail.com. Fora desse prazo, não há reembolso proporcional de mensalidades já pagas, pois o acesso continua até o fim do período."
       },
       {
-        "titulo": "6. Disponibilidade",
-        "texto": "Trabalhamos para manter o serviço disponível, mas podem ocorrer interrupções para manutenção ou por falhas de terceiros. Recomendamos exportar periodicamente relatórios importantes."
+        "titulo": "6. Mudanças de preço e de planos",
+        "texto": "Preços, limites e recursos dos planos podem mudar. Avisaremos com pelo menos 30 dias de antecedência, no app ou por e-mail. Quem já assina mantém o valor contratado até cancelar ou até a data informada no aviso, podendo cancelar sem custo caso não concorde."
       },
       {
-        "titulo": "7. Responsabilidade",
-        "texto": "Na máxima extensão permitida pela lei, a R2M não se responsabiliza por decisões tomadas com base nas informações cadastradas pelo usuário nem por perdas decorrentes de uso indevido da conta. Nada nestes termos limita direitos garantidos pelo Código de Defesa do Consumidor."
+        "titulo": "7. Seus dados",
+        "texto": "Os dados que você cadastra continuam sendo seus. Você pode exportá-los em Relatórios, pedir uma cópia completa ao suporte e excluir sua conta a qualquer momento. O tratamento de dados segue a Política de Privacidade."
       },
       {
-        "titulo": "8. Encerramento",
-        "texto": "Você pode encerrar sua conta quando quiser. A R2M pode suspender contas que violem estes termos, avisando o usuário sempre que possível."
+        "titulo": "8. Propriedade intelectual",
+        "texto": "O app, a marca Obra Fácil, o design e o código pertencem à R2M. Você recebe uma licença pessoal, não exclusiva e intransferível para usar o app enquanto sua conta estiver ativa. Os documentos que você gera com seus dados (orçamentos e relatórios) são seus."
       },
       {
-        "titulo": "9. Contato e foro",
-        "texto": "Dúvidas: r2m.tec.adm@gmail.com ou WhatsApp (31) 98676-3652. Estes termos seguem a lei brasileira, e eventuais conflitos serão resolvidos no foro do domicílio do usuário."
+        "titulo": "9. Disponibilidade e suporte",
+        "texto": "Trabalhamos para manter o serviço disponível e seguro, mas podem ocorrer interrupções para manutenção, atualização ou por falhas de terceiros (internet, hospedagem, Mercado Pago). Sempre que possível, manutenções programadas serão avisadas. O suporte atende pelo e-mail r2m.tec.adm@gmail.com e pelo WhatsApp (31) 98676-3652."
+      },
+      {
+        "titulo": "10. Responsabilidade",
+        "texto": "Na máxima extensão permitida pela lei, a R2M não se responsabiliza por decisões tomadas com base nas informações cadastradas pelo usuário, por erros de cálculo decorrentes de dados informados incorretamente ou por perdas decorrentes de uso indevido da conta por falta de cuidado com a senha. Nada nestes termos limita direitos garantidos pelo Código de Defesa do Consumidor."
+      },
+      {
+        "titulo": "11. Suspensão e encerramento",
+        "texto": "Você pode encerrar sua conta quando quiser. A R2M pode suspender ou encerrar contas que violem estes termos ou a lei, avisando o usuário com a justificativa sempre que possível; em caso de encerramento por nossa iniciativa sem violação sua, valores pagos por períodos não usados serão devolvidos."
+      },
+      {
+        "titulo": "12. Alterações destes termos",
+        "texto": "Estes termos podem ser atualizados. Mudanças relevantes serão avisadas no app ou por e-mail antes de entrarem em vigor; se você continuar usando o app depois disso, as novas condições passam a valer. A data da última atualização está no início do documento."
+      },
+      {
+        "titulo": "13. Lei aplicável e foro",
+        "texto": "Estes termos seguem a lei brasileira. Antes de qualquer medida judicial, fale com a gente — a maioria dos problemas se resolve rápido pelo suporte. Eventuais conflitos serão resolvidos no foro do domicílio do usuário consumidor."
       }
     ]
   }

@@ -23,22 +23,29 @@ async function request(method, path, body, { idempotencyKey } = {}) {
   const token = getEnv().MP_ACCESS_TOKEN;
   if (!token) throw new HttpError(503, 'Pagamentos indisponíveis no momento.', 'PAYMENTS_NOT_CONFIGURED');
 
-  const res = await fetch(`${BASE}${path}`, {
-    method,
-    headers: {
-      authorization: `Bearer ${token}`,
-      'content-type': 'application/json',
-      ...(idempotencyKey ? { 'x-idempotency-key': idempotencyKey } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    signal: AbortSignal.timeout(20000),
-  });
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, {
+      method,
+      headers: {
+        authorization: `Bearer ${token}`,
+        'content-type': 'application/json',
+        ...(idempotencyKey ? { 'x-idempotency-key': idempotencyKey } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(20000),
+    });
+  } catch (cause) {
+    logger.error({ path, err: cause?.message }, 'Mercado Pago inacessível');
+    throw new HttpError(503, 'Não foi possível falar com o Mercado Pago agora. Tente novamente em alguns minutos.', 'PAYMENT_PROVIDER_UNREACHABLE');
+  }
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     logger.error({ status: res.status, path, mp: { message: data?.message, error: data?.error } }, 'Mercado Pago recusou');
     const err = new HttpError(502, 'O Mercado Pago não respondeu como esperado. Tente novamente.', 'PAYMENT_PROVIDER_ERROR');
     err.providerStatus = res.status;
+    err.providerMessage = String(data?.message ?? data?.error ?? '');
     throw err;
   }
   return data;

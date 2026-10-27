@@ -36,7 +36,26 @@ export function normalizePlatform(value) {
   return v in PLATFORMS ? v : 'web';
 }
 
-export async function startCheckout(user, planoId, plataforma) {
+/** Traduz recusas do Mercado Pago ligadas ao pagador em mensagens claras. */
+function payerError(err) {
+  const msg = (err?.providerMessage ?? '').toLowerCase();
+  if (msg.includes('test user')) {
+    return badRequest(
+      'Este e-mail não pode pagar com a conta atual do Mercado Pago: em modo de teste, use o e-mail do usuário comprador de teste; em produção, uma conta real.',
+      'PAYER_ENVIRONMENT_MISMATCH',
+    );
+  }
+  if (msg.includes('payer') || msg.includes('email')) {
+    return badRequest('O Mercado Pago recusou o e-mail informado. Confira o e-mail da sua conta do Mercado Pago.', 'INVALID_PAYER');
+  }
+  return err;
+}
+
+/**
+ * payerEmail: e-mail da conta do Mercado Pago de quem vai pagar (pode ser
+ * diferente do e-mail do app). Padrão: e-mail da conta do app.
+ */
+export async function startCheckout(user, planoId, plataforma, payerEmail = user.email) {
   if (!(await isCheckoutEnabled(plataforma))) {
     throw forbidden('A assinatura não está disponível por aqui. Fale com o suporte para mudar de plano.', 'CHECKOUT_DISABLED');
   }
@@ -56,6 +75,7 @@ export async function startCheckout(user, planoId, plataforma) {
     status: 'pendente',
     planoId,
     valor: plan.preco,
+    payerEmail,
     createdAt: { $gt: new Date(Date.now() - 6 * 3600 * 1000) },
   });
   if (recente?.initPoint) return recente;
@@ -64,7 +84,7 @@ export async function startCheckout(user, planoId, plataforma) {
     userId: user._id,
     planoId,
     valor: plan.preco,
-    payerEmail: user.email,
+    payerEmail,
     plataforma,
     status: 'pendente',
   });
@@ -75,7 +95,7 @@ export async function startCheckout(user, planoId, plataforma) {
       {
         reason: `Obra Fácil — Plano ${plan.nome}`,
         external_reference: String(sub._id),
-        payer_email: user.email,
+        payer_email: payerEmail,
         back_url: `${PUBLIC_BASE_URL}/assinar/retorno`,
         status: 'pending',
         auto_recurring: {
@@ -93,9 +113,9 @@ export async function startCheckout(user, planoId, plataforma) {
     await sub.save();
   } catch (err) {
     sub.status = 'expirada';
-    sub.observacao = 'Falha ao criar no Mercado Pago';
+    sub.observacao = `Falha ao criar no Mercado Pago${err?.providerMessage ? `: ${err.providerMessage.slice(0, 120)}` : ''}`;
     await sub.save();
-    throw err;
+    throw payerError(err);
   }
 
   await audit({

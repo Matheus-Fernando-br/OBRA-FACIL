@@ -65,7 +65,8 @@ subscriptionRouter.get('/me', async (req, res) => {
     renovaEm: assinatura?.status === 'ativa' ? assinatura.proximaCobrancaEm : null,
     acessoAte: assinatura?.status === 'cancelada' ? assinatura.acessoAte : (origem === 'cortesia' ? req.user.planoManual?.ate ?? null : null),
     assinatura: publicSub(assinatura),
-    pendente: publicSub(pendente),
+    // O link de pagamento pendente é do próprio usuário (para continuar o pagamento).
+    pendente: pendente && { ...publicSub(pendente), initPoint: pendente.initPoint },
     uso,
     checkout: { enabled: await isCheckoutEnabled(plataforma), plataforma },
   });
@@ -76,7 +77,7 @@ subscriptionRouter.get('/me', async (req, res) => {
  * O plano só muda depois que o Mercado Pago confirmar (webhook).
  */
 subscriptionRouter.post('/checkout', validate(checkoutSchema), async (req, res) => {
-  const sub = await startCheckout(req.user, req.body.planoId, platformOf(req));
+  const sub = await startCheckout(req.user, req.body.planoId, platformOf(req), req.body.payerEmail ?? req.user.email);
   res.status(201).json({ initPoint: sub.initPoint, assinatura: publicSub(sub) });
 });
 
