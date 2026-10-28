@@ -81,6 +81,14 @@
         "projectId": "ed905f01-cef4-4b91-b2c6-ea9d98bdba93"
       }
     },
-    "description": "Gestão de clientes, orçamentos e obras para profissionais da construção civil."
+    "description": "Gestão de clientes, orçamentos e obras para profissionais da construção civil.",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/ed905f01-cef4-4b91-b2c6-ea9d98bdba93",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    }
   }
 }
