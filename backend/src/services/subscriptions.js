@@ -105,9 +105,9 @@ export function normalizePlatform(value) {
 /** Traduz recusas do Mercado Pago ligadas ao pagador em mensagens claras. */
 function payerError(err) {
   const msg = (err?.providerMessage ?? '').toLowerCase();
-  if (msg.includes('test user')) {
+  if (msg.includes('test user') || msg.includes('live credentials')) {
     return badRequest(
-      'Este e-mail não pode pagar com a conta atual do Mercado Pago: em modo de teste, use o e-mail do usuário comprador de teste; em produção, uma conta real.',
+      'O Mercado Pago está em modo de teste: nele, só uma conta de teste compradora (e-mail @testuser.com) pode pagar. Em produção, qualquer cliente paga normalmente.',
       'PAYER_ENVIRONMENT_MISMATCH',
     );
   }

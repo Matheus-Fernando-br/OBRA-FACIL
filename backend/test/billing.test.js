@@ -474,3 +474,13 @@ describe('pagamento mês a mês (Pix, crédito, débito)', () => {
     assert.equal(r.body.code, 'PAYMENT_METHOD_DISABLED');
   });
 });
+
+describe('webhook com duas assinaturas secretas (teste e produção)', () => {
+  it('aceita qualquer uma das chaves cadastradas', () => {
+    const a = crypto.randomBytes(16).toString('hex');
+    const b = crypto.randomBytes(16).toString('hex');
+    const sig = mpMod.signWebhook({ dataId: '123', requestId: 'r1', secret: b });
+    assert.equal(mpMod.verifyWebhookSignature({ signature: sig, requestId: 'r1', dataId: '123', secret: `${a}, ${b}` }), true);
+    assert.equal(mpMod.verifyWebhookSignature({ signature: sig, requestId: 'r1', dataId: '123', secret: a }), false);
+  });
+});

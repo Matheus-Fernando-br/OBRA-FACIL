@@ -78,6 +78,9 @@ export const mp = new Proxy({}, { get: (_t, key) => client[key] });
  */
 export function verifyWebhookSignature({ signature, requestId, dataId, secret = getEnv().MP_WEBHOOK_SECRET }) {
   if (!secret || !signature) return false;
+  // Aceita mais de uma assinatura secreta separadas por vírgula
+  // (o Mercado Pago tem uma para o modo de teste e outra para produção).
+  const secrets = String(secret).split(',').map((s) => s.trim()).filter(Boolean);
 
   const parts = Object.fromEntries(
     String(signature)
@@ -93,12 +96,11 @@ export function verifyWebhookSignature({ signature, requestId, dataId, secret = 
   if (requestId) manifest += `request-id:${requestId};`;
   manifest += `ts:${parts.ts};`;
 
-  const expected = crypto.createHmac('sha256', secret).update(manifest).digest('hex');
-  return safeEqual(expected, parts.v1);
+  return secrets.some((key) => safeEqual(crypto.createHmac('sha256', key).update(manifest).digest('hex'), parts.v1));
 }
 
 /** Gera uma assinatura válida (usado nos testes e no diagnóstico). */
-export function signWebhook({ dataId, requestId, ts = Date.now(), secret = getEnv().MP_WEBHOOK_SECRET }) {
+export function signWebhook({ dataId, requestId, ts = Date.now(), secret = getEnv().MP_WEBHOOK_SECRET.split(',')[0].trim() }) {
   const id = dataId && /^[a-z0-9]+$/i.test(dataId) ? String(dataId).toLowerCase() : dataId;
   const manifest = `${id ? `id:${id};` : ''}${requestId ? `request-id:${requestId};` : ''}ts:${ts};`;
   return `ts=${ts},v1=${crypto.createHmac('sha256', secret).update(manifest).digest('hex')}`;
