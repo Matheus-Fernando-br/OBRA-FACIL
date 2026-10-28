@@ -58,9 +58,9 @@ export default function PlanosScreen() {
     setMessage(null);
     setBusy(plan.id);
     try {
-      await openCheckout(plan.id, token);
+      await openCheckout(plan.id);
       setMessage({
-        text: "Conclua o pagamento no Mercado Pago. Quando ele for confirmado, seu plano muda automaticamente — puxe a tela para atualizar.",
+        text: "Conclua o pagamento na página que abriu (cartão ou Pix). Quando ele for confirmado, seu plano muda automaticamente — puxe a tela para atualizar.",
       });
     } catch (error: any) {
       setMessage({ text: error?.response?.data?.message ?? error?.message ?? "Não foi possível abrir o pagamento.", error: true });
@@ -86,6 +86,7 @@ export default function PlanosScreen() {
 
   const statusLine = (() => {
     if (sub.origem === "cortesia") return sub.acessoAte ? `Cortesia até ${fmtDate(sub.acessoAte)}` : "Plano cortesia";
+    if (sub.status === "ativa" && sub.modalidade === "avulso" && sub.acessoAte) return `Pago até ${fmtDate(sub.acessoAte)}`;
     if (sub.status === "ativa" && sub.renovaEm) return `Renova em ${fmtDate(sub.renovaEm)}`;
     if (sub.status === "cancelada" && sub.acessoAte) return `Cancelado · acesso até ${fmtDate(sub.acessoAte)}`;
     return null;
@@ -113,7 +114,7 @@ export default function PlanosScreen() {
             {!!statusLine && <Text style={[styles.caption, { marginTop: 4 }]}>{statusLine}</Text>}
             {sub.inadimplente && (
               <Text style={[styles.menuCardDescription, { color: theme.danger, marginTop: 8 }]}>
-                Não conseguimos cobrar a última mensalidade. Confira o cartão cadastrado no Mercado Pago.
+                Não conseguimos cobrar a última mensalidade no cartão. Assine de novo com outro cartão ou pague com Pix.
               </Text>
             )}
 
@@ -141,9 +142,9 @@ export default function PlanosScreen() {
               );
             })}
 
-            {sub.status === "ativa" && sub.origem === "assinatura" && (
+            {sub.status === "ativa" && sub.origem === "assinatura" && sub.modalidade !== "avulso" && (
               <AppButton
-                title={busy === "cancelar" ? "Cancelando..." : "Cancelar assinatura"}
+                title={busy === "cancelar" ? "Cancelando..." : "Cancelar cobrança automática"}
                 variant="ghost"
                 loading={busy === "cancelar"}
                 onPress={handleCancel}
@@ -172,7 +173,8 @@ export default function PlanosScreen() {
         <Text style={styles.subtitle}>Planos disponíveis</Text>
         {sub.plans.map((plan, index) => {
           const isCurrent = plan.id === currentPlan.id;
-          const canBuy = sub.checkoutEnabled && plan.precoMensal > 0 && !isCurrent && plan.disponivel !== false;
+          const renew = isCurrent && sub.modalidade === "avulso";
+          const canBuy = sub.checkoutEnabled && plan.precoMensal > 0 && (!isCurrent || renew) && plan.disponivel !== false;
           return (
             <FadeInView key={plan.id} index={index + 1}>
               <View style={[styles.card, plan.destaque && { borderColor: theme.primary, borderWidth: 1.5 }]}>
@@ -208,7 +210,7 @@ export default function PlanosScreen() {
 
                 {canBuy && (
                   <AppButton
-                    title={busy === plan.id ? "Abrindo pagamento..." : `Assinar ${plan.nome}`}
+                    title={busy === plan.id ? "Abrindo pagamento..." : renew ? "Pagar mais 1 mês" : `Assinar ${plan.nome}`}
                     variant={plan.destaque ? "primary" : "tinted"}
                     loading={busy === plan.id}
                     onPress={() => handleSubscribe(plan)}
@@ -229,7 +231,7 @@ export default function PlanosScreen() {
           title="Dúvidas"
           footer={
             sub.checkoutEnabled
-              ? "Pagamento mensal processado pelo Mercado Pago. Cancele quando quiser; o plano continua até o fim do período já pago."
+              ? "Pague com cartão de crédito (cobrança automática, cancele quando quiser) ou mês a mês com Pix, crédito ou débito — sem precisar de conta no Mercado Pago."
               : undefined
           }
         >

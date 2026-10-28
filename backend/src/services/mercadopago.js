@@ -9,7 +9,8 @@ import { HttpError } from '../utils/errors.js';
  * Documentação: https://www.mercadopago.com.br/developers/pt/reference/subscriptions
  *
  * Variáveis: MP_ACCESS_TOKEN (credencial de produção APP_USR-… ou de teste
- * TEST-…), MP_WEBHOOK_SECRET (assinatura secreta das notificações, em
+ * TEST-…), MP_PUBLIC_KEY (chave pública do mesmo par, usada no navegador),
+ * MP_WEBHOOK_SECRET (assinatura secreta das notificações, em
  * Suas integrações → Webhooks).
  */
 
@@ -57,6 +58,7 @@ const realClient = {
   cancelPreapproval: (id) => request('PUT', `/preapproval/${encodeURIComponent(id)}`, { status: 'cancelled' }),
   getAuthorizedPayment: (id) => request('GET', `/authorized_payments/${encodeURIComponent(id)}`),
   getPayment: (id) => request('GET', `/v1/payments/${encodeURIComponent(id)}`),
+  createPayment: (body, idempotencyKey) => request('POST', '/v1/payments', body, { idempotencyKey }),
   whoami: () => request('GET', '/users/me'),
 };
 

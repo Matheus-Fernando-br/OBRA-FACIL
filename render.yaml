@@ -59,3 +59,5 @@ services:
         sync: false
       - key: MP_WEBHOOK_SECRET
         sync: false
+      - key: MP_PUBLIC_KEY
+        sync: false

@@ -229,4 +229,27 @@ export const checkoutSchema = z.object({
   planoId: z.enum(['basico', 'profissional'], { error: 'Plano inválido.' }),
   /** E-mail da conta do Mercado Pago que vai pagar (opcional). */
   payerEmail: email.optional(),
+  /** Token do cartão gerado pelo formulário seguro do Mercado Pago (cobrança automática). */
+  cardTokenId: z.string().trim().min(8).max(200).optional(),
+});
+
+const shortText = (max) => z.string().trim().max(max).optional();
+
+/** Pagamento de 1 mês. Só os campos abaixo passam; o valor é sempre o do plano no servidor. */
+export const oneTimePaymentSchema = z.object({
+  planoId: z.enum(['basico', 'profissional'], { error: 'Plano inválido.' }),
+  formData: z.object({
+    payment_method_id: z.string({ error: 'Escolha a forma de pagamento.' }).trim().min(2).max(40),
+    payment_type_id: shortText(40),
+    token: shortText(200),
+    issuer_id: z.union([z.string().trim().max(40), z.number()]).optional(),
+    payer: z
+      .object({
+        email: email.optional(),
+        first_name: shortText(80),
+        last_name: shortText(80),
+        identification: z.object({ type: shortText(10), number: shortText(20) }).optional(),
+      })
+      .optional(),
+  }),
 });

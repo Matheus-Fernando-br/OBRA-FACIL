@@ -19,16 +19,82 @@ import { notify } from './telegram.js';
  *   cobrança recusada → "ativa" + inadimplenteDesde (tolerância configurável)
  *   cancelada pelo usuário/MP → "cancelada" (acesso até o fim do período pago)
  *   pendente abandonada (48 h) → "expirada"
+ *
+ * Duas modalidades:
+ *   recorrente — cobrança automática todo mês no cartão de crédito
+ *                (preapproval do Mercado Pago, com ou sem conta MP);
+ *   avulso     — o cliente paga 1 mês por vez (Pix, crédito ou débito) e o
+ *                plano vale por 30 dias; pagamentos seguidos se somam.
  */
 
 const STATUS_MAP = { authorized: 'ativa', paused: 'pausada', cancelled: 'cancelada', pending: 'pendente' };
 const PLATFORMS = { android: 'checkoutAndroid', ios: 'checkoutIos', web: 'checkoutWeb' };
+const DIA = 86400000;
+/** Dias liberados por pagamento avulso. */
+export const PERIODO_AVULSO_DIAS = 30;
+const PENDENTES_MP = ['pending', 'in_process', 'authorized'];
+
+/** Mensagens para o cliente a partir do status/status_detail do Mercado Pago. */
+const DETALHES = {
+  cc_rejected_insufficient_amount: 'Saldo ou limite insuficiente no cartão.',
+  cc_rejected_bad_filled_security_code: 'Código de segurança (CVV) incorreto.',
+  cc_rejected_bad_filled_date: 'Data de validade incorreta.',
+  cc_rejected_bad_filled_card_number: 'Número do cartão incorreto.',
+  cc_rejected_bad_filled_other: 'Confira os dados do cartão.',
+  cc_rejected_call_for_authorize: 'O banco pediu autorização: ligue para o banco do cartão e tente de novo.',
+  cc_rejected_card_disabled: 'Cartão bloqueado ou inativo. Ligue para o banco do cartão.',
+  cc_rejected_duplicated_payment: 'Você já fez um pagamento igual há pouco. Confira antes de tentar de novo.',
+  cc_rejected_high_risk: 'Pagamento recusado pela análise de segurança. Use outro cartão ou pague com Pix.',
+  cc_rejected_max_attempts: 'Limite de tentativas atingido. Use outro cartão ou pague com Pix.',
+  pending_contingency: 'Pagamento em análise. Avisaremos por e-mail assim que for confirmado.',
+  pending_review_manual: 'Pagamento em análise. Avisaremos por e-mail assim que for confirmado.',
+  pending_waiting_transfer: 'Aguardando o pagamento do Pix.',
+  pending_waiting_payment: 'Aguardando o pagamento.',
+};
+
+export function paymentMessage(status, detail) {
+  if (status === 'approved') return 'Pagamento aprovado!';
+  if (DETALHES[detail]) return DETALHES[detail];
+  if (status === 'rejected') return 'O pagamento foi recusado. Use outro cartão ou pague com Pix.';
+  if (status === 'cancelled') return 'Pagamento cancelado ou expirado.';
+  if (PENDENTES_MP.includes(status)) return 'Pagamento em processamento.';
+  return 'Não foi possível concluir o pagamento.';
+}
 
 /** Se o checkout do Mercado Pago pode aparecer nesta plataforma (regras das lojas). */
 export async function isCheckoutEnabled(plataforma) {
   if (!isMercadoPagoConfigured()) return false;
   const billing = await getSetting('billing');
   return Boolean(billing[PLATFORMS[plataforma] ?? 'checkoutWeb']);
+}
+
+/** O que a página de pagamento precisa saber (sem segredos: a Public Key é pública). */
+export async function checkoutInfo(plataforma) {
+  const billing = await getSetting('billing');
+  return {
+    enabled: await isCheckoutEnabled(plataforma),
+    provider: 'mercadopago',
+    plataforma,
+    publicKey: getEnv().MP_PUBLIC_KEY ?? null,
+    metodos: { recorrente: billing.pagamentoRecorrente !== false, avulso: billing.pagamentoAvulso !== false },
+    diasAvulso: PERIODO_AVULSO_DIAS,
+  };
+}
+
+async function assertCanBuy(user, planoId, plataforma, modalidade) {
+  if (!(await isCheckoutEnabled(plataforma))) {
+    throw forbidden('A assinatura não está disponível por aqui. Fale com o suporte para mudar de plano.', 'CHECKOUT_DISABLED');
+  }
+  const billing = await getSetting('billing');
+  const chave = modalidade === 'avulso' ? 'pagamentoAvulso' : 'pagamentoRecorrente';
+  if (billing[chave] === false) throw forbidden('Esta forma de pagamento está desativada no momento.', 'PAYMENT_METHOD_DISABLED');
+  if (!user.email_verificado) throw forbidden('Confirme seu e-mail antes de assinar.', 'EMAIL_NOT_VERIFIED');
+
+  const plan = await getPlan(planoId);
+  if (!plan || plan.id !== planoId || plan.preco <= 0 || plan.disponivel === false) {
+    throw badRequest('Plano indisponível.', 'PLAN_UNAVAILABLE');
+  }
+  return plan;
 }
 
 export function normalizePlatform(value) {
@@ -51,26 +117,35 @@ function payerError(err) {
   return err;
 }
 
+/** Recusa do cartão na criação da cobrança automática. */
+function cardError(err) {
+  const mapped = payerError(err);
+  if (mapped !== err) return mapped;
+  if (err?.providerStatus && err.providerStatus < 500) {
+    return badRequest(
+      'O cartão não foi aceito para a cobrança automática. Confira os dados, use outro cartão de crédito ou pague com Pix.',
+      'CARD_REJECTED',
+    );
+  }
+  return err;
+}
+
 /**
- * payerEmail: e-mail da conta do Mercado Pago de quem vai pagar (pode ser
- * diferente do e-mail do app). Padrão: e-mail da conta do app.
+ * Cobrança automática mensal.
+ * - Com cardTokenId (formulário de cartão da página /assinar): o cliente
+ *   paga com o próprio cartão de crédito, sem conta no Mercado Pago, e a
+ *   assinatura já nasce autorizada.
+ * - Sem cardTokenId: devolve o link do Mercado Pago (exige conta MP).
+ * payerEmail: e-mail de quem paga. Padrão: e-mail da conta do app.
  */
-export async function startCheckout(user, planoId, plataforma, payerEmail = user.email) {
-  if (!(await isCheckoutEnabled(plataforma))) {
-    throw forbidden('A assinatura não está disponível por aqui. Fale com o suporte para mudar de plano.', 'CHECKOUT_DISABLED');
-  }
-  if (!user.email_verificado) throw forbidden('Confirme seu e-mail antes de assinar.', 'EMAIL_NOT_VERIFIED');
+export async function startCheckout(user, planoId, plataforma, { payerEmail = user.email, cardTokenId } = {}) {
+  const plan = await assertCanBuy(user, planoId, plataforma, 'recorrente');
 
-  const plan = await getPlan(planoId);
-  if (!plan || plan.id !== planoId || plan.preco <= 0 || plan.disponivel === false) {
-    throw badRequest('Plano indisponível.', 'PLAN_UNAVAILABLE');
-  }
-
-  const ativa = await Subscription.findOne({ userId: user._id, status: 'ativa', planoId });
+  const ativa = await Subscription.findOne({ userId: user._id, status: 'ativa', planoId, modalidade: { $ne: 'avulso' } });
   if (ativa) throw conflict(`Você já assina o plano ${plan.nome}.`, 'ALREADY_SUBSCRIBED');
 
   // Reaproveita um link pendente recente do mesmo plano (evita duplicar).
-  const recente = await Subscription.findOne({
+  const recente = !cardTokenId && await Subscription.findOne({
     userId: user._id,
     status: 'pendente',
     planoId,
@@ -97,7 +172,7 @@ export async function startCheckout(user, planoId, plataforma, payerEmail = user
         external_reference: String(sub._id),
         payer_email: payerEmail,
         back_url: `${PUBLIC_BASE_URL}/assinar/retorno`,
-        status: 'pending',
+        ...(cardTokenId ? { card_token_id: cardTokenId, status: 'authorized' } : { status: 'pending' }),
         auto_recurring: {
           frequency: 1,
           frequency_type: 'months',
@@ -108,23 +183,219 @@ export async function startCheckout(user, planoId, plataforma, payerEmail = user
       `checkout-${sub._id}`,
     );
     sub.providerId = String(pre.id);
-    sub.initPoint = pre.init_point;
+    sub.initPoint = cardTokenId ? undefined : pre.init_point;
     sub.providerStatus = pre.status;
     await sub.save();
   } catch (err) {
     sub.status = 'expirada';
     sub.observacao = `Falha ao criar no Mercado Pago${err?.providerMessage ? `: ${err.providerMessage.slice(0, 120)}` : ''}`;
     await sub.save();
-    throw payerError(err);
+    throw cardTokenId ? cardError(err) : payerError(err);
   }
 
   await audit({
     ator: { tipo: 'usuario', id: String(user._id) },
     acao: 'assinatura.checkout_iniciado',
     alvo: { tipo: 'assinatura', id: String(sub._id) },
-    detalhes: { planoId, valor: plan.preco, plataforma },
+    detalhes: { planoId, valor: plan.preco, plataforma, cartao: Boolean(cardTokenId) },
   });
+
+  // Cartão aceito: confirma o estado no Mercado Pago e libera o plano na hora.
+  if (cardTokenId) {
+    await syncPreapproval(sub.providerId).catch((err) => logger.warn({ err: err.message }, 'Sincronização imediata falhou'));
+    return Subscription.findById(sub._id);
+  }
   return sub;
+}
+
+// ------------------------------------------------------------ pagamento avulso
+
+/** Horário de Brasília no formato aceito pelo Mercado Pago (date_of_expiration). */
+const brt = (ms) => new Date(ms - 3 * 3600000).toISOString().replace('Z', '-03:00');
+
+function metodoDe(p, fallback) {
+  if (p?.payment_method_id === 'pix') return 'pix';
+  if (p?.payment_type_id === 'debit_card') return 'debit_card';
+  if (p?.payment_type_id === 'credit_card') return 'credit_card';
+  return fallback;
+}
+
+/**
+ * Pagamento de 1 mês (Pix, cartão de crédito ou débito) com os dados do
+ * formulário do Mercado Pago (Payment Brick). O valor vem sempre do plano
+ * no servidor — o que o navegador manda como valor é ignorado.
+ */
+export async function startOneTimePayment(user, planoId, plataforma, formData) {
+  const plan = await assertCanBuy(user, planoId, plataforma, 'avulso');
+  const isPix = formData.payment_method_id === 'pix';
+  if (!isPix && !formData.token) throw badRequest('Dados do cartão incompletos. Preencha o cartão de novo.', 'INVALID_CARD');
+
+  const _id = new mongoose.Types.ObjectId();
+  const pay = await Payment.create({
+    _id,
+    providerId: `pendente:${_id}`,
+    userId: user._id,
+    planoId,
+    modalidade: 'avulso',
+    metodo: isPix ? 'pix' : formData.payment_type_id === 'debit_card' ? 'debit_card' : 'credit_card',
+    status: 'criando',
+    valor: plan.preco,
+    moeda: 'BRL',
+    data: new Date(),
+  });
+
+  const [first, ...rest] = String(user.nome ?? '').trim().split(/\s+/);
+  const ident = formData.payer?.identification;
+  const body = {
+    transaction_amount: plan.preco,
+    description: `Obra Fácil — Plano ${plan.nome} (${PERIODO_AVULSO_DIAS} dias)`,
+    external_reference: `pay_${pay._id}`,
+    payment_method_id: formData.payment_method_id,
+    payer: {
+      email: formData.payer?.email ?? user.email,
+      first_name: formData.payer?.first_name || first || undefined,
+      last_name: formData.payer?.last_name || rest.join(' ') || undefined,
+      ...(ident?.number ? { identification: { type: ident.type || 'CPF', number: String(ident.number).replace(/\D/g, '') } } : {}),
+    },
+    metadata: { pagamento_id: String(pay._id), plano_id: planoId },
+    ...(isPix
+      ? { date_of_expiration: brt(Date.now() + 30 * 60000) }
+      : {
+          token: formData.token,
+          installments: 1,
+          statement_descriptor: 'OBRAFACIL',
+          ...(formData.issuer_id ? { issuer_id: String(formData.issuer_id) } : {}),
+        }),
+  };
+
+  let p;
+  try {
+    p = await mp.createPayment(body, `pay-${pay._id}`);
+  } catch (err) {
+    pay.status = 'erro';
+    pay.statusDetail = err?.providerMessage?.slice(0, 120);
+    await pay.save();
+    const mapped = payerError(err);
+    if (mapped !== err) throw mapped;
+    if (err?.providerStatus && err.providerStatus < 500) {
+      throw badRequest('O Mercado Pago recusou os dados do pagamento. Confira e tente de novo.', 'PAYMENT_REJECTED');
+    }
+    throw err;
+  }
+
+  await audit({
+    ator: { tipo: 'usuario', id: String(user._id) },
+    acao: 'pagamento.iniciado',
+    alvo: { tipo: 'pagamento', id: String(pay._id) },
+    detalhes: { planoId, valor: plan.preco, metodo: pay.metodo, plataforma },
+  });
+  return applyProviderPayment(pay, p);
+}
+
+/** Aplica o estado de um pagamento avulso consultado no Mercado Pago. */
+async function applyProviderPayment(pay, p) {
+  const amount = Number(p.transaction_amount);
+  const valido =
+    String(p.external_reference) === `pay_${pay._id}` &&
+    Number.isFinite(amount) &&
+    Math.abs(amount - pay.valor) < 0.01 &&
+    (p.currency_id ?? 'BRL') === 'BRL';
+
+  const td = p.point_of_interaction?.transaction_data;
+  pay.providerId = String(p.id);
+  pay.paymentId = String(p.id);
+  pay.statusDetail = p.status_detail;
+  pay.metodo = metodoDe(p, pay.metodo);
+  if (td?.qr_code) {
+    pay.pix = {
+      qrCode: td.qr_code,
+      qrCodeBase64: td.qr_code_base64,
+      ticketUrl: td.ticket_url,
+      expiraEm: p.date_of_expiration ? new Date(p.date_of_expiration) : undefined,
+    };
+  }
+
+  if (!valido) {
+    if (pay.status !== 'suspeito') {
+      pay.status = 'suspeito';
+      await pay.save();
+      await audit({ ator: SYSTEM, acao: 'pagamento.divergente', alvo: { tipo: 'pagamento', id: String(pay._id) }, detalhes: { amount, ref: p.external_reference } });
+      notify('erro_webhook', `⚠️ Pagamento com dados divergentes: ${pay._id}`);
+    }
+    return pay;
+  }
+
+  pay.status = p.status;
+  if (p.status === 'approved') pay.data = new Date(p.date_approved ?? Date.now());
+  await pay.save();
+
+  if (p.status === 'approved') await applyPaidPeriod(pay);
+  else if (['refunded', 'charged_back'].includes(p.status) && pay.aplicadoEm) await revokePaidPeriod(pay);
+  return pay;
+}
+
+/** Libera (ou soma) 30 dias do plano. Idempotente: cada pagamento vale uma vez. */
+async function applyPaidPeriod(pay) {
+  if (!pay.userId) return;
+  const marcado = await Payment.findOneAndUpdate({ _id: pay._id, aplicadoEm: null }, { $set: { aplicadoEm: new Date() } }, { new: true });
+  if (!marcado) return;
+  pay.aplicadoEm = marcado.aplicadoEm;
+
+  const now = new Date();
+  let sub = await Subscription.findOne({
+    userId: pay.userId,
+    modalidade: 'avulso',
+    planoId: pay.planoId,
+    status: 'ativa',
+    acessoAte: { $gt: now },
+  });
+  const nova = !sub;
+  sub ??= new Subscription({ userId: pay.userId, planoId: pay.planoId, modalidade: 'avulso', status: 'ativa', valor: pay.valor, ativadaEm: now });
+  const base = sub.acessoAte && sub.acessoAte > now ? sub.acessoAte : now;
+  sub.acessoAte = new Date(base.getTime() + PERIODO_AVULSO_DIAS * DIA);
+  sub.valor = pay.valor;
+  sub.lembreteEnviadoEm = undefined;
+  sub.ultimoPagamento = { id: pay.providerId, status: 'approved', valor: pay.valor, data: pay.data };
+  await sub.save();
+  await Payment.updateOne({ _id: pay._id }, { $set: { subscriptionId: sub._id } });
+  pay.subscriptionId = sub._id;
+  if (nova) await replaceOtherSubscriptions(sub);
+
+  const user = await User.findById(pay.userId);
+  const plan = await getPlan(pay.planoId);
+  const ate = sub.acessoAte.toLocaleDateString('pt-BR');
+  await audit({ ator: SYSTEM, acao: 'pagamento.aprovado', alvo: { tipo: 'pagamento', id: String(pay._id) }, detalhes: { planoId: pay.planoId, valor: pay.valor, metodo: pay.metodo, acessoAte: sub.acessoAte } });
+  notify('assinatura_ativada', `✅ Pagamento aprovado (${pay.metodo}): plano ${plan.nome} (R$ ${pay.valor.toFixed(2)}) até ${ate}`);
+  if (user) {
+    sendNoticeEmailSafe(user, `Pagamento confirmado — Plano ${plan.nome}`, 'Pagamento confirmado', [
+      `Olá, ${user.nome}! Recebemos seu pagamento e o plano ${plan.nome} está liberado até ${ate}.`,
+      'Não há cobrança automática: alguns dias antes do vencimento enviaremos um lembrete para você renovar.',
+    ]);
+  }
+  await resolveEffectivePlan(pay.userId);
+}
+
+/** Estorno ou contestação depois de liberado: retira os dias pagos. */
+async function revokePaidPeriod(pay) {
+  const marcado = await Payment.findOneAndUpdate({ _id: pay._id, aplicadoEm: { $ne: null } }, { $set: { aplicadoEm: null } });
+  if (!marcado) return;
+  const sub = pay.subscriptionId && (await Subscription.findById(pay.subscriptionId));
+  if (sub?.acessoAte) {
+    sub.acessoAte = new Date(Math.max(Date.now(), sub.acessoAte.getTime() - PERIODO_AVULSO_DIAS * DIA));
+    if (sub.acessoAte <= new Date()) sub.status = 'expirada';
+    sub.observacao = `Pagamento ${pay.providerId} ${pay.status === 'charged_back' ? 'contestado' : 'estornado'}`;
+    await sub.save();
+  }
+  await audit({ ator: SYSTEM, acao: 'pagamento.estornado', alvo: { tipo: 'pagamento', id: String(pay._id) }, detalhes: { status: pay.status } });
+  notify('pagamento_recusado', `↩️ Pagamento ${pay.status === 'charged_back' ? 'contestado' : 'estornado'}: ${pay.providerId}`);
+  if (pay.userId) await resolveEffectivePlan(pay.userId);
+}
+
+/** Consulta de novo no Mercado Pago um pagamento avulso ainda pendente. */
+export async function refreshOneTimePayment(pay) {
+  if (!PENDENTES_MP.includes(pay.status) || pay.providerId.startsWith('pendente:') || !isMercadoPagoConfigured()) return pay;
+  const p = await mp.getPayment(pay.providerId);
+  return applyProviderPayment(pay, p);
 }
 
 async function cancelAtProvider(sub) {
@@ -311,9 +582,17 @@ export async function handleAuthorizedPayment(authorizedPaymentId) {
   return { resultado: 'sincronizado' };
 }
 
-/** Pagamento avulso: só interessa se pertencer a uma assinatura. */
+/** Webhook "payment": pagamento avulso nosso (pay_<id>) ou cobrança de assinatura. */
 export async function handlePayment(paymentId) {
   const p = await mp.getPayment(paymentId);
+  const ref = String(p?.external_reference ?? '');
+  if (ref.startsWith('pay_')) {
+    const id = ref.slice(4);
+    const pay = mongoose.isValidObjectId(id) ? await Payment.findById(id) : null;
+    if (!pay || (!pay.providerId.startsWith('pendente:') && pay.providerId !== String(p.id))) return { resultado: 'ignorado' };
+    await applyProviderPayment(pay, p);
+    return { resultado: 'sincronizado', status: pay.status };
+  }
   const preapprovalId = p?.metadata?.preapproval_id ?? p?.point_of_interaction?.transaction_data?.subscription_id;
   if (!preapprovalId) return { resultado: 'ignorado' };
   return syncPreapproval(String(preapprovalId));
@@ -323,6 +602,10 @@ export async function handlePayment(paymentId) {
 export async function cancelSubscription(sub, canceladaPor) {
   if (!['ativa', 'pausada', 'pendente'].includes(sub.status)) {
     throw conflict('Esta assinatura já está encerrada.', 'NOT_CANCELLABLE');
+  }
+  if (sub.modalidade === 'avulso') {
+    const ate = sub.acessoAte ? ` O plano vale até ${sub.acessoAte.toLocaleDateString('pt-BR')}.` : '';
+    throw conflict(`Pagamento mês a mês não tem cobrança automática para cancelar.${ate}`, 'NOT_CANCELLABLE');
   }
   if (!isMercadoPagoConfigured() && sub.providerId) throw unavailable('Pagamentos indisponíveis no momento.');
   await cancelAtProvider(sub);
@@ -368,7 +651,8 @@ export async function detachUserSubscriptions(userId) {
  * (caso um webhook tenha se perdido) e aplica fim de tolerância/período.
  */
 export async function reconcileSubscriptions({ limit = 200 } = {}) {
-  const resumo = { expiradas: 0, sincronizadas: 0, erros: 0, planos: 0 };
+  const resumo = { expiradas: 0, sincronizadas: 0, erros: 0, planos: 0, vencidas: 0, lembretes: 0, pagamentos: 0 };
+  const now = new Date();
   const limite48h = new Date(Date.now() - 48 * 3600 * 1000);
 
   const pendentes = await Subscription.find({ status: 'pendente', createdAt: { $lt: limite48h } }).limit(limit);
@@ -405,10 +689,69 @@ export async function reconcileSubscriptions({ limit = 200 } = {}) {
     }
   }
 
+  // Pagamentos avulsos pendentes (Pix gerado e webhook perdido).
+  const pagamentos = await Payment.find({
+    modalidade: 'avulso',
+    status: { $in: PENDENTES_MP },
+    providerId: { $not: /^pendente:/ },
+    createdAt: { $gt: new Date(now - 7 * DIA) },
+  }).limit(limit);
+  for (const pay of pagamentos) {
+    try {
+      await refreshOneTimePayment(pay);
+      resumo.pagamentos++;
+    } catch {
+      resumo.erros++;
+    }
+  }
+
+  // Pagamento mês a mês: lembrete 3 dias antes de vencer.
+  const vencendo = await Subscription.find({
+    modalidade: 'avulso',
+    status: 'ativa',
+    acessoAte: { $gt: now, $lte: new Date(now.getTime() + 3 * DIA) },
+    lembreteEnviadoEm: null,
+    userId: { $ne: null },
+  }).limit(limit);
+  const { PUBLIC_BASE_URL } = getEnv();
+  for (const s of vencendo) {
+    const [user, plan] = await Promise.all([User.findById(s.userId), getPlan(s.planoId)]);
+    if (user) {
+      sendNoticeEmailSafe(user, `Seu plano ${plan.nome} vence em ${s.acessoAte.toLocaleDateString('pt-BR')}`, 'Hora de renovar', [
+        `Olá, ${user.nome}! Seu plano ${plan.nome} do Obra Fácil vale até ${s.acessoAte.toLocaleDateString('pt-BR')}.`,
+        `Para continuar sem interrupção, pague mais um mês (Pix ou cartão) em ${PUBLIC_BASE_URL}/assinar — os dias se somam ao que você ainda tem.`,
+        'Se preferir, escolha a cobrança automática no cartão de crédito e não precisa lembrar todo mês.',
+      ]);
+    }
+    s.lembreteEnviadoEm = now;
+    await s.save();
+    resumo.lembretes++;
+  }
+
+  // Pagamento mês a mês vencido.
+  const vencidas = await Subscription.find({ modalidade: 'avulso', status: 'ativa', acessoAte: { $lte: now } }).limit(limit);
+  for (const s of vencidas) {
+    s.status = 'expirada';
+    await s.save();
+    resumo.vencidas++;
+    const user = s.userId && (await User.findById(s.userId));
+    if (user) {
+      const plan = await getPlan(s.planoId);
+      sendNoticeEmailSafe(user, `Seu plano ${plan.nome} venceu — Obra Fácil`, 'Plano vencido', [
+        `Olá, ${user.nome}. O período pago do plano ${plan.nome} terminou e sua conta voltou ao plano Gratuito. Seus dados continuam salvos.`,
+        `Para voltar ao plano, pague mais um mês em ${PUBLIC_BASE_URL}/assinar.`,
+      ]);
+    }
+  }
+
   // Recalcula planos de quem pode ter perdido o acesso (fim do período ou da tolerância).
   const userIds = await Subscription.distinct('userId', {
     userId: { $ne: null },
-    $or: [{ status: 'cancelada', acessoAte: { $lt: new Date() } }, { status: 'ativa', inadimplenteDesde: { $ne: null } }],
+    $or: [
+      { status: 'cancelada', acessoAte: { $lt: now } },
+      { status: 'ativa', inadimplenteDesde: { $ne: null } },
+      { _id: { $in: vencidas.map((s) => s._id) } },
+    ],
   });
   const cortesias = await User.distinct('_id', { 'planoManual.ate': { $lt: new Date() }, planoAtual: { $ne: 'gratuito' } });
   for (const id of new Set([...userIds, ...cortesias].map(String))) {

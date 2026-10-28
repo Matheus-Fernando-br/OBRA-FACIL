@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#C2570C">
   <title>Assinatura · Obra Fácil</title>
-  <meta name="description" content="Assine os planos Básico ou Profissional do Obra Fácil com pagamento seguro pelo Mercado Pago.">
+  <meta name="description" content="Assine os planos Básico ou Profissional do Obra Fácil com cartão de crédito, débito ou Pix — pagamento seguro processado pelo Mercado Pago.">
   <link rel="stylesheet" href="/assinar/assinar.css">
   <script src="/assinar/assinar.js" type="module"></script>
 </head>
@@ -20,7 +20,7 @@
     <ol class="steps" id="steps" aria-label="Etapas da assinatura">
       <li data-step="1" class="active"><span>1</span>Entrar</li>
       <li data-step="2"><span>2</span>Escolher o plano</li>
-      <li data-step="3"><span>3</span>Pagar no Mercado Pago</li>
+      <li data-step="3"><span>3</span>Pagamento</li>
     </ol>
 
     <div id="alerta" class="alert" role="status" aria-live="polite" hidden></div>
@@ -50,22 +50,72 @@
     <section id="tela-planos" hidden>
       <div class="card" id="atual" aria-live="polite"></div>
 
-      <div class="card">
-        <h2>Conta do Mercado Pago que vai pagar</h2>
-        <p class="muted small">Informe o e-mail da sua conta do Mercado Pago. Pode ser diferente do e-mail do app.</p>
-        <label class="stack-sm">E-mail do Mercado Pago
-          <input type="email" id="payer-email" autocomplete="email" inputmode="email" required>
-        </label>
-      </div>
-
       <div class="planos" id="planos"></div>
 
       <ul class="trust">
-        <li>🔒 Pagamento processado pelo Mercado Pago. Não vemos os dados do seu cartão.</li>
-        <li>🔁 Cobrança mensal automática. Cancele quando quiser, aqui ou no app.</li>
-        <li>✅ O plano muda no app assim que o pagamento for confirmado.</li>
+        <li>💳 Pague com o seu cartão de crédito, débito ou Pix. Não precisa ter conta no Mercado Pago.</li>
+        <li>🔒 Os dados do cartão vão direto para o Mercado Pago. Nós não vemos nem guardamos o número do cartão.</li>
+        <li>✅ O plano muda no app assim que o pagamento é confirmado.</li>
       </ul>
       <p class="muted small center">Dúvidas? <a href="mailto:r2m.tec.adm@gmail.com">r2m.tec.adm@gmail.com</a> · WhatsApp <a class="nowrap" href="https://wa.me/5531986763652" rel="noopener">(31) 98676-3652</a></p>
+    </section>
+
+    <!-- Etapa 3: pagamento -->
+    <section id="tela-pagamento" hidden>
+      <div class="card">
+        <div class="row">
+          <div>
+            <p class="muted small" style="margin:0">Você escolheu</p>
+            <h1 style="margin:2px 0" id="pg-plano"></h1>
+          </div>
+          <button class="link" type="button" id="trocar-plano">Trocar plano</button>
+        </div>
+
+        <fieldset class="modos" id="modos">
+          <legend>Como você quer pagar?</legend>
+          <label class="modo" data-modo="recorrente">
+            <input type="radio" name="modo" value="recorrente">
+            <span><strong>Cobrança automática todo mês</strong><small>No cartão de crédito. Você não precisa lembrar de pagar e pode cancelar quando quiser.</small></span>
+          </label>
+          <label class="modo" data-modo="avulso">
+            <input type="radio" name="modo" value="avulso">
+            <span><strong>Pagar mês a mês</strong><small>Pix, cartão de crédito ou débito. Cada pagamento libera <b id="dias-avulso">30</b> dias; avisamos por e-mail antes de vencer.</small></span>
+          </label>
+        </fieldset>
+      </div>
+
+      <div class="card brick-card">
+        <div id="brick-loading" class="center" hidden>
+          <div class="spinner big" aria-hidden="true"></div>
+          <p class="muted">Carregando o pagamento seguro do Mercado Pago…</p>
+        </div>
+        <div id="brick-erro" class="center" hidden>
+          <p id="brick-erro-txt"></p>
+          <button class="btn" type="button" id="brick-tentar">Tentar de novo</button>
+        </div>
+        <div id="brick"></div>
+      </div>
+      <p class="muted small center">🔒 Pagamento processado pelo Mercado Pago. Os dados do cartão não passam pelo nosso servidor.</p>
+    </section>
+
+    <!-- Resultado / Pix -->
+    <section id="tela-resultado" class="card center" hidden aria-live="polite">
+      <div class="icone" id="res-icone" aria-hidden="true"></div>
+      <h1 id="res-titulo"></h1>
+      <p class="muted" id="res-texto"></p>
+      <div id="pix" class="pix" hidden>
+        <img id="pix-qr" alt="QR Code do Pix" width="220" height="220">
+        <label class="pix-code">Pix copia e cola
+          <span class="row nowrap-row">
+            <input id="pix-codigo" readonly>
+            <button class="btn" type="button" id="pix-copiar">Copiar</button>
+          </span>
+        </label>
+        <p class="muted small" id="pix-expira"></p>
+        <p class="aguardando"><span class="spinner" aria-hidden="true"></span> Aguardando a confirmação do pagamento…</p>
+        <button class="btn" type="button" id="pix-verificar"><span class="spinner" aria-hidden="true"></span><span class="label">Já paguei</span></button>
+      </div>
+      <div class="row center-row" id="res-acoes"></div>
     </section>
 
     <!-- Carregando -->
@@ -90,7 +140,7 @@
   <div id="overlay" class="overlay" hidden>
     <div class="overlay-box" role="alertdialog" aria-live="assertive">
       <div class="spinner big" aria-hidden="true"></div>
-      <p id="overlay-txt">Abrindo o Mercado Pago…</p>
+      <p id="overlay-txt">Processando…</p>
       <p class="muted small">Não feche esta página.</p>
     </div>
   </div>

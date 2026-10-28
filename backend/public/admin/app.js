@@ -22,7 +22,8 @@ const SUB_BADGE = {
   expirada: ['', 'Expirada'],
   suspeita: ['bad', 'Suspeita'],
 };
-const PAY_BADGE = { approved: ['ok', 'Aprovado'], rejected: ['bad', 'Recusado'], recycling: ['warn', 'Retentativa'], pending: ['warn', 'Pendente'], cancelled: ['', 'Cancelado'] };
+const PAY_BADGE = { approved: ['ok', 'Aprovado'], rejected: ['bad', 'Recusado'], recycling: ['warn', 'Retentativa'], pending: ['warn', 'Pendente'], in_process: ['warn', 'Em análise'], cancelled: ['', 'Cancelado'], refunded: ['bad', 'Estornado'], charged_back: ['bad', 'Contestado'], suspeito: ['bad', 'Suspeito'], erro: ['bad', 'Erro'], criando: ['', 'Criando'] };
+const PAY_METHOD = { pix: 'Pix', credit_card: 'Cartão de crédito', debit_card: 'Cartão de débito' };
 const HOOK_BADGE = { processado: ['ok', 'Processado'], ignorado: ['', 'Ignorado'], erro: ['bad', 'Erro'], rejeitado: ['bad', 'Rejeitado'], recebido: ['warn', 'Recebido'] };
 const badge = (map, key) => {
   const [cls, label] = map[key] ?? ['', key ?? '—'];
@@ -409,10 +410,10 @@ function subsTable(items, withUser = true) {
     ${items
       .map(
         (s) => `<tr>${withUser ? `<td>${s.userId ? `<a href="#/usuarios/${esc(s.userId._id)}">${esc(s.userId.nome)}</a><div class="muted">${esc(s.userId.email)}</div>` : '<span class="muted">conta excluída</span>'}</td>` : ''}
-        <td>${esc(planName(s.planoId))}</td><td>${brl(s.valor)}</td>
-        <td>${badge(SUB_BADGE, s.status)}${s.inadimplenteDesde ? ' <span class="badge bad">inadimplente</span>' : ''}${s.acessoAte && s.status === 'cancelada' ? `<div class="muted">acesso até ${date(s.acessoAte)}</div>` : ''}${s.observacao ? `<div class="muted">${esc(s.observacao)}</div>` : ''}</td>
+        <td>${esc(planName(s.planoId))}<div class="muted">${s.modalidade === 'avulso' ? 'mês a mês' : 'automática'}</div></td><td>${brl(s.valor)}</td>
+        <td>${badge(SUB_BADGE, s.status)}${s.inadimplenteDesde ? ' <span class="badge bad">inadimplente</span>' : ''}${s.acessoAte && (s.status === 'cancelada' || s.modalidade === 'avulso') ? `<div class="muted">${s.modalidade === 'avulso' ? 'pago até' : 'acesso até'} ${date(s.acessoAte)}</div>` : ''}${s.observacao ? `<div class="muted">${esc(s.observacao)}</div>` : ''}</td>
         <td>${date(s.proximaCobrancaEm)}</td><td>${dateTime(s.updatedAt)}</td>
-        ${withUser ? `<td><div class="actions">${s.providerId ? `<button class="btn small" data-sync="${esc(s._id)}">Sincronizar</button>` : ''}${['ativa', 'pausada', 'pendente'].includes(s.status) ? `<button class="btn small danger" data-cancel="${esc(s._id)}">Cancelar</button>` : ''}</div></td>` : ''}</tr>`,
+        ${withUser ? `<td><div class="actions">${s.providerId ? `<button class="btn small" data-sync="${esc(s._id)}">Sincronizar</button>` : ''}${['ativa', 'pausada', 'pendente'].includes(s.status) && s.modalidade !== 'avulso' ? `<button class="btn small danger" data-cancel="${esc(s._id)}">Cancelar</button>` : ''}</div></td>` : ''}</tr>`,
       )
       .join('')}</tbody></table></div>`;
 }
@@ -477,18 +478,18 @@ async function renderSubscriptions() {
 
 function paymentsTable(items, withUser = true) {
   if (!items.length) return '<p class="empty">Nenhum pagamento.</p>';
-  return `<div class="table-wrap"><table><thead><tr><th>Data</th>${withUser ? '<th>Usuário</th>' : ''}<th>Plano</th><th>Valor</th><th>Situação</th><th>ID Mercado Pago</th></tr></thead><tbody>
+  return `<div class="table-wrap"><table><thead><tr><th>Data</th>${withUser ? '<th>Usuário</th>' : ''}<th>Plano</th><th>Forma</th><th>Valor</th><th>Situação</th><th>ID Mercado Pago</th></tr></thead><tbody>
     ${items
       .map(
         (p) => `<tr><td>${dateTime(p.data)}</td>${withUser ? `<td>${p.userId ? `<a href="#/usuarios/${esc(p.userId._id)}">${esc(p.userId.nome)}</a>` : '<span class="muted">conta excluída</span>'}</td>` : ''}
-        <td>${esc(planName(p.planoId))}</td><td>${brl(p.valor)}</td><td>${badge(PAY_BADGE, p.status)}</td><td class="mono">${esc(p.paymentId ?? p.providerId)}</td></tr>`,
+        <td>${esc(planName(p.planoId))}</td><td>${esc(PAY_METHOD[p.metodo] ?? (p.modalidade === 'avulso' ? '—' : 'Cobrança automática'))}</td><td>${brl(p.valor)}</td><td>${badge(PAY_BADGE, p.status)}${p.statusDetail && p.status !== 'approved' ? `<div class="muted">${esc(p.statusDetail)}</div>` : ''}</td><td class="mono">${esc(p.paymentId ?? p.providerId)}</td></tr>`,
       )
       .join('')}</tbody></table></div>`;
 }
 
 async function renderPayments() {
   const state = { page: 1, status: '' };
-  content.innerHTML = `<div class="card"><div class="filters"><select id="f-status"><option value="">Todos</option><option value="approved">Aprovados</option><option value="rejected">Recusados</option><option value="recycling">Em retentativa</option></select></div><div id="table"></div><div id="pager"></div></div>`;
+  content.innerHTML = `<div class="card"><div class="filters"><select id="f-status"><option value="">Todos</option><option value="approved">Aprovados</option><option value="rejected">Recusados</option><option value="recycling">Em retentativa</option><option value="pending">Pendentes (Pix aguardando)</option></select></div><div id="table"></div><div id="pager"></div></div>`;
   async function load() {
     const data = await api('/payments', { query: state });
     $('#table').innerHTML = paymentsTable(data.items);
@@ -510,6 +511,9 @@ async function renderPlans() {
         <label class="check"><input type="checkbox" name="checkoutWeb" ${billing.checkoutWeb ? 'checked' : ''}>Web (página /assinar e versão web do app)</label>
         <label class="check"><input type="checkbox" name="checkoutAndroid" ${billing.checkoutAndroid ? 'checked' : ''}>App Android — ligar só se estiver de acordo com as regras da Google Play</label>
         <label class="check"><input type="checkbox" name="checkoutIos" ${billing.checkoutIos ? 'checked' : ''}>App iOS — ligar só se estiver de acordo com as regras da App Store</label>
+        <p class="muted" style="margin:8px 0 0">Formas de pagamento na página /assinar (o cliente paga com o próprio cartão ou Pix, sem conta no Mercado Pago):</p>
+        <label class="check"><input type="checkbox" name="pagamentoRecorrente" ${billing.pagamentoRecorrente !== false ? 'checked' : ''}>Cobrança automática todo mês no cartão de crédito</label>
+        <label class="check"><input type="checkbox" name="pagamentoAvulso" ${billing.pagamentoAvulso !== false ? 'checked' : ''}>Pagar mês a mês (Pix, cartão de crédito ou débito) — libera 30 dias por pagamento</label>
         <label style="max-width:320px">Dias de tolerância após cobrança recusada<input type="number" min="0" max="30" name="diasTolerancia" value="${esc(billing.diasTolerancia)}"></label>
         <div class="actions"><button class="btn primary">Salvar</button></div>
       </form>
@@ -523,7 +527,7 @@ async function renderPlans() {
     try {
       await api('/settings/billing', {
         method: 'PUT',
-        body: { checkoutWeb: f.checkoutWeb.checked, checkoutAndroid: f.checkoutAndroid.checked, checkoutIos: f.checkoutIos.checked, diasTolerancia: Number(f.diasTolerancia.value) },
+        body: { checkoutWeb: f.checkoutWeb.checked, checkoutAndroid: f.checkoutAndroid.checked, checkoutIos: f.checkoutIos.checked, pagamentoRecorrente: f.pagamentoRecorrente.checked, pagamentoAvulso: f.pagamentoAvulso.checked, diasTolerancia: Number(f.diasTolerancia.value) },
       });
       toast('Configuração salva.');
     } catch (err) {

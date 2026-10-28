@@ -94,8 +94,25 @@ export function createApp() {
   app.get('/admin/vendor/chart.umd.js', (_req, res) => res.sendFile(chartJs, { maxAge: '7d' }));
   app.use('/admin', express.static(path.join(here, '../public/admin'), { index: 'index.html', maxAge: '1h' }));
 
-  // Página web de assinatura (Mercado Pago).
-  app.use('/assinar', express.static(path.join(here, '../public/assinar'), { index: 'index.html', extensions: ['html'], maxAge: '1h' }));
+  // Página web de assinatura: o formulário seguro do Mercado Pago (Bricks)
+  // carrega scripts, frames e imagens dos domínios do Mercado Pago.
+  const MP_SOURCES = ['https://*.mercadopago.com', 'https://*.mercadopago.com.br', 'https://*.mercadolibre.com', 'https://*.mercadolivre.com', 'https://*.mlstatic.com'];
+  const assinarCsp = helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://sdk.mercadopago.com', ...MP_SOURCES],
+      styleSrc: ["'self'", "'unsafe-inline'", ...MP_SOURCES],
+      imgSrc: ["'self'", 'data:', 'blob:', ...MP_SOURCES],
+      fontSrc: ["'self'", 'data:', ...MP_SOURCES],
+      connectSrc: ["'self'", ...MP_SOURCES],
+      frameSrc: [...MP_SOURCES],
+      frameAncestors: ["'none'"],
+      formAction: ["'self'", ...MP_SOURCES],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+    },
+  });
+  app.use('/assinar', assinarCsp, express.static(path.join(here, '../public/assinar'), { index: 'index.html', extensions: ['html'], maxAge: '1h' }));
 
   app.use(apiLimiter);
   app.use('/auth', authRoutes);

@@ -11,6 +11,11 @@ const SubscriptionSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'usuarios', index: true },
     planoId: { type: String, required: true },
+    /**
+     * recorrente: cobrança automática todo mês no cartão de crédito (preapproval);
+     * avulso: o cliente paga 1 mês por vez (Pix ou cartão) e o acesso vale até acessoAte.
+     */
+    modalidade: { type: String, enum: ['recorrente', 'avulso'], default: 'recorrente' },
     provider: { type: String, enum: ['mercadopago'], default: 'mercadopago' },
     providerId: { type: String },
     status: {
@@ -37,6 +42,8 @@ const SubscriptionSchema = new Schema(
       data: Date,
     },
     providerStatus: { type: String },
+    /** Aviso de vencimento já enviado (modalidade avulso). */
+    lembreteEnviadoEm: { type: Date },
     sincronizadaEm: { type: Date },
     observacao: { type: String },
   },

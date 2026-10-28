@@ -85,7 +85,8 @@ export async function resolveEffectivePlan(userId) {
 
   for (const s of subs) {
     const valida =
-      (s.status === 'ativa' && (!s.inadimplenteDesde || now - s.inadimplenteDesde < tolerancia)) ||
+      (s.status === 'ativa' && s.modalidade === 'avulso' && s.acessoAte > now) ||
+      (s.status === 'ativa' && s.modalidade !== 'avulso' && (!s.inadimplenteDesde || now - s.inadimplenteDesde < tolerancia)) ||
       (s.status === 'cancelada' && s.acessoAte && s.acessoAte > now);
     if (valida) {
       planoId = s.planoId;

@@ -284,7 +284,7 @@ router.get('/users/:id', validId(), async (req, res) => {
   const [uso, assinaturas, pagamentos, eventos] = await Promise.all([
     getUsage(user._id),
     Subscription.find({ userId: user._id }).sort({ createdAt: -1 }).limit(20).lean(),
-    Payment.find({ userId: user._id }).sort({ data: -1 }).limit(20).lean(),
+    Payment.find({ userId: user._id }).select('-pix').sort({ data: -1 }).limit(20).lean(),
     AuditLog.find({ 'alvo.id': String(user._id) }).sort({ createdAt: -1 }).limit(20).lean(),
   ]);
   res.json({ usuario: user, uso, assinaturas, pagamentos, eventos });
@@ -444,7 +444,7 @@ router.get('/payments', validate(pageQuery, 'query'), async (req, res) => {
   const { page, limit, status } = req.validQuery;
   const filter = status ? { status } : {};
   const [items, total] = await Promise.all([
-    Payment.find(filter).sort({ data: -1 }).skip((page - 1) * limit).limit(limit).populate('userId', 'nome email').lean(),
+    Payment.find(filter).select('-pix').sort({ data: -1 }).skip((page - 1) * limit).limit(limit).populate('userId', 'nome email').lean(),
     Payment.countDocuments(filter),
   ]);
   res.json({ items, total, page, pages: Math.ceil(total / limit) });
@@ -493,6 +493,8 @@ router.put(
       checkoutAndroid: z.boolean().optional(),
       checkoutIos: z.boolean().optional(),
       checkoutWeb: z.boolean().optional(),
+      pagamentoRecorrente: z.boolean().optional(),
+      pagamentoAvulso: z.boolean().optional(),
       diasTolerancia: z.coerce.number().int().min(0).max(30).optional(),
     }),
   ),

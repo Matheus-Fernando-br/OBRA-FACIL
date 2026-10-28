@@ -26,3 +26,5 @@ export const emailSendLimiter = limiter({ windowMin: 60, max: 5, key: byIpAndEma
 export const checkEmailLimiter = limiter({ windowMin: 15, max: 30 });
 export const adminLoginLimiter = limiter({ windowMin: 15, max: 10 });
 export const webhookLimiter = limiter({ windowMin: 1, max: 120 });
+/** Tentativas de pagamento (evita teste de cartões em massa). */
+export const paymentLimiter = limiter({ windowMin: 60, max: 20 });

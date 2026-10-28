@@ -8,8 +8,23 @@ const PaymentSchema = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: 'usuarios', index: true },
     subscriptionId: { type: Schema.Types.ObjectId, ref: 'assinaturas', index: true },
     provider: { type: String, default: 'mercadopago' },
-    /** ID da cobrança recorrente (authorized_payment) no Mercado Pago. */
+    /**
+     * ID no Mercado Pago: cobrança recorrente (authorized_payment) ou
+     * pagamento avulso (/v1/payments). Antes da resposta: "pendente:<_id>".
+     */
     providerId: { type: String, required: true },
+    modalidade: { type: String, enum: ['recorrente', 'avulso'], default: 'recorrente' },
+    /** pix | credit_card | debit_card */
+    metodo: { type: String },
+    statusDetail: { type: String },
+    /** Pagamento avulso já liberou o período (evita liberar duas vezes). */
+    aplicadoEm: { type: Date },
+    pix: {
+      qrCode: String,
+      qrCodeBase64: String,
+      ticketUrl: String,
+      expiraEm: Date,
+    },
     paymentId: { type: String },
     planoId: { type: String },
     status: { type: String },

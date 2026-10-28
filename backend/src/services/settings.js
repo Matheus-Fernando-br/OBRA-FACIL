@@ -10,6 +10,9 @@ const DEFAULTS = {
     checkoutAndroid: false,
     checkoutIos: false,
     checkoutWeb: true,
+    /** Formas de pagamento na página /assinar. */
+    pagamentoRecorrente: true,
+    pagamentoAvulso: true,
     /** Dias de tolerância após falha de pagamento antes de voltar ao Gratuito. */
     diasTolerancia: 7,
   },

@@ -1,6 +1,6 @@
 import { Linking } from "react-native";
 import { DEFAULT_PLAN_ID, LimitKey, PLANS, PlanDefinition, PlanId, plansFromServer } from "@/config/plans";
-import { cancelSubscription, getMySubscription, getPlans, startCheckout, syncSubscription } from "./api";
+import { API_URL, cancelSubscription, getMySubscription, getPlans, syncSubscription } from "./api";
 
 /* ==========================================================
    ASSINATURA (Mercado Pago, via backend)
@@ -22,6 +22,8 @@ export interface SubscriptionState {
   planId: PlanId;
   origem: "gratuito" | "assinatura" | "cortesia";
   status: SubscriptionStatus;
+  /** recorrente: cobrança automática no cartão; avulso: pago mês a mês (Pix/cartão). */
+  modalidade: "recorrente" | "avulso" | null;
   renovaEm: string | null;
   acessoAte: string | null;
   inadimplente: boolean;
@@ -35,6 +37,7 @@ export const EMPTY_SUBSCRIPTION: SubscriptionState = {
   planId: DEFAULT_PLAN_ID,
   origem: "gratuito",
   status: "gratuito",
+  modalidade: null,
   renovaEm: null,
   acessoAte: null,
   inadimplente: false,
@@ -57,6 +60,7 @@ export async function fetchSubscriptionState(token: string): Promise<Subscriptio
     planId,
     origem: me?.origem ?? "gratuito",
     status: me?.status ?? "gratuito",
+    modalidade: me?.modalidade ?? null,
     renovaEm: me?.renovaEm ?? null,
     acessoAte: me?.acessoAte ?? null,
     inadimplente: Boolean(me?.assinatura?.inadimplente),
@@ -66,11 +70,13 @@ export async function fetchSubscriptionState(token: string): Promise<Subscriptio
   };
 }
 
-/** Abre o pagamento do Mercado Pago no navegador. */
-export async function openCheckout(planId: PlanId, token: string) {
-  const { initPoint } = await startCheckout(planId, token);
-  if (!initPoint) throw new Error("Não foi possível abrir o pagamento.");
-  await Linking.openURL(initPoint);
+/**
+ * Abre a página de pagamento (/assinar) no navegador com o plano escolhido.
+ * Lá o cliente paga com o próprio cartão (cobrança automática) ou mês a mês
+ * com Pix/cartão, sem precisar de conta no Mercado Pago.
+ */
+export async function openCheckout(planId: PlanId) {
+  await Linking.openURL(`${API_URL}/assinar?plano=${encodeURIComponent(planId)}`);
 }
 
 export async function refreshFromProvider(token: string) {

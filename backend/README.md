@@ -88,6 +88,7 @@ O arquivo `render.yaml` (na raiz do repositório) define o serviço.
 | `MAIL_FROM_EMAIL` | sim* | Remetente verificado no Brevo |
 | `MP_ACCESS_TOKEN` | para cobrar | Credencial do Mercado Pago (`TEST-...` para testes, `APP_USR-...` em produção) |
 | `MP_WEBHOOK_SECRET` | para cobrar | Assinatura secreta dos webhooks do Mercado Pago |
+| `MP_PUBLIC_KEY` | para cobrar | Public Key do mesmo par do Access Token (formulário de cartão/Pix da página `/assinar`; é pública) |
 | `CORS_ORIGINS` | não | Origens web permitidas, separadas por vírgula. O app nativo não precisa disso. |
 
 ## Painel administrativo
@@ -118,7 +119,13 @@ Detalhes de segurança:
 
 ## Mercado Pago (assinaturas)
 
-Cada assinatura é criada no Mercado Pago como uma cobrança recorrente mensal (*preapproval*). O usuário paga na página do Mercado Pago, e o plano só muda quando o servidor confirma o pagamento consultando a API do Mercado Pago.
+O cliente paga na página `/assinar` com o **próprio cartão ou Pix, sem precisar de conta no Mercado Pago**. Os campos do cartão são do formulário seguro do Mercado Pago (Bricks): o número do cartão vai direto para o Mercado Pago e o servidor recebe só um token.
+
+Duas formas de pagar (cada uma pode ser desligada no painel → **Planos e cobrança**):
+- **Cobrança automática todo mês** (cartão de crédito): cria uma assinatura *preapproval* já autorizada com o token do cartão. O plano é liberado assim que o Mercado Pago confirma. O cliente pode cancelar quando quiser.
+- **Pagar mês a mês** (Pix, cartão de crédito ou débito): cria um pagamento único (`/v1/payments`) no valor do plano. Cada pagamento aprovado libera **30 dias**; pagamentos seguidos se somam. Três dias antes de vencer o cliente recebe um lembrete por e-mail; no vencimento a conta volta ao Gratuito (os dados ficam salvos). Estorno ou contestação retira os 30 dias.
+
+O plano só muda quando o servidor confirma o pagamento consultando a API do Mercado Pago. O valor cobrado é sempre o preço do plano no servidor.
 
 O pedido do app ou o corpo do webhook nunca alteram o plano sozinhos. As proteções são:
 - **Assinatura do webhook:** HMAC conferido com `MP_WEBHOOK_SECRET`.
@@ -127,12 +134,15 @@ O pedido do app ou o corpo do webhook nunca alteram o plano sozinhos. As proteç
 - **Rotina a cada 6 horas:** corrige webhooks perdidos e encerra os períodos que terminaram.
 
 **Configuração**
-1. Em mercadopago.com.br/developers, crie a aplicação e copie o **Access Token**. Use primeiro as credenciais de teste.
+1. Em mercadopago.com.br/developers, crie a aplicação e copie o **Access Token** (`MP_ACCESS_TOKEN`) e a **Public Key** (`MP_PUBLIC_KEY`) do **mesmo** ambiente (as duas de teste ou as duas de produção).
 2. Em **Webhooks**, cadastre:
    - URL: `https://SEU-SERVICO.onrender.com/webhooks/mercadopago`
    - Eventos: **Planos e assinaturas** e **Pagamentos**
 3. Copie a **assinatura secreta** para `MP_WEBHOOK_SECRET`.
 4. No painel, abra **Integrações** e use **Testar credencial**.
+5. Para receber Pix em produção, a conta do Mercado Pago precisa ter uma **chave Pix cadastrada**.
+
+**Testes (credenciais de teste):** cartões de teste do Mercado Pago com o nome do titular `APRO` (aprovado) ou `OTHE` (recusado), CPF `12345678909`. Use um e-mail de comprador diferente do e-mail da conta vendedora. O Pix de teste gera o QR Code, mas fica pendente (não há como pagá-lo de verdade no ambiente de teste).
 
 **Regras das lojas**
 - A Google Play exige o faturamento dela (Play Billing) para assinaturas vendidas dentro do app Android. No Brasil, outro meio de pagamento só é aceito com adesão ao programa de faturamento alternativo da Google, oferecendo também o Play Billing.
