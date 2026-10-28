@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Obra Fácil",
-    "slug": "frontend",
+    "name": "ObraFácil",
+    "slug": "obra-facil",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/app-icon.png",
@@ -78,7 +78,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "30fc7508-1797-451d-8f89-a98037fe3255"
+        "projectId": "d7a12dc7-7f6e-4188-bd5d-0f7b14df2561"
       }
     },
     "description": "Gestão de clientes, orçamentos e obras para profissionais da construção civil.",
@@ -86,7 +86,7 @@
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/30fc7508-1797-451d-8f89-a98037fe3255",
+      "url": "https://u.expo.dev/d7a12dc7-7f6e-4188-bd5d-0f7b14df2561",
       "checkAutomatically": "ON_LOAD",
       "fallbackToCacheTimeout": 0
     },
