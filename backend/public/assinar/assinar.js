@@ -310,6 +310,7 @@ async function montarBrick(modo) {
           })
         : await bricks.create('payment', 'brick', {
             ...comum,
+            initialization: { ...comum.initialization, payer: { ...comum.initialization.payer, entityType: 'individual' } },
             customization: {
               visual,
               paymentMethods: { creditCard: 'all', debitCard: 'all', bankTransfer: ['pix'], maxInstallments: 1 },

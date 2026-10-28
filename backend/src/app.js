@@ -83,6 +83,7 @@ export function createApp() {
     res.status(db ? 200 : 503).json({ status: db ? 'ok' : 'degradado', db, versao: VERSION });
   });
 
+  app.get('/favicon.ico', (_req, res) => res.status(204).end());
   app.get('/', (_req, res) => res.json({ servico: 'Obra Fácil API', versao: VERSION, status: 'ok' }));
 
   // Webhooks antes do limitador geral (têm limite próprio).
@@ -100,7 +101,9 @@ export function createApp() {
   const assinarCsp = helmet.contentSecurityPolicy({
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", 'https://sdk.mercadopago.com', ...MP_SOURCES],
+      // O SDK do Mercado Pago executa scripts inline (identificação do aparelho,
+      // usada na análise antifraude). Sem isso, mais pagamentos são recusados.
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://sdk.mercadopago.com', ...MP_SOURCES],
       styleSrc: ["'self'", "'unsafe-inline'", ...MP_SOURCES],
       imgSrc: ["'self'", 'data:', 'blob:', ...MP_SOURCES],
       fontSrc: ["'self'", 'data:', ...MP_SOURCES],
