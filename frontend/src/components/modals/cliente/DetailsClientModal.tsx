@@ -1,6 +1,7 @@
 import { Modal, View } from "react-native";
 import { ClientForm } from "@/components/forms/ClienteForms";
 import { Cliente } from "@/components/layout/interface";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface Props {
   visible: boolean;
@@ -15,6 +16,7 @@ export function DetailsClientModal({
   onClose,
   onEdit,
 }: Props) {
+  const { theme } = useTheme();
   if (!client) {
     return null;
   }
@@ -29,7 +31,7 @@ export function DetailsClientModal({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
+          backgroundColor: theme.backgroundDestaque,
         }}
       >
         <ClientForm

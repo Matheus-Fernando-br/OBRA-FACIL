@@ -1,4 +1,5 @@
 import { Stack, type ErrorBoundaryProps } from "expo-router";
+import { pageTitle } from "@/config/brand";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, Text, View } from "react-native";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -80,11 +81,11 @@ function RootStack() {
           contentStyle: { backgroundColor: theme.background },
         }}
       >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-        <Stack.Screen name="cadastro" options={{ animation: "slide_from_right" }} />
-        <Stack.Screen name="senha" options={{ animation: "slide_from_right" }} />
-        <Stack.Screen name="legal" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="index" options={{ title: pageTitle("Entrar") }} />
+        <Stack.Screen name="login" options={{ title: pageTitle("Entrar") }} />
+        <Stack.Screen name="cadastro" options={{ animation: "slide_from_right", title: pageTitle("Criar conta") }} />
+        <Stack.Screen name="senha" options={{ animation: "slide_from_right", title: pageTitle("Recuperar senha") }} />
+        <Stack.Screen name="legal" options={{ animation: "slide_from_right", title: pageTitle("Termos e privacidade") }} />
         <Stack.Screen name="(tabs)" />
       </Stack>
       <ConnectionBanner />

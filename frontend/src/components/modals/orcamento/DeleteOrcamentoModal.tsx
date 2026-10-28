@@ -62,7 +62,7 @@ export function DeleteOrcamentoModal({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,.6)",
+          backgroundColor: theme.backgroundDestaque,
           justifyContent: "center",
           alignItems: "center",
         }}

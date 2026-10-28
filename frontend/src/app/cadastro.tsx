@@ -15,6 +15,7 @@ import { RegisterStepSuccess } from "../components/cadastro/RegisterStepSuccess"
 import { StepIndicator } from "../components/cadastro/StepIndicator";
 import { registerUser } from "../services/api";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { GradientBackground } from "../styles/GradientBackground";
 import legal from "@/content/legal.json";
 
@@ -23,11 +24,13 @@ import legal from "@/content/legal.json";
  * 1. dados + aceite dos termos → cria a conta (não verificada) e o
  *    servidor envia o código por e-mail;
  * 2. código de verificação;
- * 3. apresentação do plano inicial (Gratuito) → login.
+ * 3. apresentação do plano inicial (Gratuito) → entra na conta
+ *    automaticamente (com o e-mail e a senha recém-cadastrados).
  * "?verificar=<email>" abre direto na etapa 2 (vindo do login).
  */
 export default function CadastroScreen() {
   const { styles } = useTheme();
+  const { login } = useAuth();
   const { verificar } = useLocalSearchParams<{ verificar?: string }>();
   const [step, setStep] = useState(verificar ? 2 : 1);
   const [nome, setNome] = useState("");
@@ -53,9 +56,24 @@ export default function CadastroScreen() {
     setStep(2);
   }
 
-  function finish() {
+  // Sem a senha (veio do login só para confirmar o e-mail), volta ao login.
+  const podeEntrar = !verificar && Boolean(senha);
+
+  async function finish() {
     setStep(4);
-    setTimeout(() => router.replace("/login"), 2500);
+    if (!podeEntrar) {
+      setTimeout(() => router.replace("/login"), 2500);
+      return;
+    }
+    try {
+      await login(email, senha);
+      setSenha("");
+      setConfirmarSenha("");
+      router.replace("/(tabs)?fromLogin=true");
+    } catch {
+      // Falhou (rede, servidor): o usuário entra pela tela de login.
+      router.replace("/login");
+    }
   }
 
   return (
@@ -109,7 +127,7 @@ export default function CadastroScreen() {
               />
             )}
             {step === 3 && <PlanoStep onContinue={finish} />}
-            {step === 4 && <RegisterStepSuccess />}
+            {step === 4 && <RegisterStepSuccess entrando={podeEntrar} />}
           </View>
 
           {step < 4 && (

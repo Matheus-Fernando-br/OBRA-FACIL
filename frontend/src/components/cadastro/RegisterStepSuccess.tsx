@@ -4,7 +4,8 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTheme } from "@/contexts/ThemeContext";
 
-export function RegisterStepSuccess() {
+/** entrando: a conta já está sendo aberta (login automático após o cadastro). */
+export function RegisterStepSuccess({ entrando = false }: { entrando?: boolean }) {
   const { styles, theme } = useTheme();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -12,6 +13,22 @@ export function RegisterStepSuccess() {
   async function handleGoToLogin() {
     setLoading(true);
     router.replace("/login");
+  }
+
+  if (entrando) {
+    return (
+      <View style={styles.successWrap}>
+        <View style={styles.successBadge}>
+          <Check size={48} color={theme.success} strokeWidth={3} />
+        </View>
+        <Text style={styles.successTitle}>Cadastro realizado!</Text>
+        <Text style={styles.successText}>Sua conta foi criada com sucesso.</Text>
+        <Text style={styles.successHint}>Entrando na sua conta...</Text>
+        <View style={styles.successAction}>
+          <ActivityIndicator color={theme.title} />
+        </View>
+      </View>
+    );
   }
 
   return (

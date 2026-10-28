@@ -186,7 +186,7 @@ export function renderDocument({
 <body>
   <div class="doc-header">
     <div>
-      ${options.showLogo ? `<div class="brand">Obra<span>Fácil</span></div>` : ""}
+      ${options.showLogo ? `<div class="brand">Obra <span>Fácil</span></div>` : ""}
       ${issuerLine ? `<div class="issuer">${issuerLine}</div>` : ""}
     </div>
     <div class="doc-title">

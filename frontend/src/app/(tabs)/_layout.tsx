@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { AppTabBar } from "@/components/layout/AppTabBar";
 import { useTheme } from "@/contexts/ThemeContext";
+import { pageTitle } from "@/config/brand";
 
 /*
  * Telas internas (abertas pelo menu / tela "Mais"): sem header e fora da
@@ -10,15 +11,15 @@ import { useTheme } from "@/contexts/ThemeContext";
  * `href: null`: no expo-router 58 isso esconde a rota e redireciona
  * para a primeira aba.
  */
-const INTERNAL_SCREENS = [
-  "configuracoes",
-  "seguranca",
-  "relatorios",
-  "planos",
-  "catalogo",
-  "notificacoes",
-  "ajuda",
-  "sobre",
+const INTERNAL_SCREENS: [string, string][] = [
+  ["configuracoes", "Configurações"],
+  ["seguranca", "Segurança"],
+  ["relatorios", "Relatórios"],
+  ["planos", "Planos"],
+  ["catalogo", "Catálogo"],
+  ["notificacoes", "Notificações"],
+  ["ajuda", "Ajuda"],
+  ["sobre", "Sobre"],
 ];
 
 export default function TabsLayout() {
@@ -38,17 +39,18 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: theme.background },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Início" }} />
-      <Tabs.Screen name="clientes" options={{ title: "Clientes" }} />
-      <Tabs.Screen name="orcamentos" options={{ title: "Orçamentos" }} />
-      <Tabs.Screen name="obras" options={{ title: "Obras" }} />
-      <Tabs.Screen name="mais" options={{ title: "Mais" }} />
+      {/* title = título da aba do navegador no site; os rótulos da barra ficam na AppTabBar. */}
+      <Tabs.Screen name="index" options={{ title: pageTitle("Início") }} />
+      <Tabs.Screen name="clientes" options={{ title: pageTitle("Clientes") }} />
+      <Tabs.Screen name="orcamentos" options={{ title: pageTitle("Orçamentos") }} />
+      <Tabs.Screen name="obras" options={{ title: pageTitle("Obras") }} />
+      <Tabs.Screen name="mais" options={{ title: pageTitle("Mais") }} />
 
-      {INTERNAL_SCREENS.map((name) => (
+      {INTERNAL_SCREENS.map(([name, title]) => (
         <Tabs.Screen
           key={name}
           name={name}
-          options={{ headerShown: false, animation: "fade" }}
+          options={{ headerShown: false, animation: "fade", title: pageTitle(title) }}
         />
       ))}
     </Tabs>

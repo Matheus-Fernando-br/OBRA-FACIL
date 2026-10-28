@@ -118,7 +118,7 @@ export function EditUserModal({ visible, onClose, user }: Props) {
       <Pressable
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,.65)",
+          backgroundColor: theme.backgroundDestaque,
           justifyContent: "flex-end",
         }}
         onPress={onClose}

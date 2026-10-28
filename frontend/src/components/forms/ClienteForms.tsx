@@ -238,12 +238,8 @@ export function ClientForm({
       return false;
     }
 
-    if (!documento.trim()) {
-      setFeedback("Informe o CPF/CNPJ do cliente.");
-      return false;
-    }
-
-    const documentoErro = validateDocument(documento);
+    // CPF/CNPJ é opcional; se for informado, precisa ser válido.
+    const documentoErro = documento.trim() ? validateDocument(documento) : null;
     if (documentoErro) {
       setFeedback(documentoErro);
       return false;
@@ -290,8 +286,9 @@ export function ClientForm({
       const clientData: ClientFormData = {
         nome: nome.trim(),
         tipo: tipoPessoa.trim(),
-        CPF: documento.length === 11 ? documento : undefined,
-        CNPJ: documento.length === 14 ? documento : undefined,
+        // Na edição, "" apaga o documento que existia.
+        CPF: documento.length === 11 ? documento : mode === "edit" ? "" : undefined,
+        CNPJ: documento.length === 14 ? documento : mode === "edit" ? "" : undefined,
         email: email.trim(),
         telefone: telefoneLimpo,
         descricao: descricao.trim(),
@@ -426,8 +423,7 @@ export function ClientForm({
 
             <View style={styles.column}>
               <Text style={styles.label}>
-                CPF / CNPJ:
-                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+                CPF / CNPJ (opcional):
               </Text>
 
               <AppInput

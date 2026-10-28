@@ -70,6 +70,7 @@ router.put('/:id', ownAccount, validate(updateUserSchema), async (req, res) => {
   }
 
   if (rest.nome) user.nome = rest.nome;
+  if (rest.preferencias?.tema) user.set('preferencias.tema', rest.preferencias.tema);
   if (rest.imagem_perfil !== undefined) user.imagem_perfil = rest.imagem_perfil;
   for (const doc of ['CPF', 'CNPJ']) {
     if (rest[doc]) user[doc] = onlyDigits(rest[doc]);

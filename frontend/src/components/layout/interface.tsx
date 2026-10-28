@@ -9,6 +9,9 @@ export interface Usuario {
 
   CPF?: string;
   CNPJ?: string;
+
+  /** Preferências da interface, salvas na conta. */
+  preferencias?: { tema?: "light" | "dark" | "system" };
 }
 
 /** Campos aceitos na atualização do usuário. */

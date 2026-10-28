@@ -1,13 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "react-native";
 import {
   createContext,
   ReactNode,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useColorScheme } from "react-native";
+
+import { useAuth } from "@/contexts/AuthContext";
+import { updateUser } from "@/services/api";
 
 import {
   COLORS,
@@ -36,9 +40,16 @@ interface Props {
 const ThemeContext = createContext<ThemeContextData>({} as ThemeContextData);
 
 const THEME_STORAGE_KEY = "@obra_facil_theme";
+const isPreference = (v: unknown): v is ThemePreference => v === "dark" || v === "light" || v === "system";
 
+/*
+ * Tema: claro por padrão. A escolha fica salva no aparelho (AsyncStorage,
+ * que no site é o localStorage) e na conta do usuário — ao entrar em outro
+ * aparelho ou navegador, o tema escolhido é restaurado.
+ */
 export function ThemeProvider({ children }: Props) {
-  const [preference, setPreference] = useState<ThemePreference>("system");
+  const { user, token, setUser } = useAuth();
+  const [preference, setPreference] = useState<ThemePreference>("light");
   const systemScheme = useColorScheme();
   const mode: ThemeMode =
     preference === "system" ? (systemScheme === "dark" ? "dark" : "light") : preference;
@@ -52,9 +63,7 @@ export function ThemeProvider({ children }: Props) {
     try {
       const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
 
-      if (savedTheme === "dark" || savedTheme === "light" || savedTheme === "system") {
-        setPreference(savedTheme);
-      }
+      if (isPreference(savedTheme)) setPreference(savedTheme);
     } catch (error) {
       console.log("Erro ao carregar tema:", error);
     } finally {
@@ -62,13 +71,30 @@ export function ThemeProvider({ children }: Props) {
     }
   }
 
-  async function setTheme(themeMode: ThemePreference) {
-    try {
-      setPreference(themeMode);
+  // Ao entrar na conta, aplica o tema salvo nela.
+  const appliedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const saved = user?.preferencias?.tema;
+    if (!user?._id || appliedFor.current === user._id) return;
+    appliedFor.current = user._id;
+    if (isPreference(saved)) {
+      setPreference(saved);
+      AsyncStorage.setItem(THEME_STORAGE_KEY, saved).catch(() => {});
+    }
+  }, [user]);
 
+  async function setTheme(themeMode: ThemePreference) {
+    setPreference(themeMode);
+    try {
       await AsyncStorage.setItem(THEME_STORAGE_KEY, themeMode);
     } catch (error) {
       console.log("Erro ao salvar tema:", error);
+    }
+    if (user?._id && token && user.preferencias?.tema !== themeMode) {
+      setUser({ ...user, preferencias: { ...user.preferencias, tema: themeMode } });
+      updateUser(user._id, { preferencias: { tema: themeMode } }, token).catch((error) =>
+        console.log("Não foi possível salvar o tema na conta:", error?.message),
+      );
     }
   }
 
@@ -94,7 +120,8 @@ export function ThemeProvider({ children }: Props) {
       toggleTheme,
       setTheme,
     }),
-    [mode, preference, theme, styles],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mode, preference, theme, styles, user, token],
   );
 
   if (!loaded) {

@@ -1229,7 +1229,7 @@ export function OrcamentoForm({
         <View
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
+            backgroundColor: theme.backgroundDestaque,
             justifyContent: "flex-end",
           }}
         >

@@ -41,8 +41,7 @@ export function BrandMark({ size = 30 }: Props) {
         />
       </View>
       <Text style={{ fontSize: size * 0.62, fontWeight: "800", letterSpacing: -0.4, color: theme.text }}>
-        Obra
-        <Text style={{ color: theme.primary }}>Fácil</Text>
+        Obra <Text style={{ color: theme.primary }}>Fácil</Text>
       </Text>
     </View>
   );

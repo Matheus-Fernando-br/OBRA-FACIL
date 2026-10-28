@@ -10,6 +10,10 @@ const UserSchema = new Schema(
     CPF: { type: String, trim: true },
     CNPJ: { type: String, trim: true },
     imagem_perfil: { type: String, trim: true },
+    /** Preferências da interface (restauradas após o login em qualquer aparelho). */
+    preferencias: {
+      tema: { type: String, enum: ['light', 'dark', 'system'] },
+    },
 
     email_verificado: { type: Boolean, default: false },
     /** Contas criadas antes da verificação obrigatória (migração 003). */

@@ -26,6 +26,7 @@ export interface User {
   email: string;
   CPF?: string;
   CNPJ?: string;
+  preferencias?: { tema?: "light" | "dark" | "system" };
 }
 
 interface AuthContextData {

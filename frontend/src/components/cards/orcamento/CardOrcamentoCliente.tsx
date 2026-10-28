@@ -1,6 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/contexts/ThemeContext";
+import { withAlpha } from "@/styles/globalStyles";
 
 interface Props {
   name: string;
@@ -13,36 +14,18 @@ export function CardOrcamentoCliente({ name, value, status, onClick }: Props) {
   const { styles, theme } = useTheme();
 
   function getInitials(nome: string) {
-    const nomes = nome.trim().split(" ");
-
-    if (nomes.length === 1) {
-      return nomes[0][0].toUpperCase();
-    }
-
+    const nomes = nome.trim().split(/\s+/).filter(Boolean);
+    if (!nomes.length) return "?";
+    if (nomes.length === 1) return nomes[0][0].toUpperCase();
     return (nomes[0][0] + nomes[1][0]).toUpperCase();
   }
 
+  // Tons do tema (funcionam no claro e no escuro).
   function getAvatarColor(nome: string) {
-    const theme = [
-      "#DBEAFE",
-      "#DCFCE7",
-      "#FEF3C7",
-      "#FCE7F3",
-      "#EDE9FE",
-      "#FFE4E6",
-      "#E0F2FE",
-      "#F3E8FF",
-      "#ECFCCB",
-      "#FDE68A",
-    ];
-
+    const palette = [theme.primary, theme.info, theme.success, theme.warning, theme.secondary, theme.danger];
     let hash = 0;
-
-    for (let i = 0; i < nome.length; i++) {
-      hash = nome.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    return theme[Math.abs(hash) % theme.length];
+    for (let i = 0; i < nome.length; i++) hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+    return withAlpha(palette[Math.abs(hash) % palette.length], 0.16);
   }
 
   function getStatusColor() {

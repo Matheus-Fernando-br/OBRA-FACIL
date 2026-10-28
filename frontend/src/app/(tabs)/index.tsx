@@ -245,13 +245,13 @@ export default function HomeScreen() {
 
             <View style={styles.heroFooter}>
               <View style={styles.heroChip}>
-                <Ionicons name="checkmark-circle" size={13} color="#FFFFFF" />
+                <Ionicons name="checkmark-circle" size={13} color={theme.onAccent} />
                 <Text style={styles.heroChipText}>
                   {stats.approved.length} aprovado{stats.approved.length === 1 ? "" : "s"}
                 </Text>
               </View>
               <View style={styles.heroChip}>
-                <Ionicons name="pie-chart" size={12} color="#FFFFFF" />
+                <Ionicons name="pie-chart" size={12} color={theme.onAccent} />
                 <Text style={styles.heroChipText}>
                   {stats.approvalRate === null
                     ? "Sem decisões ainda"
@@ -260,7 +260,7 @@ export default function HomeScreen() {
               </View>
               {stats.pendingValue > 0 && (
                 <View style={styles.heroChip}>
-                  <Ionicons name="time" size={12} color="#FFFFFF" />
+                  <Ionicons name="time" size={12} color={theme.onAccent} />
                   <Text style={styles.heroChipText}>
                     {formatCompactCurrency(stats.pendingValue)} em negociação
                   </Text>

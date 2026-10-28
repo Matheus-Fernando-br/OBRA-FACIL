@@ -85,6 +85,7 @@ export const updateUserSchema = z.object({
   imagem_perfil: optText(500),
   senha: senha.optional(),
   senhaAtual: z.string().max(128).optional(),
+  preferencias: z.object({ tema: z.enum(['light', 'dark', 'system']).optional() }).optional(),
 });
 
 export const deleteUserSchema = z.object({
