@@ -264,6 +264,10 @@ function abrirPagamento(planoId) {
 }
 
 async function montarBrick(modo) {
+  // Cada montagem tem um número: se o usuário trocar de opção enquanto o
+  // formulário ainda carrega, o formulário antigo é descartado.
+  const gen = (state.gen = (state.gen ?? 0) + 1);
+  const atual = () => gen === state.gen && !$('#tela-pagamento').hidden;
   state.modo = modo;
   desmontarBrick();
   $('#brick-erro').hidden = true;
@@ -277,14 +281,21 @@ async function montarBrick(modo) {
     $('#brick-erro').hidden = false;
     return;
   }
-  if (state.modo !== modo || $('#tela-pagamento').hidden) return; // usuário mudou de opção enquanto carregava
+  if (!atual()) return;
+
+  // Contêiner novo a cada montagem (um formulário atrasado nunca aparece junto do atual).
+  const alvo = document.createElement('div');
+  alvo.id = `brick-${gen}`;
+  $('#brick').replaceChildren(alvo);
 
   const mp = new window.MercadoPago(state.checkout.publicKey, { locale: 'pt-BR' });
   const bricks = mp.bricks();
   const comum = {
     initialization: { amount: state.plano.preco, payer: { email: state.usuario.email } },
     callbacks: {
-      onReady: () => ($('#brick-loading').hidden = true),
+      onReady: () => {
+        if (atual()) $('#brick-loading').hidden = true;
+      },
       onError: (error) => {
         console.warn('Mercado Pago:', error?.type, error?.message);
         if (error?.type === 'critical') {
@@ -298,9 +309,9 @@ async function montarBrick(modo) {
   const visual = { style: { theme: temaEscuro() ? 'dark' : 'default' }, hidePaymentButton: false };
 
   try {
-    state.brick =
+    const controller =
       modo === 'recorrente'
-        ? await bricks.create('cardPayment', 'brick', {
+        ? await bricks.create('cardPayment', alvo.id, {
             ...comum,
             customization: {
               visual,
@@ -308,7 +319,7 @@ async function montarBrick(modo) {
             },
             callbacks: { ...comum.callbacks, onSubmit: (formData) => pagarRecorrente(formData) },
           })
-        : await bricks.create('payment', 'brick', {
+        : await bricks.create('payment', alvo.id, {
             ...comum,
             initialization: { ...comum.initialization, payer: { ...comum.initialization.payer, entityType: 'individual' } },
             customization: {
@@ -317,7 +328,13 @@ async function montarBrick(modo) {
             },
             callbacks: { ...comum.callbacks, onSubmit: ({ formData }) => pagarAvulso(formData) },
           });
+    if (!atual()) {
+      controller.unmount?.();
+      return;
+    }
+    state.brick = controller;
   } catch (err) {
+    if (!atual()) return;
     console.warn(err);
     $('#brick-loading').hidden = true;
     $('#brick-erro-txt').textContent = 'Não foi possível abrir o pagamento. Confira se a chave pública do Mercado Pago está configurada.';
