@@ -50,7 +50,8 @@
     "start:tunnel": "expo start --tunnel --clear",
     "start:usb": "adb reverse tcp:8081 tcp:8081 && expo start --localhost --clear",
     "build:web": "expo export --platform web",
-    "legal:pages": "node scripts/gerar-paginas-legais.js"
+    "legal:pages": "node scripts/gerar-paginas-legais.js",
+    "update:preview": "EXPO_PUBLIC_API_URL=https://obra-facil-api.onrender.com eas update --channel preview --environment preview --platform android --non-interactive"
   },
   "private": true
 }
