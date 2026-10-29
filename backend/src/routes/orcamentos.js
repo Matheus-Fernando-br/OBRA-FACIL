@@ -60,6 +60,23 @@ router.put('/:id', validId(), validate(orcamentoUpdateSchema), async (req, res) 
   res.json(await orcamento.populate(populate));
 });
 
+/**
+ * Aprovação direta (card do orçamento). Só passa de PENDENTE para APROVADO,
+ * numa única operação no banco: duas aprovações seguidas não duplicam nada.
+ */
+router.post('/:id/aprovar', validId(), async (req, res) => {
+  const aprovado = await Orcamento.findOneAndUpdate(
+    { ...owned(req), status: 'PENDENTE', arquivado: { $ne: true } },
+    { $set: { status: 'APROVADO', aprovadoEm: new Date() } },
+    { new: true },
+  ).populate(populate);
+  if (aprovado) return res.json(aprovado);
+  const atual = await Orcamento.findOne(owned(req)).lean();
+  if (!atual) throw notFound('Orçamento não encontrado.');
+  if (atual.status === 'APROVADO') throw conflict('Este orçamento já está aprovado.', 'ALREADY_APPROVED');
+  throw conflict(atual.arquivado ? 'Desarquive o orçamento antes de aprovar.' : 'Só orçamentos pendentes podem ser aprovados.', 'NOT_APPROVABLE');
+});
+
 router.delete('/:id', validId(), async (req, res) => {
   const orcamento = await Orcamento.findOne(owned(req));
   if (!orcamento) throw notFound('Orçamento não encontrado.');

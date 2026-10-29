@@ -23,6 +23,12 @@ interface Props {
   onEdit(): void;
   onDelete(): void;
   onArchive(): void;
+  /** Gera o PDF e abre o compartilhamento (WhatsApp, e-mail...). */
+  onShare?(): void;
+  loadingShare?: boolean;
+  /** Aprovar direto pelo card (só aparece em orçamentos pendentes). */
+  onApprove?(): void;
+  loadingApprove?: boolean;
 }
 
 export function BudgetCard({
@@ -39,6 +45,10 @@ export function BudgetCard({
   onEdit,
   onDelete,
   onArchive,
+  onShare,
+  loadingShare,
+  onApprove,
+  loadingApprove,
 }: Props) {
   const { styles, theme } = useTheme();
   const meta = getBudgetStatusMeta(status, theme);
@@ -46,6 +56,7 @@ export function BudgetCard({
   const upper = status.toUpperCase();
   const isLocked = arquivado || upper === "APROVADO" || upper === "RECUSADO";
   const canArchive = upper === "APROVADO" || upper === "RECUSADO";
+  const canApprove = !arquivado && upper === "PENDENTE" && !!onApprove;
 
   return (
     <PressableScale
@@ -109,6 +120,38 @@ export function BudgetCard({
           <Ionicons name="eye-outline" size={15} color={theme.text} />
           <Text style={styles.actionChipText}>Detalhes</Text>
         </PressableScale>
+
+        {onShare && (
+          <PressableScale
+            onPress={onShare}
+            disabled={loadingShare}
+            style={styles.actionChip}
+            accessibilityLabel={`Compartilhar PDF do orçamento ${nome}`}
+          >
+            {loadingShare ? (
+              <ActivityIndicator size="small" color={theme.text} />
+            ) : (
+              <Ionicons name="share-social-outline" size={15} color={theme.text} />
+            )}
+            <Text style={styles.actionChipText}>PDF</Text>
+          </PressableScale>
+        )}
+
+        {canApprove && (
+          <PressableScale
+            onPress={onApprove}
+            disabled={loadingApprove}
+            style={[styles.actionChip, { borderColor: theme.success }]}
+            accessibilityLabel={`Aprovar orçamento ${nome}`}
+          >
+            {loadingApprove ? (
+              <ActivityIndicator size="small" color={theme.success} />
+            ) : (
+              <Ionicons name="checkmark-circle-outline" size={15} color={theme.success} />
+            )}
+            <Text style={[styles.actionChipText, { color: theme.success }]}>Aprovar</Text>
+          </PressableScale>
+        )}
 
         <View style={{ flex: 1 }} />
 

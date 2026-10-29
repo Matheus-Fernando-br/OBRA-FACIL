@@ -1,3 +1,4 @@
+import { calcularOrcamento, diasAte } from "@/utils/budgetCalc";
 import type { Cliente, Orcamento } from "@/components/layout/interface";
 import { BUDGET_STATUS_LABEL, getBudgetValidUntil } from "@/utils/status";
 import {
@@ -45,6 +46,11 @@ export function buildBudgetHtml({
 
   const validUntil = getBudgetValidUntil(budget);
   const categorias = Array.isArray(budget.categoria) ? budget.categoria : [];
+  // Valores recalculados com a mesma regra do app e do servidor.
+  const calc = calcularOrcamento(categorias, budget.bdi);
+  const temBdi = Number(budget.bdi) > 0;
+  const dias =
+    validUntil && budget.data_publicacao ? diasAte(new Date(budget.data_publicacao), validUntil) : budget.valido_durante;
 
   const categoriesHtml = categorias.length
     ? categorias
@@ -74,20 +80,17 @@ export function buildBudgetHtml({
               <td>${esc(servico.unidade)}</td>
               <td class="num">${num(servico.quantidade_unidade)}</td>
               <td class="num">${money(servico.preco_da_unidade)}</td>
-              <td class="num">${money(servico.preco_total)}</td>
+              <td class="num">${money(calc.itens[index]?.[sIndex] ?? 0)}</td>
             </tr>`,
             )
             .join("")}
         </tbody>
       </table>
-      <div class="subtotal">Subtotal da etapa: <strong>${money(
-        categoria.preco_total_da_categoria,
-      )}</strong></div>`,
+      <div class="subtotal">Subtotal da etapa: <strong>${money(calc.etapas[index] ?? 0)}</strong></div>`,
         )
         .join("")
     : `<p class="empty">Nenhum serviço cadastrado.</p>`;
 
-  const bdiValue = (budget.preco_com_bdi ?? 0) - (budget.preco ?? 0);
 
   const body = `
     <div class="grid">
@@ -118,7 +121,7 @@ export function buildBudgetHtml({
         <div class="label">Validade da proposta</div>
         <div class="value">${
           validUntil ? `Até ${date(validUntil)}` : "—"
-        } <span class="muted">(${num(budget.valido_durante)} dias)</span></div>
+        }${dias ? ` <span class="muted">(${num(dias)} ${dias === 1 ? "dia" : "dias"})</span>` : ""}</div>
       </div>
     </div>
 
@@ -133,9 +136,9 @@ export function buildBudgetHtml({
     ${categoriesHtml}
 
     <div class="totals">
-      <div class="row"><span>Custo direto</span><strong>${money(budget.preco)}</strong></div>
-      <div class="row"><span>BDI (${num(budget.bdi)}%)</span><strong>${money(bdiValue)}</strong></div>
-      <div class="row grand"><span>Valor total</span><span>${money(budget.preco_com_bdi)}</span></div>
+      <div class="row"><span>Subtotal</span><strong>${money(calc.subtotal)}</strong></div>
+      ${temBdi ? `<div class="row"><span>BDI (${num(budget.bdi)}%)</span><strong>${money(calc.valorBdi)}</strong></div>` : ""}
+      <div class="row grand"><span>Valor total</span><span>${money(calc.total)}</span></div>
     </div>
 
     <div class="notes">

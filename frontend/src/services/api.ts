@@ -277,6 +277,17 @@ export async function archiveBudget(
   return data;
 }
 
+/** Aprova direto pelo card (só orçamentos pendentes; o servidor impede duplicar). */
+export async function approveBudget(id: string, token: string) {
+  const { data } = await api.post(`/orcamento/${id}/aprovar`, {}, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return data;
+}
+
 export async function deleteBudget(id: string, token: string) {
   const { data } = await api.delete(`/orcamento/${id}`, {
     headers: {

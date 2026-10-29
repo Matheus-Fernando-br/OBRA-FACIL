@@ -21,6 +21,8 @@ import { getBudgets, getClients, getWork } from "@/services/api";
 import { Obra, Orcamento, Cliente } from "@/components/layout/interface";
 
 import { AvailableBudgetCard } from "../../cards/orcamento/AvailableBudgetCard";
+import { getClientName } from "@/utils/status";
+import { router } from "expo-router";
 
 interface Props {
   visible: boolean;
@@ -114,6 +116,11 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
     });
   }, [budgets, works]);
 
+  // Um único orçamento disponível: já deixa selecionado.
+  useEffect(() => {
+    if (!loading && availableBudgets.length === 1) setSelectedBudget(availableBudgets[0]);
+  }, [loading, availableBudgets]);
+
   const clientsMap = useMemo(() => {
     return clients.reduce((acc: Record<string, Cliente>, client) => {
       acc[client._id] = client;
@@ -127,7 +134,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
     const searchLower = search.toLowerCase();
 
     return availableBudgets.filter((budget) => {
-      const clientName = clientsMap[budget.cliente as string]?.nome ?? "";
+      const clientName = getClientName(budget.cliente, clientsMap);
 
       return (
         budget.nome.toLowerCase().includes(searchLower) ||
@@ -137,7 +144,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
   }, [availableBudgets, clientsMap, search]);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View
         style={{
           flex: 1,
@@ -216,12 +223,25 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
               <Text
                 style={{
                   marginTop: 8,
-                  color: theme.card,
+                  color: theme.textSecondary,
                   textAlign: "center",
                 }}
               >
-                Apenas orçamentos aprovados e sem obra criada aparecem aqui.
+                {budgets.some((b) => b.status === "PENDENTE")
+                  ? "A obra nasce de um orçamento aprovado. Aprove um orçamento pendente (botão Aprovar no card) e volte aqui."
+                  : "A obra nasce de um orçamento aprovado. Crie o orçamento da obra primeiro."}
               </Text>
+              <View style={{ width: "100%", marginTop: 16 }}>
+                <AppButton
+                  title={budgets.some((b) => b.status === "PENDENTE") ? "Ver orçamentos pendentes" : "Criar orçamento"}
+                  icon="document-text-outline"
+                  onPress={() => {
+                    onClose();
+                    const pendente = budgets.some((b) => b.status === "PENDENTE");
+                    router.navigate(pendente ? "/orcamentos" : { pathname: "/orcamentos", params: { action: "new" } });
+                  }}
+                />
+              </View>
             </View>
           ) : (
             <ScrollView
@@ -234,10 +254,7 @@ export function AddObrasModal({ visible, onClose, onSelect }: Props) {
                 <AvailableBudgetCard
                   key={budget._id}
                   budget={budget}
-                  clientName={
-                    clientsMap[budget.cliente as string]?.nome ??
-                    "Cliente não encontrado"
-                  }
+                  clientName={getClientName(budget.cliente, clientsMap)}
                   selected={selectedBudget?._id === budget._id}
                   onPress={() => setSelectedBudget(budget)}
                 />

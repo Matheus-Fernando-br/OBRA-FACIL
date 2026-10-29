@@ -1,5 +1,5 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ComponentRef, useEffect, useState, useRef } from "react";
+import { ComponentRef, MutableRefObject, useEffect, useMemo, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Pressable,
   Modal,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -26,6 +27,16 @@ import {
   Orcamento,
 } from "@/components/layout/interface";
 import { getClientById } from "@/services/api";
+import { AddClientModal } from "@/components/modals/cliente/AddClientModal";
+import {
+  calcularOrcamento,
+  dataMask,
+  diasAte,
+  formatBRL,
+  parseDataBR,
+  VALIDADE_OPCOES,
+  validadeDe,
+} from "@/utils/budgetCalc";
 
 interface ServicoForm extends Servico {
   id: number;
@@ -33,8 +44,10 @@ interface ServicoForm extends Servico {
   quantidade_texto?: string;
 }
 
-/* Opções de validade da proposta (dias). */
-const VALIDADE_OPCOES = [5, 7, 10, 15, 20, 30, 45, 60, 90];
+
+// Identificador local único de etapas/serviços (evita ids repetidos).
+let seq = 0;
+const nextId = () => ++seq;
 
 interface CategoriaForm extends Categoria {
   id: number;
@@ -52,6 +65,13 @@ interface OrcamentoFormProps {
   onSuccess?: () => void;
   onEdit?: () => void;
   onClientDetails?: (client: Cliente) => void;
+  /** A lista de clientes já foi carregada (mostra o aviso "sem clientes"). */
+  clientsLoaded?: boolean;
+  /**
+   * O modal pai guarda aqui o "fechar com confirmação" do formulário, para
+   * usá-lo no botão voltar do Android e na tecla Esc do site.
+   */
+  closeRef?: MutableRefObject<(() => void) | null>;
 }
 
 export function OrcamentoForm({
@@ -65,6 +85,8 @@ export function OrcamentoForm({
   onSuccess,
   onEdit,
   onClientDetails,
+  clientsLoaded = true,
+  closeRef,
 }: OrcamentoFormProps) {
   const { styles, theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -123,6 +145,20 @@ export function OrcamentoForm({
     }
   }, [initialData]);
 
+  // Clientes cadastrados aqui mesmo (sem sair do orçamento).
+  const [novosClientes, setNovosClientes] = useState<Cliente[]>([]);
+  const [addClientVisible, setAddClientVisible] = useState(false);
+  const todosClientes = useMemo(() => {
+    const ids = new Set(clientsList.map((c) => c._id));
+    return [...clientsList, ...novosClientes.filter((c) => !ids.has(c._id))];
+  }, [clientsList, novosClientes]);
+
+  /*
+   * Cliente exibido = o cliente selecionado. Usa a lista já carregada e só
+   * busca na API se ele não estiver nela. Respostas atrasadas de uma seleção
+   * anterior são descartadas (antes, trocar de cliente rápido podia mostrar
+   * o nome do cliente anterior).
+   */
   useEffect(() => {
     if (!selectedClient || !token) {
       setSelectedClientData(null);
@@ -130,32 +166,38 @@ export function OrcamentoForm({
       return;
     }
 
-    async function loadSelectedClient() {
-      try {
-        if (!token) return;
-        setLoadingClient(true);
-
-        const client = await getClientById(selectedClient, token);
-
-        setSelectedClientData(client);
-      } catch (error: any) {
-        console.log(
-          "ERRO AO CARREGAR CLIENTE:",
-          error?.response?.data || error?.message || error,
-        );
-
-        setSelectedClientData(null);
-      } finally {
-        setLoadingClient(false);
-      }
+    const local = todosClientes.find((c) => c._id === selectedClient);
+    if (local) {
+      setSelectedClientData(local);
+      setLoadingClient(false);
+      return;
     }
 
-    loadSelectedClient();
-  }, [selectedClient, token, mode]);
+    let ativo = true;
+    setLoadingClient(true);
+    getClientById(selectedClient, token)
+      .then((client) => {
+        if (ativo) setSelectedClientData(client);
+      })
+      .catch((error: any) => {
+        console.log("ERRO AO CARREGAR CLIENTE:", error?.response?.data || error?.message || error);
+        if (ativo) setSelectedClientData(null);
+      })
+      .finally(() => {
+        if (ativo) setLoadingClient(false);
+      });
+    return () => {
+      ativo = false;
+    };
+  }, [selectedClient, token, todosClientes]);
 
-  const [validade, setValidade] = useState<number>(
-    initialData?.valido_durante || 0,
-  );
+  // Validade: opções prontas (dias após a emissão) ou "Outros" (dias ou data).
+  const diasIniciais = initialData?.valido_durante || 0;
+  const opcaoInicial = !diasIniciais ? "" : VALIDADE_OPCOES.includes(diasIniciais) ? String(diasIniciais) : "outros";
+  const [validade, setValidade] = useState<string>(opcaoInicial);
+  const [outrosModo, setOutrosModo] = useState<"dias" | "data">("dias");
+  const [outrosDias, setOutrosDias] = useState(opcaoInicial === "outros" ? String(diasIniciais) : "");
+  const [outrosData, setOutrosData] = useState("");
   const [cep, setCep] = useState(initialData?.endereco.CEP || "");
   const [estado, setEstado] = useState(initialData?.endereco.estado || "");
   const [cidade, setCidade] = useState(initialData?.endereco.cidade || "");
@@ -168,19 +210,19 @@ export function OrcamentoForm({
   const [categorias, setCategorias] = useState<CategoriaForm[]>(
     initialData?.categoria.map((cat) => ({
       ...cat,
-      id: Date.now() + Math.random(),
+      id: nextId(),
       servicos: cat.servicos.map((serv) => ({
         ...serv,
-        id: Date.now() + Math.random(),
+        id: nextId(),
       })),
     })) || [
       {
-        id: Date.now(),
+        id: nextId(),
         nome: "",
         preco_total_da_categoria: 0,
         servicos: [
           {
-            id: Date.now() + 1,
+            id: nextId(),
             nome: "",
             descricao: "",
             unidade: "",
@@ -199,31 +241,45 @@ export function OrcamentoForm({
   );
   const [pdfLoading, setPdfLoading] = useState(false);
 
-  const validadeOpcoes = Array.from(
-    new Set([...VALIDADE_OPCOES, ...(validade > 0 ? [validade] : [])]),
-  ).sort((a, b) => a - b);
   const [feedback, setFeedback] = useState("");
   const [feedbackSinapi, setFeedbackSinapi] = useState("");
-  const dataPublicacao = initialData
-    ? new Date(initialData.data_publicacao)
-    : new Date();
-  const dataValidade =
-    validade > 0
-      ? new Date(
-          dataPublicacao.getTime() + (validade - 1) * 24 * 60 * 60 * 1000,
-        )
-      : null;
+  // Data de emissão fixa enquanto o formulário está aberto.
+  const [dataPublicacao] = useState(() =>
+    initialData?.data_publicacao ? new Date(initialData.data_publicacao) : new Date(),
+  );
+
+  const { diasValidade, dataValidade, erroValidade } = useMemo(() => {
+    if (validade === "outros") {
+      if (outrosModo === "dias") {
+        const n = Number(outrosDias);
+        if (!outrosDias) return { diasValidade: 0, dataValidade: null, erroValidade: "Informe em quantos dias o orçamento vence." };
+        if (!Number.isInteger(n) || n < 1 || n > 3650) {
+          return { diasValidade: 0, dataValidade: null, erroValidade: "Informe um prazo entre 1 e 3650 dias." };
+        }
+        return { diasValidade: n, dataValidade: validadeDe(dataPublicacao, n), erroValidade: "" };
+      }
+      const data = parseDataBR(outrosData);
+      if (!data) return { diasValidade: 0, dataValidade: null, erroValidade: "Informe a data de validade no formato dd/mm/aaaa." };
+      const dias = diasAte(dataPublicacao, data);
+      if (dias < 1) return { diasValidade: 0, dataValidade: null, erroValidade: "A data de validade precisa ser depois da emissão." };
+      return { diasValidade: dias, dataValidade: data, erroValidade: "" };
+    }
+    const n = Number(validade);
+    return n > 0
+      ? { diasValidade: n, dataValidade: validadeDe(dataPublicacao, n), erroValidade: "" }
+      : { diasValidade: 0, dataValidade: null, erroValidade: "Escolha a validade do orçamento." };
+  }, [validade, outrosModo, outrosDias, outrosData, dataPublicacao]);
 
   function addCategoria() {
     setCategorias((prev) => [
       ...prev,
       {
-        id: Date.now(),
+        id: nextId(),
         nome: "",
         preco_total_da_categoria: 0,
         servicos: [
           {
-            id: Date.now() + 1,
+            id: nextId(),
             nome: "",
             descricao: "",
             unidade: "",
@@ -253,7 +309,7 @@ export function OrcamentoForm({
               servicos: [
                 ...categoria.servicos,
                 {
-                  id: Date.now(),
+                  id: nextId(),
                   nome: "",
                   descricao: "",
                   unidade: "",
@@ -343,12 +399,13 @@ export function OrcamentoForm({
     );
   }
 
-  const custoObraCalculado = categorias.reduce(
-    (acc, categoria) => acc + categoria.preco_total_da_categoria,
-    0,
-  );
-  const bdiNumero = parseDecimal(bdi);
-  const custoTotalComBDI = custoObraCalculado + custoObraCalculado * (bdiNumero / 100);
+  // Valores sempre derivados das quantidades e dos valores unitários
+  // (mesma regra do servidor e do PDF). BDI vazio = sem BDI.
+  const temBdi = bdi.trim() !== "";
+  const bdiNumero = temBdi ? parseDecimal(bdi) : 0;
+  const calc = useMemo(() => calcularOrcamento(categorias, bdiNumero), [categorias, bdiNumero]);
+  const custoObraCalculado = calc.subtotal;
+  const custoTotalComBDI = calc.total;
 
   async function buscarCep(cepDigitado: string) {
     const cepLimpo = cepDigitado.replace(/\D/g, "");
@@ -372,7 +429,7 @@ export function OrcamentoForm({
     setStatus("PENDENTE");
     setDescricao("");
     setSelectedClient("");
-    setValidade(0);
+    setValidade("");
     setCep("");
     setEstado("");
   }
@@ -417,13 +474,8 @@ export function OrcamentoForm({
         return;
       }
 
-      if (!validade) {
-        setFeedback("Informe a validade do orçamento.");
-        return;
-      }
-
-      if (!cep.trim()) {
-        setFeedback("Informe o CEP.");
+      if (erroValidade) {
+        setFeedback(erroValidade);
         return;
       }
 
@@ -488,11 +540,6 @@ export function OrcamentoForm({
         }
       }
 
-      if (!bdi.trim()) {
-        setFeedback("Informe o BDI (use 0 se não houver).");
-        return;
-      }
-
       setLoadingSubmit(true);
 
       const budgetData = {
@@ -509,24 +556,25 @@ export function OrcamentoForm({
         descricao,
         cliente: selectedClient,
         responsavel: user!._id,
-        categoria: categorias.map((cat) => ({
+        categoria: categorias.map((cat, i) => ({
           nome: cat.nome,
-          preco_total_da_categoria: cat.preco_total_da_categoria,
-          servicos: cat.servicos.map((s) => ({
+          preco_total_da_categoria: calc.etapas[i],
+          servicos: cat.servicos.map((s, j) => ({
             nome: s.nome,
             descricao: s.descricao,
             unidade: s.unidade,
             quantidade_unidade: s.quantidade_unidade,
             preco_da_unidade: s.preco_da_unidade,
-            preco_total: s.preco_total,
+            preco_total: calc.itens[i][j],
           })),
         })),
         status,
         preco: custoObraCalculado,
-        bdi: bdiNumero,
+        // null = sem BDI (o servidor remove o valor anterior).
+        bdi: temBdi ? bdiNumero : null,
         preco_com_bdi: custoTotalComBDI,
         data_publicacao: dataPublicacao,
-        valido_durante: validade,
+        valido_durante: diasValidade,
         data_validade: dataValidade!,
       };
       if (onSave) {
@@ -534,6 +582,7 @@ export function OrcamentoForm({
       }
 
       setFeedback("Orçamento salvo com sucesso!");
+      salvoRef.current = true;
 
       zerarCampos();
       onSuccess?.();
@@ -596,15 +645,51 @@ export function OrcamentoForm({
     if (feedback) scrollRef.current?.scrollToEnd({ animated: true });
   }, [feedback]);
 
+  // ---------------------------------------------------------------
+  // Alterações não salvas: compara com o estado inicial do formulário.
+  // ---------------------------------------------------------------
+  const snapshot = JSON.stringify({
+    nome, descricao, status, selectedClient, validade, outrosModo, outrosDias, outrosData,
+    cep, estado, cidade, bairro, logradouro, numero, complemento, bdi,
+    categorias: categorias.map((c) => ({
+      nome: c.nome,
+      servicos: c.servicos.map((sv) => [sv.nome, sv.descricao, sv.unidade, Number(sv.quantidade_unidade) || 0, Number(sv.preco_da_unidade) || 0]),
+    })),
+  });
+  const inicialRef = useRef<string | null>(null);
+  if (inicialRef.current === null) inicialRef.current = snapshot;
+  const salvoRef = useRef(false);
+  const temAlteracoes = canEdit && !salvoRef.current && snapshot !== inicialRef.current;
+  const [confirmSairVisible, setConfirmSairVisible] = useState(false);
+
   function handleClose() {
     setFeedback("");
     onClose();
   }
 
+  /** Fechar pelo voltar, Cancelar, Esc ou botão voltar do Android. */
+  function requestClose() {
+    if (loadingSubmit) return;
+    if (temAlteracoes) setConfirmSairVisible(true);
+    else handleClose();
+  }
+  if (closeRef) closeRef.current = requestClose;
+
+  // Site: avisa o navegador antes de fechar/recarregar a aba com alterações.
+  useEffect(() => {
+    if (Platform.OS !== "web" || !temAlteracoes || typeof window === "undefined") return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [temAlteracoes]);
+
   return (
     <View style={[styles.formScreen, { paddingTop: insets.top }]}>
       <View style={styles.modalHeader}>
-        <Pressable onPress={onClose} style={styles.leftAction}>
+        <Pressable onPress={requestClose} style={styles.leftAction} accessibilityLabel="Voltar">
           <Ionicons name="chevron-back" size={26} color={theme.primary} />
         </Pressable>
         <Text style={styles.addTitle}>
@@ -685,6 +770,15 @@ export function OrcamentoForm({
 
             <Text style={styles.subtitle}>Carregando cliente...</Text>
           </View>
+        ) : canEdit && clientsLoaded && todosClientes.length === 0 ? (
+          <View style={[styles.card, { alignItems: "center", gap: 10, paddingVertical: 22 }]}>
+            <Ionicons name="person-add-outline" size={30} color={theme.primary} />
+            <Text style={[styles.subtitle, { textAlign: "center" }]}>Você ainda não tem clientes</Text>
+            <Text style={[styles.label, { textAlign: "center" }]}>
+              Cadastre o cliente deste orçamento. O que você já preencheu aqui continua salvo.
+            </Text>
+            <AppButton title="Cadastrar cliente" icon="person-add" onPress={() => setAddClientVisible(true)} />
+          </View>
         ) : (
           <ClientCardSelect
             name={selectedClientData?.nome || "Selecionar Cliente"}
@@ -757,23 +851,68 @@ export function OrcamentoForm({
               </Text>
               <Picker
                 selectedValue={validade}
-                onValueChange={(v) => setValidade(Number(v))}
-                style={[styles.picker, isReadOnly && styles.pickerReadOnly]}
+                onValueChange={(v) => setValidade(String(v))}
+                style={[styles.picker, !canEdit && styles.pickerReadOnly]}
                 enabled={canEdit}
+                accessibilityLabel="Validade do orçamento"
               >
-                <Picker.Item label="Selecione" value={0} />
-                {validadeOpcoes.map((dias) => (
-                  <Picker.Item key={dias} label={`${dias} dias`} value={dias} />
+                <Picker.Item label="Selecione" value="" />
+                {VALIDADE_OPCOES.map((dias) => (
+                  <Picker.Item key={dias} label={`${dias} ${dias === 1 ? "dia" : "dias"}`} value={String(dias)} />
                 ))}
+                <Picker.Item label="Outros" value="outros" />
               </Picker>
             </View>
           </View>
-          <Text style={styles.label}>Válido até dia:</Text>
+          {validade === "outros" && canEdit && (
+            <>
+              <Text style={styles.label}>Prazo personalizado:</Text>
+              <View style={[styles.row, { gap: 8, marginBottom: 8 }]}>
+                {(["dias", "data"] as const).map((m) => (
+                  <Pressable
+                    key={m}
+                    onPress={() => setOutrosModo(m)}
+                    accessibilityRole="radio"
+                    accessibilityState={{ selected: outrosModo === m }}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 10,
+                      borderRadius: 10,
+                      borderWidth: 1.2,
+                      alignItems: "center",
+                      borderColor: outrosModo === m ? theme.primary : theme.border,
+                      backgroundColor: outrosModo === m ? theme.titleBackground : theme.white,
+                    }}
+                  >
+                    <Text style={{ color: outrosModo === m ? theme.primary : theme.text, fontWeight: "600" }}>
+                      {m === "dias" ? "Quantidade de dias" : "Data de vencimento"}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+              {outrosModo === "dias" ? (
+                <AppInput
+                  placeholder="Ex.: 21"
+                  value={outrosDias}
+                  onChangeText={(t) => setOutrosDias(t.replace(/\D/g, "").slice(0, 4))}
+                  keyboardType="numeric"
+                />
+              ) : (
+                <AppInput
+                  placeholder="dd/mm/aaaa"
+                  value={outrosData}
+                  onChangeText={(t) => setOutrosData(dataMask(t))}
+                  keyboardType="numeric"
+                />
+              )}
+            </>
+          )}
+          <Text style={styles.label}>Válido até:</Text>
           <AppInput
             value={
               dataValidade
-                ? dataValidade.toLocaleDateString("pt-BR")
-                : "Selecione a validade acima"
+                ? `${dataValidade.toLocaleDateString("pt-BR")} (${diasValidade} ${diasValidade === 1 ? "dia" : "dias"} após a emissão)`
+                : "Escolha a validade acima"
             }
             editable={false}
           />
@@ -819,8 +958,7 @@ export function OrcamentoForm({
               <View style={styles.row}>
                 <View style={styles.column}>
                   <Text style={styles.label}>
-                    CEP:
-                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+                    CEP (opcional):
                   </Text>
                   <AppInput
                     placeholder="CEP"
@@ -932,8 +1070,7 @@ export function OrcamentoForm({
               <View style={styles.row}>
                 <View style={styles.column}>
                   <Text style={styles.label}>
-                    Número:
-                    {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+                    Número (opcional):
                   </Text>
 
                   <AppInput
@@ -1117,7 +1254,7 @@ export function OrcamentoForm({
                 </View>
                 <Text style={styles.serviceTotalText}>
                   Subtotal:{" "}
-                  {s.preco_total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                  {formatBRL(calc.itens[idx]?.[sIdx] ?? 0)}
                 </Text>
               </View>
             ))}
@@ -1128,10 +1265,7 @@ export function OrcamentoForm({
               ]}
             >
               Subtotal da etapa:{" "}
-              {cat.preco_total_da_categoria.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
+              {formatBRL(calc.etapas[idx] ?? 0)}
             </Text>
             <View style={styles.divider} />
 
@@ -1148,8 +1282,7 @@ export function OrcamentoForm({
 
         {canEdit && (
           <AppButton
-            title="Adicionar etapa"
-            icon="layers-outline"
+            title="+ Etapa"
             variant="tinted"
             onPress={addCategoria}
           />
@@ -1162,24 +1295,17 @@ export function OrcamentoForm({
         <View style={styles.card}>
           <View style={styles.row}>
             <View style={styles.column}>
-              <Text style={styles.label}>Custo Obra:</Text>
+              <Text style={styles.label}>Subtotal (custo da obra):</Text>
 
-              <AppInput
-                value={custoObraCalculado.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-                editable={false}
-              />
+              <AppInput value={formatBRL(custoObraCalculado)} editable={false} />
             </View>
             <View style={styles.column}>
               <Text style={styles.label}>
-                BDI (%):
-                {!isReadOnly && <Text style={styles.obrigatorio}>*</Text>}
+                BDI % (opcional):
               </Text>
 
               <AppInput
-                placeholder="BDI (%)"
+                placeholder="Sem BDI"
                 value={bdi}
                 onChangeText={(t) => setBdi(sanitizeDecimalInput(t))}
                 editable={canEdit}
@@ -1188,14 +1314,14 @@ export function OrcamentoForm({
             </View>
           </View>
 
-          <Text style={styles.label}>Custo Total da Obra com BDI:</Text>
-          <AppInput
-            value={custoTotalComBDI.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            editable={false}
-          />
+          {temBdi && (
+            <>
+              <Text style={styles.label}>Valor do BDI ({bdi}%):</Text>
+              <AppInput value={formatBRL(calc.valorBdi)} editable={false} />
+            </>
+          )}
+          <Text style={styles.label}>Total do orçamento:</Text>
+          <AppInput value={formatBRL(custoTotalComBDI)} editable={false} />
         </View>
         {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
         {!!feedbackMessage && (
@@ -1222,7 +1348,7 @@ export function OrcamentoForm({
         <AppButton
           variant="secondary"
           title={isReadOnly ? "Voltar" : "Cancelar"}
-          onPress={handleClose}
+          onPress={requestClose}
         />
       </ScrollView>
       <Modal visible={clientModalVisible} animationType="slide" transparent>
@@ -1258,7 +1384,7 @@ export function OrcamentoForm({
             </View>
             <View style={styles.divider} />
             <ScrollView>
-              {clientsList.map((client) => (
+              {todosClientes.map((client) => (
                 <Pressable
                   key={client._id}
                   onPress={() => {
@@ -1279,6 +1405,43 @@ export function OrcamentoForm({
                 </Pressable>
               ))}
             </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <AddClientModal
+        visible={addClientVisible}
+        onClose={() => setAddClientVisible(false)}
+        onCreated={(client) => {
+          setNovosClientes((prev) => [...prev, client]);
+          setSelectedClient(client._id);
+          setSelectedClientData(client);
+        }}
+      />
+
+      {/* Sair com alterações não salvas */}
+      <Modal visible={confirmSairVisible} transparent animationType="fade" onRequestClose={() => setConfirmSairVisible(false)}>
+        <View style={{ flex: 1, backgroundColor: theme.backgroundDestaque, justifyContent: "center", padding: 24 }}>
+          <View style={[styles.card, { gap: 10, maxWidth: 440, width: "100%", alignSelf: "center" }]}>
+            <Text style={styles.subtitle}>Sair sem salvar?</Text>
+            <Text style={styles.label}>Você fez alterações neste orçamento que ainda não foram salvas.</Text>
+            <AppButton
+              title={isAdd ? "Salvar orçamento e sair" : "Salvar alterações e sair"}
+              icon="checkmark"
+              onPress={() => {
+                setConfirmSairVisible(false);
+                handleSubmit();
+              }}
+            />
+            <AppButton
+              title="Descartar alterações"
+              variant="secondary"
+              onPress={() => {
+                setConfirmSairVisible(false);
+                handleClose();
+              }}
+            />
+            <AppButton title="Continuar editando" variant="tinted" onPress={() => setConfirmSairVisible(false)} />
           </View>
         </View>
       </Modal>

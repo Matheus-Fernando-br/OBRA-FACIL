@@ -74,7 +74,8 @@ export function getBudgetValidUntil(budget: Orcamento) {
   if (!published || !budget.valido_durante) return null;
 
   const end = new Date(published);
-  end.setDate(end.getDate() + budget.valido_durante - 1);
+  // Mesma regra do formulário e do servidor: emissão + N dias.
+  end.setDate(end.getDate() + budget.valido_durante);
   return end;
 }
 

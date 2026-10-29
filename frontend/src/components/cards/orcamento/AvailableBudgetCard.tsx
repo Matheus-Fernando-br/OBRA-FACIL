@@ -45,6 +45,12 @@ export function AvailableBudgetCard({
         return;
       }
 
+      // O orçamento já vem com o cliente completo: usa o nome dele.
+      if (typeof budget.cliente === "object" && budget.cliente.nome) {
+        setClientDisplayName(budget.cliente.nome);
+        return;
+      }
+
       const clientId =
         typeof budget.cliente === "string"
           ? budget.cliente

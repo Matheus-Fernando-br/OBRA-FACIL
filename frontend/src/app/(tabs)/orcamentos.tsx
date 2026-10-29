@@ -1,4 +1,5 @@
-import { View, ScrollView, RefreshControl } from "react-native";
+import { View, ScrollView, RefreshControl, Text } from "react-native";
+import { withAlpha } from "@/styles/globalStyles";
 
 import { useState, useEffect, useMemo } from "react";
 
@@ -19,7 +20,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePlanLimit } from "@/components/modals/PlanLimitModal";
 import { countForLimit } from "@/config/plans";
 
-import { getBudgets, getClients, archiveBudget } from "../../services/api";
+import { getBudgets, getClients, archiveBudget, approveBudget } from "../../services/api";
+import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
+import { loadPdfOptions } from "@/utils/pdf/preferences";
+import { sharePdf } from "@/utils/pdf/output";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
 
@@ -44,7 +49,7 @@ import FilterModal, {
 } from "@/components/modals/FilterModal";
 
 export default function OrcamentosScreen() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { styles, theme } = useTheme();
 
   // ============================================================
@@ -187,6 +192,58 @@ export default function OrcamentosScreen() {
       );
     } finally {
       setLoadingArquivo(null);
+    }
+  }
+
+  // ============================================================
+  // COMPARTILHAR PDF / APROVAR PELO CARD
+  // ============================================================
+  const [loadingShare, setLoadingShare] = useState<string | null>(null);
+  const [loadingApprove, setLoadingApprove] = useState<string | null>(null);
+  const [approveTarget, setApproveTarget] = useState<Orcamento | null>(null);
+  const [cardMessage, setCardMessage] = useState<{ text: string; error?: boolean } | null>(null);
+
+  function showCardMessage(text: string, error = false) {
+    setCardMessage({ text, error });
+    setTimeout(() => setCardMessage(null), 5000);
+  }
+
+  async function handleShareBudget(budget: Orcamento) {
+    if (loadingShare) return;
+    setLoadingShare(budget._id);
+    try {
+      const clientId = typeof budget.cliente === "object" ? budget.cliente?._id : budget.cliente;
+      const client = clientsById[clientId ?? ""] ?? (typeof budget.cliente === "object" ? budget.cliente : null);
+      const pdf = await generateBudgetPdf({
+        budget,
+        client,
+        issuer: user ?? undefined,
+        options: await loadPdfOptions(),
+      });
+      await sharePdf(pdf);
+    } catch (error: any) {
+      console.log("ERRO AO COMPARTILHAR PDF:", error);
+      showCardMessage(error?.message ? `Não foi possível gerar o PDF: ${error.message}` : "Não foi possível gerar o PDF.", true);
+    } finally {
+      setLoadingShare(null);
+    }
+  }
+
+  async function confirmApprove() {
+    const budget = approveTarget;
+    if (!budget || !token || loadingApprove) return;
+    setApproveTarget(null);
+    setLoadingApprove(budget._id);
+    try {
+      const updated = await approveBudget(budget._id, token);
+      // Só mostra aprovado depois que o servidor confirmou.
+      setBudgetsList((prev) => prev.map((b) => (b._id === budget._id ? { ...b, ...updated } : b)));
+      showCardMessage(`Orçamento "${budget.nome}" aprovado.`);
+    } catch (error: any) {
+      showCardMessage(error?.response?.data?.message ?? "Não foi possível aprovar agora. Tente novamente.", true);
+      await loadBudgets();
+    } finally {
+      setLoadingApprove(null);
     }
   }
 
@@ -734,6 +791,20 @@ export default function OrcamentosScreen() {
           ]}
         />
 
+        {cardMessage && (
+          <View
+            style={[
+              styles.card,
+              {
+                borderColor: cardMessage.error ? theme.danger : theme.success,
+                backgroundColor: withAlpha(cardMessage.error ? theme.danger : theme.success, 0.08),
+              },
+            ]}
+          >
+            <Text style={styles.menuCardDescription}>{cardMessage.text}</Text>
+          </View>
+        )}
+
         <FilterChips
           labels={activeFilterLabels.filter(
             (label) => !["Pendente", "Aprovado", "Recusado"].includes(label),
@@ -792,6 +863,10 @@ export default function OrcamentosScreen() {
                   }}
                   onArchive={() => handleArchiveBudget(budget)}
                   loadingArchive={loadingArquivo === budget._id}
+                  onShare={() => handleShareBudget(budget)}
+                  loadingShare={loadingShare === budget._id}
+                  onApprove={() => setApproveTarget(budget)}
+                  loadingApprove={loadingApprove === budget._id}
                 />
               </FadeInView>
             );
@@ -924,6 +999,18 @@ export default function OrcamentosScreen() {
 
           setFilterVisible(false);
         }}
+      />
+      <ConfirmDialog
+        visible={!!approveTarget}
+        title="Aprovar orçamento?"
+        message={
+          approveTarget
+            ? `O orçamento "${approveTarget.nome}" passa a Aprovado e não poderá mais ser editado. Depois você pode criar a obra a partir dele.`
+            : ""
+        }
+        confirmLabel="Aprovar"
+        onConfirm={confirmApprove}
+        onCancel={() => setApproveTarget(null)}
       />
       {limitModal}
     </View>

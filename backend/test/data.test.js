@@ -204,3 +204,70 @@ describe('exclusão de conta', () => {
     assert.equal(r.body.usuario.senha, undefined);
   });
 });
+
+describe('orçamentos: cálculo, BDI opcional, aprovação e cliente sem CPF', () => {
+  let u;
+  let cli;
+  before(async () => {
+    u = await createUser(ctx, { email: 'calc@dados.com' });
+    // Cliente só com nome: CPF, e-mail e telefone são opcionais.
+    const r = await ctx.api().post('/client').set(u.auth).send({ nome: 'Cliente Sem Documento' });
+    assert.equal(r.status, 201, JSON.stringify(r.body));
+    cli = r.body;
+  });
+
+  const corpo = (extra = {}) => ({
+    nome: 'Banheiro',
+    cliente: cli._id,
+    endereco: { CEP: '', numero: '', rua: 'Rua B', cidade: 'BH', estado: 'MG', bairro: 'Centro' },
+    categoria: [
+      { nome: 'Piso', servicos: [{ nome: 'Porcelanato', unidade: 'm²', quantidade_unidade: 12.5, preco_da_unidade: 19.99, preco_total: 1 }] },
+      {
+        nome: 'Elétrica',
+        servicos: [
+          { nome: 'Tomada', unidade: 'UN', quantidade_unidade: 3, preco_da_unidade: 0.1, preco_total: 0 },
+          { nome: 'Chuveiro', unidade: 'UN', quantidade_unidade: 1, preco_da_unidade: 150, preco_total: 0 },
+        ],
+      },
+    ],
+    // Valores enviados pelo app são ignorados: o servidor recalcula.
+    preco: 1,
+    preco_com_bdi: 1,
+    valido_durante: 7,
+    ...extra,
+  });
+
+  it('recalcula subtotais e total em centavos, sem BDI', async () => {
+    const r = await ctx.api().post('/orcamento').set(u.auth).send(corpo());
+    assert.equal(r.status, 201, JSON.stringify(r.body));
+    const [piso, eletrica] = r.body.categoria;
+    assert.equal(piso.servicos[0].preco_total, 249.88); // 12,5 × 19,99 = 249,875 → 249,88
+    assert.equal(piso.preco_total_da_categoria, 249.88);
+    assert.equal(eletrica.servicos[0].preco_total, 0.3); // 3 × 0,10 (sem erro de ponto flutuante)
+    assert.equal(eletrica.preco_total_da_categoria, 150.3);
+    assert.equal(r.body.preco, 400.18);
+    assert.equal(r.body.preco_com_bdi, 400.18, 'sem BDI não há acréscimo');
+    assert.ok(r.body.data_validade, 'validade calculada a partir dos dias');
+  });
+
+  it('aplica o BDI e recalcula ao editar', async () => {
+    let r = await ctx.api().post('/orcamento').set(u.auth).send(corpo({ bdi: 25 }));
+    assert.equal(r.body.preco_com_bdi, 500.23); // 400,18 + 100,045 → 100,05
+    r = await ctx.api().put(`/orcamento/${r.body._id}`).set(u.auth).send({ bdi: 10 });
+    assert.equal(r.body.preco_com_bdi, 440.2);
+  });
+
+  it('aprova pelo card uma única vez', async () => {
+    const o = (await ctx.api().post('/orcamento').set(u.auth).send(corpo())).body;
+    let r = await ctx.api().post(`/orcamento/${o._id}/aprovar`).set(u.auth);
+    assert.equal(r.status, 200);
+    assert.equal(r.body.status, 'APROVADO');
+    assert.ok(r.body.aprovadoEm);
+    r = await ctx.api().post(`/orcamento/${o._id}/aprovar`).set(u.auth);
+    assert.equal(r.status, 409);
+    assert.equal(r.body.code, 'ALREADY_APPROVED');
+    // Outro usuário não aprova.
+    r = await ctx.api().post(`/orcamento/${o._id}/aprovar`).set(beto.auth);
+    assert.equal(r.status, 404);
+  });
+});
