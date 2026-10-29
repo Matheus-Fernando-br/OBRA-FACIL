@@ -218,3 +218,56 @@ describe('CORS', () => {
     assert.equal(r.headers['access-control-allow-origin'], undefined);
   });
 });
+
+describe('comunicados do painel para os usuários', () => {
+  it('envia para filtrados e selecionados, no app e por e-mail, e o usuário lê e remove', async () => {
+    const adm = request.agent(ctx.app);
+    assert.equal((await adm.post('/admin/api/login').set(H).send({ username: 'admin', senha: newPassword })).status, 200);
+    const u1 = await createUser(ctx, { email: 'com1@teste.com' });
+    const u2 = await createUser(ctx, { email: 'com2@teste.com' });
+
+    // Pré-visualização do público.
+    let r = await adm.post('/admin/api/notifications/preview').set(H).send({ publico: { tipo: 'selecionados', userIds: [u1.user._id] } });
+    assert.equal(r.status, 200);
+    assert.equal(r.body.total, 1);
+
+    // Sem canal: recusado.
+    r = await adm.post('/admin/api/notifications').set(H).send({ titulo: 'Teste', mensagem: 'Oi', canais: { app: false, email: false }, publico: { tipo: 'todos' } });
+    assert.equal(r.status, 400);
+
+    const mailsAntes = ctx.mails.length;
+    r = await adm.post('/admin/api/notifications').set(H).send({
+      titulo: 'Nova função: EAP',
+      mensagem: 'Agora você gera a EAP da obra em PDF.\n\nConfira em Obras.',
+      canais: { app: true, email: true },
+      publico: { tipo: 'selecionados', userIds: [u1.user._id] },
+    });
+    assert.equal(r.status, 201, JSON.stringify(r.body));
+    assert.equal(r.body.destinatarios, 1);
+
+    // Só o selecionado recebe no app.
+    let n1 = await ctx.api().get('/notificacoes').set(u1.auth);
+    const n2 = await ctx.api().get('/notificacoes').set(u2.auth);
+    assert.equal(n1.body.length, 1);
+    assert.equal(n1.body[0].titulo, 'Nova função: EAP');
+    assert.equal(n2.body.length, 0);
+
+    // E-mail enviado em segundo plano.
+    for (let i = 0; i < 20 && ctx.mails.length === mailsAntes; i++) await new Promise((res) => setTimeout(res, 50));
+    assert.ok(ctx.mails.slice(mailsAntes).some((m) => m.to === u1.email && /EAP/.test(m.subject)));
+
+    // Marcar como lida e remover.
+    await ctx.api().post('/notificacoes/lidas').set(u1.auth).send({ todas: true });
+    n1 = await ctx.api().get('/notificacoes').set(u1.auth);
+    assert.ok(n1.body[0].lidaEm);
+    r = await ctx.api().delete(`/notificacoes/${n1.body[0]._id}`).set(u2.auth);
+    assert.equal(r.status, 404, 'outro usuário não remove');
+    await ctx.api().delete(`/notificacoes/${n1.body[0]._id}`).set(u1.auth);
+    n1 = await ctx.api().get('/notificacoes').set(u1.auth);
+    assert.equal(n1.body.length, 0);
+
+    // Histórico no painel.
+    r = await adm.get('/admin/api/notifications').set(H);
+    assert.equal(r.body[0].titulo, 'Nova função: EAP');
+  });
+});

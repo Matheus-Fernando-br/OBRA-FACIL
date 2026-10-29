@@ -20,7 +20,8 @@ interface Props {
   arquivado?: boolean;
   loadingArchive?: boolean;
   onDetails(): void;
-  onEdit(): void;
+  /** Não usado no card (editar fica no formulário); mantido por compatibilidade. */
+  onEdit?(): void;
   onDelete(): void;
   onArchive(): void;
   /** Gera o PDF e abre o compartilhamento (WhatsApp, e-mail...). */
@@ -42,7 +43,6 @@ export function BudgetCard({
   arquivado = false,
   loadingArchive,
   onDetails,
-  onEdit,
   onDelete,
   onArchive,
   onShare,
@@ -91,7 +91,9 @@ export function BudgetCard({
 
       <Text style={styles.listCardValue}>{formatCurrency(value)}</Text>
 
-      <View style={styles.listCardMetaRow}>
+      {/* Datas + excluir (acima da linha das ações). Editar fica só no formulário. */}
+      <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+      <View style={[styles.listCardMetaRow, { flex: 1 }]}>
         {issuedAt ? (
           <View style={styles.listCardMeta}>
             <Ionicons name="calendar-outline" size={13} color={theme.textSecondary} />
@@ -113,6 +115,16 @@ export function BudgetCard({
             {expired ? `Vencido em ${date}` : `Válido até ${date}`}
           </Text>
         </View>
+      </View>
+        {!isLocked && (
+          <PressableScale
+            onPress={onDelete}
+            style={styles.iconButton}
+            accessibilityLabel={`Excluir orçamento ${nome}`}
+          >
+            <Ionicons name="trash-outline" size={16} color={theme.danger} />
+          </PressableScale>
+        )}
       </View>
 
       <View style={styles.listCardActions}>
@@ -154,25 +166,6 @@ export function BudgetCard({
         )}
 
         <View style={{ flex: 1 }} />
-
-        {!isLocked && (
-          <>
-            <PressableScale
-              onPress={onEdit}
-              style={styles.iconButton}
-              accessibilityLabel="Editar orçamento"
-            >
-              <Ionicons name="pencil" size={16} color={theme.text} />
-            </PressableScale>
-            <PressableScale
-              onPress={onDelete}
-              style={styles.iconButton}
-              accessibilityLabel="Excluir orçamento"
-            >
-              <Ionicons name="trash-outline" size={16} color={theme.danger} />
-            </PressableScale>
-          </>
-        )}
 
         {canArchive && (
           <PressableScale

@@ -26,6 +26,8 @@ import {
   signAdminToken,
 } from '../services/admins.js';
 import { audit } from '../services/audit.js';
+import { contarPublico, enviarComunicado } from '../services/comunicados.js';
+import Comunicado from '../models/Comunicado.js';
 import { auditPdf } from '../services/auditPdf.js';
 import { jobsStatus, runReconcileNow } from '../services/jobs.js';
 import { isMailConfigured, sendMail, sendNoticeEmailSafe } from '../services/mail.js';
@@ -276,6 +278,54 @@ router.get('/users', validate(pageQuery, 'query'), async (req, res) => {
     User.countDocuments(filter),
   ]);
   res.json({ items, total, page, pages: Math.ceil(total / limit) });
+});
+
+// ------------------------------------------------------------------ comunicados
+
+const publicoSchema = z
+  .object({
+    tipo: z.enum(['todos', 'filtro', 'selecionados']),
+    filtros: z
+      .object({
+        plano: z.enum(['gratuito', 'basico', 'profissional']).optional().or(z.literal('')),
+        verificado: z.enum(['sim', 'nao']).optional().or(z.literal('')),
+      })
+      .optional()
+      .default({}),
+    userIds: z.array(z.string().regex(/^[a-f\d]{24}$/i)).max(1000).optional().default([]),
+  })
+  .refine((p) => p.tipo !== 'selecionados' || p.userIds.length > 0, 'Selecione pelo menos um usuário.');
+
+router.post('/notifications/preview', validate(z.object({ publico: publicoSchema })), async (req, res) => {
+  res.json(await contarPublico(req.body.publico));
+});
+
+router.post(
+  '/notifications',
+  validate(
+    z
+      .object({
+        titulo: z.string().trim().min(3, 'Informe o título (mínimo 3 caracteres).').max(120),
+        mensagem: z.string().trim().min(3, 'Escreva a mensagem.').max(2000),
+        canais: z.object({ app: z.boolean(), email: z.boolean() }),
+        publico: publicoSchema,
+      })
+      .refine((b) => b.canais.app || b.canais.email, 'Escolha pelo menos um canal: app ou e-mail.'),
+  ),
+  async (req, res) => {
+    const c = await enviarComunicado({ ...req.body, enviadoPor: req.admin.username });
+    await log(req, 'comunicado.enviado', { tipo: 'comunicado', id: String(c._id) }, {
+      titulo: c.titulo,
+      canais: c.canais,
+      publico: c.publico,
+      destinatarios: c.destinatarios,
+    });
+    res.status(201).json(c);
+  },
+);
+
+router.get('/notifications', async (_req, res) => {
+  res.json(await Comunicado.find().sort({ createdAt: -1 }).limit(50).lean());
 });
 
 router.get('/users/:id', validId(), async (req, res) => {

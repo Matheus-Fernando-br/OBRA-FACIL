@@ -43,6 +43,13 @@ export const COLORS = {
   borderNull: "#D1D1D6",
   separator: "rgba(60, 60, 67, 0.12)",
 
+  /* Campos de formulário: editável (caixa branca com borda) x somente
+     leitura (faixa cinza sem borda, texto secundário e cadeado). */
+  fieldEditableBg: "#FFFFFF",
+  fieldEditableBorder: "#C7C7CC",
+  fieldReadOnlyBg: "#EDEDF2",
+  fieldReadOnlyText: "#6C6C70",
+
   /* Status (validados p/ CVD) */
   success: "#13876F",
   warning: "#C98208",
@@ -80,6 +87,11 @@ export const DARK_COLORS: ThemeColors = {
   border: "#38383A",
   borderNull: "#48484A",
   separator: "rgba(84, 84, 88, 0.45)",
+
+  fieldEditableBg: "#2C2C2E",
+  fieldEditableBorder: "#5A5A5F",
+  fieldReadOnlyBg: "#121214",
+  fieldReadOnlyText: "#8E8E93",
 
   success: "#209A80",
   warning: "#B38A12",
@@ -129,6 +141,9 @@ export const RADIUS = {
   xl: 26,
   pill: 999,
 };
+
+/** Altura padrão de todo campo (texto, seleção, moeda). */
+export const FIELD_HEIGHT = 52;
 
 export function elevation(level: 1 | 2 | 3, color = "#000"): ViewStyle {
   const map = {
@@ -305,15 +320,33 @@ export function createGlobalStyles(colors: ThemeColors) {
       elevation: 0,
       paddingHorizontal: 16,
     },
+    /* -------- Campos: um único padrão de tamanho e dois estados -------- */
     appInput: {
       width: "100%",
-      minHeight: 50,
+      minHeight: FIELD_HEIGHT,
       ...TYPE.body,
-      borderWidth: 1,
+      borderWidth: 1.2,
       borderRadius: RADIUS.md,
       paddingHorizontal: SPACE.lg,
       paddingVertical: 13,
       marginBottom: SPACE.md,
+    },
+    /** Pode editar: caixa clara com borda visível. */
+    fieldEditable: {
+      backgroundColor: colors.fieldEditableBg,
+      borderColor: colors.fieldEditableBorder,
+      color: colors.text,
+    },
+    /** Não pode editar: faixa cinza, sem borda, texto secundário. */
+    fieldReadOnly: {
+      backgroundColor: colors.fieldReadOnlyBg,
+      borderColor: "transparent",
+      color: colors.fieldReadOnlyText,
+    },
+    fieldLockIcon: {
+      position: "absolute",
+      right: SPACE.md,
+      top: (FIELD_HEIGHT - 14) / 2,
     },
     authPasswordWrap: { position: "relative" },
     authPasswordInput: { paddingRight: 50 },
@@ -1014,18 +1047,22 @@ export function createGlobalStyles(colors: ThemeColors) {
 
     picker: {
       width: "100%",
-      minHeight: 50,
-      backgroundColor: colors.surfaceMuted,
+      minHeight: FIELD_HEIGHT,
+      height: FIELD_HEIGHT,
+      backgroundColor: colors.fieldEditableBg,
       color: colors.text,
       borderRadius: RADIUS.md,
-      borderWidth: 0,
+      borderWidth: 1.2,
+      borderColor: colors.fieldEditableBorder,
       paddingHorizontal: SPACE.md,
       marginBottom: SPACE.md,
+      ...TYPE.body,
     },
 
     pickerReadOnly: {
-      color: colors.textSecondary,
-      opacity: 0.85,
+      backgroundColor: colors.fieldReadOnlyBg,
+      borderColor: "transparent",
+      color: colors.fieldReadOnlyText,
     },
 
     searchField: {
@@ -2674,13 +2711,13 @@ export function createGlobalStyles(colors: ThemeColors) {
     },
 
     input: {
-      height: 46,
-      borderWidth: 1,
-      borderColor: colors.borderNull,
-      borderRadius: 10,
-      paddingHorizontal: 12,
+      height: FIELD_HEIGHT,
+      borderWidth: 1.2,
+      borderColor: colors.fieldEditableBorder,
+      borderRadius: RADIUS.md,
+      paddingHorizontal: SPACE.md,
       color: colors.text,
-      backgroundColor: colors.card,
+      backgroundColor: colors.fieldEditableBg,
     },
 
     selectContainer: {

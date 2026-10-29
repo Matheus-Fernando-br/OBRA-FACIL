@@ -491,3 +491,28 @@ export async function deleteProduto(id: string, token: string) {
 
   return data;
 }
+
+/* ==========================================================
+   NOTIFICAÇÕES DA EQUIPE (enviadas pelo painel admin)
+========================================================== */
+
+export interface ServerNotification {
+  _id: string;
+  titulo: string;
+  mensagem: string;
+  lidaEm?: string | null;
+  createdAt: string;
+}
+
+export async function getMyNotifications(token: string): Promise<ServerNotification[]> {
+  const { data } = await api.get("/notificacoes", { headers: { Authorization: `Bearer ${token}` } });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function markNotificationsRead(ids: string[], token: string) {
+  await api.post("/notificacoes/lidas", { ids }, { headers: { Authorization: `Bearer ${token}` } });
+}
+
+export async function removeNotification(id: string, token: string) {
+  await api.delete(`/notificacoes/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+}

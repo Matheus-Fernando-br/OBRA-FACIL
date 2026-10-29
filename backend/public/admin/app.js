@@ -142,6 +142,7 @@ const routes = {
   assinaturas: ['Assinaturas', renderSubscriptions],
   pagamentos: ['Pagamentos', renderPayments],
   planos: ['Planos e cobrança', renderPlans],
+  notificacoes: ['Notificações', renderNotifications],
   integracoes: ['Integrações', renderIntegrations],
   diagnostico: ['Diagnóstico', renderDiagnostics],
   auditoria: ['Auditoria', renderAudit],
@@ -873,3 +874,145 @@ window.addEventListener('hashchange', () => {
 });
 
 boot();
+
+
+// ---------- notificações para os usuários (app e/ou e-mail)
+
+async function renderNotifications() {
+  const selecionados = new Map(); // id → { nome, email }
+  content.innerHTML = `
+    <form class="card grid" id="notif-form">
+      <h3>Enviar notificação</h3>
+      <p class="muted">Aparece no painel de notificações (sino) do app e do site e, se marcado, também por e-mail. Usuários bloqueados não recebem; o e-mail vai só para quem confirmou o endereço.</p>
+      <label>Título<input name="titulo" maxlength="120" required placeholder="Ex.: Nova função: EAP da obra em PDF"></label>
+      <label>Mensagem<textarea name="mensagem" rows="5" maxlength="2000" required placeholder="Escreva a mensagem. Linhas em branco viram parágrafos no e-mail."></textarea></label>
+      <fieldset class="grid"><legend>Canais</legend>
+        <label class="check"><input type="checkbox" name="app" checked>No app (painel de notificações)</label>
+        <label class="check"><input type="checkbox" name="email">Por e-mail também</label>
+      </fieldset>
+      <fieldset class="grid"><legend>Para quem</legend>
+        <label class="check"><input type="radio" name="tipo" value="todos" checked>Todos os usuários</label>
+        <label class="check"><input type="radio" name="tipo" value="filtro">Filtrar por tipo de usuário</label>
+        <div class="filters" id="filtro-box" hidden>
+          <select name="plano"><option value="">Todos os planos</option><option value="gratuito">Gratuito</option><option value="basico">Básico</option><option value="profissional">Profissional</option></select>
+          <select name="verificado"><option value="">E-mail confirmado ou não</option><option value="sim">E-mail confirmado</option><option value="nao">E-mail não confirmado</option></select>
+        </div>
+        <label class="check"><input type="radio" name="tipo" value="selecionados">Escolher usuários</label>
+        <div id="sel-box" hidden>
+          <input id="sel-q" type="search" placeholder="Buscar por nome ou e-mail">
+          <div id="sel-results" class="grid" style="margin-top:8px"></div>
+          <p class="muted" style="margin-top:8px">Selecionados:</p>
+          <div id="sel-chips" class="actions"></div>
+        </div>
+      </fieldset>
+      <p id="notif-count" class="muted"></p>
+      <div class="actions"><button class="btn primary" id="notif-send">Enviar</button></div>
+    </form>
+    <div class="card"><h3>Enviadas</h3><div id="notif-hist"><p class="muted">Carregando…</p></div></div>`;
+
+  const f = $('#notif-form');
+  const tipo = () => f.querySelector('input[name=tipo]:checked').value;
+  const publico = () => ({
+    tipo: tipo(),
+    filtros: { plano: f.plano.value, verificado: f.verificado.value },
+    userIds: [...selecionados.keys()],
+  });
+
+  let previewTimer;
+  async function preview() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(async () => {
+      if (tipo() === 'selecionados' && !selecionados.size) {
+        $('#notif-count').textContent = 'Selecione pelo menos um usuário.';
+        return;
+      }
+      try {
+        const r = await api('/notifications/preview', { method: 'POST', body: { publico: publico() } });
+        $('#notif-count').textContent = `Vai para ${num(r.total)} usuário(s)${f.email.checked ? ` · e-mail para ${num(r.comEmail)} com endereço confirmado` : ''}.`;
+      } catch (err) {
+        $('#notif-count').textContent = err.message;
+      }
+    }, 250);
+  }
+
+  function renderChips() {
+    $('#sel-chips').innerHTML = [...selecionados.entries()]
+      .map(([id, u]) => `<button type="button" class="btn small" data-rm="${esc(id)}" title="Remover">${esc(u.nome)} ✕</button>`)
+      .join('') || '<span class="muted">Nenhum</span>';
+    $('#sel-chips').querySelectorAll('[data-rm]').forEach((b) =>
+      b.addEventListener('click', () => {
+        selecionados.delete(b.dataset.rm);
+        renderChips();
+        preview();
+      }),
+    );
+  }
+
+  let searchTimer;
+  $('#sel-q').addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(async () => {
+      const q = e.target.value.trim();
+      if (q.length < 2) return ($('#sel-results').innerHTML = '');
+      const data = await api('/users', { query: { q, page: 1 } });
+      $('#sel-results').innerHTML = data.items
+        .map((u) => `<label class="check"><input type="checkbox" data-id="${esc(u._id)}" data-nome="${esc(u.nome)}" ${selecionados.has(u._id) ? 'checked' : ''}>${esc(u.nome)} <span class="muted">${esc(u.email)} · ${esc(planName(u.planoAtual))}</span></label>`)
+        .join('') || '<p class="muted">Nenhum usuário encontrado.</p>';
+      $('#sel-results').querySelectorAll('input[data-id]').forEach((c) =>
+        c.addEventListener('change', () => {
+          if (c.checked) selecionados.set(c.dataset.id, { nome: c.dataset.nome });
+          else selecionados.delete(c.dataset.id);
+          renderChips();
+          preview();
+        }),
+      );
+    }, 300);
+  });
+
+  f.addEventListener('change', () => {
+    $('#filtro-box').hidden = tipo() !== 'filtro';
+    $('#sel-box').hidden = tipo() !== 'selecionados';
+    preview();
+  });
+
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const body = {
+      titulo: f.titulo.value.trim(),
+      mensagem: f.mensagem.value.trim(),
+      canais: { app: f.app.checked, email: f.email.checked },
+      publico: publico(),
+    };
+    if (!body.canais.app && !body.canais.email) return toast('Escolha pelo menos um canal: app ou e-mail.', true);
+    confirmAction('Enviar notificação', `${$('#notif-count').textContent} Não é possível desfazer o envio.`, async () => {
+      const r = await api('/notifications', { method: 'POST', body });
+      toast(`Enviada para ${num(r.destinatarios)} usuário(s).`);
+      f.reset();
+      selecionados.clear();
+      renderChips();
+      f.dispatchEvent(new Event('change'));
+      loadHist();
+    }, { confirmLabel: 'Enviar' });
+  });
+
+  async function loadHist() {
+    const items = await api('/notifications');
+    const publicoTxt = (p) =>
+      p?.tipo === 'todos'
+        ? 'Todos'
+        : p?.tipo === 'selecionados'
+          ? `${num(p.quantidadeSelecionados)} selecionado(s)`
+          : `Filtro: ${[p?.filtros?.plano && planName(p.filtros.plano), p?.filtros?.verificado && (p.filtros.verificado === 'sim' ? 'e-mail confirmado' : 'e-mail não confirmado')].filter(Boolean).join(', ') || 'todos'}`;
+    $('#notif-hist').innerHTML = items.length
+      ? `<div class="table-wrap"><table><thead><tr><th>Data</th><th>Título</th><th>Para</th><th>Canais</th><th>Destinatários</th><th>Por</th></tr></thead><tbody>${items
+          .map(
+            (c) => `<tr><td>${dateTime(c.createdAt)}</td><td><strong>${esc(c.titulo)}</strong><div class="muted">${esc(c.mensagem.slice(0, 120))}</div></td><td>${esc(publicoTxt(c.publico))}</td><td>${[c.canais?.app && 'App', c.canais?.email && 'E-mail'].filter(Boolean).join(' + ')}</td><td>${num(c.destinatarios)}${c.canais?.email ? `<div class="muted">e-mails: ${c.emails?.emAndamento ? 'enviando…' : `${num(c.emails?.enviados)} enviados${c.emails?.falhas ? `, ${num(c.emails.falhas)} falhas` : ''}`}</div>` : ''}</td><td>${esc(c.enviadoPor)}</td></tr>`,
+          )
+          .join('')}</tbody></table></div>`
+      : '<p class="empty">Nenhuma notificação enviada ainda.</p>';
+  }
+
+  renderChips();
+  preview();
+  await loadHist();
+}

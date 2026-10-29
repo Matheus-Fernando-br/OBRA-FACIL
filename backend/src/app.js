@@ -20,6 +20,7 @@ import produtoRoutes from './routes/produtos.js';
 import { plansRouter, subscriptionRouter } from './routes/subscription.js';
 import userRoutes from './routes/user.js';
 import webhookRoutes from './routes/webhooks.js';
+import notificacaoRoutes from './routes/notificacoes.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
@@ -126,6 +127,7 @@ export function createApp() {
   app.use('/obra', obraRoutes);
   app.use('/plans', plansRouter);
   app.use('/subscription', subscriptionRouter);
+  app.use('/notificacoes', notificacaoRoutes);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

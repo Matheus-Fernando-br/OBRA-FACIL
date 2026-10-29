@@ -61,6 +61,8 @@ export function NotificationModal({ visible, onClose }: Props) {
       Ontem: notifications.filter((n) => n.date === "Ontem"),
 
       "Esta semana": notifications.filter((n) => n.date === "Esta semana"),
+
+      Anteriores: notifications.filter((n) => n.date === "Anteriores"),
     };
   }, [notifications]);
 
@@ -120,6 +122,9 @@ export function NotificationModal({ visible, onClose }: Props) {
    */
   function openNotification(notification: Notification) {
     markRead([notification.id]);
+
+    // Recado da equipe: só marca como lido (a mensagem já aparece inteira).
+    if (!notification.route) return;
 
     handleClose();
 

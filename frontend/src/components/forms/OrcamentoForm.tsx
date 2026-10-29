@@ -988,7 +988,7 @@ export function OrcamentoForm({
                       onValueChange={(value) => setEstado(value)}
                       style={[
                         styles.picker,
-                        isReadOnly && styles.pickerReadOnly,
+                        !canEdit && styles.pickerReadOnly,
                       ]}
                       enabled={canEdit}
                     >
@@ -1198,7 +1198,7 @@ export function OrcamentoForm({
                       }
                       style={[
                         styles.picker,
-                        isReadOnly && styles.pickerReadOnly,
+                        !canEdit && styles.pickerReadOnly,
                       ]}
                       enabled={canEdit}
                     >

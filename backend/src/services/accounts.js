@@ -1,3 +1,4 @@
+import Notificacao from '../models/Notificacao.js';
 import Client from '../models/Client.js';
 import Obra from '../models/Obra.js';
 import Orcamento from '../models/Orcamento.js';
@@ -24,6 +25,7 @@ export async function deleteUserAccount(user) {
     Produto.deleteMany({ responsavel: id }),
     RefreshToken.deleteMany({ userId: id }),
     VerificationCode.deleteMany({ userId: id }),
+    Notificacao.deleteMany({ userId: id }),
   ]);
   await User.deleteOne({ _id: id });
 

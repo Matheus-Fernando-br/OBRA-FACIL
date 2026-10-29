@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Notification } from "@/data/notifications";
 import type { Obra, Orcamento } from "@/components/layout/interface";
-import { getBudgets, getWork } from "@/services/api";
+import { getBudgets, getMyNotifications, getWork, markNotificationsRead, removeNotification } from "@/services/api";
+import type { ServerNotification } from "@/services/api";
 import { getBudgetDaysLeft, getWorkName, isWorkFinished } from "./status";
 import { formatDate, toDate } from "./format";
 
@@ -133,6 +134,34 @@ export function buildAlerts(
   return alerts;
 }
 
+/* Notificações enviadas pela equipe (painel admin): id com prefixo "srv-". */
+const SRV = "srv-";
+
+function grupoData(iso: string) {
+  const d = new Date(iso);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const dia = new Date(d);
+  dia.setHours(0, 0, 0, 0);
+  const diff = Math.round((hoje.getTime() - dia.getTime()) / 86_400_000);
+  return diff <= 0 ? "Hoje" : diff === 1 ? "Ontem" : diff < 7 ? "Esta semana" : "Anteriores";
+}
+
+function fromServer(n: ServerNotification): Notification {
+  const d = new Date(n.createdAt);
+  return {
+    id: `${SRV}${n._id}`,
+    title: n.titulo,
+    description: n.mensagem,
+    date: grupoData(n.createdAt),
+    hour: grupoData(n.createdAt) === "Hoje" || grupoData(n.createdAt) === "Ontem"
+      ? d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+      : d.toLocaleDateString("pt-BR"),
+    route: "",
+    read: Boolean(n.lidaEm),
+  };
+}
+
 /** Carrega os alertas quando o painel é aberto e guarda lidas/removidas. */
 export function useAlerts(token: string | null, active: boolean) {
   const [items, setItems] = useState<Notification[]>([]);
@@ -151,11 +180,12 @@ export function useAlerts(token: string | null, active: boolean) {
     (async () => {
       setLoading(true);
       try {
-        const [prefs, saved, budgets, works] = await Promise.all([
+        const [prefs, saved, budgets, works, enviadas] = await Promise.all([
           loadAlertPrefs(),
           loadState(),
           getBudgets(token),
           getWork(token),
+          getMyNotifications(token).catch(() => [] as ServerNotification[]),
         ]);
         if (cancelled) return;
 
@@ -171,11 +201,13 @@ export function useAlerts(token: string | null, active: boolean) {
           dismissed: saved.dismissed.filter((id) => ids.has(id)),
         };
         setState(pruned);
-        setItems(
-          alerts
+        setItems([
+          // Recados da equipe primeiro, depois os alertas de orçamentos e obras.
+          ...enviadas.map(fromServer),
+          ...alerts
             .filter((a) => !pruned.dismissed.includes(a.id))
             .map((a) => ({ ...a, read: pruned.read.includes(a.id) })),
-        );
+        ]);
       } catch (error) {
         console.log("ERRO AO CARREGAR ALERTAS:", error);
       } finally {
@@ -191,17 +223,22 @@ export function useAlerts(token: string | null, active: boolean) {
   const markRead = useCallback(
     (ids: string[]) => {
       setItems((old) => old.map((n) => (ids.includes(n.id) ? { ...n, read: true } : n)));
-      persist({ ...state, read: Array.from(new Set([...state.read, ...ids])) });
+      const srv = ids.filter((id) => id.startsWith(SRV)).map((id) => id.slice(SRV.length));
+      if (srv.length && token) markNotificationsRead(srv, token).catch(() => {});
+      persist({ ...state, read: Array.from(new Set([...state.read, ...ids.filter((id) => !id.startsWith(SRV))])) });
     },
-    [state, persist],
+    [state, persist, token],
   );
 
   const dismiss = useCallback(
     (ids: string[]) => {
       setItems((old) => old.filter((n) => !ids.includes(n.id)));
-      persist({ ...state, dismissed: Array.from(new Set([...state.dismissed, ...ids])) });
+      if (token) {
+        ids.filter((id) => id.startsWith(SRV)).forEach((id) => removeNotification(id.slice(SRV.length), token).catch(() => {}));
+      }
+      persist({ ...state, dismissed: Array.from(new Set([...state.dismissed, ...ids.filter((id) => !id.startsWith(SRV))])) });
     },
-    [state, persist],
+    [state, persist, token],
   );
 
   return { items, loading, markRead, dismiss };
