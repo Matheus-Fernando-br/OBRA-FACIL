@@ -1,5 +1,6 @@
 import type { Cliente, Obra, Orcamento } from "@/components/layout/interface";
-import { WORK_STATUS_LABEL } from "@/utils/status";
+import { getWorkName, WORK_STATUS_LABEL } from "@/utils/status";
+import { buildEapSection } from "./eap";
 import {
   DEFAULT_PDF_OPTIONS,
   PdfIssuer,
@@ -137,11 +138,14 @@ export function buildWorkHtml({
       }
     </div>
 
-    ${stagesHtml}`;
+    ${stagesHtml}
+
+    <div style="page-break-before:always"></div>
+    ${buildEapSection(work, getWorkName(work, budget))}`;
 
   return renderDocument({
     title: "Relatório de obra",
-    subtitle: budget?.nome ?? "Obra",
+    subtitle: getWorkName(work, budget),
     badge: pill(WORK_STATUS_LABEL[statusKey] ?? statusKey, statusKey),
     issuer,
     options,
@@ -154,5 +158,21 @@ export function buildWorkHtml({
 }
 
 export async function generateWorkPdf(args: WorkPdfArgs): Promise<GeneratedPdf> {
-  return createPdf(buildWorkHtml(args), `Relatorio-obra ${args.budget?.nome ?? "obra"}`);
+  return createPdf(buildWorkHtml(args), `Relatorio-obra ${getWorkName(args.work, args.budget)}`);
+}
+
+/** Só a EAP e o cronograma da obra. */
+export function buildWorkEapHtml({ work, budget, client, issuer, options = DEFAULT_PDF_OPTIONS }: WorkPdfArgs) {
+  const nome = getWorkName(work, budget);
+  return renderDocument({
+    title: "EAP da obra",
+    subtitle: client?.nome ? `${nome} · ${client.nome}` : nome,
+    issuer,
+    options: { ...options, signature: false },
+    body: buildEapSection(work, nome),
+  });
+}
+
+export async function generateWorkEapPdf(args: WorkPdfArgs): Promise<GeneratedPdf> {
+  return createPdf(buildWorkEapHtml(args), `EAP-obra ${getWorkName(args.work, args.budget)}`);
 }

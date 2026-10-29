@@ -188,14 +188,28 @@ export const orcamentoUpdateSchema = z
 
 // ---------------------------------------------------------------- obras
 
-const servicoObra = z.object({
-  nome: text(200, 'Informe o nome do serviço.').min(1, 'Informe o nome do serviço.'),
-  descricao: optText(2000),
-  qt_dias_prevista: optNumber,
-  qt_dias_real: optNumber,
-  porcentagem_de_conclusao: z.coerce.number().min(0).max(100).optional().nullable().transform((v) => v ?? undefined),
-  concluido: z.boolean().optional(),
-});
+const diaCronograma = z.coerce
+  .number({ error: 'Dia inválido.' })
+  .int('Use dias inteiros no cronograma.')
+  .min(1, 'O cronograma começa no dia 1.')
+  .max(3650, 'Cronograma muito longo.')
+  .optional()
+  .nullable()
+  .transform((v) => v ?? undefined);
+
+const servicoObra = z
+  .object({
+    nome: text(200, 'Informe o nome do serviço.').min(1, 'Informe o nome do serviço.'),
+    descricao: optText(2000),
+    qt_dias_prevista: optNumber,
+    qt_dias_real: optNumber,
+    porcentagem_de_conclusao: z.coerce.number().min(0).max(100).optional().nullable().transform((v) => v ?? undefined),
+    concluido: z.boolean().optional(),
+    dia_inicio: diaCronograma,
+    dia_fim: diaCronograma,
+  })
+  .refine((s) => (s.dia_inicio === undefined) === (s.dia_fim === undefined), 'Informe o dia de início e o dia de término do serviço.')
+  .refine((s) => s.dia_inicio === undefined || s.dia_fim >= s.dia_inicio, 'O dia de término não pode ser antes do dia de início.');
 
 const categoriaObra = z.object({
   nome: text(200, 'Informe o nome da etapa.').min(1, 'Informe o nome da etapa.'),
@@ -208,6 +222,7 @@ const categoriaObra = z.object({
 const orcamentoRef = z.preprocess((v) => (v && typeof v === 'object' ? v._id : v), objectId);
 
 const obraBase = {
+  nome: optText(200),
   orcamento: orcamentoRef,
   categoria: z.array(categoriaObra).max(200).default([]),
   status: z.enum(['NOPRAZO', 'ATRASADO', 'ADIANTADO', 'ENTREGUE', 'CANCELADO']).optional(),

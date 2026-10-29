@@ -107,6 +107,11 @@ export function isWorkFinished(work: Obra) {
   );
 }
 
+/** Nome da obra: o nome próprio dela ou, se não tiver, o do orçamento. */
+export function getWorkName(work: Obra | null | undefined, budget?: Orcamento | null) {
+  return work?.nome?.trim() || budget?.nome || "Obra";
+}
+
 export function getClientName(
   cliente: Orcamento["cliente"] | undefined,
   clientsById?: Record<string, { nome: string }>,

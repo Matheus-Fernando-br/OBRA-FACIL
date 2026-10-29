@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { Notification } from "@/data/notifications";
 import type { Obra, Orcamento } from "@/components/layout/interface";
 import { getBudgets, getWork } from "@/services/api";
-import { getBudgetDaysLeft, isWorkFinished } from "./status";
+import { getBudgetDaysLeft, getWorkName, isWorkFinished } from "./status";
 import { formatDate, toDate } from "./format";
 
 /* ==========================================================
@@ -51,7 +51,7 @@ async function loadState(): Promise<AlertState> {
 
 function workName(work: Obra, budgets: Record<string, Orcamento>) {
   const budget = typeof work.orcamento === "object" ? work.orcamento : budgets[work.orcamento];
-  return budget?.nome ?? "Obra";
+  return getWorkName(work, budget);
 }
 
 export function buildAlerts(

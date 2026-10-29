@@ -271,3 +271,59 @@ describe('orçamentos: cálculo, BDI opcional, aprovação e cliente sem CPF', (
     assert.equal(r.status, 404);
   });
 });
+
+describe('obras: cronograma e nome', () => {
+  let u;
+  let orc;
+  before(async () => {
+    u = await createUser(ctx, { email: 'cronograma@dados.com' });
+    const cli = (await ctx.api().post('/client').set(u.auth).send({ nome: 'Cliente Cronograma' })).body;
+    orc = (await ctx.api().post('/orcamento').set(u.auth).send(orcamentoBody(cli._id))).body;
+  });
+
+  const obra = (servicos, extra = {}) => ({
+    orcamento: orc._id,
+    nome: 'Reforma da Ana',
+    data_inicio_prevista: '2026-11-02T12:00:00.000Z',
+    categoria: [{ nome: 'Etapa A', servicos }],
+    // Enviados pelo app, mas recalculados pelo servidor a partir do cronograma.
+    qt_dias_prevista: 999,
+    ...extra,
+  });
+
+  it('serviços simultâneos: a duração é o período geral, não a soma', async () => {
+    const r = await ctx.api().post('/obra').set(u.auth).send(
+      obra([
+        { nome: 'Serviço 1', dia_inicio: 2, dia_fim: 4 },
+        { nome: 'Serviço 2', dia_inicio: 3, dia_fim: 5 },
+        { nome: 'Serviço 3', dia_inicio: 6, dia_fim: 6 },
+      ]),
+    );
+    assert.equal(r.status, 201, JSON.stringify(r.body));
+    assert.equal(r.body.nome, 'Reforma da Ana');
+    assert.deepEqual(r.body.categoria[0].servicos.map((s) => s.qt_dias_prevista), [3, 3, 1]);
+    assert.equal(r.body.categoria[0].qt_dias_prevista, 5);
+    assert.equal(r.body.qt_dias_prevista, 5, 'dia 2 ao dia 6');
+    // Fim previsto = início (dia 1) + 5 dias → 07/11.
+    assert.equal(new Date(r.body.data_fim_prevista).toISOString().slice(0, 10), '2026-11-07');
+
+    // Editar o nome da obra e de um serviço não muda o orçamento.
+    const servicos = r.body.categoria[0].servicos.map((s, i) => ({ ...s, nome: i === 0 ? 'Demolição do piso' : s.nome }));
+    const e = await ctx.api().put(`/obra/${r.body._id}`).set(u.auth).send({ nome: 'Obra renomeada', categoria: [{ nome: 'Etapa A', servicos }] });
+    assert.equal(e.status, 200, JSON.stringify(e.body));
+    assert.equal(e.body.nome, 'Obra renomeada');
+    assert.equal(e.body.categoria[0].servicos[0].nome, 'Demolição do piso');
+    const o = await ctx.api().get(`/orcamento/${orc._id}`).set(u.auth);
+    assert.equal(o.body.categoria[0].servicos[0].nome, 'Remover piso');
+  });
+
+  it('recusa período inválido', async () => {
+    let r = await ctx.api().post('/obra').set(u.auth).send(obra([{ nome: 'X', dia_inicio: 5, dia_fim: 3 }]));
+    assert.equal(r.status, 400);
+    assert.match(r.body.message, /término/);
+    r = await ctx.api().post('/obra').set(u.auth).send(obra([{ nome: 'X', dia_inicio: 2 }]));
+    assert.equal(r.status, 400);
+    r = await ctx.api().post('/obra').set(u.auth).send(obra([{ nome: 'X', dia_inicio: 0, dia_fim: 2 }]));
+    assert.equal(r.status, 400);
+  });
+});

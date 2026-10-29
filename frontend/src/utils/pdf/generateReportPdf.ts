@@ -3,6 +3,7 @@ import {
   BUDGET_STATUS_LABEL,
   WORK_STATUS_LABEL,
   getClientName,
+  getWorkName,
   isWorkFinished,
 } from "@/utils/status";
 import {
@@ -113,7 +114,7 @@ function worksTable(data: ReportData) {
         const b = workBudget(w, byBudget);
         const key = (w.status || "NOPRAZO").toUpperCase();
         return `<tr>
-          <td><strong>${esc(b?.nome ?? "Obra")}</strong>${w.arquivado ? `<div class="desc">Arquivada</div>` : ""}</td>
+          <td><strong>${esc(getWorkName(w, b))}</strong>${w.arquivado ? `<div class="desc">Arquivada</div>` : ""}</td>
           <td>${esc(b ? getClientName(b.cliente, byClient) : "—")}</td>
           <td>${date(w.data_fim_prevista)}</td>
           <td>${pill(WORK_STATUS_LABEL[key] ?? key, key)}</td>
@@ -216,7 +217,7 @@ export function buildReportCsv(kind: ReportKind, data: ReportData, options: PdfO
       data.works.map((w) => {
         const b = workBudget(w, byBudget);
         return [
-          b?.nome ?? "Obra",
+          getWorkName(w, b),
           b ? getClientName(b.cliente, byClient) : "",
           WORK_STATUS_LABEL[w.status] ?? w.status,
           Math.round(w.porcentagem_de_conclusao ?? 0),

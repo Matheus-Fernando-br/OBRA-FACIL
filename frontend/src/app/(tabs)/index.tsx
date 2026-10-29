@@ -31,7 +31,7 @@ import {
   formatCurrency,
   formatLongToday,
 } from "@/utils/format";
-import { getClientName, isBudgetExpired, getBudgetDaysLeft, isWorkFinished } from "@/utils/status";
+import { getClientName, getWorkName, isBudgetExpired, getBudgetDaysLeft, isWorkFinished } from "@/utils/status";
 
 export default function HomeScreen() {
   const { styles, theme } = useTheme();
@@ -349,7 +349,7 @@ export default function HomeScreen() {
             expired={stats.expired}
             expiringSoon={stats.expiringSoon}
             lateWorks={stats.lateWorks}
-            getWorkName={(w) => getBudget(w)?.nome ?? "Obra"}
+            getWorkName={(w) => getWorkName(w, getBudget(w))}
             getClientLabel={(b) => getClientName(b.cliente, clientsById)}
           />
         )}
@@ -405,7 +405,7 @@ export default function HomeScreen() {
             return (
               <FadeInView key={work._id} index={index}>
                 <WorkCard
-                  title={budget?.nome ?? "Obra"}
+                  title={getWorkName(work, budget)}
                   client={budget ? getClientName(budget.cliente, clientsById) : undefined}
                   progress={work.porcentagem_de_conclusao ?? 0}
                   status={work.status}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, View, Text, Pressable, Platform } from "react-native";
+import { Modal, View, Text, Pressable, Platform, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -59,8 +59,10 @@ export function PdfViewerModal({ visible, onClose, pdf, budgetTitle }: Props) {
       >
         <Animated.View
           entering={ZoomIn.springify().damping(18)}
-          style={[styles.card, { width: "100%", maxWidth: 440, padding: 22, marginBottom: 0 }]}
+          style={[styles.card, { width: "100%", maxWidth: 440, maxHeight: "100%", padding: 0, marginBottom: 0 }]}
         >
+          {/* Rolagem: em telas pequenas (ou com teclado/fonte grande) nada fica cortado. */}
+          <ScrollView contentContainerStyle={{ padding: 22 }} bounces={false}>
           <Pressable
             onPress={onClose}
             style={[styles.menuCloseButton, { position: "absolute", top: 14, right: 14, zIndex: 2 }]}
@@ -118,9 +120,10 @@ export function PdfViewerModal({ visible, onClose, pdf, budgetTitle }: Props) {
 
           <Text style={[styles.caption, { textAlign: "center", marginTop: 4 }]}>
             {isWeb
-              ? "Na janela de impressão, escolha “Salvar como PDF”."
+              ? "O documento abre em uma nova aba; toque em “Salvar PDF / Imprimir”."
               : "Envie pelo WhatsApp, e-mail ou salve em Arquivos/Drive."}
           </Text>
+          </ScrollView>
         </Animated.View>
       </Animated.View>
     </Modal>

@@ -23,7 +23,7 @@ import { countForLimit } from "@/config/plans";
 import { getBudgets, getClients, archiveBudget, approveBudget } from "../../services/api";
 import { generateBudgetPdf } from "@/utils/pdf/generateBudgetPdf";
 import { loadPdfOptions } from "@/utils/pdf/preferences";
-import { sharePdf } from "@/utils/pdf/output";
+import { openPdfWindow, sharePdf } from "@/utils/pdf/output";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 import { BudgetCard } from "@/components/cards/orcamento/BudgetCard";
@@ -211,6 +211,8 @@ export default function OrcamentosScreen() {
   async function handleShareBudget(budget: Orcamento) {
     if (loadingShare) return;
     setLoadingShare(budget._id);
+    // Site: abre a janela no clique (o iPhone bloqueia se abrir depois).
+    const win = openPdfWindow();
     try {
       const clientId = typeof budget.cliente === "object" ? budget.cliente?._id : budget.cliente;
       const client = clientsById[clientId ?? ""] ?? (typeof budget.cliente === "object" ? budget.cliente : null);
@@ -220,8 +222,9 @@ export default function OrcamentosScreen() {
         issuer: user ?? undefined,
         options: await loadPdfOptions(),
       });
-      await sharePdf(pdf);
+      await sharePdf(pdf, win);
     } catch (error: any) {
+      win?.close();
       console.log("ERRO AO COMPARTILHAR PDF:", error);
       showCardMessage(error?.message ? `Não foi possível gerar o PDF: ${error.message}` : "Não foi possível gerar o PDF.", true);
     } finally {

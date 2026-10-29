@@ -154,6 +154,10 @@ export interface ServicoObra {
   qt_dias_real?: number;
 
   concluido?: boolean;
+
+  /** Cronograma: dias contados a partir do início previsto da obra (dia 1). */
+  dia_inicio?: number;
+  dia_fim?: number;
 }
 
 // ==============================
@@ -178,6 +182,9 @@ export interface CategoriaObra {
 
 export interface Obra {
   _id: string;
+
+  /** Nome da obra (editável); sem ele, usa o nome do orçamento. */
+  nome?: string;
 
   orcamento: string | Orcamento;
 

@@ -26,6 +26,7 @@ import { maskDate } from "./mask";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { StatusPill } from "@/components/ui/StatusPill";
 import { getWorkStatusMeta } from "@/utils/status";
+import { diasPrevistos, diasReais, duracaoServico, erroPeriodo, periodo, temCronograma } from "@/utils/workSchedule";
 
 type ObraStatus = Obra["status"];
 
@@ -51,8 +52,10 @@ interface ObrasFormProps {
   loading?: boolean;
   onSuccess?: () => void;
   onEdit?: () => void;
-  /** Gera o relatório da obra em PDF (modo detalhes). */
+  /** Gera o relatório da obra em PDF (inclui a EAP no final). */
   onGeneratePdf?: () => Promise<void> | void;
+  /** Gera só a EAP e o cronograma em PDF. */
+  onGenerateEapPdf?: () => Promise<void> | void;
 }
 
 function formatDateToBR(value?: Date | string | null): string {
@@ -102,28 +105,20 @@ const calculateCategoryProgress = (
     };
   }
 
-  const qt_dias_prevista = services.reduce(
-    (sum, s) => sum + Number(s.qt_dias_prevista ?? 0),
-    0,
-  );
+  // Com cronograma: período da etapa (serviços simultâneos não somam).
+  const qt_dias_prevista = diasPrevistos(services);
+  const qt_dias_real = diasReais(services);
 
-  const qt_dias_real = services.reduce(
-    (sum, s) => sum + Number(s.qt_dias_real ?? 0),
-    0,
-  );
-
-  // Dias previstos dos serviços concluídos
+  // Peso de cada serviço no progresso = sua duração prevista.
+  const pesoTotal = services.reduce((sum, s) => sum + Number(s.qt_dias_prevista ?? 0), 0);
   const diasPrevistosConcluidos = services.reduce(
     (sum, s) => (s.concluido ? sum + Number(s.qt_dias_prevista ?? 0) : sum),
     0,
   );
 
   const porcentagem_de_conclusao =
-    qt_dias_prevista > 0
-      ? Math.min(
-          100,
-          Math.round((diasPrevistosConcluidos / qt_dias_prevista) * 100),
-        )
+    pesoTotal > 0
+      ? Math.min(100, Math.round((diasPrevistosConcluidos / pesoTotal) * 100))
       : 0;
 
   const todosConcluidos = services.every((s) => s.concluido === true);
@@ -152,6 +147,7 @@ const calculateWorkStatus = (
   categorias: CategoriaObraForm[],
   dataFimPrevista?: string,
   porcentagem?: number,
+  totais?: { previstos: number; reais: number },
 ): ObraStatus => {
   if (categorias.length === 0) {
     return "NOPRAZO";
@@ -161,22 +157,16 @@ const calculateWorkStatus = (
     (c) => c.porcentagem_de_conclusao === 100,
   );
 
-  const diasPrevistos = categorias.reduce(
-    (s, c) => s + Number(c.qt_dias_prevista ?? 0),
-    0,
-  );
-
-  const diasReais = categorias.reduce(
-    (s, c) => s + Number(c.qt_dias_real ?? 0),
-    0,
-  );
+  const previstosObra =
+    totais?.previstos ?? categorias.reduce((s, c) => s + Number(c.qt_dias_prevista ?? 0), 0);
+  const reaisObra = totais?.reais ?? categorias.reduce((s, c) => s + Number(c.qt_dias_real ?? 0), 0);
 
   if (todasConcluidas) {
-    if (diasReais > diasPrevistos) {
+    if (reaisObra > previstosObra) {
       return "ATRASADO";
     }
 
-    if (diasReais < diasPrevistos) {
+    if (reaisObra < previstosObra) {
       return "ADIANTADO";
     }
 
@@ -210,7 +200,7 @@ function mapCategoriasFromObra(
       const servicoForm: ServicoObraForm = {
         ...serv,
         id: Date.now() + catIdx * 1000 + servIdx + 1,
-        qt_dias_prevista: Number(serv.qt_dias_prevista ?? 0),
+        qt_dias_prevista: duracaoServico(serv) ?? Number(serv.qt_dias_prevista ?? 0),
         qt_dias_real: Number(serv.qt_dias_real ?? 0),
         concluido: Boolean(serv.concluido),
         status: "NOPRAZO",
@@ -242,6 +232,8 @@ function mapCategoriasFromBudget(budget: Orcamento): CategoriaObraForm[] {
       descricao: serv.descricao,
       qt_dias_prevista: 0,
       qt_dias_real: 0,
+      dia_inicio: undefined,
+      dia_fim: undefined,
       concluido: false,
       status: "NOPRAZO" as ObraStatus,
     })),
@@ -259,6 +251,7 @@ export function ObrasForm({
   onSuccess,
   onEdit,
   onGeneratePdf,
+  onGenerateEapPdf,
 }: ObrasFormProps) {
   const { styles, theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -332,6 +325,13 @@ export function ObrasForm({
     carregarDados();
   }, [budget, initialData, token, mode]);
 
+  // Nome da obra: editável na obra (o orçamento aprovado continua intacto).
+  const [nomeObra, setNomeObra] = useState(initialData?.nome || budget?.nome || "");
+  useEffect(() => {
+    if (!nomeObra && orcamentoAtrelado?.nome) setNomeObra(orcamentoAtrelado.nome);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orcamentoAtrelado]);
+
   const [dataInicioPrevista, setDataInicioPrevista] = useState("");
   const [dataInicioReal, setDataInicioReal] = useState("");
   const [categorias, setCategorias] = useState<CategoriaObraForm[]>([]);
@@ -393,23 +393,26 @@ export function ObrasForm({
     return Math.min(100, Math.round((concluidos / previstos) * 100));
   }, [categoriasCalculadas]);
 
-  // Total de dias previstos/reais da obra = soma dos totais de cada categoria
+  // Duração da obra: período geral do cronograma (do primeiro ao último dia),
+  // não a soma das durações. Obras antigas sem cronograma: soma das etapas.
+  const todosServicos = useMemo(() => categoriasCalculadas.flatMap((c) => c.servicos), [categoriasCalculadas]);
+  const usaCronograma = isAdd || temCronograma(todosServicos);
+  const periodoGeral = useMemo(() => periodo(todosServicos), [todosServicos]);
+
   const totalQtDiasPrevista = useMemo(
     () =>
-      categoriasCalculadas.reduce(
-        (sum, cat) => sum + Number(cat.qt_dias_prevista ?? 0),
-        0,
-      ),
-    [categoriasCalculadas],
+      usaCronograma
+        ? diasPrevistos(todosServicos)
+        : categoriasCalculadas.reduce((sum, cat) => sum + Number(cat.qt_dias_prevista ?? 0), 0),
+    [usaCronograma, todosServicos, categoriasCalculadas],
   );
 
   const totalQtDiasReal = useMemo(
     () =>
-      categoriasCalculadas.reduce(
-        (sum, cat) => sum + Number(cat.qt_dias_real ?? 0),
-        0,
-      ),
-    [categoriasCalculadas],
+      usaCronograma
+        ? diasReais(todosServicos)
+        : categoriasCalculadas.reduce((sum, cat) => sum + Number(cat.qt_dias_real ?? 0), 0),
+    [usaCronograma, todosServicos, categoriasCalculadas],
   );
 
   const formatDate = (date: Date) => {
@@ -430,12 +433,14 @@ export function ObrasForm({
 
     const end = new Date(start);
 
-    if (totalQtDiasPrevista > 0) {
-      end.setDate(end.getDate() + totalQtDiasPrevista - 1);
+    // Com cronograma: dia 1 = início previsto; termina no último dia do cronograma.
+    const ultimoDia = periodoGeral ? periodoGeral.fim : totalQtDiasPrevista;
+    if (ultimoDia > 0) {
+      end.setDate(end.getDate() + ultimoDia - 1);
     }
 
     return formatDate(end);
-  }, [dataInicioPrevista, totalQtDiasPrevista]);
+  }, [dataInicioPrevista, totalQtDiasPrevista, periodoGeral]);
 
   const dataFimRealCalculada = useMemo(() => {
     if (!dataInicioReal) return "";
@@ -459,11 +464,14 @@ export function ObrasForm({
       categoriasCalculadas,
       dataFimPrevistaCalculada,
       porcentagemConclusaoGeral,
+      { previstos: totalQtDiasPrevista, reais: totalQtDiasReal },
     );
   }, [
     categoriasCalculadas,
     dataFimPrevistaCalculada,
     porcentagemConclusaoGeral,
+    totalQtDiasPrevista,
+    totalQtDiasReal,
   ]);
 
   const updateServico = useCallback(
@@ -471,7 +479,7 @@ export function ObrasForm({
       categoriaId: number,
       servicoId: number,
       field: keyof ServicoObraForm,
-      value: string | number | boolean,
+      value: string | number | boolean | undefined,
     ) => {
       setCategorias((prevCategorias) =>
         prevCategorias.map((cat) => {
@@ -484,6 +492,9 @@ export function ObrasForm({
 
               [field]: value,
             };
+            if (field === "dia_inicio" || field === "dia_fim") {
+              novoServico.qt_dias_prevista = duracaoServico(novoServico) ?? 0;
+            }
 
             novoServico.status = calculateServiceStatus(novoServico);
 
@@ -514,21 +525,23 @@ export function ObrasForm({
   }
 
   const [submitting, setSubmitting] = useState(false);
-  const [pdfLoading, setPdfLoading] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState<"completo" | "eap" | null>(null);
 
-  async function handleGeneratePdf() {
-    if (!onGeneratePdf || pdfLoading) return;
+  async function runPdf(kind: "completo" | "eap") {
+    const fn = kind === "eap" ? onGenerateEapPdf : onGeneratePdf;
+    if (!fn || pdfLoading) return;
     setFeedback("");
-    setPdfLoading(true);
+    setPdfLoading(kind);
     try {
-      await onGeneratePdf();
+      await fn();
     } catch (error: any) {
       console.log("ERRO AO GERAR PDF DA OBRA:", error);
       setFeedback(error?.message ? `Erro ao gerar PDF: ${error.message}` : "Erro ao gerar PDF.");
     } finally {
-      setPdfLoading(false);
+      setPdfLoading(null);
     }
   }
+  const handleGeneratePdf = () => runPdf("completo");
 
   async function handleSubmit() {
     if (isReadOnly) return;
@@ -570,16 +583,29 @@ export function ObrasForm({
       return;
     }
 
-    const semPrazo = categoriasCalculadas
-      .flatMap((cat) => cat.servicos)
-      .find((serv) => !(Number(serv.qt_dias_prevista) > 0));
-
-    if (isAdd && semPrazo) {
-      setFeedback(`Informe os dias previstos do serviço "${semPrazo.nome}".`);
+    if (!nomeObra.trim()) {
+      setFeedback("Informe o nome da obra.");
       return;
     }
 
+    const semNome = todosServicos.find((serv) => !serv.nome?.trim());
+    if (semNome) {
+      setFeedback("Informe o nome de todos os serviços.");
+      return;
+    }
+
+    if (usaCronograma) {
+      for (const serv of todosServicos) {
+        const erro = erroPeriodo(serv);
+        if (erro) {
+          setFeedback(`Cronograma do serviço "${serv.nome}": ${erro}`);
+          return;
+        }
+      }
+    }
+
     const workData = {
+      nome: nomeObra.trim(),
       orcamento: orcamentoAtrelado._id,
       responsavel: user._id,
       status: obraStatusCalculado,
@@ -604,6 +630,8 @@ export function ObrasForm({
           qt_dias_prevista: s.qt_dias_prevista,
           qt_dias_real: s.qt_dias_real,
           concluido: s.concluido,
+          dia_inicio: s.dia_inicio,
+          dia_fim: s.dia_fim,
           status: s.status,
         })),
       })),
@@ -667,14 +695,29 @@ export function ObrasForm({
                 <Text style={styles.saveText}>Editar</Text>
               </Pressable>
             )}
+            {onGenerateEapPdf && (
+              <Pressable
+                onPress={() => runPdf("eap")}
+                disabled={!!pdfLoading}
+                style={[styles.rightAction, { marginRight: 6 }]}
+                accessibilityLabel="Gerar EAP em PDF"
+              >
+                {pdfLoading === "eap" ? (
+                  <ActivityIndicator size="small" color={theme.primary} />
+                ) : (
+                  <Ionicons name="git-network-outline" size={16} color={theme.primary} />
+                )}
+                <Text style={styles.saveText}>EAP</Text>
+              </Pressable>
+            )}
             {onGeneratePdf && (
               <Pressable
                 onPress={handleGeneratePdf}
-                disabled={pdfLoading}
+                disabled={!!pdfLoading}
                 style={styles.rightAction}
                 accessibilityLabel="Gerar relatório em PDF"
               >
-                {pdfLoading ? (
+                {pdfLoading === "completo" ? (
                   <ActivityIndicator size="small" color={theme.primary} />
                 ) : (
                   <Ionicons name="document-text-outline" size={16} color={theme.primary} />
@@ -710,11 +753,18 @@ export function ObrasForm({
         <Text style={styles.subtitle}>Informações Gerais</Text>
         <View style={styles.divider} />
         <View style={styles.card}>
-          <Text
-            style={[styles.title, { marginVertical: 10, textAlign: "center" }]}
-          >
-            {orcamentoAtrelado?.nome ?? ""}
-          </Text>
+          {isReadOnly ? (
+            <Text style={[styles.title, { marginVertical: 10, textAlign: "center" }]}>
+              {nomeObra || orcamentoAtrelado?.nome || ""}
+            </Text>
+          ) : (
+            <>
+              <Text style={styles.label}>
+                Nome da obra:<Text style={styles.obrigatorio}>*</Text>
+              </Text>
+              <AppInput placeholder="Nome da obra" value={nomeObra} onChangeText={setNomeObra} maxLength={200} />
+            </>
+          )}
           {!isAdd && (
             <View style={{ alignSelf: "center", marginBottom: 8 }}>
               <StatusPill meta={getWorkStatusMeta(obraStatusCalculado, theme)} withIcon />
@@ -977,7 +1027,53 @@ export function ObrasForm({
 
                 <Text style={styles.label}>Nome do Serviço {sIdx + 1}:</Text>
 
-                <AppInput value={servico.nome} editable={false} />
+                <AppInput
+                  value={servico.nome}
+                  placeholder="Nome do serviço"
+                  onChangeText={(text) => updateServico(categoria.id, servico.id, "nome", text)}
+                  editable={!isReadOnly}
+                />
+                {usaCronograma && (
+                  <>
+                    <Text style={styles.label}>
+                      Cronograma (dias a partir do início da obra):
+                      {isAdd && <Text style={styles.obrigatorio}>*</Text>}
+                    </Text>
+                    <View style={styles.row}>
+                      <View style={styles.column}>
+                        <Text style={styles.label}>Do dia</Text>
+                        <AppInput
+                          placeholder="Ex.: 2"
+                          value={servico.dia_inicio ? String(servico.dia_inicio) : ""}
+                          onChangeText={(text) => {
+                            const n = parseInt(text.replace(/\D/g, ""), 10);
+                            updateServico(categoria.id, servico.id, "dia_inicio", Number.isFinite(n) ? n : undefined);
+                          }}
+                          keyboardType="numeric"
+                          maxLength={4}
+                          editable={isAdd}
+                        />
+                      </View>
+                      <View style={styles.column}>
+                        <Text style={styles.label}>Até o dia</Text>
+                        <AppInput
+                          placeholder="Ex.: 4"
+                          value={servico.dia_fim ? String(servico.dia_fim) : ""}
+                          onChangeText={(text) => {
+                            const n = parseInt(text.replace(/\D/g, ""), 10);
+                            updateServico(categoria.id, servico.id, "dia_fim", Number.isFinite(n) ? n : undefined);
+                          }}
+                          keyboardType="numeric"
+                          maxLength={4}
+                          editable={isAdd}
+                        />
+                      </View>
+                    </View>
+                    {isAdd && !!erroPeriodo(servico) && (servico.dia_inicio || servico.dia_fim) ? (
+                      <Text style={styles.feedback}>{erroPeriodo(servico)}</Text>
+                    ) : null}
+                  </>
+                )}
                 <Text style={styles.label}>Descrição:</Text>
                 <AppInput
                   placeholder="Informe detalhes sobre esse serviço"
@@ -989,26 +1085,9 @@ export function ObrasForm({
                 />
                 <View style={styles.row}>
                   <View style={styles.column}>
-                    <Text style={styles.label}>
-                      Dias Previstos:
-                      {!isReadOnly && !isEdit && (
-                        <Text style={styles.obrigatorio}>*</Text>
-                      )}
-                    </Text>
-                    <AppInput
-                      placeholder="Dias"
-                      value={String(servico.qt_dias_prevista ?? 0)}
-                      onChangeText={(text) =>
-                        updateServico(
-                          categoria.id,
-                          servico.id,
-                          "qt_dias_prevista",
-                          Number(text) || 0,
-                        )
-                      }
-                      keyboardType="numeric"
-                      editable={!isReadOnly && !isEdit}
-                    />
+                    <Text style={styles.label}>Dias Previstos:</Text>
+                    {/* Calculado pelo cronograma (sempre só leitura). */}
+                    <AppInput value={String(servico.qt_dias_prevista ?? 0)} editable={false} />
                   </View>
                   {!isAdd && (
                     <View style={styles.column}>
@@ -1079,6 +1158,15 @@ export function ObrasForm({
         <Text style={styles.subtitle}>Resumo da Obra</Text>
         <View style={styles.divider} />
         <View style={styles.card}>
+          <Text style={styles.label}>Duração prevista da obra:</Text>
+          <AppInput
+            value={
+              periodoGeral
+                ? `${periodoGeral.dias} ${periodoGeral.dias === 1 ? "dia" : "dias"} (do dia ${periodoGeral.inicio} ao dia ${periodoGeral.fim})`
+                : `${totalQtDiasPrevista} ${totalQtDiasPrevista === 1 ? "dia" : "dias"}`
+            }
+            editable={false}
+          />
           <View style={styles.row}>
             <View style={styles.column}>
               <Text style={styles.label}>Data de Fim Prevista:</Text>
@@ -1129,16 +1217,33 @@ export function ObrasForm({
           <Text style={styles.feedback}>{feedbackMessage}</Text>
         )}
         <View style={styles.divider}></View>
-        {isReadOnly ? (
-          onGeneratePdf && (
-            <AppButton
-              title="Gerar relatório da obra (PDF)"
-              icon="document-text-outline"
-              onPress={handleGeneratePdf}
-              loading={pdfLoading}
-            />
-          )
-        ) : (
+        {(onGeneratePdf || onGenerateEapPdf) && !isAdd && (
+          <View style={styles.row}>
+            {onGeneratePdf && (
+              <View style={styles.column}>
+                <AppButton
+                  title="Relatório (PDF)"
+                  icon="document-text-outline"
+                  variant={isReadOnly ? "primary" : "tinted"}
+                  onPress={handleGeneratePdf}
+                  loading={pdfLoading === "completo"}
+                />
+              </View>
+            )}
+            {onGenerateEapPdf && (
+              <View style={styles.column}>
+                <AppButton
+                  title="EAP (PDF)"
+                  icon="git-network-outline"
+                  variant="tinted"
+                  onPress={() => runPdf("eap")}
+                  loading={pdfLoading === "eap"}
+                />
+              </View>
+            )}
+          </View>
+        )}
+        {isReadOnly ? null : (
           <AppButton
             title={mode === "add" ? "Criar obra" : "Salvar andamento"}
             icon="checkmark"

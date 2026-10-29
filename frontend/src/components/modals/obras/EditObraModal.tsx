@@ -4,6 +4,7 @@ import { ObrasForm } from "../../forms/ObrasForms";
 import { getClients, updateWork } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { Cliente, Obra } from "@/components/layout/interface";
+import { useWorkPdf } from "./useWorkPdf";
 
 interface Props {
   visible: boolean;
@@ -17,6 +18,8 @@ export function EditObraModal({ visible, work, onClose, onSuccess }: Props) {
   const [clientsList, setClientsList] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState("");
+  // PDFs da versão salva da obra (salve antes para incluir as alterações).
+  const { generatePdf, generateEapPdf, viewer } = useWorkPdf(work);
 
   useEffect(() => {
     async function loadClients() {
@@ -64,7 +67,10 @@ export function EditObraModal({ visible, work, onClose, onSuccess }: Props) {
           onSave={handleSave}
           feedbackMessage={feedback}
           loading={loading}
+          onGeneratePdf={generatePdf}
+          onGenerateEapPdf={generateEapPdf}
         />
+        {viewer}
       </View>
     </Modal>
   );

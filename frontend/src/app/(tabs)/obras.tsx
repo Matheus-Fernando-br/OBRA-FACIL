@@ -7,11 +7,15 @@ import { Header } from "@/components/cards/Header";
 
 import { SearchField } from "@/components/ui/SearchField";
 import { FilterChips } from "@/components/ui/FilterChips";
+import { StatusSegment } from "@/components/ui/StatusSegment";
+
+/** Status com atalho nos mini-filtros (Adiantadas/Canceladas ficam no filtro completo). */
+const SEGMENT_STATUS: string[] = ["all", "noprazo", "atrasado", "entregue"];
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FadeInView } from "@/components/ui/FadeInView";
 import { ListSkeleton } from "@/components/ui/Skeleton";
 import { formatDate } from "@/utils/format";
-import { getClientName, isWorkFinished } from "@/utils/status";
+import { getClientName, getWorkName, isWorkFinished } from "@/utils/status";
 import { router, useLocalSearchParams } from "expo-router";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -426,7 +430,7 @@ export default function ObrasScreen() {
           NOME DA OBRA
         ====================================================== */
 
-      const nomeObra = budget?.nome?.toLowerCase() ?? "";
+      const nomeObra = getWorkName(work, budget).toLowerCase();
 
       /* ======================================================
           NOME DO CLIENTE
@@ -466,7 +470,8 @@ export default function ObrasScreen() {
       if (workFilters.status !== "all") {
         const currentStatus = normalizeStatus(work.status);
 
-        if (currentStatus !== workFilters.status) {
+        // O filtro usa minúsculas ("noprazo") e a obra, maiúsculas ("NOPRAZO").
+        if (currentStatus !== normalizeStatus(workFilters.status)) {
           return false;
         }
       }
@@ -913,6 +918,18 @@ export default function ObrasScreen() {
           onChangeText={setSearch}
         />
 
+        {/* Mini-filtros de status (mesmo padrão da tela de orçamentos). */}
+        <StatusSegment
+          value={SEGMENT_STATUS.includes(workFilters.status) ? workFilters.status : "all"}
+          onChange={(status) => setWorkFilters((prev) => ({ ...prev, status }))}
+          options={[
+            { value: "all", label: "Todas" },
+            { value: "noprazo", label: "No prazo" },
+            { value: "atrasado", label: "Atrasadas" },
+            { value: "entregue", label: "Entregues" },
+          ]}
+        />
+
         <FilterChips labels={activeFilterLabels} onClear={clearFilters} />
 
         {loading && worksList.length === 0 ? (
@@ -944,7 +961,7 @@ export default function ObrasScreen() {
             return (
               <FadeInView key={work._id} index={index}>
                 <ObrasCard
-                  title={budget?.nome ?? "Obra"}
+                  title={getWorkName(work, budget)}
                   client={clientLabel(budget)}
                   status={work.status}
                   progress={work.porcentagem_de_conclusao ?? 0}
@@ -1051,7 +1068,7 @@ export default function ObrasScreen() {
       <DeleteObraModal
         visible={deleteVisible}
         WorkId={selectedWork?._id ?? ""}
-        WorkName={selectedBudgetObra?.nome ?? "Obra"}
+        WorkName={getWorkName(selectedWork, selectedBudgetObra)}
         onClose={() => setDeleteVisible(false)}
         onSuccess={loadWorks}
       />

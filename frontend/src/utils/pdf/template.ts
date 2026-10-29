@@ -1,3 +1,5 @@
+import { LOGO_MARK_DATA_URI } from "./logoData";
+
 /* ==========================================================
    TEMPLATE DOS DOCUMENTOS PDF
    HTML/CSS compartilhado por orçamento, relatório de obra e
@@ -88,8 +90,10 @@ const CSS = `
   }
   .doc-header { display: flex; justify-content: space-between; align-items: flex-start;
     padding-bottom: 14px; border-bottom: 2px solid ${ACCENT}; margin-bottom: 18px; }
-  .brand { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
-  .brand span { color: ${ACCENT}; }
+  .brand { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
+  .brand img { width: 26px; height: 26px; }
+  .brand i { display: inline-block; width: 1px; height: 22px; background: #3A3A3C; opacity: .6; }
+  .brand span { color: #F28A12; }
   .issuer { font-size: 10px; color: #6C6C70; margin-top: 4px; }
   .doc-title { text-align: right; }
   .doc-title h1 { margin: 0; font-size: 17px; letter-spacing: -0.2px; }
@@ -129,6 +133,27 @@ const CSS = `
   .footer { margin-top: 26px; padding-top: 8px; border-top: 1px solid #E5E5EA; color: #8E8E93;
     font-size: 8.5px; display: flex; justify-content: space-between; }
   .empty { color: #8E8E93; font-style: italic; padding: 8px 0; }
+
+  /* Visualização na tela (site): folha centralizada no computador e
+     layout em coluna no celular. Não afeta o PDF/impressão. */
+  @media screen {
+    html { background: #E9E9EE; }
+    body { max-width: 210mm; margin: 0 auto; padding: 18mm 16mm; background: #FFFFFF; min-height: 100vh; }
+  }
+  @media screen and (max-width: 700px) {
+    body { padding: 16px 14px 40px; font-size: 12px; }
+    .doc-header { flex-direction: column; gap: 10px; }
+    .doc-title { text-align: left; }
+    .grid { flex-direction: column; }
+    .box { flex-basis: auto; }
+    .kpis { flex-direction: column; }
+    .totals { width: 100%; }
+    .signatures { flex-direction: column; gap: 34px; }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .eap .tree-stages { flex-direction: column; }
+    .eap .gantt { display: block; min-width: 560px; }
+    .eap .gantt-wrap { overflow-x: auto; }
+  }
 `;
 
 export const STATUS_COLORS: Record<string, string> = {
@@ -186,7 +211,11 @@ export function renderDocument({
 <body>
   <div class="doc-header">
     <div>
-      ${options.showLogo ? `<div class="brand">Obra <span>Fácil</span></div>` : ""}
+      ${
+        options.showLogo
+          ? `<div class="brand"><img src="${LOGO_MARK_DATA_URI}" alt="" /><i></i>Obra <span>Fácil</span></div>`
+          : ""
+      }
       ${issuerLine ? `<div class="issuer">${issuerLine}</div>` : ""}
     </div>
     <div class="doc-title">

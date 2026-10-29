@@ -50,19 +50,35 @@ export async function createPdf(html: string, baseName: string): Promise<Generat
   }
 }
 
+/**
+ * Site: abre a janela do documento JÁ no clique (antes de qualquer espera).
+ * O Safari do iPhone bloqueia janelas abertas depois de um "await", e era
+ * por isso que o PDF não aparecia no celular.
+ */
+export function openPdfWindow(): Window | null {
+  if (Platform.OS !== "web" || typeof window === "undefined") return null;
+  const win = window.open("", "_blank");
+  if (win) {
+    win.document.write(
+      '<!DOCTYPE html><meta name="viewport" content="width=device-width, initial-scale=1"><p style="font-family:sans-serif;padding:24px;color:#6C6C70">Gerando o documento…</p>',
+    );
+  }
+  return win;
+}
+
 /** Abre a visualização/impressão do sistema (permite salvar como PDF). */
-export async function printPdf(pdf: GeneratedPdf) {
+export async function printPdf(pdf: GeneratedPdf, win?: Window | null) {
   if (Platform.OS === "web") {
-    openHtmlForPrint(pdf.html);
+    openHtmlForPrint(pdf.html, win);
     return;
   }
   await Print.printAsync({ uri: pdf.uri });
 }
 
 /** Compartilha o arquivo (WhatsApp, e-mail, Drive, "Salvar em Arquivos"…). */
-export async function sharePdf(pdf: GeneratedPdf) {
+export async function sharePdf(pdf: GeneratedPdf, win?: Window | null) {
   if (Platform.OS === "web") {
-    openHtmlForPrint(pdf.html);
+    openHtmlForPrint(pdf.html, win);
     return;
   }
 
@@ -77,16 +93,36 @@ export async function sharePdf(pdf: GeneratedPdf) {
   });
 }
 
-function openHtmlForPrint(html: string) {
-  const win = window.open("", "_blank");
+/* Barra fixa na visualização do site (some na impressão/PDF). */
+const WEB_TOOLBAR = `
+<style>
+  .of-toolbar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; justify-content: flex-end;
+    padding: 10px 12px; background: rgba(255,255,255,.96); border-bottom: 1px solid #E5E5EA;
+    margin: -18mm -16mm 14px; font-family: -apple-system, Roboto, Arial, sans-serif; }
+  .of-toolbar button { border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .of-toolbar .p { background: #C2570C; color: #fff; }
+  .of-toolbar .s { background: #F2F2F7; color: #1C1C1E; }
+  @media screen and (max-width: 700px) { .of-toolbar { margin: -16px -14px 14px; } .of-toolbar button { flex: 1; } }
+  @media print { .of-toolbar { display: none !important; } }
+</style>
+<div class="of-toolbar">
+  <button class="s" onclick="window.close()">Fechar</button>
+  <button class="p" onclick="window.print()">Salvar PDF / Imprimir</button>
+</div>`;
+
+function openHtmlForPrint(html: string, preOpened?: Window | null) {
+  const win = preOpened && !preOpened.closed ? preOpened : window.open("", "_blank");
   if (!win) {
     throw new Error("O navegador bloqueou a nova janela. Permita pop-ups para gerar o PDF.");
   }
   win.document.open();
-  win.document.write(html);
+  win.document.write(html.replace(/<body>/, `<body>${WEB_TOOLBAR}`));
   win.document.close();
   win.focus();
-  setTimeout(() => win.print(), 350);
+  // No computador já abre a impressão; no celular a pessoa vê o documento
+  // primeiro e usa o botão "Salvar PDF / Imprimir".
+  const touch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+  if (!touch) setTimeout(() => win.print(), 350);
 }
 
 /* ==========================================================
