@@ -1,6 +1,6 @@
 {
-  "versao": "2026-10-27",
-  "atualizadoEm": "27 de outubro de 2026",
+  "versao": "2026-10-29",
+  "atualizadoEm": "29/10/2026",
   "privacidade": {
     "titulo": "Política de Privacidade",
     "intro": "Esta política explica como o aplicativo Obra Fácil e o site de assinatura, mantidos pela R2M, coletam, usam, compartilham e protegem dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD) e o Marco Civil da Internet (Lei nº 12.965/2014).",
@@ -31,11 +31,11 @@
       },
       {
         "titulo": "7. Compartilhamento e transferência internacional",
-        "texto": "Compartilhamos dados apenas com fornecedores que atuam como operadores da R2M, para as finalidades desta política: Render (hospedagem do servidor, nos Estados Unidos), MongoDB Atlas (banco de dados em nuvem), Brevo (envio de e-mails de serviço, na União Europeia) e Mercado Pago (processamento das assinaturas, no Brasil). Por isso, alguns dados podem ser armazenados fora do Brasil, com as garantias do art. 33 da LGPD, como cláusulas contratuais e padrões de segurança desses fornecedores. Os dados também podem ser fornecidos a autoridades quando houver obrigação legal ou ordem judicial. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
+        "texto": "Compartilhamos dados apenas com fornecedores que atuam como operadores da R2M, para as finalidades desta política: Render (hospedagem do servidor, nos Estados Unidos), MongoDB Atlas (banco de dados em nuvem), Brevo (envio de e-mails de serviço, na União Europeia) Mercado Pago (processamento das assinaturas, no Brasil) e Google (anúncios do AdMob, no aplicativo, e do AdSense, no site, exibidos apenas no plano Gratuito). Por isso, alguns dados podem ser armazenados fora do Brasil, com as garantias do art. 33 da LGPD, como cláusulas contratuais e padrões de segurança desses fornecedores. Os dados também podem ser fornecidos a autoridades quando houver obrigação legal ou ordem judicial. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
       },
       {
         "titulo": "8. Armazenamento no aparelho e rastreadores",
-        "texto": "O app guarda sua sessão no armazenamento seguro do aparelho (Keychain no iOS e Keystore no Android) e algumas preferências (tema, opções de PDF e alertas) na memória local do app. O site de assinatura guarda a sessão apenas enquanto a aba estiver aberta. Não usamos cookies de publicidade, ferramentas de rastreamento de terceiros nem identificadores de anúncio."
+        "texto": "O app guarda sua sessão no armazenamento seguro do aparelho (Keychain no iOS e Keystore no Android) e algumas preferências (tema, opções de PDF e alertas) na memória local do app. O site de assinatura guarda a sessão apenas enquanto a aba estiver aberta. Não usamos cookies de publicidade, ferramentas de rastreamento de terceiros nem identificadores de anúncio. No plano Gratuito, o aplicativo e o site exibem anúncios do Google (AdMob e AdSense). Para isso, o Google pode usar o identificador de publicidade do aparelho, cookies e dados de uso para escolher e medir os anúncios, conforme a política de privacidade do Google (policies.google.com/technologies/ads). Quando a lei exigir, pedimos seu consentimento antes; você pode limitar anúncios personalizados nas configurações do Android (Google → Anúncios) ou em adssettings.google.com. Nenhum dado dos seus clientes, orçamentos ou obras é enviado aos anunciantes. Os planos pagos não exibem anúncios."
       },
       {
         "titulo": "9. Segurança",
@@ -81,7 +81,7 @@
       },
       {
         "titulo": "4. Planos, preços e pagamento",
-        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional), com limites diferentes de clientes, orçamentos ativos, obras ativas e itens de catálogo, informados na tela Planos e no site de assinatura antes da contratação. As assinaturas são feitas pelo site de assinatura do Obra Fácil e cobradas mensalmente pelo Mercado Pago, com renovação automática até o cancelamento. Os preços incluem os tributos aplicáveis. O plano pago é liberado assim que o Mercado Pago confirma o pagamento. Se uma cobrança for recusada e não for regularizada no prazo de tolerância informado, a conta volta ao plano Gratuito, sem perda dos dados — apenas a criação de novos itens fica sujeita aos limites do Gratuito."
+        "texto": "O app oferece o plano Gratuito e planos pagos (Básico e Profissional), com limites diferentes de clientes, orçamentos ativos, obras ativas e itens de catálogo, informados na tela Planos e no site de assinatura antes da contratação. As assinaturas são feitas pelo site de assinatura do Obra Fácil e cobradas mensalmente pelo Mercado Pago, com renovação automática até o cancelamento. Os preços incluem os tributos aplicáveis. O plano pago é liberado assim que o Mercado Pago confirma o pagamento. Se uma cobrança for recusada e não for regularizada no prazo de tolerância informado, a conta volta ao plano Gratuito, sem perda dos dados — apenas a criação de novos itens fica sujeita aos limites do Gratuito. O plano Gratuito exibe anúncios de terceiros (Google); os planos pagos não exibem anúncios."
       },
       {
         "titulo": "5. Cancelamento e direito de arrependimento",

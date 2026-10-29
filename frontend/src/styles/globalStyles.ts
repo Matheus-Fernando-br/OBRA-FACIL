@@ -726,7 +726,8 @@ export function createGlobalStyles(colors: ThemeColors) {
     },
 
     scrollContent: {
-      paddingBottom: 140,
+      // Espaço para a barra de abas e o banner de anúncio (plano Gratuito).
+      paddingBottom: 210,
     },
 
     feedback: {

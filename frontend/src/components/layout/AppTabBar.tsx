@@ -7,6 +7,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { AdBanner } from "@/components/ads/AdBanner";
 import { useTheme } from "@/contexts/ThemeContext";
 
 type TabBarProps = Parameters<
@@ -70,6 +71,8 @@ export function AppTabBar({ state, emitter, navigateToTab, insets }: TabBarProps
       style={[styles.tabBarWrap, { paddingBottom: Math.max(insets.bottom, 12) }]}
       pointerEvents="box-none"
     >
+      {/* Anúncio (só plano Gratuito) logo acima da barra, nas abas principais. */}
+      {activeIndex >= 0 && <AdBanner />}
       <View
         style={styles.tabBar}
         onLayout={(e: LayoutChangeEvent) => setBarWidth(e.nativeEvent.layout.width)}

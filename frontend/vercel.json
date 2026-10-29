@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx expo export --platform web",
+  "buildCommand": "node scripts/ads-txt.js && npx expo export --platform web",
   "outputDirectory": "dist",
   "cleanUrls": true,
   "installCommand": "npm install"

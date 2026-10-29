@@ -6,6 +6,8 @@ import { EMPTY_SUBSCRIPTION, fetchSubscriptionState, SubscriptionState } from "@
 interface SubscriptionContextData extends SubscriptionState {
   plan: PlanDefinition;
   loading: boolean;
+  /** O plano do usuário logado já foi confirmado pelo servidor. */
+  ready: boolean;
   refresh(): Promise<void>;
 }
 
@@ -16,15 +18,19 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const { token } = useAuth();
   const [state, setState] = useState<SubscriptionState>(EMPTY_SUBSCRIPTION);
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!token) {
       setState(EMPTY_SUBSCRIPTION);
+      setReady(false);
       return;
     }
     setLoading(true);
     try {
-      setState(await fetchSubscriptionState(token));
+      const next = await fetchSubscriptionState(token);
+      setState(next);
+      setReady(next.confirmado);
     } finally {
       setLoading(false);
     }
@@ -37,7 +43,7 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const plan = getPlan(state.planId as PlanId, state.plans);
 
   return (
-    <SubscriptionContext.Provider value={{ ...state, plan, loading, refresh }}>
+    <SubscriptionContext.Provider value={{ ...state, plan, loading, ready, refresh }}>
       {children}
     </SubscriptionContext.Provider>
   );

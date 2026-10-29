@@ -30,6 +30,8 @@ export interface SubscriptionState {
   pendente: boolean;
   uso: Partial<Record<LimitKey, number>>;
   checkoutEnabled: boolean;
+  /** O servidor respondeu qual é o plano (falha de rede = não confirmado). */
+  confirmado: boolean;
 }
 
 export const EMPTY_SUBSCRIPTION: SubscriptionState = {
@@ -44,6 +46,7 @@ export const EMPTY_SUBSCRIPTION: SubscriptionState = {
   pendente: false,
   uso: {},
   checkoutEnabled: false,
+  confirmado: false,
 };
 
 const VALID_IDS = new Set<string>(PLANS.map((p) => p.id));
@@ -58,6 +61,7 @@ export async function fetchSubscriptionState(token: string): Promise<Subscriptio
   return {
     plans: serverPlans ?? PLANS,
     planId,
+    confirmado: Boolean(me),
     origem: me?.origem ?? "gratuito",
     status: me?.status ?? "gratuito",
     modalidade: me?.modalidade ?? null,
