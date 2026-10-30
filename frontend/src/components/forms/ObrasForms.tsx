@@ -700,7 +700,7 @@ export function ObrasForm({
                 onPress={() => runPdf("eap")}
                 disabled={!!pdfLoading}
                 style={[styles.rightAction, { marginRight: 6 }]}
-                accessibilityLabel="Gerar EAP em PDF"
+                accessibilityLabel="Gerar estrutura analítica em PDF"
               >
                 {pdfLoading === "eap" ? (
                   <ActivityIndicator size="small" color={theme.primary} />
@@ -1218,9 +1218,9 @@ export function ObrasForm({
         )}
         <View style={styles.divider}></View>
         {(onGeneratePdf || onGenerateEapPdf) && !isAdd && (
-          <View style={styles.row}>
+          <View>
             {onGeneratePdf && (
-              <View style={styles.column}>
+              <View>
                 <AppButton
                   title="Relatório (PDF)"
                   icon="document-text-outline"
@@ -1231,9 +1231,9 @@ export function ObrasForm({
               </View>
             )}
             {onGenerateEapPdf && (
-              <View style={styles.column}>
+              <View>
                 <AppButton
-                  title="EAP (PDF)"
+                  title="Estrutura analítica (PDF)"
                   icon="git-network-outline"
                   variant="tinted"
                   onPress={() => runPdf("eap")}

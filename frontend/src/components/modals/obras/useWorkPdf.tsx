@@ -30,7 +30,11 @@ export function useWorkPdf(work: Obra | null) {
     }
     const args = { work, budget, client, issuer: user ?? undefined, options: await loadPdfOptions() };
     setPdf(kind === "eap" ? await generateWorkEapPdf(args) : await generateWorkPdf(args));
-    setTitle(kind === "eap" ? "EAP e cronograma da obra" : "Relatório de acompanhamento da obra (com EAP)");
+    setTitle(
+      kind === "eap"
+        ? "Estrutura analítica e cronograma da obra"
+        : "Relatório de acompanhamento da obra (com a estrutura analítica)",
+    );
     setVisible(true);
   }
 

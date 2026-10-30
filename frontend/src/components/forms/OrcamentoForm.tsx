@@ -795,6 +795,16 @@ export function OrcamentoForm({
             icon={mode === "details" ? "eye" : "chevron-down"}
           />
         )}
+        {canEdit && !loadingClient && todosClientes.length > 0 && (
+          <Pressable
+            onPress={() => setAddClientVisible(true)}
+            style={{ flexDirection: "row", alignItems: "center", alignSelf: "flex-end", gap: 6, paddingVertical: 6, marginBottom: 8 }}
+            accessibilityRole="button"
+          >
+            <Ionicons name="person-add-outline" size={16} color={theme.primary} />
+            <Text style={{ color: theme.primary, fontWeight: "600" }}>Cadastrar novo cliente</Text>
+          </Pressable>
+        )}
         <Text style={styles.subtitle}>Informações Gerais</Text>
         <View style={styles.divider} />
         <View style={styles.card}>
@@ -1383,6 +1393,16 @@ export function OrcamentoForm({
               </Pressable>
             </View>
             <View style={styles.divider} />
+            {/* Cliente novo: abre direto o cadastro; ao salvar, já fica selecionado. */}
+            <AppButton
+              title="Cadastrar novo cliente"
+              icon="person-add-outline"
+              variant="tinted"
+              onPress={() => {
+                setClientModalVisible(false);
+                setTimeout(() => setAddClientVisible(true), 250);
+              }}
+            />
             <ScrollView>
               {todosClientes.map((client) => (
                 <Pressable

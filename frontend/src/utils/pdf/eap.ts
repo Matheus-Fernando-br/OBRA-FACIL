@@ -111,9 +111,9 @@ export function buildEapSection(work: Obra, nomeObra: string) {
   }
 
   return `<style>${EAP_CSS}</style><div class="eap">
-    <h2 class="eap-title">EAP e cronograma da obra</h2>
+    <h2 class="eap-title">Estrutura analítica e cronograma da obra</h2>
     <div class="eap-sub">Estrutura dos serviços e períodos de execução (dias relativos ao início da obra)</div>
-    <h3>Estrutura Analítica do Projeto (EAP)</h3>
+    <h3>Estrutura Analítica do Projeto</h3>
     <div class="tree-root">${esc(nomeObra)}</div>
     <div class="tree-line"></div>
     <div class="tree-stages">${tree || `<p class="empty">Nenhuma etapa cadastrada.</p>`}</div>

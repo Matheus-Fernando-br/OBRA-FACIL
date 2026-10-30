@@ -165,7 +165,7 @@ export async function generateWorkPdf(args: WorkPdfArgs): Promise<GeneratedPdf> 
 export function buildWorkEapHtml({ work, budget, client, issuer, options = DEFAULT_PDF_OPTIONS }: WorkPdfArgs) {
   const nome = getWorkName(work, budget);
   return renderDocument({
-    title: "EAP da obra",
+    title: "Estrutura analítica da obra",
     subtitle: client?.nome ? `${nome} · ${client.nome}` : nome,
     issuer,
     options: { ...options, signature: false },
@@ -174,5 +174,5 @@ export function buildWorkEapHtml({ work, budget, client, issuer, options = DEFAU
 }
 
 export async function generateWorkEapPdf(args: WorkPdfArgs): Promise<GeneratedPdf> {
-  return createPdf(buildWorkEapHtml(args), `EAP-obra ${getWorkName(args.work, args.budget)}`);
+  return createPdf(buildWorkEapHtml(args), `Estrutura-analitica-obra ${getWorkName(args.work, args.budget)}`);
 }
