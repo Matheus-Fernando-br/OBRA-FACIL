@@ -1,4 +1,4 @@
-import { Linking } from "react-native";
+import { Linking, Platform } from "react-native";
 import { DEFAULT_PLAN_ID, LimitKey, PLANS, PlanDefinition, PlanId, plansFromServer } from "@/config/plans";
 import { API_URL, cancelSubscription, getMySubscription, getPlans, syncSubscription } from "./api";
 
@@ -7,7 +7,7 @@ import { API_URL, cancelSubscription, getMySubscription, getPlans, syncSubscript
    ----------------------------------------------------------
    - O plano efetivo vem sempre do servidor (GET /subscription/me).
    - O checkout só aparece se o servidor liberar para a plataforma
-     (painel → Planos e cobrança). No Android começa desligado:
+     (painel → Planos e cobrança). No Android fica sempre desligado:
      a Google Play exige o faturamento dela para vender assinaturas
      dentro do app. A assinatura fica disponível na página web
      /assinar do backend.
@@ -70,7 +70,10 @@ export async function fetchSubscriptionState(token: string): Promise<Subscriptio
     inadimplente: Boolean(me?.assinatura?.inadimplente),
     pendente: Boolean(me?.pendente),
     uso: me?.uso ?? {},
-    checkoutEnabled: Boolean(me?.checkout?.enabled ?? (plansRes.status === "fulfilled" && plansRes.value?.checkout?.enabled)),
+    // Android (Google Play): nunca vende dentro do app, mesmo que o painel libere.
+    checkoutEnabled:
+      Platform.OS !== "android" &&
+      Boolean(me?.checkout?.enabled ?? (plansRes.status === "fulfilled" && plansRes.value?.checkout?.enabled)),
   };
 }
 

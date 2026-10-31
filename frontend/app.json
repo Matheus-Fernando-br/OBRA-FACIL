@@ -69,8 +69,7 @@
           "faceIDPermission": "O Obra Fácil usa o Face ID para desbloquear sua conta com segurança."
         }
       ],
-      "expo-sharing",
-      "react-native-google-mobile-ads"
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true,
