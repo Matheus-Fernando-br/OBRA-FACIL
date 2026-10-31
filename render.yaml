@@ -53,7 +53,7 @@ services:
       - key: MAIL_FROM_NAME
         value: Obra Fácil
       - key: SUPPORT_EMAIL
-        value: r2m.tec.adm@gmail.com
+        value: obra.app.dev@gmail.com
       # --- Mercado Pago ---
       - key: MP_ACCESS_TOKEN
         sync: false

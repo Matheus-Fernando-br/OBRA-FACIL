@@ -44,6 +44,8 @@ async function brevoTransport({ to, subject, html, text, code }) {
     },
     body: JSON.stringify({
       sender: { email: env.MAIL_FROM_EMAIL, name: env.MAIL_FROM_NAME },
+      // Respostas do usuário vão para o canal de suporte.
+      replyTo: { email: env.SUPPORT_EMAIL, name: env.MAIL_FROM_NAME },
       to: [{ email: to }],
       subject,
       htmlContent: html,

@@ -37,7 +37,7 @@ const schema = z.object({
   BREVO_API_KEY: optional,
   MAIL_FROM_EMAIL: optional,
   MAIL_FROM_NAME: z.string().default('Obra Fácil'),
-  SUPPORT_EMAIL: z.string().default('r2m.tec.adm@gmail.com'),
+  SUPPORT_EMAIL: z.string().default('obra.app.dev@gmail.com'),
 
   MP_ACCESS_TOKEN: optional,
   MP_WEBHOOK_SECRET: optional,

@@ -49,7 +49,7 @@ SEGURANÇA E PRIVACIDADE
 PLANOS
 Comece grátis no plano Gratuito. Quando precisar de mais espaço, os planos Básico e Profissional ampliam ou removem os limites de clientes, orçamentos e obras.
 
-Dúvidas ou sugestões? Fale com a gente: r2m.tec.adm@gmail.com ou WhatsApp (31) 98676-3652.
+Dúvidas ou sugestões? Fale com a gente: obra.app.dev@gmail.com ou WhatsApp (31) 98676-3652.
 
 Obra Fácil — desenvolvido pela R2M.
 ```
@@ -60,7 +60,7 @@ Obra Fácil — desenvolvido pela R2M.
 | Tipo | App |
 | Categoria | Empresas (Business) |
 | Tags sugeridas | Produtividade, Gestão de negócios |
-| E-mail | r2m.tec.adm@gmail.com |
+| E-mail | obra.app.dev@gmail.com |
 | Telefone | +55 31 98676-3652 |
 | Site | https://matheus-fernando-br.github.io/OBRA-FACIL/ |
 | Política de privacidade | https://matheus-fernando-br.github.io/OBRA-FACIL/privacidade.html |

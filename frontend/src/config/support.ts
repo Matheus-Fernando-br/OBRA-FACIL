@@ -11,7 +11,7 @@ export const COMPANY = {
 };
 
 export const SUPPORT = {
-  email: "r2m.tec.adm@gmail.com",
+  email: "obra.app.dev@gmail.com",
   /** Somente dígitos, com DDI 55. */
   whatsapp: "5531986763652",
   whatsappDisplay: "(31) 98676-3652",

@@ -13,7 +13,7 @@ const OUT = path.join(__dirname, "..", "..", "docs");
 
 const SUPPORT = {
   empresa: "R2M",
-  email: "r2m.tec.adm@gmail.com",
+  email: "obra.app.dev@gmail.com",
   whatsapp: "5531986763652",
   whatsappDisplay: "(31) 98676-3652",
 };
