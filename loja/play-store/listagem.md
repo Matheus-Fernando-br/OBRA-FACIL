@@ -27,12 +27,14 @@ ORÇAMENTOS PROFISSIONAIS
 
 CONTROLE DE OBRAS
 • Transforme um orçamento aprovado em obra com um toque
-• Acompanhe dias previstos e reais de cada serviço
-• Progresso calculado automaticamente e status: no prazo, adiantada, atrasada ou entregue
-• Relatório de acompanhamento da obra em PDF
+• Cronograma por serviço: dia de início e de fim de cada etapa
+• Progresso calculado automaticamente e status: no prazo, atrasada ou entregue
+• Estrutura analítica e cronograma da obra em PDF
+• Relatório de acompanhamento da obra em PDF, pronto para enviar ao cliente
 
 CLIENTES
 • Cadastro com CPF/CNPJ, e-mail e telefone
+• Cadastre um cliente novo direto da tela do orçamento
 • Ligue ou chame no WhatsApp direto do app
 • Veja quantos orçamentos cada cliente tem
 
@@ -70,7 +72,6 @@ Obra Fácil — desenvolvido pela R2M.
 |---|---|
 | Ícone 512×512 | `icone-512.png` |
 | Gráfico de recursos 1024×500 | `feature-graphic-1024x500.png` |
-| Capturas de tela (1080×1920) | `01-inicio.png` … `06-relatorios.png` (+ versões `-escuro`) |
+| Capturas de tela (1080×1920, 8 no total — o máximo da loja) | `01-inicio.png`, `01-inicio-escuro.png`, `02-orcamentos.png`, `03-orcamento-detalhes.png`, `04-obras.png`, `05-obra-cronograma.png`, `06-clientes.png`, `07-relatorios.png` |
 
-> As capturas usam dados de exemplo. Antes de enviar, se quiser, gere novas no seu celular
-> com dados reais do seu uso (sem expor dados de clientes reais).
+> As capturas usam uma conta de demonstração com dados fictícios (nenhum cliente real).

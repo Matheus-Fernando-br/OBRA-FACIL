@@ -1,6 +1,6 @@
 # Respostas para os formulários do Play Console
 
-Baseadas no que o app e o backend próprio (`/backend`) fazem hoje (versão 1.0.0).
+Baseadas no que o app e o backend próprio (`/backend`) fazem hoje (versão 1.1.0, revisado em 01/11/2026).
 
 ---
 
@@ -45,8 +45,8 @@ Se no futuro for adicionada ferramenta de análise/erros (ex.: Sentry), marque t
 - Violência, sexo, linguagem imprópria, drogas, jogos de azar: **Não** para todos
 - Os usuários interagem entre si / trocam conteúdo? **Não**
 - Compartilha localização? **Não**
-- Permite compras digitais? **Não** — no app Android não há compra (o checkout fica desligado no
-  painel). Se um dia a compra for liberada dentro do app, atualize para **Sim**.
+- Permite compras digitais? **Não** — no app Android não há compra (o checkout fica sempre desligado
+  no Android, no próprio código). Se um dia a compra for liberada dentro do app, atualize para **Sim**.
 
 Resultado esperado: **Classificação Livre (L)**.
 
@@ -62,8 +62,8 @@ Resultado esperado: **Classificação Livre (L)**.
 ## 4. Outras declarações
 | Pergunta | Resposta |
 |---|---|
-| Anúncios | **Não contém anúncios** |
-| Acesso ao app (para revisão) | **Todas ou algumas funcionalidades são restritas** → informe e-mail e senha de uma **conta de teste** criada para o revisor do Google |
+| Anúncios | **Não, o app não contém anúncios** (o AdMob foi removido do build; quando voltar, mude para Sim) |
+| Acesso ao app (para revisão) | **Todas ou algumas funcionalidades são restritas** → informe e-mail e senha de uma **conta de teste** criada para o revisor do Google (ex.: `obra.app.dev+revisor@gmail.com`; o código de verificação chega na caixa do obra.app.dev@gmail.com). Instruções: "Entre com o e-mail e a senha abaixo. Não é necessário código adicional." |
 | App governamental | Não |
 | Recursos financeiros (empréstimos, etc.) | Não |
 | App de saúde | Não |
@@ -75,8 +75,10 @@ Resultado esperado: **Classificação Livre (L)**.
 ## 5. Permissões declaradas no app
 | Permissão | Por quê |
 |---|---|
-| `INTERNET` | Comunicação com o servidor |
+| `INTERNET` / `ACCESS_NETWORK_STATE` | Comunicação com o servidor e aviso de sem conexão |
 | `USE_BIOMETRIC` / `USE_FINGERPRINT` | Desbloqueio com digital/rosto |
 | `VIBRATE` | Retorno tátil do sistema (adicionada pelas bibliotecas) |
+
+Nenhuma dessas é "permissão sensível" do Google Play — não há formulário extra de permissões.
 
 Câmera, microfone, localização, armazenamento e janelas sobrepostas estão **bloqueados** no `app.json`.

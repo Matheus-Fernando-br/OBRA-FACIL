@@ -11,11 +11,11 @@ Tudo o que é do frontend já está pronto no código. Este guia cobre o que é 
 ## Identidade do app (não mude depois de publicar)
 - Nome: **Obra Fácil**
 - Pacote Android: **`com.r2m.obrafacil`** (iOS: mesmo `bundleIdentifier`)
-- Versão: `expo.version` no `app.json` (1.0.0). O número de build (versionCode) é controlado pelo EAS
+- Versão: `expo.version` no `app.json` (1.1.0). O número de build (versionCode) é controlado pelo EAS
   (`appVersionSource: remote` + `autoIncrement`).
 
 ## 0. Antes de tudo
-1. **Ative o GitHub Pages** (políticas exigidas pela loja):
+1. **GitHub Pages** (políticas exigidas pela loja) — já está ativo; só confira se as páginas abrem:
    GitHub → repositório OBRA-FACIL → **Settings → Pages → Source: Deploy from a branch →
    Branch: `main` / pasta `/docs` → Save**. Em ~1 min ficam no ar:
    - https://matheus-fernando-br.github.io/OBRA-FACIL/privacidade.html
@@ -61,11 +61,11 @@ veja https://docs.expo.dev/submit/android/).
 
 ## 5. Planos e pagamento
 - Preços, limites e textos: painel administrativo (`/admin` → **Planos e cobrança**). O app lê do servidor.
-- Cobrança: **Mercado Pago** (assinatura mensal), confirmada pelo servidor via webhook.
+- Cobrança: **Mercado Pago** (cartão recorrente ou Pix/cartão mês a mês), confirmada pelo servidor via webhook.
 - **Regra da Google Play:** assinaturas vendidas *dentro* do app Android precisam do Google Play Billing
   (no Brasil, outro meio só com adesão ao programa de faturamento alternativo da Google). Por isso o
-  checkout do app Android começa **desligado**; quem quiser assinar usa a página web
-  `https://SEU-SERVICO.onrender.com/assinar`, e o plano aparece no app automaticamente.
+  checkout do app Android fica **sempre desligado** (travado no código); quem quiser assinar usa a página web
+  `https://obra-facil-api.onrender.com/assinar`, e o plano aparece no app automaticamente.
   O app não deve ter botões ou links que levem ao pagamento fora da Play Store.
 - Se no futuro quiser vender dentro do app Android: implementar o Google Play Billing (react-native-iap
   ou RevenueCat) ou aderir ao programa de faturamento alternativo, e atualizar a classificação de
