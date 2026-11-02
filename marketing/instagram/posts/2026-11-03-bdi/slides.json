@@ -1,0 +1,10 @@
+{"slides": [
+ {"estilo": "capa", "html": "<span class='tag'>Orçamento de obra</span><h1>Seu preço está sem BDI?</h1><p class='sub'>O erro que come o lucro de muita obra.</p>"},
+ {"estilo": "escuro", "html": "<h2>Material + mão de obra não é preço.</h2><p>É custo. Se você cobra só isso, está pagando do seu bolso o carro, o telefone, o imposto e ainda trabalha sem lucro.</p>"},
+ {"estilo": "claro", "html": "<h2>O que é BDI</h2><p><b>Benefícios e Despesas Indiretas.</b> É a porcentagem que você soma ao custo da obra para cobrir o que não aparece na planilha e garantir o seu lucro.</p>"},
+ {"estilo": "claro", "html": "<h2>O que entra nele</h2><ul><li><b>1</b>Administração: carro, combustível, telefone, contador</li><li><b>2</b>Seguro e risco: imprevisto, retrabalho</li><li><b>3</b>Impostos sobre a nota</li><li><b>4</b>O seu lucro</li></ul>"},
+ {"estilo": "escuro", "html": "<h2>Na prática</h2><p>Custo direto da obra: R$ 10.000<br>BDI de 25%</p><div class='big' style='margin-top:40px'>R$ 12.500</div><p style='margin-top:30px'>São R$ 2.500 que muita gente deixa na mesa em cada obra desse tamanho.</p>"},
+ {"estilo": "claro", "html": "<h2>Quanto usar?</h2><p>Em obras de edificação, a referência do TCU fica <b>entre 20% e 25%</b> (Acórdão 2622/2013).</p><p style='margin-top:30px'>Use como ponto de partida e ajuste ao seu custo fixo e ao imposto do seu regime.</p>"},
+ {"estilo": "escuro", "html": "<span class='tag'>Resumo · salve</span><ul><li><b>1</b>Some material e mão de obra: é o custo direto</li><li><b>2</b>Defina seu BDI (20% a 25% é a referência)</li><li><b>3</b>Preço = custo direto × (1 + BDI)</li><li><b>4</b>Revise o BDI a cada obra</li></ul>"},
+ {"estilo": "capa", "html": "<h1 style='font-size:96px'>Salve para o próximo orçamento.</h1><p class='sub'>No Obra Fácil, você informa o BDI do orçamento e ele entra sozinho no total e no PDF do cliente.</p><p class='sub' style='font-size:40px'>Comece grátis: link na bio.</p>"}
+]}
