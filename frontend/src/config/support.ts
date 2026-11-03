@@ -6,7 +6,7 @@ import { Linking } from "react-native";
 ========================================================== */
 
 export const COMPANY = {
-  nome: "R2M",
+  nome: "Bellman",
   app: "Obra Fácil",
 };
 

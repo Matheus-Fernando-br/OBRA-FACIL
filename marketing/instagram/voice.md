@@ -3,7 +3,7 @@
 Lido por todas as skills de `instagram-agent-skill` antes de escrever.
 
 ## Quem somos
-- **Nome:** Obra Fácil (R2M)
+- **Nome:** Obra Fácil (Bellman)
 - **Perfil:** @obra.facil.app
 - **O que fazemos, numa frase:** app que monta o orçamento com BDI, gera o PDF para o cliente e acompanha a obra pelo cronograma.
 - **Com quem falamos:** pedreiros, empreiteiros, mestres de obra, técnicos em edificações, engenheiros e arquitetos autônomos ou de escritório pequeno, que hoje fazem orçamento no caderno, no Excel ou no WhatsApp.

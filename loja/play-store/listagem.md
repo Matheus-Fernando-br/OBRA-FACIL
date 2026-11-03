@@ -53,7 +53,7 @@ Comece grátis no plano Gratuito. Quando precisar de mais espaço, os planos Bá
 
 Dúvidas ou sugestões? Fale com a gente: obra.app.dev@gmail.com ou WhatsApp (31) 98676-3652.
 
-Obra Fácil — desenvolvido pela R2M.
+Obra Fácil — desenvolvido pela Bellman.
 ```
 
 ## Categoria e contato

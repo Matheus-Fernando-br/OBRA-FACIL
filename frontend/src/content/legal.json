@@ -1,17 +1,17 @@
 {
-  "versao": "2026-11-01",
-  "atualizadoEm": "01/11/2026",
+  "versao": "2026-11-03",
+  "atualizadoEm": "03/11/2026",
   "privacidade": {
     "titulo": "Política de Privacidade",
-    "intro": "Esta política explica como o aplicativo Obra Fácil e o site de assinatura, mantidos pela R2M, coletam, usam, compartilham e protegem dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD) e o Marco Civil da Internet (Lei nº 12.965/2014).",
+    "intro": "Esta política explica como o aplicativo Obra Fácil e o site de assinatura, mantidos pela Bellman, coletam, usam, compartilham e protegem dados pessoais, em conformidade com a Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD) e o Marco Civil da Internet (Lei nº 12.965/2014).",
     "secoes": [
       {
         "titulo": "1. Quem é o responsável",
-        "texto": "O controlador dos dados da sua conta é a R2M. O encarregado pelo tratamento de dados pessoais (DPO) atende pelo e-mail obra.app.dev@gmail.com e pelo WhatsApp (31) 98676-3652, para dúvidas sobre privacidade e para o exercício dos seus direitos."
+        "texto": "O controlador dos dados da sua conta é a Bellman. O encarregado pelo tratamento de dados pessoais (DPO) atende pelo e-mail obra.app.dev@gmail.com e pelo WhatsApp (31) 98676-3652, para dúvidas sobre privacidade e para o exercício dos seus direitos."
       },
       {
         "titulo": "2. Dados que coletamos",
-        "texto": "Dados da conta: nome, e-mail, CPF ou CNPJ e senha (guardada apenas como código criptográfico irreversível — nem a R2M consegue lê-la), além da data e da versão destes termos que você aceitou. Dados que você cadastra para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra), obras (datas, prazos e andamento) e o catálogo de produtos e serviços. Se você assinar um plano pago: plano contratado, valores, datas, situação das cobranças e o e-mail da conta do Mercado Pago informado no pagamento. Os dados do cartão são digitados diretamente no Mercado Pago e não passam pelos nossos servidores. Dados técnicos necessários à segurança: endereço IP, data e hora de acesso e identificação do aparelho ou navegador nas sessões."
+        "texto": "Dados da conta: nome, e-mail, CPF ou CNPJ e senha (guardada apenas como código criptográfico irreversível — nem a Bellman consegue lê-la), além da data e da versão destes termos que você aceitou. Dados que você cadastra para o seu trabalho: clientes (nome, CPF/CNPJ, e-mail, telefone e observações), orçamentos (serviços, valores e endereço da obra), obras (datas, prazos e andamento) e o catálogo de produtos e serviços. Se você assinar um plano pago: plano contratado, valores, datas, situação das cobranças e o e-mail da conta do Mercado Pago informado no pagamento. Os dados do cartão são digitados diretamente no Mercado Pago e não passam pelos nossos servidores. Dados técnicos necessários à segurança: endereço IP, data e hora de acesso e identificação do aparelho ou navegador nas sessões."
       },
       {
         "titulo": "3. Para que usamos",
@@ -23,7 +23,7 @@
       },
       {
         "titulo": "5. Dados dos seus clientes",
-        "texto": "Os dados de clientes que você cadastra são tratados em seu nome: você é o controlador desses dados e a R2M atua como operadora, apenas armazenando-os e processando-os para as funções do app, conforme as suas instruções. Cadastre somente dados que você tenha autorização para usar e informe seus clientes sobre esse uso quando necessário."
+        "texto": "Os dados de clientes que você cadastra são tratados em seu nome: você é o controlador desses dados e a Bellman atua como operadora, apenas armazenando-os e processando-os para as funções do app, conforme as suas instruções. Cadastre somente dados que você tenha autorização para usar e informe seus clientes sobre esse uso quando necessário."
       },
       {
         "titulo": "6. Biometria",
@@ -31,7 +31,7 @@
       },
       {
         "titulo": "7. Compartilhamento e transferência internacional",
-        "texto": "Compartilhamos dados apenas com fornecedores que atuam como operadores da R2M, para as finalidades desta política: Render (hospedagem do servidor, nos Estados Unidos), MongoDB Atlas (banco de dados em nuvem), Brevo (envio de e-mails de serviço, na União Europeia), e Mercado Pago (processamento das assinaturas, no Brasil). Por isso, alguns dados podem ser armazenados fora do Brasil, com as garantias do art. 33 da LGPD, como cláusulas contratuais e padrões de segurança desses fornecedores. Os dados também podem ser fornecidos a autoridades quando houver obrigação legal ou ordem judicial. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
+        "texto": "Compartilhamos dados apenas com fornecedores que atuam como operadores da Bellman, para as finalidades desta política: Render (hospedagem do servidor, nos Estados Unidos), MongoDB Atlas (banco de dados em nuvem), Brevo (envio de e-mails de serviço, na União Europeia), e Mercado Pago (processamento das assinaturas, no Brasil). Por isso, alguns dados podem ser armazenados fora do Brasil, com as garantias do art. 33 da LGPD, como cláusulas contratuais e padrões de segurança desses fornecedores. Os dados também podem ser fornecidos a autoridades quando houver obrigação legal ou ordem judicial. Documentos em PDF só são enviados a terceiros quando você mesmo os compartilha."
       },
       {
         "titulo": "8. Armazenamento no aparelho e rastreadores",
@@ -65,7 +65,7 @@
   },
   "termos": {
     "titulo": "Termos de Uso",
-    "intro": "Estes termos regem o uso do aplicativo Obra Fácil e do site de assinatura, mantidos pela R2M. Ao criar uma conta ou usar o serviço, você declara que leu e concorda com eles e com a Política de Privacidade.",
+    "intro": "Estes termos regem o uso do aplicativo Obra Fácil e do site de assinatura, mantidos pela Bellman. Ao criar uma conta ou usar o serviço, você declara que leu e concorda com eles e com a Política de Privacidade.",
     "secoes": [
       {
         "titulo": "1. O serviço",
@@ -97,7 +97,7 @@
       },
       {
         "titulo": "8. Propriedade intelectual",
-        "texto": "O app, a marca Obra Fácil, o design e o código pertencem à R2M. Você recebe uma licença pessoal, não exclusiva e intransferível para usar o app enquanto sua conta estiver ativa. Os documentos que você gera com seus dados (orçamentos e relatórios) são seus."
+        "texto": "O app, a marca Obra Fácil, o design e o código pertencem à Bellman. Você recebe uma licença pessoal, não exclusiva e intransferível para usar o app enquanto sua conta estiver ativa. Os documentos que você gera com seus dados (orçamentos e relatórios) são seus."
       },
       {
         "titulo": "9. Disponibilidade e suporte",
@@ -105,11 +105,11 @@
       },
       {
         "titulo": "10. Responsabilidade",
-        "texto": "Na máxima extensão permitida pela lei, a R2M não se responsabiliza por decisões tomadas com base nas informações cadastradas pelo usuário, por erros de cálculo decorrentes de dados informados incorretamente ou por perdas decorrentes de uso indevido da conta por falta de cuidado com a senha. Nada nestes termos limita direitos garantidos pelo Código de Defesa do Consumidor."
+        "texto": "Na máxima extensão permitida pela lei, a Bellman não se responsabiliza por decisões tomadas com base nas informações cadastradas pelo usuário, por erros de cálculo decorrentes de dados informados incorretamente ou por perdas decorrentes de uso indevido da conta por falta de cuidado com a senha. Nada nestes termos limita direitos garantidos pelo Código de Defesa do Consumidor."
       },
       {
         "titulo": "11. Suspensão e encerramento",
-        "texto": "Você pode encerrar sua conta quando quiser. A R2M pode suspender ou encerrar contas que violem estes termos ou a lei, avisando o usuário com a justificativa sempre que possível; em caso de encerramento por nossa iniciativa sem violação sua, valores pagos por períodos não usados serão devolvidos."
+        "texto": "Você pode encerrar sua conta quando quiser. A Bellman pode suspender ou encerrar contas que violem estes termos ou a lei, avisando o usuário com a justificativa sempre que possível; em caso de encerramento por nossa iniciativa sem violação sua, valores pagos por períodos não usados serão devolvidos."
       },
       {
         "titulo": "12. Alterações destes termos",

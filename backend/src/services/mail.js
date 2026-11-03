@@ -75,7 +75,7 @@ function layout(title, body) {
 <h1 style="font-size:22px;margin:8px 0 16px">${escape(title)}</h1>
 ${body}
 <hr style="border:none;border-top:1px solid #E3E3E6;margin:28px 0 16px">
-<p style="font-size:12px;color:#6B6B70;margin:0">E-mail automático do Obra Fácil (R2M). Dúvidas: ${support}</p>
+<p style="font-size:12px;color:#6B6B70;margin:0">E-mail automático do Obra Fácil (Bellman). Dúvidas: ${support}</p>
 </td></tr></table></td></tr></table></body></html>`;
 }
 

@@ -34,7 +34,7 @@ function row(e) {
 }
 
 export function auditPdf({ items, total, filtros, geradoPor, limite }) {
-  const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 36, bufferPages: true, info: { Title: 'Auditoria — Obra Fácil', Author: 'Obra Fácil (R2M)' } });
+  const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 36, bufferPages: true, info: { Title: 'Auditoria — Obra Fácil', Author: 'Obra Fácil (Bellman)' } });
   const left = doc.page.margins.left;
   const width = doc.page.width - left - doc.page.margins.right;
 

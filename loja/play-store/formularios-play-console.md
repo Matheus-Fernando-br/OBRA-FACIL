@@ -29,8 +29,8 @@ e pela página https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.ht
 identificadores de publicidade, dados de saúde, dados biométricos (a biometria é verificada pelo
 sistema do aparelho e o app não recebe nenhum dado biométrico).
 
-Os provedores usados pela R2M (Render, MongoDB Atlas, Brevo, Mercado Pago) atuam como **prestadores
-de serviço** em nome da R2M — pela definição do Google, isso **não** conta como "compartilhamento".
+Os provedores usados pela Bellman (Render, MongoDB Atlas, Brevo, Mercado Pago) atuam como **prestadores
+de serviço** em nome da Bellman — pela definição do Google, isso **não** conta como "compartilhamento".
 Dados do cartão vão direto para o Mercado Pago e não passam pelo app nem pelo servidor.
 
 Se no futuro for adicionada ferramenta de análise/erros (ex.: Sentry), marque também
