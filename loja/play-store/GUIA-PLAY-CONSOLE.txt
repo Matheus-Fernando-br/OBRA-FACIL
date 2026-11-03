@@ -1,0 +1,289 @@
+=====================================================================
+ OBRA FÁCIL — GUIA DE RESPOSTAS DO PLAY CONSOLE (copiar e colar)
+ Conta: bellman.adm@gmail.com · Desenvolvedor: Bellman · Conta Pessoal
+ Atualizado em 03/11/2026
+=====================================================================
+
+ARQUIVO PARA ENVIAR (.aab) — versão 1.1.0 (código 4):
+https://expo.dev/artifacts/eas/i0legI5M0oVETgFbpdS6lwp1YsYJ-eMEN7RxeguMODM.aab
+(Use só este. Os links anteriores ainda diziam "R2M".)
+
+IMAGENS: pasta loja/play-store/imagens do projeto
+ - icone-512.png (ícone 512x512)
+ - feature-graphic-1024x500.png (gráfico de recursos)
+ - 01-inicio.png, 01-inicio-escuro.png, 02-orcamentos.png,
+   03-orcamento-detalhes.png, 04-obras.png, 05-obra-cronograma.png,
+   06-clientes.png, 07-relatorios.png (8 capturas de telefone)
+
+---------------------------------------------------------------------
+PASSO 0 — ANTES DE COMEÇAR
+---------------------------------------------------------------------
+[ ] Perfil de pagamentos com o SEU NOME COMPLETO (igual ao documento).
+    "Bellman" vai só no campo "Nome do desenvolvedor".
+[ ] Crie a conta de teste do revisor no app ou no site:
+    E-mail: obra.app.dev+revisor@gmail.com
+    Senha: (crie uma só para isso e anote)
+    O código de confirmação chega na caixa do obra.app.dev@gmail.com.
+    Cadastre 1 ou 2 clientes e 1 orçamento de exemplo nela.
+
+---------------------------------------------------------------------
+PASSO 1 — CRIAR APP  (Todos os apps > Criar app)
+---------------------------------------------------------------------
+Nome do app ............ Obra Fácil: Orçamentos e Obras
+Idioma padrão .......... Português (Brasil) – pt-BR
+App ou jogo ............ App
+Gratuito ou pago ....... Gratuito
+Declarações ............ marque as 2 caixas (Políticas do programa
+                         para desenvolvedores e Leis de exportação dos EUA)
+
+---------------------------------------------------------------------
+PASSO 2 — CONFIGURAR O APP  (Painel > "Configurar seu app")
+Responda cada item abaixo. Os nomes podem variar um pouco.
+---------------------------------------------------------------------
+
+2.1 POLÍTICA DE PRIVACIDADE
+URL: https://matheus-fernando-br.github.io/OBRA-FACIL/privacidade.html
+
+2.2 ACESSO AO APP
+Escolha: "Todas ou algumas funcionalidades do app são restritas"
+Adicionar instruções:
+  Nome: Conta de teste
+  Nome de usuário: obra.app.dev+revisor@gmail.com
+  Senha: (a senha que você criou no Passo 0)
+  Outras informações:
+    Abra o app, toque em "Entrar" e use o e-mail e a senha acima.
+    Não é necessário código adicional. Todas as funções (clientes,
+    orçamentos, obras, PDFs e relatórios) ficam disponíveis após o login.
+  [x] Não é necessário nenhum outro dado para acessar o app
+
+2.3 ANÚNCIOS
+"Seu app contém anúncios?" -> NÃO
+
+2.4 CLASSIFICAÇÃO DO CONTEÚDO (questionário IARC)
+E-mail de contato: obra.app.dev@gmail.com
+Categoria: "Todos os outros tipos de app" / Utilitário, produtividade,
+           comunicação ou outro
+Violência ........................ Não
+Sexualidade ...................... Não
+Linguagem imprópria .............. Não
+Substâncias controladas .......... Não
+Diversos (humor ofensivo etc.) ... Não
+Os usuários interagem ou trocam conteúdo entre si? .... Não
+O app compartilha a localização do usuário? .......... Não
+O app permite comprar produtos digitais? .............. Não
+O app é um navegador ou mecanismo de pesquisa? ........ Não
+O app contém jogos de azar / apostas? ................. Não
+Resultado esperado: Livre (L) / Classificação 3+
+
+2.5 PÚBLICO-ALVO E CONTEÚDO
+Faixa etária: marque SOMENTE "18 anos ou mais"
+O app pode atrair crianças? -> Não
+(Não precisa de página de política para crianças.)
+
+2.6 APPS DE NOTÍCIAS
+"Seu app é de notícias?" -> Não
+
+2.7 APPS DE RASTREAMENTO DE CONTATO / STATUS DE SAÚDE (COVID-19)
+-> "Meu app não é um app de rastreamento de contatos ou status..."
+
+2.8 SEGURANÇA DOS DADOS
+Pergunta 1: O app coleta ou compartilha algum dos tipos de dados
+            do usuário obrigatórios? -> SIM
+Pergunta 2: Todos os dados coletados são criptografados em trânsito? -> SIM
+Pergunta 3: Os usuários podem pedir a exclusão dos dados? -> SIM
+            (forneça o link de exclusão quando pedir:)
+            https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.html
+Login: "Meu app permite que os usuários criem uma conta" -> com
+       nome de usuário e senha.
+Link para exclusão da conta:
+       https://matheus-fernando-br.github.io/OBRA-FACIL/excluir-conta.html
+
+TIPOS DE DADOS — marque estes (e só estes):
+ Informações pessoais
+   [x] Nome
+   [x] Endereço de e-mail
+   [x] Endereço (endereço das obras)
+   [x] Número de telefone (telefone dos clientes cadastrados)
+   [x] Outras informações (CPF/CNPJ)
+ Informações financeiras
+   [x] Histórico de compras (plano assinado, só de quem assina pelo site)
+   [x] Outras informações financeiras (valores dos orçamentos)
+ Todo o resto: NÃO marque (localização, contatos, fotos, áudio,
+ mensagens, saúde, apps instalados, histórico de navegação,
+ identificadores do dispositivo/publicidade, registros de falha).
+
+Para CADA tipo marcado, responda:
+ Coletado? ................ Sim
+ Compartilhado? ........... Não
+ (Render, MongoDB, Brevo e Mercado Pago são prestadores de serviço
+  da Bellman: pela regra do Google isso NÃO é "compartilhamento".)
+ Processado temporariamente (efêmero)? ... Não
+ Obrigatório ou opcional?
+   Nome, E-mail, Outras informações (CPF/CNPJ) .... Obrigatório
+   Endereço, Telefone, Histórico de compras,
+   Outras informações financeiras ................ Opcional
+     (o usuário pode escolher se fornece)
+ Finalidade:
+   Nome, E-mail ............ Funcionalidade do app + Gerenciamento da conta
+                             (+ Comunicações do desenvolvedor no E-mail)
+   CPF/CNPJ ................ Gerenciamento da conta
+   Endereço, Telefone ...... Funcionalidade do app
+   Histórico de compras .... Gerenciamento da conta
+   Outras inf. financeiras . Funcionalidade do app
+
+2.9 APPS GOVERNAMENTAIS -> Não
+2.10 RECURSOS FINANCEIROS -> "Meu app não oferece nenhum recurso financeiro"
+2.11 SAÚDE -> "Meu app não tem recursos de saúde"
+2.12 ID DE PUBLICIDADE
+"Seu app usa o ID de publicidade?" -> NÃO
+
+---------------------------------------------------------------------
+PASSO 3 — LISTAGEM DA LOJA  (Crescimento > Presença na loja >
+           Listagem principal da loja)
+---------------------------------------------------------------------
+Nome do app (30):
+Obra Fácil: Orçamentos e Obras
+
+Descrição curta (80):
+Orçamentos com BDI, PDF para o cliente e controle de obras em um só app.
+
+Descrição completa (4000):
+O Obra Fácil é o app de gestão feito para quem vive a construção civil: técnicos em edificações, engenheiros, arquitetos, empreiteiros e prestadores de serviço.
+
+Chega de planilha, caderno e mensagem perdida no WhatsApp. Organize clientes, monte orçamentos profissionais e acompanhe cada obra do início à entrega.
+
+ORÇAMENTOS PROFISSIONAIS
+• Monte orçamentos por etapas e serviços, com unidade, quantidade e valor unitário
+• Quantidades com casas decimais (m², m³, kg, horas e mais)
+• Cálculo automático do custo direto, BDI e valor total
+• Validade da proposta e aviso de orçamentos vencendo
+• Gere o PDF com sua identificação e envie pelo WhatsApp ou e-mail
+
+CONTROLE DE OBRAS
+• Transforme um orçamento aprovado em obra com um toque
+• Cronograma por serviço: dia de início e de fim de cada etapa
+• Progresso calculado automaticamente e status: no prazo, atrasada ou entregue
+• Estrutura analítica e cronograma da obra em PDF
+• Relatório de acompanhamento da obra em PDF, pronto para enviar ao cliente
+
+CLIENTES
+• Cadastro com CPF/CNPJ, e-mail e telefone
+• Cadastre um cliente novo direto da tela do orçamento
+• Ligue ou chame no WhatsApp direto do app
+• Veja quantos orçamentos cada cliente tem
+
+PAINEL E RELATÓRIOS
+• Receita aprovada, taxa de aprovação e valores em negociação
+• Alertas de orçamentos vencendo e obras atrasadas
+• Relatório geral em PDF e exportação para Excel (CSV)
+
+SEGURANÇA E PRIVACIDADE
+• Desbloqueio com digital ou reconhecimento facial
+• Sessão protegida no armazenamento seguro do aparelho
+• Exclua sua conta e seus dados quando quiser
+
+PLANOS
+Comece grátis no plano Gratuito. Quando precisar de mais espaço, os planos Básico e Profissional ampliam ou removem os limites de clientes, orçamentos e obras.
+
+Dúvidas ou sugestões? Fale com a gente: obra.app.dev@gmail.com ou WhatsApp (31) 98676-3652.
+
+Obra Fácil — desenvolvido pela Bellman.
+
+Ícone do app ........... icone-512.png
+Gráfico de recursos .... feature-graphic-1024x500.png
+Capturas de telefone ... as 8 imagens 01 a 07 (ordem: 01-inicio, 02,
+                         03, 04, 05, 06, 07, 01-inicio-escuro)
+Vídeo .................. deixe em branco
+Tablet/Chromebook ...... deixe em branco (opcional)
+
+CONFIGURAÇÕES DA LOJA (Presença na loja > Configurações da loja)
+Categoria ............ App > Empresas (Business)
+Tags ................. Produtividade, Gestão de negócios (se aparecerem)
+E-mail ............... obra.app.dev@gmail.com
+Telefone ............. +55 31 98676-3652
+Site ................. https://obra-facil-r2ms-projects.vercel.app
+
+---------------------------------------------------------------------
+PASSO 4 — TESTE FECHADO  (Testar e lançar > Testes > Teste fechado)
+---------------------------------------------------------------------
+1. "Criar faixa" -> use a faixa "Teste fechado - Alfa".
+2. Testadores -> "Criar lista de e-mails" -> Nome: Testadores Obra Fácil
+   -> cole os e-mails (conta Google) de PELO MENOS 12 pessoas
+   (coloque 15 para ter folga).
+   E-mail ou URL de feedback: obra.app.dev@gmail.com
+3. Países -> Brasil.
+4. "Criar nova versão":
+   - Assinatura de apps do Google Play: ACEITAR / Continuar
+   - Envie o .aab do link lá no topo
+   - Nome da versão: 1.1.0 (4)
+   - Notas da versão (pt-BR):
+     <pt-BR>
+     Primeira versão do Obra Fácil: orçamentos com BDI e PDF para o
+     cliente, cadastro de clientes e acompanhamento de obras com
+     cronograma e estrutura analítica.
+     </pt-BR>
+   - Salvar > Revisar versão > Iniciar lançamento para Teste fechado.
+5. Copie o LINK DE PARTICIPAÇÃO e mande para os testadores.
+
+MENSAGEM PARA OS TESTADORES (copie e mande no WhatsApp):
+  Oi! Preciso da sua ajuda para publicar o Obra Fácil na Play Store.
+  1) Abra este link no celular Android e toque em "Tornar-se testador":
+     [LINK DE PARTICIPAÇÃO]
+  2) Se você tem o APK antigo do Obra Fácil, DESINSTALE antes.
+     (Seus dados ficam salvos no servidor, não perde nada.)
+  3) Instale pela Play Store pelo mesmo link.
+  4) Deixe o app instalado por 14 dias e abra de vez em quando.
+  Obrigado!
+
+REGRA: 12+ testadores com o app instalado por 14 DIAS SEGUIDOS.
+
+---------------------------------------------------------------------
+PASSO 5 — PEDIR ACESSO À PRODUÇÃO  (depois dos 14 dias)
+---------------------------------------------------------------------
+Painel > "Solicitar acesso à produção". Respostas sugeridas:
+
+Como você recrutou os testadores?
+  Convidei profissionais da construção civil (técnicos, pedreiros e
+  empreiteiros) e conhecidos que usam o celular no trabalho, pela
+  minha rede de contatos e WhatsApp.
+
+Como foi o engajamento dos testadores?
+  Os testadores criaram contas, cadastraram clientes, montaram
+  orçamentos, geraram PDFs e acompanharam obras durante o período.
+  (ajuste com o que realmente aconteceu)
+
+Resumo do feedback recebido:
+  (escreva os pedidos reais: ex.: ajustes de layout, cálculos,
+  atalho para cadastrar cliente no orçamento, nomes mais claros nos
+  PDFs. Diga que foram corrigidos.)
+
+Público-alvo do app:
+  Profissionais da construção civil: técnicos em edificações,
+  engenheiros, arquitetos, empreiteiros e prestadores de serviço.
+
+Como o app agrega valor a esse público?
+  Substitui o orçamento feito no caderno ou planilha: calcula custo
+  direto, BDI e total, gera o PDF para o cliente e acompanha a obra
+  pelo cronograma.
+
+Quantas instalações espera no primeiro ano? -> 1.000 a 10.000
+
+Mudanças feitas a partir do teste: descreva as correções.
+Você está pronto para a produção? -> Sim
+
+---------------------------------------------------------------------
+PASSO 6 — PRODUÇÃO
+---------------------------------------------------------------------
+Testar e lançar > Produção > Criar nova versão > "Adicionar da
+biblioteca" (o mesmo .aab, código 4) > Países: Brasil > Revisar >
+Iniciar lançamento para Produção. Revisão: 1 a 7 dias.
+
+---------------------------------------------------------------------
+LEMBRETES
+---------------------------------------------------------------------
+- Se algo mudar no app (anúncios, compra no app), atualize as
+  respostas de Anúncios, Classificação e Segurança dos dados.
+- A contratação de planos NÃO fica disponível no app Android
+  (aparece "em breve"); quem assina usa o site.
+- Troque as senhas que foram enviadas no chat.
+- Dúvida em alguma tela: mande o print para o Claude.
