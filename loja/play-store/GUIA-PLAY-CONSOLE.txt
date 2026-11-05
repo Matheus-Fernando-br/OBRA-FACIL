@@ -21,8 +21,8 @@ PASSO 0 — ANTES DE COMEÇAR
 [ ] Perfil de pagamentos com o SEU NOME COMPLETO (igual ao documento).
     "Bellman" vai só no campo "Nome do desenvolvedor".
 [ ] Crie a conta de teste do revisor no app ou no site:
-    E-mail: obra.app.dev+revisor@gmail.com
-    Senha: (crie uma só para isso e anote)
+    E-mail: obra.app.dev+revisor@gmail.com   (JÁ CRIADA)
+    Senha: (veja no chat do Claude)
     O código de confirmação chega na caixa do obra.app.dev@gmail.com.
     Cadastre 1 ou 2 clientes e 1 orçamento de exemplo nela.
 
@@ -49,7 +49,7 @@ Escolha: "Todas ou algumas funcionalidades do app são restritas"
 Adicionar instruções:
   Nome: Conta de teste
   Nome de usuário: obra.app.dev+revisor@gmail.com
-  Senha: (a senha que você criou no Passo 0)
+  Senha: (veja no chat do Claude)
   Outras informações:
     Abra o app, toque em "Entrar" e use o e-mail e a senha acima.
     Não é necessário código adicional. Todas as funções (clientes,
@@ -102,14 +102,19 @@ TIPOS DE DADOS — marque estes (e só estes):
  Informações pessoais
    [x] Nome
    [x] Endereço de e-mail
+   [x] IDs de usuário (identificador interno da conta)
    [x] Endereço (endereço das obras)
    [x] Número de telefone (telefone dos clientes cadastrados)
    [x] Outras informações (CPF/CNPJ)
  Informações financeiras
    [x] Histórico de compras (plano assinado, só de quem assina pelo site)
    [x] Outras informações financeiras (valores dos orçamentos)
+ Atividade em apps
+   [x] Outro conteúdo gerado pelo usuário (orçamentos, obras, observações)
  Todo o resto: NÃO marque (localização, contatos, fotos, áudio,
  mensagens, saúde, apps instalados, histórico de navegação,
+ arquivos e documentos (os PDFs são gerados no aparelho e não vão
+ para o servidor),
  identificadores do dispositivo/publicidade, registros de falha).
 
 Para CADA tipo marcado, responda:
@@ -119,17 +124,21 @@ Para CADA tipo marcado, responda:
   da Bellman: pela regra do Google isso NÃO é "compartilhamento".)
  Processado temporariamente (efêmero)? ... Não
  Obrigatório ou opcional?
-   Nome, E-mail, Outras informações (CPF/CNPJ) .... Obrigatório
+   Nome, E-mail, IDs de usuário, CPF/CNPJ ......... Obrigatório
    Endereço, Telefone, Histórico de compras,
-   Outras informações financeiras ................ Opcional
+   Outras informações financeiras,
+   Outro conteúdo gerado pelo usuário ............. Opcional
      (o usuário pode escolher se fornece)
  Finalidade:
-   Nome, E-mail ............ Funcionalidade do app + Gerenciamento da conta
+   Nome, E-mail, IDs ....... Funcionalidade do app + Gerenciamento da conta
                              (+ Comunicações do desenvolvedor no E-mail)
    CPF/CNPJ ................ Gerenciamento da conta
    Endereço, Telefone ...... Funcionalidade do app
    Histórico de compras .... Gerenciamento da conta
    Outras inf. financeiras . Funcionalidade do app
+   Outro conteúdo gerado ... Funcionalidade do app
+ FUTURO: quando a foto no orçamento for lançada, marque também
+ "Fotos e vídeos > Fotos" ANTES de enviar essa versão.
 
 2.9 APPS GOVERNAMENTAIS -> Não
 2.10 RECURSOS FINANCEIROS -> "Meu app não oferece nenhum recurso financeiro"
